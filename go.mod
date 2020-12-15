@@ -1,0 +1,18 @@
+module scs
+
+go 1.13
+
+require (
+	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
+	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
+	github.com/go-ole/go-ole v1.2.4 // indirect
+	github.com/hyahm/golog v0.0.0-20200921065817-f362e2249806
+	github.com/hyahm/xmux v0.0.0-20201002164645-6fda7cef7192
+	github.com/mattn/go-colorable v0.1.7 // indirect
+	github.com/shirou/gopsutil v2.20.9+incompatible
+	github.com/spf13/cobra v1.0.0
+	golang.org/x/net v0.0.0-20201201195509-5d6afe98e0b7 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
+	gopkg.in/yaml.v2 v2.3.0
+)

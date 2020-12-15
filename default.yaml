@@ -1,0 +1,59 @@
+# 监听端口
+listen: 127.0.0.1:11111
+# 保存输出日志的行数
+logCount: 500
+# 请求头认证 Token： xxxx
+log:
+    path: log
+    day: true
+    size: 0
+token: 
+alert:
+  email:
+    host: smtp.qq.com
+    port: 465
+    username:  165464646@qq.com
+    password: 123456
+    to:  
+      - 7270235460@qq.com
+  rocket:
+    server: https://chat.hyahm.com
+    username: "test"
+    password: "123456"
+    to: 
+      - "#general"
+  telegram:
+    server: https://chat.hyahm.com
+    username: "test"
+    password: "123456"
+    to: 
+      - -575533567
+# 本地磁盘， cpu， 内存监控项， 确保elert存在才会有通知
+hardware:
+  # mem使用率, 默认90, 小于0表示不启用检测
+  mem: 60 
+  # cpu使用率, 默认90, 小于0表示不启用检测
+  cpu: 90
+  # 硬盘使用率， 默认85, 小于0表示不启用检测
+  disk: 50        
+  # 排除的挂载点， 默认已经去掉了swap， 设备, 数组
+  excludeDisk: 
+  # 检测间隔， 默认10秒
+  interval: 10s
+  # 下次报警时间间隔， 如果恢复了就重置
+  continuityInterval: 1h
+scripts:
+
+  - name: test
+    # 脚本执行的根目录
+    dir: /data/scs
+    env:
+      GOPROXY: MMMM
+    # 启动脚本
+    command: "python test.py"
+    # replicate， 开启副本数
+    replicate: 1
+    # 报警的邮箱
+    alert:
+      email: 
+        - 727023885460@qq.com
