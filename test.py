@@ -28,11 +28,11 @@ while True:
         "Token": os.getenv("TOKEN")
     }
     data["value"] = True
-    r = requests.post("https://127.0.0.1:11111/change/signal", data=json.dumps(data), verify=False, headers=headers)
-    log(r.status_code)
+    # r = requests.post("https://127.0.0.1:11111/change/signal", data=json.dumps(data), verify=False, headers=headers)
+    # log(r.status_code)
     time.sleep(random.randint(10, 20))
     data["value"] = False
-    resp = requests.post("https://127.0.0.1:11111/change/signal", data=json.dumps(data), verify=False, headers=headers)
+    # resp = requests.post("https://127.0.0.1:11111/change/signal", data=json.dumps(data), verify=False, headers=headers)
 
     log("can not stop it")
     time.sleep(random.randint(10, 20))

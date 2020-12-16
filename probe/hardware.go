@@ -110,10 +110,11 @@ func (at *AlterTimer) CheckServer() {
 		if err != nil {
 			golog.Error(err)
 			failed = true
-		}
-		if resp.StatusCode != 200 {
-			golog.Error(resp.StatusCode)
-			failed = true
+		} else {
+			if resp.StatusCode != 200 {
+				golog.Error(resp.StatusCode)
+				failed = true
+			}
 		}
 
 		if failed {

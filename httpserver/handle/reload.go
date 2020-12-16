@@ -12,10 +12,10 @@ var reloadKey bool
 func Reload(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
 	if reloadKey {
-		w.Write([]byte("config file is reloading, waiting completed first"))
+		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return
 	} else {
-		w.Write([]byte("waiting config file reloaded"))
+		w.Write([]byte(`{"code": 201, "msg": "waiting config file reloaded"}`))
 	}
 	probe.VarAT.Exit <- true
 
@@ -31,4 +31,5 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 	}
 	script.StopUnUseScript()
 	reloadKey = false
+	w.Write([]byte(`{"code": 200, "msg": "config file reloaded"}`))
 }

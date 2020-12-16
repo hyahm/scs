@@ -23,10 +23,10 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 	}
 	golog.Infof("%+v", *s)
 	if err := config.Cfg.AddScript(*s); err != nil {
-		w.Write([]byte(err.Error()))
+		w.Write([]byte(`{"code": 201, "msg": "already exist script"}`))
 		return
 	}
-	w.Write([]byte("add script"))
+	w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
 	return
 }
 
@@ -37,10 +37,10 @@ func DelScript(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if reloadKey {
-		w.Write([]byte("config file is reloading, waiting completed first"))
+		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return
 	} else {
-		w.Write([]byte("waiting config file reloaded"))
+		w.Write([]byte(`{"code": 201, "msg": "waiting config file reloaded"}`))
 	}
 	probe.VarAT.Exit <- true
 
@@ -56,6 +56,6 @@ func DelScript(w http.ResponseWriter, r *http.Request) {
 	}
 	script.StopUnUseScript()
 	reloadKey = false
-	w.Write([]byte("del script"))
+	w.Write([]byte(`{"code": 200, "msg": "already delete script"}`))
 	return
 }

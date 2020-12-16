@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"net/http"
 	"scs/script"
 
@@ -20,16 +21,15 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 			}
 
 		} else {
-			w.Write([]byte("not found this name:" + name))
+			w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, name)))
 			return
 		}
 
 	} else {
-		w.Write([]byte("not found this pname:" + pname))
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s"}`, pname)))
 		return
 	}
-
-	w.Write([]byte("waiting restart"))
+	w.Write([]byte(`{"code": 200, "msg": "waiting restart"}`))
 	return
 }
 
@@ -47,11 +47,11 @@ func RestartPname(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		w.Write([]byte("not found this pname:" + pname))
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s"}`, pname)))
 		return
 	}
 
-	w.Write([]byte("waiting restart"))
+	w.Write([]byte(`{"code": 200, "msg": "waiting restart"}`))
 	return
 }
 
@@ -67,7 +67,6 @@ func RestartAll(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
-	w.Write([]byte("waiting restart"))
+	w.Write([]byte(`{"code": 200, "msg": "waiting restart"}`))
 	return
 }

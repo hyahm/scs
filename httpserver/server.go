@@ -15,11 +15,6 @@ import (
 	"github.com/hyahm/xmux"
 )
 
-func test(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("asdfasdf"))
-	return
-}
-
 // var dir := "key"
 func HttpServer() {
 	router := xmux.NewRouter()
@@ -69,7 +64,6 @@ func HttpServer() {
 	router.Get("/probe", handle.Probe).DelModule(midware.CheckToken)
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
-	router.Post("/test", test)
 	router.Post("/script", handle.AddScript).Bind(&internal.Script{}).AddModule(midware.Unmarshal)
 	router.Post("/script/delete/{pname}", handle.DelScript)
 

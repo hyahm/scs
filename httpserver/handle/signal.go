@@ -2,6 +2,7 @@ package handle
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"scs/script"
@@ -27,7 +28,7 @@ func Signal(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(res, sg)
 	if err != nil {
 		golog.Error(err)
-		w.Write([]byte(err.Error()))
+		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
 		return
 	}
 
@@ -38,7 +39,6 @@ func Signal(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
-	w.Write([]byte("update successed"))
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
 	return
 }

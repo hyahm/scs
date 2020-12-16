@@ -20,6 +20,6 @@ func Version(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write([]byte("set verion"))
+	w.Write([]byte(`{"code": 200, "msg": "set verion"}`))
 	return
 }

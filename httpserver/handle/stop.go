@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"net/http"
 	"scs/script"
 
@@ -16,20 +17,20 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 				go script.SS.Infos[pname][name].Stop()
 
 			} else {
-				w.Write([]byte("this script not running"))
+				w.Write([]byte(fmt.Sprintf(`{"code": 201, "msg": "this script not running"}`)))
 				return
 			}
 		} else {
-			w.Write([]byte("not found this script"))
+			w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this script"}`)))
 			return
 		}
 
 	} else {
-		w.Write([]byte("not found this script"))
+		w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
 		return
 	}
 
-	w.Write([]byte("stoped"))
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
 	return
 }
 
@@ -43,11 +44,11 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		w.Write([]byte("not found this pname:" + pname))
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
 		return
 	}
 
-	w.Write([]byte("waiting stop"))
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
 	return
 }
 
@@ -60,7 +61,6 @@ func StopAll(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
-	w.Write([]byte("waiting for stop all"))
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
 	return
 }

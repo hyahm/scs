@@ -10,8 +10,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	if r.Header.Get("Token") != global.Token {
-		w.WriteHeader(http.StatusNonAuthoritativeInfo)
-		w.Write([]byte("token error"))
+		w.Write([]byte(`{"code": 203, "msg": "token error"}`))
 		return true
 	}
 

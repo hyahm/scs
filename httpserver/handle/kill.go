@@ -16,7 +16,7 @@ func Kill(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write([]byte("killed"))
+	w.Write([]byte(`{"code": 200, "msg": "already killed"}`))
 	return
 }
 
@@ -27,7 +27,6 @@ func KillPname(w http.ResponseWriter, r *http.Request) {
 			script.SS.Infos[pname][name].Kill()
 		}
 	}
-
-	w.Write([]byte("killed"))
+	w.Write([]byte(`{"code": 200, "msg": "already killed"}`))
 	return
 }
