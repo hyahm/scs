@@ -13,6 +13,11 @@ import (
 	"github.com/hyahm/golog"
 )
 
+func Shell(command string) ([]byte, error) {
+	cmd := exec.Command("/bin/bash", "-c", command)
+	return cmd.Output()
+}
+
 func (s *Script) Stop() {
 	if s.Status.Status == RUNNING {
 		s.Status.Status = WAITSTOP
