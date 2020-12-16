@@ -14,8 +14,6 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 	if reloadKey {
 		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return
-	} else {
-		w.Write([]byte(`{"code": 201, "msg": "waiting config file reloaded"}`))
 	}
 	probe.VarAT.Exit <- true
 
