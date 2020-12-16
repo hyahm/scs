@@ -5,7 +5,6 @@ service control service or script
 2.  监控硬件信息， 主要是磁盘， cpu， 内存  
 3.  服务之间可以相互控制增删改查  
 4.  报警功能api  
-5.  服务安装（臆想中）  
 
 # 文档
 [安装](document/install.md)  
@@ -27,20 +26,7 @@ service control service or script
 - [x] 支持邮箱报警
 - [x] 支持rocket.chat报警 （https://rocket.chat/install/?gclid=undefined 此处下载app, 也可以直接浏览器访问 https://chat.hyahm.com）
 
-# 关于打通所有linux和mac服务安装构想  (技术卡壳，诚邀合作开发者)
 
-1. 构建仓库(git仓库)，  
-2. 安装时候从git仓库clone到本地  
-3. 读取对应的配置文件  
-4. 执行shell脚本文件  
-5. 挂在到scs配置文件  
-所有服务都通过shell来安装， 可以将服务挂载给systemd， 也可以挂载给scs  
-根据仓库的顺序来决定优先级， 每个仓库是一个目录， 目录无法重名， 目录下面有3个文件， 一个是shell脚本文件， 一个是yaml配置文件，一个是markdown说明文档, 仓库类似apt，yum， 对应系统的目录    
-安装命令   
-```
-scsctl install xxx  <--without-script(不将服务挂载给scs)>
-scsctl search  xxx  
-```
 不比docker， 此服务与宿主机其实就是一台服务器， 会有环境的冲突， 暂时没考虑安装一套服务  
 
 [版本更新](update.md)
