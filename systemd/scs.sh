@@ -56,7 +56,7 @@ log:
     day: true
     size: 0
 # 请求头认证 Token： xxxx
-token: $TOKEN
+token: "$TOKEN"
 alert:
   email:
     host: smtp.qq.com
@@ -139,5 +139,5 @@ cat > ~/scsctl.yaml <<EOF
 nodes:
   localhost:
     url: https://127.0.0.1:11111
-    token: $token
+    token: "$token"
 EOF
