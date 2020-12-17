@@ -61,7 +61,7 @@ func HttpServer() {
 	router.Post("/set/alert", handle.Alert)
 	router.Post("/get/alert", handle.Alert)
 	// 监测点
-	router.Get("/probe", handle.Probe).DelModule(midware.CheckToken)
+	router.Get("/probe", handle.Probe)
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
 	router.Post("/script", handle.AddScript).Bind(&internal.Script{}).AddModule(midware.Unmarshal)
