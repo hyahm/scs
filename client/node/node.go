@@ -159,7 +159,7 @@ func (node *Node) Status(args ...string) {
 		}
 		err = json.Unmarshal(b, &s)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err.Error() + " or token error")
 			return
 		}
 	case 1:
@@ -171,7 +171,7 @@ func (node *Node) Status(args ...string) {
 
 		err = json.Unmarshal(b, &s)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err.Error() + " or token error")
 			return
 		}
 	default:
@@ -183,7 +183,7 @@ func (node *Node) Status(args ...string) {
 
 		err = json.Unmarshal(b, &s)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err.Error() + " or token error")
 			return
 		}
 	}
