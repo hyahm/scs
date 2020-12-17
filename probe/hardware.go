@@ -239,7 +239,7 @@ func (at *AlterTimer) CheckCpu() {
 
 	if totalPercents >= at.HWA.Cpu*(float64)(len(percents)) {
 		am := &alert.Message{
-			Title: fmt.Sprintf("cpu 繁忙超过%.2f%%", at.HWA.Cpu),
+			Title: fmt.Sprintf("cpu 繁忙超过%.2f%%", at.HWA.Cpu*(float64)(len(percents))),
 		}
 		am.UsePercent, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", totalPercents), 64)
 		am.Top = TopCpu(1)[0].ToString()
