@@ -6,7 +6,7 @@
 
 # 报警服务
 
-目前支持邮箱， rocket.chat,  telegram
+目前支持邮箱， rocket.chat,  telegram, 企业微信
 ```
 alert:
   email:
@@ -28,6 +28,9 @@ alert:
     password: 123456
     to:
       - "-789789435"
+  # https://work.weixin.qq.com/help?person_id=1&doc_id=13376#markdown%E7%B1%BB%E5%9E%8B 固定mark格式
+  weixin:
+    server: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=dd065367-b753-48fb-a974-bbfff0284c1c
 ```
 ### 自建发件邮箱服务器
 参考： https://gitee.com/cander/maddy
@@ -101,4 +104,5 @@ curl -X POST  https://127.0.0.1:11111/set/alert -d '{"title":"test","pname":"ale
 ```
 <script>; if [[ $? -ne 0 ]]; then /usr/bin/curl -X POST  https://127.0.0.1:11111/set/alert -d '{"title":"test","pname":"alert","name":"test","reason":"test", "broken": true, "interval":100,"to":{"telegram":["-346345"]}}' -k; sleep 10; /usr/bin/curl -X POST  https://127.0.0.1:11111/set/alert -d '{"title":"test","pname":"alert","name":"test","reason":"test", "broken": false, "interval":100,"to":{"telegram":["-346345"]}}' -k; fi
 ```
-
+### 企业微信
+参考：  https://zhuanlan.zhihu.com/p/139593901
