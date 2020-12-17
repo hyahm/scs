@@ -154,6 +154,10 @@ func (c *config) initAlert() {
 		}
 
 	}
+	if c.Alert.WeiXin != nil {
+		alert.Alerts["weixin"] = c.Alert.WeiXin
+
+	}
 }
 
 func (c *config) initHWAlert() {

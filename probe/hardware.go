@@ -183,7 +183,6 @@ func (at *AlterTimer) getDisk() {
 }
 
 func (at *AlterTimer) CheckDisk() {
-
 	for _, part := range at.HWA.dp {
 		di, err := disk.Usage(part.Mountpoint)
 		if err != nil {

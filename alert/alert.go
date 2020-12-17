@@ -12,6 +12,7 @@ type Alert struct {
 	Email    *AlertEmail    `yaml:"email"`
 	Rocket   *AlertRocket   `yaml:"rocket"`
 	Telegram *AlertTelegram `yaml:"telegram"`
+	WeiXin   *AlertWeiXin   `yaml:"weixin"`
 }
 
 type SendAlerter interface {
@@ -52,6 +53,14 @@ func AlertMessage(msg *Message, at *internal.AlertTo) {
 		case *AlertTelegram:
 			go func() {
 				alertErr := al.Send(msg, at.Telegram...)
+				if alertErr != nil {
+					golog.Error(alertErr)
+				}
+
+			}()
+		case *AlertWeiXin:
+			go func() {
+				alertErr := al.Send(msg, at.WeiXin...)
 				if alertErr != nil {
 					golog.Error(alertErr)
 				}
