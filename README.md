@@ -73,6 +73,9 @@ alert:
     password: "123456"
     to: 
       - "-575533567"
+  # https://work.weixin.qq.com/help?person_id=1&doc_id=13376#markdown%E7%B1%BB%E5%9E%8B 固定mark格式
+  weixin:
+    server: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=dd065367-b753-48fb-a974-bbfff0284c1c
 # 本地磁盘， cpu， 内存监控项, 就算没写， 也会默认监控, v2版以后此key更改为probe
 hardware:
   # mem使用率, 默认90, 小于0不检测
