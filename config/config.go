@@ -231,7 +231,10 @@ func (c *config) fill(index int) {
 }
 
 func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
-	// 添加到
+	if err := script.GetResource(c.SC[index]); err != nil {
+		golog.Info(err)
+		return
+	}
 	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
 		Name:      c.SC[index].Name,
 		Command:   command,
@@ -305,7 +308,11 @@ func (c *config) AddScript(s internal.Script) error {
 	if s.KillTime == 0 {
 		s.KillTime = time.Second * 1
 	}
-	// 添加到
+	if err := script.GetResource(s); err != nil {
+		return err
+	}
+	// 如果添加了GetIfNotExist 优先执行完成然后再处理
+	// 添加到配置文件
 	for i, v := range c.SC {
 		if v.Name == s.Name {
 			c.SC[i] = s
