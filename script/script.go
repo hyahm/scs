@@ -11,19 +11,6 @@ import (
 	"github.com/hyahm/golog"
 )
 
-func GetResource(s internal.Script) error {
-	if s.GetIfNotExist != "" && s.Dir != "" {
-		if _, err := os.Open(s.Dir); os.IsNotExist(err) {
-			_, err := Shell(s.GetIfNotExist)
-			if err != nil {
-				golog.Error(err)
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 // 脚本的信息
 type Script struct {
 	GetIfNotExist      string

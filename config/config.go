@@ -254,9 +254,6 @@ func (c *config) AddScript(s internal.Script) error {
 		s.KillTime = time.Second * 1
 	}
 
-	if err := script.GetResource(s); err != nil {
-		return err
-	}
 	// 如果添加了GetIfNotExist 优先执行完成然后再处理
 	// 添加到配置文件
 	for i, v := range c.SC {
