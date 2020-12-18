@@ -1,5 +1,5 @@
 # 监听端口
-listen: 127.0.0.1:11111
+listen: :11111
 # 保存输出日志的行数
 logCount: 500
 # 请求头认证 Token： xxxx
@@ -8,6 +8,8 @@ log:
     day: true
     size: 0
 token: 
+# 忽略token验证的客户端ip
+ignoreToken: []
 alert:
   email:
     host: smtp.qq.com
