@@ -26,6 +26,7 @@ func GetResource(s internal.Script) error {
 
 // 脚本的信息
 type Script struct {
+	GetIfNotExist      string
 	Name               string
 	Dir                string
 	Command            string
@@ -47,7 +48,21 @@ type Script struct {
 	cancel             context.CancelFunc
 	Email              []string
 	KillTime           time.Duration
+	IsScript           bool
 	// exitCode chan int // 如果推出信号是9
+}
+
+func (s *Script) RunGetResource() error {
+	if s.GetIfNotExist != "" && s.Dir != "" {
+		if _, err := os.Open(s.Dir); os.IsNotExist(err) {
+			s.IsScript = true
+			defer func() {
+				s.IsScript = false
+			}()
+			return s.Start(s.GetIfNotExist)
+		}
+	}
+	return nil
 }
 
 func (s *Script) Restart() {
@@ -62,7 +77,7 @@ func (s *Script) Restart() {
 		time.Sleep(s.KillTime)
 	}
 	s.exit = false
-	s.Start()
+	s.Start(s.Command)
 }
 
 func (s *Script) GetEnv() []string {
@@ -104,12 +119,12 @@ func (s *Script) wait() error {
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
 
-		if !s.exit && s.Always {
+		if !s.exit && s.Always && !s.IsScript {
 			// 失败了， 每秒启动一次
 			golog.Info("restart")
 			time.Sleep(1 * time.Second)
 			s.Status.RestartCount++
-			s.Start()
+			s.Start(s.Command)
 		}
 		s.exit = false
 		// s.Status.Last = false

@@ -17,33 +17,16 @@ import (
 	"github.com/shirou/gopsutil/net"
 )
 
-//  保存配置文件信息
-type HWAlert struct {
-	Monitor   []string `yaml:"monitor"`
-	Monitored []string `yaml:"monitored"`
-	// 内存使用率 默认90
-	Mem float64 `yaml:"mem"`
-	// cpu使用率, 默认90
-	Cpu float64 `yaml:"cpu"`
-	// 硬盘使用率， 默认90
-	Disk        float64  `yaml:"disk"`
-	ExcludeDisk []string `yaml:"excludeDisk"`
-	// 检测间隔， 默认10秒
-	Interval time.Duration `yaml:"interval"`
-	dp       []disk.PartitionStat
-	// 下次报警时间间隔， 如果恢复了就重置
-	ContinuityInterval time.Duration `yaml:"continuityInterval"`
-}
+// 保存 probe 报警信息
+var GlobalProbe *AlterTimer
 
 //  设置报警时间间隔, 因为是单线程的检测， 所以不用加锁
 type AlterTimer struct {
-	AT  map[string]*alert.AlertInfo // 保存硬件监控信息
-	HWA HWAlert
+	AT    map[string]*alert.AlertInfo // 保存硬件监控信息
+	Probe *Probe
 
 	Exit chan bool
 }
-
-var VarAT *AlterTimer
 
 // 默认监控的磁盘
 var cludeType = map[string]int{
@@ -55,36 +38,35 @@ var cludeType = map[string]int{
 }
 
 func init() {
-	VarAT = &AlterTimer{
+	GlobalProbe = &AlterTimer{
 		AT:   make(map[string]*alert.AlertInfo),
 		Exit: make(chan bool),
 	}
-	VarAT.AT["cpu"] = &alert.AlertInfo{}
-	VarAT.AT["mem"] = &alert.AlertInfo{}
-	VarAT.AT["disk"] = &alert.AlertInfo{}
-	VarAT.AT["server"] = &alert.AlertInfo{}
-
+	GlobalProbe.AT["cpu"] = &alert.AlertInfo{}
+	GlobalProbe.AT["mem"] = &alert.AlertInfo{}
+	GlobalProbe.AT["disk"] = &alert.AlertInfo{}
+	GlobalProbe.AT["server"] = &alert.AlertInfo{}
 }
 
 func CheckHardWare() {
-	VarAT.getDisk()
+	GlobalProbe.getDisk()
 	for {
 		select {
-		case <-VarAT.Exit:
+		case <-GlobalProbe.Exit:
 			golog.Info("exit check")
 			return
-		case <-time.After(VarAT.HWA.Interval):
-			if VarAT.HWA.Cpu > 0 {
-				VarAT.CheckCpu()
+		case <-time.After(GlobalProbe.Probe.Interval):
+			if GlobalProbe.Probe.Cpu > 0 {
+				GlobalProbe.CheckCpu()
 			}
-			if VarAT.HWA.Mem > 0 {
-				VarAT.CheckMem()
+			if GlobalProbe.Probe.Mem > 0 {
+				GlobalProbe.CheckMem()
 			}
-			if VarAT.HWA.Disk > 0 {
-				VarAT.CheckDisk()
+			if GlobalProbe.Probe.Disk > 0 {
+				GlobalProbe.CheckDisk()
 			}
-			if len(VarAT.HWA.Monitor) > 0 {
-				VarAT.CheckServer()
+			if len(GlobalProbe.Probe.Monitor) > 0 {
+				GlobalProbe.CheckServer()
 			}
 		}
 	}
@@ -92,7 +74,7 @@ func CheckHardWare() {
 }
 
 func (at *AlterTimer) CheckServer() {
-	for _, server := range at.HWA.Monitor {
+	for _, server := range at.Probe.Monitor {
 		var failed bool
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -128,7 +110,7 @@ func (at *AlterTimer) CheckServer() {
 				at.AT["server"].Start = time.Now()
 				at.AT["server"].AlertTime = time.Now()
 			} else {
-				if time.Since(at.AT["server"].AlertTime) >= at.HWA.ContinuityInterval {
+				if time.Since(at.AT["server"].AlertTime) >= at.Probe.ContinuityInterval {
 					at.AT["server"].AlertTime = time.Now()
 					alert.AlertMessage(am, nil)
 				}
@@ -150,8 +132,8 @@ func (at *AlterTimer) CheckServer() {
 }
 
 func (at *AlterTimer) getDisk() {
-	if at.HWA.dp == nil {
-		at.HWA.dp = make([]disk.PartitionStat, 0)
+	if at.Probe.dp == nil {
+		at.Probe.dp = make([]disk.PartitionStat, 0)
 	}
 	parts, err := disk.Partitions(true)
 	if err != nil {
@@ -159,7 +141,7 @@ func (at *AlterTimer) getDisk() {
 		return
 	}
 	excludePath := make(map[string]int)
-	for _, he := range at.HWA.ExcludeDisk {
+	for _, he := range at.Probe.ExcludeDisk {
 		excludePath[strings.ToUpper(he)] = 0
 	}
 
@@ -171,27 +153,27 @@ func (at *AlterTimer) getDisk() {
 
 		if _, ok := cludeType[strings.ToUpper(part.Fstype)]; ok {
 			mountNames[part.Mountpoint] = part.Fstype
-			at.HWA.dp = append(at.HWA.dp, part)
+			at.Probe.dp = append(at.Probe.dp, part)
 			continue
 		}
 
 	}
-	for _, part := range at.HWA.dp {
+	for _, part := range at.Probe.dp {
 		golog.Infof("alert dist: --%s--, type: %s", part.Mountpoint, part.Fstype)
 	}
 
 }
 
 func (at *AlterTimer) CheckDisk() {
-	for _, part := range at.HWA.dp {
+	for _, part := range at.Probe.dp {
 		di, err := disk.Usage(part.Mountpoint)
 		if err != nil {
 			golog.Error(err)
 			continue
 		}
-		if float64(di.Used)/float64(di.Total)*100 >= at.HWA.Disk {
+		if float64(di.Used)/float64(di.Total)*100 >= at.Probe.Disk {
 			am := &alert.Message{
-				Title: fmt.Sprintf("硬盘使用率超过%.2f%%", at.HWA.Disk),
+				Title: fmt.Sprintf("硬盘使用率超过%.2f%%", at.Probe.Disk),
 			}
 			am.DiskPath = part.Mountpoint
 			am.Use = di.Used / 1024 / 1024 / 1024
@@ -204,7 +186,7 @@ func (at *AlterTimer) CheckDisk() {
 				at.AT["disk"].AlertTime = time.Now()
 
 			} else {
-				if time.Since(at.AT["disk"].AlertTime) >= at.HWA.ContinuityInterval {
+				if time.Since(at.AT["disk"].AlertTime) >= at.Probe.ContinuityInterval {
 					at.AT["disk"].AlertTime = time.Now()
 					alert.AlertMessage(am, nil)
 				}
@@ -236,9 +218,9 @@ func (at *AlterTimer) CheckCpu() {
 		totalPercents += percent
 	}
 
-	if totalPercents >= at.HWA.Cpu*(float64)(len(percents)) {
+	if totalPercents >= at.Probe.Cpu*(float64)(len(percents)) {
 		am := &alert.Message{
-			Title: fmt.Sprintf("cpu 繁忙超过%.2f%%", at.HWA.Cpu*(float64)(len(percents))),
+			Title: fmt.Sprintf("cpu 繁忙超过%.2f%%", at.Probe.Cpu*(float64)(len(percents))),
 		}
 		am.UsePercent, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", totalPercents), 64)
 		am.Top = TopCpu(1)[0].ToString()
@@ -249,7 +231,7 @@ func (at *AlterTimer) CheckCpu() {
 			at.AT["cpu"].AlertTime = time.Now()
 
 		} else {
-			if time.Since(at.AT["cpu"].AlertTime) >= at.HWA.ContinuityInterval {
+			if time.Since(at.AT["cpu"].AlertTime) >= at.Probe.ContinuityInterval {
 				am.BrokenTime = at.AT["cpu"].Start.String()
 				at.AT["cpu"].AlertTime = time.Now()
 				alert.AlertMessage(am, nil)
@@ -276,9 +258,9 @@ func (at *AlterTimer) CheckMem() {
 		return
 	}
 
-	if float64(memInfo.Used)/float64(memInfo.Total)*100 >= at.HWA.Disk {
+	if float64(memInfo.Used)/float64(memInfo.Total)*100 >= at.Probe.Disk {
 		am := &alert.Message{
-			Title: fmt.Sprintf("内存使用率超过 %.2f%%", at.HWA.Mem),
+			Title: fmt.Sprintf("内存使用率超过 %.2f%%", at.Probe.Mem),
 		}
 		am.Use = memInfo.Used / 1024 / 1024 / 1024
 		am.Total = memInfo.Total / 1024 / 1024 / 1024
@@ -292,7 +274,7 @@ func (at *AlterTimer) CheckMem() {
 			at.AT["mem"].AlertTime = time.Now()
 			return
 		} else {
-			if time.Since(at.AT["mem"].AlertTime) >= at.HWA.ContinuityInterval {
+			if time.Since(at.AT["mem"].AlertTime) >= at.Probe.ContinuityInterval {
 				am.BrokenTime = at.AT["mem"].Start.String()
 				at.AT["mem"].AlertTime = time.Now()
 				alert.AlertMessage(am, nil)

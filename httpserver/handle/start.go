@@ -21,7 +21,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			script.SS.Infos[pname][name].Status.Status = script.RUNNING
-			script.SS.Infos[pname][name].Start()
+			script.SS.Infos[pname][name].Start(script.SS.Infos[pname][name].Command)
 			w.Write([]byte(`{"code": 200, "msg": "already start"}`))
 			return
 		} else {
@@ -40,7 +40,7 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 	if _, pok := script.SS.Infos[pname]; pok {
 		for name := range script.SS.Infos[pname] {
 			if script.SS.Infos[pname][name].Status.Status == script.STOP {
-				script.SS.Infos[pname][name].Start()
+				script.SS.Infos[pname][name].Start(script.SS.Infos[pname][name].Command)
 			}
 		}
 
@@ -57,7 +57,7 @@ func StartAll(w http.ResponseWriter, r *http.Request) {
 	for pname := range script.SS.Infos {
 		for name := range script.SS.Infos[pname] {
 			if script.SS.Infos[pname][name].Status.Status == script.STOP {
-				script.SS.Infos[pname][name].Start()
+				script.SS.Infos[pname][name].Start(script.SS.Infos[pname][name].Command)
 			}
 		}
 	}

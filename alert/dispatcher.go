@@ -80,7 +80,6 @@ func (ra *RespAlert) SendAlert() {
 func SendNetAlert() {
 	for {
 		dispatcherLock.Lock()
-
 		for pname := range dispatcher {
 			for name, di := range dispatcher[pname] {
 				if !di.Broken {

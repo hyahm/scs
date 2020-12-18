@@ -19,6 +19,7 @@ func main() {
 		fmt.Println("version:", global.VERSION)
 		return
 	}
+	// 报警器
 	go alert.SendNetAlert()
 	config.Start(cfg)
 

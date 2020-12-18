@@ -15,11 +15,43 @@ type Alert struct {
 	WeiXin   *AlertWeiXin   `yaml:"weixin"`
 }
 
-type SendAlerter interface {
-	Send(body *Message, to ...string) error
+var Alerts map[string]SendAlerter
+
+func init() {
+	Alerts = make(map[string]SendAlerter)
 }
 
-var Alerts map[string]SendAlerter
+func (alert *Alert) InitAlert() {
+	// 报警配置转移到了 Alerts
+	if alert.Email != nil {
+		if alert.Email.Host != "" && alert.Email.UserName != "" &&
+			alert.Email.Password != "" {
+			if alert.Email.Port == 0 {
+				alert.Email.Port = 465
+			}
+			Alerts["email"] = alert.Email
+
+		}
+	}
+	if alert.Rocket != nil {
+		if alert.Rocket.Server != "" && alert.Rocket.Username != "" &&
+			alert.Rocket.Password != "" {
+			Alerts["rocket"] = alert.Rocket
+		}
+
+	}
+
+	if alert.Telegram != nil {
+		if alert.Telegram.Server != "" && alert.Telegram.Username != "" &&
+			alert.Telegram.Password != "" {
+			Alerts["telegram"] = alert.Telegram
+		}
+
+	}
+	if alert.WeiXin != nil {
+		Alerts["weixin"] = alert.WeiXin
+	}
+}
 
 func AlertMessage(msg *Message, at *internal.AlertTo) {
 	for _, alert := range Alerts {

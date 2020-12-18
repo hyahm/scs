@@ -25,14 +25,15 @@ type Repo struct {
 }
 
 type config struct {
-	Listen   string            `yaml:"listen"`
-	Token    string            `yaml:"token"`
-	Log      logger.Logger     `yaml:"log"`
-	LogCount int               `yaml:"logCount"`
-	Repo     *Repo             `yaml:"repo"`
-	Alert    alert.Alert       `yaml:"alert"`
-	Probe    probe.HWAlert     `yaml:"probe"`
-	SC       []internal.Script `yaml:"scripts"`
+	Listen      string            `yaml:"listen"`
+	Token       string            `yaml:"token"`
+	Log         logger.Logger     `yaml:"log"`
+	LogCount    int               `yaml:"logCount"`
+	IgnoreToken []string          `yaml:"ignoreToken"`
+	Repo        *Repo             `yaml:"repo"`
+	Alert       alert.Alert       `yaml:"alert"`
+	Probe       probe.Probe       `yaml:"probe"`
+	SC          []internal.Script `yaml:"scripts"`
 }
 
 // 保存的全局的配置
@@ -71,9 +72,10 @@ func Load() error {
 	// 装载配置
 	global.Token = Cfg.Token
 	global.Listen = Cfg.Listen
+	global.IgnoreToken = Cfg.IgnoreToken
 	// 初始化报警信息
-	Cfg.initAlert()
-	Cfg.initHWAlert()
+	Cfg.Alert.InitAlert()
+	Cfg.Probe.InitHWAlert()
 	golog.InitLogger(Cfg.Log.Path, Cfg.Log.Size, Cfg.Log.Day)
 	// 设置所有级别的日志都显示
 	golog.Level = golog.All
@@ -81,8 +83,6 @@ func Load() error {
 		if Cfg.SC[index].Replicate < 1 {
 			Cfg.SC[index].Replicate = 1
 		}
-		// baseEnv := os.Environ()
-
 		if _, ok := script.SS.Infos[Cfg.SC[index].Name]; !ok {
 			script.SS.Infos[Cfg.SC[index].Name] = make(map[string]*script.Script)
 		}
@@ -122,67 +122,6 @@ func readConfig() error {
 func (c *config) Run() {
 	c.checkName()
 	script.SS.Start()
-}
-
-func (c *config) initAlert() {
-	// 报警配置转移到了 alert.Alerts
-	if alert.Alerts == nil {
-		alert.Alerts = make(map[string]alert.SendAlerter)
-	}
-	if c.Alert.Email != nil {
-		if c.Alert.Email.Host != "" && c.Alert.Email.UserName != "" &&
-			c.Alert.Email.Password != "" {
-			if c.Alert.Email.Port == 0 {
-				c.Alert.Email.Port = 465
-			}
-			alert.Alerts["email"] = c.Alert.Email
-
-		}
-	}
-	if c.Alert.Rocket != nil {
-		if c.Alert.Rocket.Server != "" && c.Alert.Rocket.Username != "" &&
-			c.Alert.Rocket.Password != "" {
-			alert.Alerts["rocket"] = c.Alert.Rocket
-		}
-
-	}
-
-	if c.Alert.Telegram != nil {
-		if c.Alert.Telegram.Server != "" && c.Alert.Telegram.Username != "" &&
-			c.Alert.Telegram.Password != "" {
-			alert.Alerts["telegram"] = c.Alert.Telegram
-		}
-
-	}
-	if c.Alert.WeiXin != nil {
-		alert.Alerts["weixin"] = c.Alert.WeiXin
-
-	}
-}
-
-func (c *config) initHWAlert() {
-
-	if c.Probe.Interval == 0 {
-		c.Probe.Interval = time.Second * 10
-	}
-	if c.Probe.ContinuityInterval == 0 {
-		c.Probe.ContinuityInterval = time.Hour * 1
-	}
-
-	if c.Probe.Cpu == 0 {
-		c.Probe.Cpu = 90
-	}
-	if c.Probe.Mem == 0 {
-		c.Probe.Cpu = 90
-	}
-	if c.Probe.Disk == 0 {
-		c.Probe.Cpu = 85
-	}
-	probe.VarAT.HWA = c.Probe
-	if c.Probe.Cpu > 0 || c.Probe.Mem > 0 || c.Probe.Disk > 0 || len(c.Probe.Monitor) > 0 {
-		go probe.CheckHardWare()
-	}
-
 }
 
 // 检测配置脚本是否
@@ -235,18 +174,16 @@ func (c *config) fill(index int) {
 }
 
 func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
-	if err := script.GetResource(c.SC[index]); err != nil {
-		golog.Info(err)
-		return
-	}
+
 	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
-		Name:      c.SC[index].Name,
-		Command:   command,
-		Env:       baseEnv,
-		Dir:       c.SC[index].Dir,
-		Replicate: c.SC[index].Replicate,
-		Log:       make([]string, 0, c.LogCount),
-		SubName:   subname,
+		Name:          c.SC[index].Name,
+		GetIfNotExist: c.SC[index].GetIfNotExist,
+		Command:       command,
+		Env:           baseEnv,
+		Dir:           c.SC[index].Dir,
+		Replicate:     c.SC[index].Replicate,
+		Log:           make([]string, 0, c.LogCount),
+		SubName:       subname,
 		Status: &script.ServiceStatus{
 			Name:    subname,
 			PName:   c.SC[index].Name,
@@ -263,8 +200,12 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		KillTime:           c.SC[index].KillTime,
 	}
 	// 新增的时候
+	if err := script.SS.Infos[c.SC[index].Name][subname].RunGetResource(); err != nil {
+		golog.Error(err)
+		return
+	}
 	script.SetUseScript(subname, c.SC[index].Name)
-	script.SS.Infos[c.SC[index].Name][subname].Start()
+	script.SS.Infos[c.SC[index].Name][subname].Start(command)
 
 }
 
@@ -288,7 +229,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	golog.Info(c.SC[index].Version)
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
-		script.SS.Infos[c.SC[index].Name][subname].Start()
+		script.SS.Infos[c.SC[index].Name][subname].Start(command)
 	}
 	// 删除需要删除的服务
 	script.DelDelScript(subname)
@@ -312,6 +253,7 @@ func (c *config) AddScript(s internal.Script) error {
 	if s.KillTime == 0 {
 		s.KillTime = time.Second * 1
 	}
+
 	if err := script.GetResource(s); err != nil {
 		return err
 	}

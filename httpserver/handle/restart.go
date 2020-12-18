@@ -17,7 +17,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 			if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
 				go script.SS.Infos[pname][name].Restart()
 			} else if script.SS.Infos[pname][name].Status.Status == script.STOP {
-				script.SS.Infos[pname][name].Start()
+				script.SS.Infos[pname][name].Start(script.SS.Infos[pname][name].Command)
 			}
 
 		} else {
@@ -42,7 +42,7 @@ func RestartPname(w http.ResponseWriter, r *http.Request) {
 				golog.Info("restart ", pname, " ", name)
 				go script.SS.Infos[pname][name].Restart()
 			} else if script.SS.Infos[pname][name].Status.Status == script.STOP {
-				script.SS.Infos[pname][name].Start()
+				script.SS.Infos[pname][name].Start(script.SS.Infos[pname][name].Command)
 			}
 		}
 
@@ -62,7 +62,7 @@ func RestartAll(w http.ResponseWriter, r *http.Request) {
 			if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
 				go script.SS.Infos[pname][name].Restart()
 			} else if script.SS.Infos[pname][name].Status.Status == script.STOP {
-				script.SS.Infos[pname][name].Start()
+				script.SS.Infos[pname][name].Start(script.SS.Infos[pname][name].Command)
 			}
 		}
 

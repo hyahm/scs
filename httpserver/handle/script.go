@@ -42,7 +42,7 @@ func DelScript(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Write([]byte(`{"code": 201, "msg": "waiting config file reloaded"}`))
 	}
-	probe.VarAT.Exit <- true
+	probe.GlobalProbe.Exit <- true
 
 	script.Reloadlocker.Lock()
 	defer script.Reloadlocker.Unlock()

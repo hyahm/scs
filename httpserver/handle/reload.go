@@ -15,7 +15,7 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return
 	}
-	probe.VarAT.Exit <- true
+	probe.GlobalProbe.Exit <- true
 
 	script.Reloadlocker.Lock()
 	defer script.Reloadlocker.Unlock()

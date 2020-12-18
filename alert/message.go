@@ -1,5 +1,6 @@
 package alert
 
+// 用来组装body
 import (
 	"bytes"
 	"io/ioutil"
