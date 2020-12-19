@@ -23,12 +23,11 @@ func (weixin *AlertWeiXin) Send(body *Message, to ...string) error {
 			fmt.Sprintf(`{"msgtype": "markdown", "markdown": {"content": "%s"}}`, text),
 		),
 	)
-	defer resp.Body.Close()
 	if err != nil {
 		golog.Error(err)
 		return err
 	}
-
+	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		golog.Error(err)

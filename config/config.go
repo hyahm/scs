@@ -178,6 +178,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
 		Name:          c.SC[index].Name,
 		GetIfNotExist: c.SC[index].GetIfNotExist,
+		LookPath:      c.SC[index].LookPath,
 		Command:       command,
 		Env:           baseEnv,
 		Dir:           c.SC[index].Dir,
@@ -200,6 +201,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		KillTime:           c.SC[index].KillTime,
 	}
 	// 新增的时候
+	script.SS.Infos[c.SC[index].Name][subname].LookCommandPath()
 	if err := script.SS.Infos[c.SC[index].Name][subname].RunGetResource(); err != nil {
 		golog.Error(err)
 		return
@@ -214,7 +216,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	for k, v := range baseEnv {
 		script.SS.Infos[c.SC[index].Name][subname].Env[k] = v
 	}
-
+	script.SS.Infos[c.SC[index].Name][subname].LookPath = c.SC[index].LookPath
 	script.SS.Infos[c.SC[index].Name][subname].Command = command
 	script.SS.Infos[c.SC[index].Name][subname].Dir = c.SC[index].Dir
 	script.SS.Infos[c.SC[index].Name][subname].Replicate = c.SC[index].Replicate
@@ -226,7 +228,6 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	script.SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
 	script.SS.Infos[c.SC[index].Name][subname].Status.Version = c.SC[index].Version
 	script.SS.Infos[c.SC[index].Name][subname].KillTime = c.SC[index].KillTime
-	golog.Info(c.SC[index].Version)
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
 		script.SS.Infos[c.SC[index].Name][subname].Start(command)
@@ -238,7 +239,6 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 
 func (c *config) AddScript(s internal.Script) error {
 	// 启动脚本
-	golog.Info(s.KillTime)
 	if s.Replicate < 1 {
 		s.Replicate = 1
 	}

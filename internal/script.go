@@ -19,6 +19,12 @@ type Script struct {
 	AT                 AlertTo           `yaml:"alert,omitempty" json:"alert"`
 	KillTime           time.Duration     `yaml:"killTime,omitempty" json:"killTime"`
 	Version            string            `yaml:"version,omitempty" json:"version"`
+	LookPath           []*LoopPath       `yaml:"lookPath,omitempty" json:"loopPath"`
+}
+
+type LoopPath struct {
+	Command string `yaml:"command,omitempty" json:"command"`
+	Install string `yaml:"install,omitempty" json:"install"`
 }
 
 // 优先执行的代码

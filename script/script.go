@@ -13,6 +13,7 @@ import (
 
 // 脚本的信息
 type Script struct {
+	LookPath           []*internal.LoopPath
 	GetIfNotExist      string
 	Name               string
 	Dir                string

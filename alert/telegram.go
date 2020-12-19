@@ -39,11 +39,12 @@ func (telegram *AlertTelegram) Send(body *Message, to ...string) error {
 					text),
 			),
 		)
-		defer resp.Body.Close()
+
 		if err != nil {
 			golog.Error(err)
 			continue
 		}
+		defer resp.Body.Close()
 
 		b, err := ioutil.ReadAll(resp.Body)
 		if err == nil {
