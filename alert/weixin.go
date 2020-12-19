@@ -30,7 +30,7 @@ func (weixin *AlertWeiXin) Send(body *Message, to ...string) error {
 	}
 
 	b, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
+	if err != nil {
 		golog.Error(err)
 		return err
 	}
@@ -38,7 +38,5 @@ func (weixin *AlertWeiXin) Send(body *Message, to ...string) error {
 		golog.Error(string(b))
 		return errors.New(string(b))
 	}
-	golog.Error(err)
-	golog.Info(string(b))
 	return nil
 }
