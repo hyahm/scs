@@ -7,6 +7,7 @@ import (
 )
 
 func (s *Script) LookCommandPath() {
+	s.IsScript = true
 	for _, v := range s.LookPath {
 		path, err := exec.LookPath(v.Command)
 		if err != nil {
@@ -21,4 +22,5 @@ func (s *Script) LookCommandPath() {
 		}
 
 	}
+	s.IsScript = false
 }
