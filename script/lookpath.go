@@ -2,15 +2,20 @@ package script
 
 import (
 	"os/exec"
+
+	"github.com/hyahm/golog"
 )
 
-func (s *Script) LookCommandPath() {
-	s.IsScript = true
+func (s *Script) LookCommandPath() error {
 	for _, v := range s.LookPath {
 		_, err := exec.LookPath(v.Command)
 		if err != nil {
-			s.Start(v.Install)
+			golog.Info(v.Install)
+			if err := Shell(v.Install, s.Env); err != nil {
+				return err
+			}
 		}
 	}
-	s.IsScript = false
+
+	return nil
 }

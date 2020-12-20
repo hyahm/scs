@@ -8,7 +8,9 @@ import (
 	"scs/client/node"
 	"scs/config"
 	"scs/install"
+	"scs/internal"
 	"scs/script"
+	"time"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
@@ -116,4 +118,22 @@ func InstallPackage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func InstallScript(w http.ResponseWriter, r *http.Request) {
+	s := xmux.GetData(r).Data.(*internal.Script)
+	s.ContinuityInterval = s.ContinuityInterval * 1000000000
+	if s.KillTime == 0 {
+		s.KillTime = 1 * time.Second
+	} else {
+		golog.Info(s.KillTime)
+		s.KillTime = s.KillTime * 1000000000
+	}
+	golog.Infof("%+v", *s)
+	if err := config.Cfg.AddScript(*s); err != nil {
+		w.Write([]byte(`{"code": 201, "msg": "already exist script"}`))
+		return
+	}
+	w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
+	return
 }

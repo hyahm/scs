@@ -174,17 +174,16 @@ func (c *config) fill(index int) {
 }
 
 func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
-
+	golog.Info(command)
 	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
-		Name:          c.SC[index].Name,
-		GetIfNotExist: c.SC[index].GetIfNotExist,
-		LookPath:      c.SC[index].LookPath,
-		Command:       command,
-		Env:           baseEnv,
-		Dir:           c.SC[index].Dir,
-		Replicate:     c.SC[index].Replicate,
-		Log:           make([]string, 0, c.LogCount),
-		SubName:       subname,
+		Name:      c.SC[index].Name,
+		LookPath:  c.SC[index].LookPath,
+		Command:   command,
+		Env:       baseEnv,
+		Dir:       c.SC[index].Dir,
+		Replicate: c.SC[index].Replicate,
+		Log:       make([]string, 0, c.LogCount),
+		SubName:   subname,
 		Status: &script.ServiceStatus{
 			Name:    subname,
 			PName:   c.SC[index].Name,
@@ -201,13 +200,14 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		KillTime:           c.SC[index].KillTime,
 	}
 	// 新增的时候
-	script.SS.Infos[c.SC[index].Name][subname].LookCommandPath()
-	if err := script.SS.Infos[c.SC[index].Name][subname].RunGetResource(); err != nil {
+
+	if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
 		golog.Error(err)
 		return
 	}
+
 	script.SetUseScript(subname, c.SC[index].Name)
-	script.SS.Infos[c.SC[index].Name][subname].Start(command)
+	script.SS.Infos[c.SC[index].Name][subname].Start()
 
 }
 
@@ -230,7 +230,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	script.SS.Infos[c.SC[index].Name][subname].KillTime = c.SC[index].KillTime
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
-		script.SS.Infos[c.SC[index].Name][subname].Start(command)
+		script.SS.Infos[c.SC[index].Name][subname].Start()
 	}
 	// 删除需要删除的服务
 	script.DelDelScript(subname)
@@ -269,7 +269,6 @@ func (c *config) AddScript(s internal.Script) error {
 			return ioutil.WriteFile(cfgfile, b, 0644)
 		}
 	}
-	golog.Info(s)
 	c.SC = append(c.SC, s)
 	index := len(c.SC) - 1
 	c.fill(index)

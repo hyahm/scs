@@ -3,6 +3,7 @@ package script
 import (
 	"bufio"
 	"io"
+	"os/exec"
 	"scs/global"
 	"time"
 
@@ -55,6 +56,41 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 			}
 		} else {
 			s.appendLog(line)
+		}
+
+	}
+}
+
+func read(cmd *exec.Cmd) {
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		golog.Error(err)
+	}
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		golog.Error(err)
+	}
+
+	//实时循环读取输出流中的一行内容
+	go appendRead(stderr, true)
+
+	//实时循环读取输出流中的一行内容
+	go appendRead(stdout, false)
+}
+
+func appendRead(stdout io.ReadCloser, iserr bool) {
+	readout := bufio.NewReader(stdout)
+	for {
+		line, err := readout.ReadString('\n')
+		if err != nil || io.EOF == err {
+			stdout.Close()
+			break
+		}
+		if iserr {
+			golog.Error(line)
+		} else {
+			golog.Info(line)
 		}
 
 	}

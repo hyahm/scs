@@ -12,11 +12,31 @@ import (
 	"github.com/hyahm/golog"
 )
 
-func Shell(command string) ([]byte, error) {
-	cmd := exec.Command("cmd", "/C", command)
-	return cmd.Output()
+func Shell(command string, env map[string]string) error {
+	cmd := exec.Command("cmd", "/c", command)
+	baseEnv := make(map[string]string)
+	for _, v := range os.Environ() {
+		kv := strings.Split(v, "=")
+		baseEnv[kv[0]] = kv[1]
+	}
+	for k, v := range env {
+		if k == "PATH" {
+			baseEnv[k] = baseEnv[k] + ";" + v
+		} else {
+			baseEnv[k] = v
+		}
+	}
+	for k, v := range baseEnv {
+		cmd.Env = append(cmd.Env, k+"="+v)
+	}
+	read(cmd)
+	err := cmd.Start()
+	if err != nil {
+		golog.Error(err)
+		return err
+	}
+	return cmd.Wait()
 }
-
 func (s *Script) Stop() {
 	if s.Status.Status == RUNNING {
 		s.Status.Status = WAITSTOP
@@ -71,6 +91,7 @@ func (s *Script) Kill() {
 
 func (s *Script) start(command string) error {
 	s.cmd = exec.Command("cmd", "/C", command)
+
 	baseEnv := make(map[string]string)
 	for _, v := range os.Environ() {
 		kv := strings.Split(v, "=")
@@ -83,11 +104,12 @@ func (s *Script) start(command string) error {
 			baseEnv[k] = v
 		}
 	}
-	s.cmd.Dir = s.Dir
 	for k, v := range baseEnv {
 		s.cmd.Env = append(s.cmd.Env, k+"="+v)
 	}
+	s.cmd.Dir = s.Dir
 
+	s.Command = "cd " + s.cmd.Dir + " ; " + s.Command
 	// 等待初始化完成完成后向后执行
 	s.read()
 	s.Status.Up = time.Now().Unix() // 设置启动状态是成功的

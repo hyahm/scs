@@ -8,7 +8,6 @@ import (
 type Script struct {
 	Name               string            `yaml:"name,omitempty" json:"name"`
 	Dir                string            `yaml:"dir,omitempty" json:"dir"`
-	GetIfNotExist      string            `yaml:"get,omitempty" json:"get"`
 	Command            string            `yaml:"command,omitempty" json:"command"`
 	Replicate          int               `yaml:"replicate,omitempty" json:"replicate"`
 	Always             bool              `yaml:"always,omitempty" json:"always"`

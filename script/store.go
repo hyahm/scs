@@ -59,7 +59,7 @@ func (s *Service) Start() {
 	s.mu.RLock()
 	for pname := range SS.Infos {
 		for name := range SS.Infos[pname] {
-			SS.Infos[pname][name].Start(SS.Infos[pname][name].Command)
+			SS.Infos[pname][name].Start()
 		}
 	}
 	s.mu.RUnlock()

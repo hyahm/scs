@@ -13,9 +13,33 @@ import (
 	"github.com/hyahm/golog"
 )
 
-func Shell(command string) ([]byte, error) {
+func Shell(command string, env map[string]string) error {
 	cmd := exec.Command("/bin/bash", "-c", command)
-	return cmd.Output()
+	baseEnv := make(map[string]string)
+	for _, v := range os.Environ() {
+		kv := strings.Split(v, "=")
+		baseEnv[kv[0]] = kv[1]
+	}
+	for k, v := range env {
+		if k == "PATH" {
+			baseEnv[k] = baseEnv[k] + ";" + v
+		} else {
+			baseEnv[k] = v
+		}
+	}
+	for k, v := range baseEnv {
+		cmd.Env = append(cmd.Env, k+"="+v)
+	}
+	read(cmd)
+	err := cmd.Start()
+	if err != nil {
+		golog.Error(err)
+		return err
+	}
+	defer func() {
+		golog.Error(cmd.ProcessState.ExitCode())
+	}()
+	return cmd.Wait()
 }
 
 func (s *Script) Stop() {
@@ -71,10 +95,10 @@ func (s *Script) Kill() {
 
 }
 
-func (s *Script) start(command string) error {
-	s.cmd = exec.Command("/bin/bash", "-c", command)
-
+func (s *Script) start() error {
+	s.cmd = exec.Command("/bin/bash", "-c", s.Command)
 	s.cmd.Dir = s.Dir
+	s.Command = "cd " + s.cmd.Dir + " && " + s.Command
 	baseEnv := make(map[string]string)
 	for _, v := range os.Environ() {
 		kv := strings.Split(v, "=")
@@ -105,12 +129,12 @@ func (s *Script) start(command string) error {
 	return nil
 }
 
-func (s *Script) Start(command string) error {
+func (s *Script) Start() error {
 	s.exit = false
 	s.Status.Status = RUNNING
 	// index := strings.Index(s.Command, " ")
 	// s.cmd = exec.Command(s.Command[:index], s.Command[index:])
-	if err := s.start(command); err != nil {
+	if err := s.start(); err != nil {
 		return err
 	}
 	// 等待初始化完成完成后向后执行
@@ -119,6 +143,7 @@ func (s *Script) Start(command string) error {
 	s.Status.Ppid = s.cmd.Process.Pid
 	go s.wait()
 	return nil
+
 }
 
 // func (s *Script) Install(command string) {
