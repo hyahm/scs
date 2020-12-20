@@ -1,12 +1,17 @@
 package command
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"scs/client/cliconfig"
 	"scs/client/node"
+	"scs/internal"
 	"sync"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 // install <-f yaml> || <-u url> || <name>
@@ -16,18 +21,50 @@ var InstallCmd = &cobra.Command{
 	Long:  `install package`,
 	Run: func(cmd *cobra.Command, args []string) {
 		condition := 0
-		op := ""
+		sc := &internal.Script{}
 		if len(args) > 1 {
 			condition++
-			op = args[0]
+			// op = args[0]
+			// get yaml file
+			// f, err := ioutil.ReadFile(file)
+			// if err != nil {
+			// 	fmt.Println(err)
+			// 	return
+			// }
+
+			// err = json.Unmarshal(f, sc)
+			// if err != nil {
+			// 	fmt.Println(err)
+			// 	return
+			// }
 		}
 		if url != "" {
 			condition++
-			op = url
+			resp, err := http.Get(url)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			err = json.NewDecoder(resp.Body).Decode(sc)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
 		if file != "" {
 			condition++
-			op = file
+			f, err := ioutil.ReadFile(file)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			err = yaml.Unmarshal(f, sc)
+			if err != nil {
+				fmt.Println("0000")
+				fmt.Println(err)
+				return
+			}
 		}
 		if condition == 0 {
 			fmt.Println("at lease one params : scsctl install <-f yaml> || <-u url> || <name>")
@@ -39,7 +76,7 @@ var InstallCmd = &cobra.Command{
 		}
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
-				nodeInfo.Install(op, env)
+				nodeInfo.Install(sc, env)
 				return
 			}
 		}
@@ -49,7 +86,7 @@ var InstallCmd = &cobra.Command{
 				if nodeInfo, ok := cliconfig.Cfg.Nodes[v]; ok {
 					wg.Add(1)
 					nodeInfo.Wg = wg
-					nodeInfo.Install(op, env)
+					nodeInfo.Install(sc, env)
 				}
 			}
 			wg.Wait()
@@ -57,10 +94,11 @@ var InstallCmd = &cobra.Command{
 		}
 		wg := &sync.WaitGroup{}
 		for name, nodeInfo := range cliconfig.Cfg.Nodes {
+			fmt.Println("99999")
 			nodeInfo.Name = name
 			wg.Add(1)
 			nodeInfo.Wg = wg
-			nodeInfo.Install(op, env)
+			nodeInfo.Install(sc, env)
 		}
 		wg.Wait()
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"scs/internal"
 	"scs/script"
 	"sync"
 
@@ -253,19 +254,18 @@ func (node *Node) getDependEnv(args ...string) {
 	fmt.Println(string(b))
 }
 
-func (node *Node) Install(args string, env map[string]string) {
+func (node *Node) Install(script *internal.Script, env map[string]string) {
 	// 先读取配置文件
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-
-	body, err := json.Marshal(env)
+	body, err := json.Marshal(script)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	b, err := Requests("POST", fmt.Sprintf("%s/install/%s", node.Url, args), node.Token, bytes.NewReader(body))
+	b, err := Requests("POST", fmt.Sprintf("%s/script", node.Url), node.Token, bytes.NewReader(body))
 	if err != nil {
 		fmt.Println(err)
 		return
