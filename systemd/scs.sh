@@ -42,7 +42,7 @@ if [[ $? -ne 0 ]]; then
         $gobin build -o /usr/local/bin/scsctl cmd/scsctl/main.go
         "
 fi
-token=$($gobin run cmd/random/random.go)
+TOKEN=$($gobin run cmd/random/random.go)
 
 if [[ ! -f /etc/scs.yaml ]];then
 sudo /bin/bash -c 'export TOKEN=$token && cat > /etc/scs.yaml << EOF
@@ -142,5 +142,5 @@ cat > ~/scsctl.yaml <<EOF
 nodes:
   localhost:
     url: https://127.0.0.1:11111
-    token: "$token"
+    token: "$TOKEN"
 EOF
