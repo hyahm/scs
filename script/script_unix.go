@@ -105,13 +105,12 @@ func (s *Script) start(command string) error {
 	return nil
 }
 
-func (s *Script) Start() error {
+func (s *Script) Start(command string) error {
 	s.exit = false
 	s.Status.Status = RUNNING
 	// index := strings.Index(s.Command, " ")
 	// s.cmd = exec.Command(s.Command[:index], s.Command[index:])
-	s.Status.Command = s.Command
-	if err := s.start(s.Command); err != nil {
+	if err := s.start(command); err != nil {
 		return err
 	}
 	// 等待初始化完成完成后向后执行

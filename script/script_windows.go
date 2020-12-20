@@ -110,8 +110,7 @@ func (s *Script) Start(command string) error {
 	s.Status.Status = RUNNING
 	// index := strings.Index(s.Command, " ")
 	// s.cmd = exec.Command(s.Command[:index], s.Command[index:])
-	s.Status.Command = command
-	if err := s.start(s.Command); err != nil {
+	if err := s.start(command); err != nil {
 		return err
 	}
 	s.Status.Ppid = s.cmd.Process.Pid
