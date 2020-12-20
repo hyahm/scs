@@ -98,7 +98,6 @@ func (s *Script) Kill() {
 func (s *Script) start() error {
 	s.cmd = exec.Command("/bin/bash", "-c", s.Command)
 	s.cmd.Dir = s.Dir
-	s.Command = "cd " + s.cmd.Dir + " && " + s.Command
 	baseEnv := make(map[string]string)
 	for _, v := range os.Environ() {
 		kv := strings.Split(v, "=")

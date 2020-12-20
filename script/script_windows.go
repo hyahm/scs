@@ -109,7 +109,6 @@ func (s *Script) start(command string) error {
 	}
 	s.cmd.Dir = s.Dir
 
-	s.Command = "cd " + s.cmd.Dir + " ; " + s.Command
 	// 等待初始化完成完成后向后执行
 	s.read()
 	s.Status.Up = time.Now().Unix() // 设置启动状态是成功的
