@@ -89,8 +89,8 @@ func (s *Script) Kill() {
 
 }
 
-func (s *Script) start(command string) error {
-	s.cmd = exec.Command("cmd", "/C", command)
+func (s *Script) start() error {
+	s.cmd = exec.Command("cmd", "/C", s.Command)
 
 	baseEnv := make(map[string]string)
 	for _, v := range os.Environ() {
@@ -126,12 +126,12 @@ func (s *Script) start(command string) error {
 	return nil
 }
 
-func (s *Script) Start(command string) error {
+func (s *Script) Start() error {
 	s.exit = false
 	s.Status.Status = RUNNING
 	// index := strings.Index(s.Command, " ")
 	// s.cmd = exec.Command(s.Command[:index], s.Command[index:])
-	if err := s.start(command); err != nil {
+	if err := s.start(); err != nil {
 		return err
 	}
 	s.Status.Ppid = s.cmd.Process.Pid
