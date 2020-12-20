@@ -7,9 +7,12 @@ import (
 	"scs/config"
 	"scs/global"
 	"scs/httpserver"
+
+	"github.com/hyahm/golog"
 )
 
 func main() {
+	defer golog.Sync()
 	var cfg string
 	var showversion bool
 	flag.BoolVar(&showversion, "v", false, "get scs server version")
