@@ -22,7 +22,7 @@ type Script struct {
 }
 
 type LoopPath struct {
-	Command string `yaml:"command,omitempty" json:"command"`
+	Path    string `yaml:"path,omitempty" json:"path"`
 	Install string `yaml:"install,omitempty" json:"install"`
 }
 
