@@ -7,7 +7,6 @@ require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hyahm/golog v0.0.0-20201212071038-b0712927aed5
 	github.com/hyahm/xmux v0.0.0-20201002164645-6fda7cef7192
 	github.com/shirou/gopsutil v2.20.9+incompatible
