@@ -104,7 +104,7 @@ func (s *Script) wait() error {
 		// s.Status.Last = false
 		return err
 	}
-	if s.Loop > 0 && s.Always {
+	if s.Loop > 0 {
 		// 允许循环， 每秒启动一次
 		golog.Info("restart")
 		time.Sleep(time.Now().Sub(s.loopTime))
