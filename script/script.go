@@ -93,7 +93,7 @@ func (s *Script) wait() error {
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
 
-		if !s.exit && s.Always {
+		if !s.exit && s.Always && s.Loop == 0 {
 			// 失败了， 每秒启动一次
 			golog.Info("restart")
 			time.Sleep(1 * time.Second)
