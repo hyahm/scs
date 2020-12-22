@@ -96,9 +96,10 @@ func (s *Script) wait() error {
 			goto loop
 		}
 		if !s.exit && s.Always {
+			golog.Info(time.Now())
 			// 失败了， 每秒启动一次
 			golog.Info("restart")
-			time.Sleep(1 * time.Second)
+			time.Sleep(s.KillTime)
 			s.Status.RestartCount++
 			s.Start()
 		}
@@ -108,10 +109,8 @@ func (s *Script) wait() error {
 	}
 loop:
 	if s.Loop > 0 {
-		// 允许循环， 每秒启动一次
-		golog.Info("restart")
-		time.Sleep(time.Now().Sub(s.loopTime))
-		s.Status.RestartCount++
+		// 允许循环， 每s.Loop秒启动一次
+		time.Sleep(time.Duration(float64(s.Loop)-time.Now().Sub(s.loopTime).Seconds()) * time.Second)
 		s.Start()
 		s.exit = false
 		return nil
