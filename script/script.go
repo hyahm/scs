@@ -92,7 +92,7 @@ func (s *Script) wait() error {
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
-		if s.Loop > 0 {
+		if !s.exit && s.Loop > 0 {
 			goto loop
 		}
 		if !s.exit && s.Always {
