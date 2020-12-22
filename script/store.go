@@ -89,10 +89,12 @@ func All() []byte {
 			} else {
 				s.Status.Start = "0s"
 			}
+			s.Status.Command = s.Command
 			ss = append(ss, s.Status)
 		}
 
 	}
+
 	send, err := json.MarshalIndent(ss, "", "\t")
 	if err != nil {
 		golog.Error(err)

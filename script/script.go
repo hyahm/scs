@@ -2,6 +2,7 @@ package script
 
 import (
 	"context"
+	"math"
 	"os/exec"
 	"scs/alert"
 	"scs/internal"
@@ -109,8 +110,12 @@ func (s *Script) wait() error {
 	}
 loop:
 	if s.Loop > 0 {
-		// 允许循环， 每s.Loop秒启动一次
-		time.Sleep(time.Duration(float64(s.Loop)-time.Now().Sub(s.loopTime).Seconds()) * time.Second)
+		sleep := math.Ceil(float64(s.Loop) - time.Now().Sub(s.loopTime).Seconds())
+		if sleep > 0 {
+			// 允许循环， 每s.Loop秒启动一次
+			time.Sleep(time.Duration(sleep) * time.Second)
+		}
+
 		s.Start()
 		s.exit = false
 		return nil
@@ -129,8 +134,6 @@ func (s *Script) stopStatus() {
 func (s *Script) Install(command string) {
 	s.exit = false
 	golog.Info(s.Log)
-	// index := strings.Index(s.Command, " ")
-	// s.cmd = exec.Command(s.Command[:index], s.Command[index:])
 	s.start()
 
 	go s.waitinstall()

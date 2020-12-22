@@ -24,19 +24,6 @@ var InstallCmd = &cobra.Command{
 		sc := &internal.Script{}
 		if len(args) > 1 {
 			condition++
-			// op = args[0]
-			// get yaml file
-			// f, err := ioutil.ReadFile(file)
-			// if err != nil {
-			// 	fmt.Println(err)
-			// 	return
-			// }
-
-			// err = json.Unmarshal(f, sc)
-			// if err != nil {
-			// 	fmt.Println(err)
-			// 	return
-			// }
 		}
 		if url != "" {
 			condition++
