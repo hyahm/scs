@@ -137,7 +137,7 @@ func (c *config) checkName() error {
 		checkrepeat[c.SC[index].Name] = true
 
 		// 命令行是空的或者name是空的就忽略
-		if strings.Trim(c.SC[index].Command, " ") == "" || strings.Trim(c.SC[index].Name, " ") == "" {
+		if strings.Trim(c.SC[index].Command, " ") == "" || strings.Trim(c.SC[index].Name, " ") == "" || strings.Trim(c.SC[index].Dir, " ") == "" {
 			continue
 		}
 		if c.SC[index].Replicate < 1 {
@@ -208,7 +208,9 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 	}
 
 	script.SetUseScript(subname, c.SC[index].Name)
-	script.SS.Infos[c.SC[index].Name][subname].Start()
+	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && strings.Trim(c.SC[index].Dir, " ") != "" {
+		script.SS.Infos[c.SC[index].Name][subname].Start()
+	}
 
 }
 
@@ -232,7 +234,10 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	script.SS.Infos[c.SC[index].Name][subname].KillTime = c.SC[index].KillTime
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
-		script.SS.Infos[c.SC[index].Name][subname].Start()
+		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && strings.Trim(c.SC[index].Dir, " ") != "" {
+			script.SS.Infos[c.SC[index].Name][subname].Start()
+		}
+
 	}
 	// 删除需要删除的服务
 	script.DelDelScript(subname)
@@ -240,7 +245,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 }
 
 func (c *config) AddScript(s internal.Script) error {
-	// 启动脚本
+	// 默认配置
 	if s.Replicate < 1 {
 		s.Replicate = 1
 	}
@@ -248,7 +253,7 @@ func (c *config) AddScript(s internal.Script) error {
 	if _, ok := script.SS.Infos[s.Name]; !ok {
 		script.SS.Infos[s.Name] = make(map[string]*script.Script)
 	}
-	// 保存上次的副本数，
+
 	if s.ContinuityInterval == 0 {
 		s.ContinuityInterval = time.Minute * 10
 	}
@@ -256,10 +261,10 @@ func (c *config) AddScript(s internal.Script) error {
 		s.KillTime = time.Second * 1
 	}
 
-	// 如果添加了GetIfNotExist 优先执行完成然后再处理
 	// 添加到配置文件
 	for i, v := range c.SC {
 		if v.Name == s.Name {
+			// 修改
 			c.SC[i] = s
 			c.fill(i)
 
@@ -267,10 +272,11 @@ func (c *config) AddScript(s internal.Script) error {
 			if err != nil {
 				return err
 			}
-
+			// 跟新配置文件
 			return ioutil.WriteFile(cfgfile, b, 0644)
 		}
 	}
+	// 添加
 	c.SC = append(c.SC, s)
 	index := len(c.SC) - 1
 	c.fill(index)
@@ -279,7 +285,7 @@ func (c *config) AddScript(s internal.Script) error {
 	if err != nil {
 		return err
 	}
-
+	// 跟新配置文件
 	return ioutil.WriteFile(cfgfile, b, 0644)
 }
 
