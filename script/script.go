@@ -18,6 +18,8 @@ type Script struct {
 	Command            string
 	Replicate          int
 	Always             bool
+	Loop               int
+	loopTime           time.Time
 	DisableAlert       bool
 	Env                map[string]string
 	SubName            string
@@ -101,6 +103,15 @@ func (s *Script) wait() error {
 		s.exit = false
 		// s.Status.Last = false
 		return err
+	}
+	if s.Loop > 0 && s.Always {
+		// 允许循环， 每秒启动一次
+		golog.Info("restart")
+		time.Sleep(time.Now().Sub(s.loopTime))
+		s.Status.RestartCount++
+		s.Start()
+		s.exit = false
+		return nil
 	}
 	s.stopStatus()
 	return nil

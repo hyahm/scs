@@ -18,6 +18,7 @@ type Script struct {
 	AT                 AlertTo           `yaml:"alert,omitempty" json:"alert"`
 	KillTime           time.Duration     `yaml:"killTime,omitempty" json:"killTime"`
 	Version            string            `yaml:"version,omitempty" json:"version"`
+	Loop               int               `yaml:"loop,omitempty" json:"loop"`
 	LookPath           []*LoopPath       `yaml:"lookPath,omitempty" json:"loopPath"`
 }
 

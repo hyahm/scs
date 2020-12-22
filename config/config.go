@@ -180,6 +180,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		LookPath:  c.SC[index].LookPath,
 		Command:   command,
 		Env:       baseEnv,
+		Loop:      c.SC[index].Loop,
 		Dir:       c.SC[index].Dir,
 		Replicate: c.SC[index].Replicate,
 		Log:       make([]string, 0, c.LogCount),
@@ -217,6 +218,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 		script.SS.Infos[c.SC[index].Name][subname].Env[k] = v
 	}
 	script.SS.Infos[c.SC[index].Name][subname].LookPath = c.SC[index].LookPath
+	script.SS.Infos[c.SC[index].Name][subname].Loop = c.SC[index].Loop
 	script.SS.Infos[c.SC[index].Name][subname].Command = command
 	script.SS.Infos[c.SC[index].Name][subname].Dir = c.SC[index].Dir
 	script.SS.Infos[c.SC[index].Name][subname].Replicate = c.SC[index].Replicate

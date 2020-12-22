@@ -116,6 +116,9 @@ func (s *Script) start() error {
 	}
 	s.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	s.read()
+	if s.Loop > 0 {
+		s.loopTime = time.Now()
+	}
 	if err := s.cmd.Start(); err != nil {
 		// 执行脚本前的错误, 改变状态
 		golog.Error(err)

@@ -129,6 +129,9 @@ func (s *Script) start() error {
 func (s *Script) Start() error {
 	s.exit = false
 	s.Status.Status = RUNNING
+	if s.Loop > 0 {
+		s.loopTime = time.Now()
+	}
 	// index := strings.Index(s.Command, " ")
 	// s.cmd = exec.Command(s.Command[:index], s.Command[index:])
 	if err := s.start(); err != nil {
