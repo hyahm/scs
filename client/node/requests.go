@@ -11,7 +11,7 @@ import (
 
 var ReadTimeout time.Duration
 
-func client() *http.Client {
+func client(timeout time.Duration) *http.Client {
 	// var tr *http.Transport
 	// certs, err := tls.LoadX509KeyPair(rootCa, rootKey)
 	// if err != nil {
@@ -32,21 +32,30 @@ func client() *http.Client {
 
 	// }
 	// return &http.Client{Transport: tr}
-	return &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}}
+
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: timeout,
+	}
 
 }
 
-func Requests(method, url, token string, body io.Reader) ([]byte, error) {
+func Requests(method, url, token string, body io.Reader, timeout ...time.Duration) ([]byte, error) {
 
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Token", token)
-
-	resp, err := client().Do(req)
+	var t time.Duration
+	if len(timeout) == 0 {
+		t = 0
+	} else {
+		t = timeout[0]
+	}
+	resp, err := client(t).Do(req)
 	if err != nil {
 		return nil, err
 	}

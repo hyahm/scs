@@ -158,7 +158,6 @@ func (node *Node) Status(args ...string) {
 		if len(b) == 0 {
 			break
 		}
-		fmt.Println(string(b))
 		err = json.Unmarshal(b, &s)
 		if err != nil {
 			fmt.Println(err.Error() + " or token error")

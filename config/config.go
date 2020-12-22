@@ -195,6 +195,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		DisableAlert:       c.SC[index].DisableAlert,
 		ContinuityInterval: c.SC[index].ContinuityInterval,
 		Always:             c.SC[index].Always,
+		Disable:            c.SC[index].Disable,
 		AI:                 &alert.AlertInfo{},
 		Port:               port,
 		AT:                 c.SC[index].AT,
@@ -208,7 +209,8 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 	}
 
 	script.SetUseScript(subname, c.SC[index].Name)
-	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && strings.Trim(c.SC[index].Dir, " ") != "" {
+	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
+		strings.Trim(c.SC[index].Dir, " ") != "" && !c.SC[index].Disable {
 		script.SS.Infos[c.SC[index].Name][subname].Start()
 	}
 
@@ -230,11 +232,12 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	script.SS.Infos[c.SC[index].Name][subname].ContinuityInterval = c.SC[index].ContinuityInterval
 	script.SS.Infos[c.SC[index].Name][subname].Port = c.SC[index].Port + index
 	script.SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
+	script.SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
 	script.SS.Infos[c.SC[index].Name][subname].Status.Version = c.SC[index].Version
 	script.SS.Infos[c.SC[index].Name][subname].KillTime = c.SC[index].KillTime
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
-		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && strings.Trim(c.SC[index].Dir, " ") != "" {
+		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && strings.Trim(c.SC[index].Dir, " ") != "" && !c.SC[index].Disable {
 			script.SS.Infos[c.SC[index].Name][subname].Start()
 		}
 
@@ -244,28 +247,63 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 
 }
 
+// 更新配置文件
+func (c *config) updateConfig(s internal.Script, index int) {
+	if s.Dir != "" {
+		c.SC[index].Dir = s.Dir
+	}
+	if s.Command != "" {
+		c.SC[index].Command = s.Command
+	}
+	if s.Env != nil {
+		for k, v := range s.Env {
+			c.SC[index].Env[k] = v
+		}
+	}
+	c.SC[index].Replicate = s.Replicate
+	c.SC[index].Always = s.Always
+	c.SC[index].DisableAlert = s.DisableAlert
+	if s.ContinuityInterval != 0 {
+		c.SC[index].ContinuityInterval = s.ContinuityInterval
+	} else {
+		c.SC[index].ContinuityInterval = time.Minute * 10
+	}
+	if s.Port != 0 {
+		c.SC[index].Port = s.Port
+	}
+	if s.AT != nil {
+		c.SC[index].AT = s.AT
+	}
+	if s.KillTime != 0 {
+		c.SC[index].KillTime = s.KillTime
+	} else {
+		s.KillTime = time.Second * 1
+	}
+	if s.Version != "" {
+		c.SC[index].Version = s.Version
+	}
+	c.SC[index].Loop = s.Loop
+	if len(s.LookPath) > 0 {
+		c.SC[index].LookPath = s.LookPath
+	}
+}
+
 func (c *config) AddScript(s internal.Script) error {
+	if _, ok := script.SS.Infos[s.Name]; !ok {
+		script.SS.Infos[s.Name] = make(map[string]*script.Script)
+	}
 	// 默认配置
 	if s.Replicate < 1 {
 		s.Replicate = 1
 	}
 
-	if _, ok := script.SS.Infos[s.Name]; !ok {
-		script.SS.Infos[s.Name] = make(map[string]*script.Script)
-	}
-
-	if s.ContinuityInterval == 0 {
-		s.ContinuityInterval = time.Minute * 10
-	}
-	if s.KillTime == 0 {
-		s.KillTime = time.Second * 1
-	}
-
+	golog.Infof("%+v", s)
 	// 添加到配置文件
 	for i, v := range c.SC {
 		if v.Name == s.Name {
 			// 修改
-			c.SC[i] = s
+			c.updateConfig(s, i)
+
 			c.fill(i)
 
 			b, err := yaml.Marshal(c)
@@ -277,6 +315,12 @@ func (c *config) AddScript(s internal.Script) error {
 		}
 	}
 	// 添加
+	if s.ContinuityInterval == 0 {
+		s.ContinuityInterval = time.Minute * 10
+	}
+	if s.KillTime == 0 {
+		s.KillTime = time.Second * 1
+	}
 	c.SC = append(c.SC, s)
 	index := len(c.SC) - 1
 	c.fill(index)

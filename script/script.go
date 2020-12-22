@@ -24,11 +24,12 @@ type Script struct {
 	DisableAlert       bool
 	Env                map[string]string
 	SubName            string
+	Disable            bool
 	Log                []string
 	cmd                *exec.Cmd
 	Status             *ServiceStatus
 	Alert              map[string]alert.SendAlerter
-	AT                 internal.AlertTo
+	AT                 *internal.AlertTo
 	Port               int
 	ContinuityInterval time.Duration
 	AI                 *alert.AlertInfo // 报警规则
@@ -83,12 +84,12 @@ func (s *Script) wait() error {
 				am.BrokenTime = s.AI.Start.String()
 				s.AI.AlertTime = time.Now()
 				s.AI.Broken = true
-				alert.AlertMessage(am, &s.AT)
+				alert.AlertMessage(am, s.AT)
 			} else {
 				// 间隔时间内才发送报警
 				if time.Since(s.AI.AlertTime) >= s.ContinuityInterval {
 					s.AI.AlertTime = time.Now()
-					alert.AlertMessage(am, &s.AT)
+					alert.AlertMessage(am, s.AT)
 				}
 			}
 		}

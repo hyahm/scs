@@ -19,7 +19,7 @@ func (s *Script) successAlert() {
 			BrokenTime: s.AI.Start.String(),
 			FixTime:    time.Now().String(),
 		}
-		alert.AlertMessage(am, &s.AT)
+		alert.AlertMessage(am, s.AT)
 		s.AI.Broken = false
 		return
 	case <-s.ctx.Done():

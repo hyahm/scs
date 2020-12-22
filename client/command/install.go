@@ -48,7 +48,6 @@ var InstallCmd = &cobra.Command{
 
 			err = yaml.Unmarshal(f, sc)
 			if err != nil {
-				fmt.Println("0000")
 				fmt.Println(err)
 				return
 			}
@@ -81,7 +80,6 @@ var InstallCmd = &cobra.Command{
 		}
 		wg := &sync.WaitGroup{}
 		for name, nodeInfo := range cliconfig.Cfg.Nodes {
-			fmt.Println("99999")
 			nodeInfo.Name = name
 			wg.Add(1)
 			nodeInfo.Wg = wg

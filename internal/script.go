@@ -15,11 +15,12 @@ type Script struct {
 	Env                map[string]string `yaml:"env,omitempty" json:"env"`
 	ContinuityInterval time.Duration     `yaml:"continuityInterval,omitempty" json:"continuityInterval"`
 	Port               int               `yaml:"port,omitempty" json:"port"`
-	AT                 AlertTo           `yaml:"alert,omitempty" json:"alert"`
+	AT                 *AlertTo          `yaml:"alert,omitempty" json:"alert"`
 	KillTime           time.Duration     `yaml:"killTime,omitempty" json:"killTime"`
 	Version            string            `yaml:"version,omitempty" json:"version"`
 	Loop               int               `yaml:"loop,omitempty" json:"loop"`
 	LookPath           []*LoopPath       `yaml:"lookPath,omitempty" json:"loopPath"`
+	Disable            bool              `yaml:"disable,omitempty" json:"disable"`
 }
 
 type LoopPath struct {
