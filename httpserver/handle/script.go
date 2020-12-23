@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"scs/config"
 	"scs/internal"
-	"scs/probe"
 	"scs/script"
 	"time"
 
@@ -42,7 +41,6 @@ func DelScript(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Write([]byte(`{"code": 201, "msg": "waiting config file reloaded"}`))
 	}
-	probe.GlobalProbe.Exit <- true
 
 	script.Reloadlocker.Lock()
 	defer script.Reloadlocker.Unlock()
