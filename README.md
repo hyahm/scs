@@ -121,21 +121,21 @@ name  相对于 replicate 来，只有1的个话， pname = name，  否则依�
 # 获取脚本状态
 POST /status/{pname}/{name}
 POST /status/{pname}
-POST /status/all
+POST /status
 
 # 启动脚本的api 
 POST /start/{pname}/{name}
 POST /start/{pname}
-POST /start/all
+POST /start
 # 停止脚本的api 
 POST /stop/{pname}/{name}
 POST /stop/{pname}
-POST /stop/all
+POST /stop
 
 # 重启脚本的api
 POST /restart/{pname}/{name}
 POST /restart/{pname}
-POST /restart/all
+POST /restart
 
 # 脚本日志的api
 POST /log/{pname}/{name}
