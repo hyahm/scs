@@ -22,7 +22,8 @@ func HttpServer() {
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
 	router.AddModule(midware.CheckToken)
-
+	// 增加请求时间
+	router.MiddleWare(xmux.GetExecTime)
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 		return
