@@ -13,6 +13,7 @@ import (
 	"scs/script"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -196,6 +197,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		ContinuityInterval: c.SC[index].ContinuityInterval,
 		Always:             c.SC[index].Always,
 		Disable:            c.SC[index].Disable,
+		Exit:               make(chan bool),
 		AI:                 &alert.AlertInfo{},
 		Port:               port,
 		AT:                 c.SC[index].AT,
@@ -210,7 +212,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 
 	script.SetUseScript(subname, c.SC[index].Name)
 	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
-		strings.Trim(c.SC[index].Dir, " ") != "" && !c.SC[index].Disable {
+		!c.SC[index].Disable {
 		script.SS.Infos[c.SC[index].Name][subname].Start()
 	}
 
@@ -237,7 +239,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	script.SS.Infos[c.SC[index].Name][subname].KillTime = c.SC[index].KillTime
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
-		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && strings.Trim(c.SC[index].Dir, " ") != "" && !c.SC[index].Disable {
+		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && !c.SC[index].Disable {
 			script.SS.Infos[c.SC[index].Name][subname].Start()
 		}
 
@@ -260,7 +262,10 @@ func (c *config) updateConfig(s internal.Script, index int) {
 			c.SC[index].Env[k] = v
 		}
 	}
-	c.SC[index].Replicate = s.Replicate
+	if s.Replicate != 0 {
+		c.SC[index].Replicate = s.Replicate
+	}
+
 	c.SC[index].Always = s.Always
 	c.SC[index].DisableAlert = s.DisableAlert
 	if s.ContinuityInterval != 0 {
@@ -292,10 +297,6 @@ func (c *config) AddScript(s internal.Script) error {
 	if _, ok := script.SS.Infos[s.Name]; !ok {
 		script.SS.Infos[s.Name] = make(map[string]*script.Script)
 	}
-	// 默认配置
-	if s.Replicate < 1 {
-		s.Replicate = 1
-	}
 
 	golog.Infof("%+v", s)
 	// 添加到配置文件
@@ -315,6 +316,11 @@ func (c *config) AddScript(s internal.Script) error {
 		}
 	}
 	// 添加
+	// 默认配置
+	if s.Replicate < 1 {
+		s.Replicate = 1
+	}
+
 	if s.ContinuityInterval == 0 {
 		s.ContinuityInterval = time.Minute * 10
 	}
@@ -334,12 +340,23 @@ func (c *config) AddScript(s internal.Script) error {
 }
 
 func (c *config) DelScript(pname string) error {
+	del := make(chan bool)
 	if _, ok := script.SS.Infos[pname]; ok {
-		for name := range script.SS.Infos[pname] {
-			if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
-				go script.SS.Infos[pname][name].Stop()
+
+		go func() {
+			wg := &sync.WaitGroup{}
+			script.Reloadlocker.Lock()
+			for name := range script.SS.Infos[pname] {
+				if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
+					wg.Add(1)
+					script.SS.Infos[pname][name].Stop()
+					wg.Done()
+
+				}
 			}
-		}
+			wg.Wait()
+			del <- true
+		}()
 
 	} else {
 		return errors.New("not found this pname:" + pname)
@@ -347,6 +364,13 @@ func (c *config) DelScript(pname string) error {
 	for i, s := range c.SC {
 		if s.Name == pname {
 			c.SC = append(c.SC[:i], c.SC[i+1:]...)
+			go func() {
+				<-del
+				delete(script.SS.Infos, pname)
+				script.Reloadlocker.Unlock()
+
+			}()
+			break
 		}
 	}
 	b, err := yaml.Marshal(c)

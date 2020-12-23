@@ -34,7 +34,11 @@
     #  开启的副本数       
 	replicate          int      
     #  如果异常退出会相差    killTime 的时间退出     
-	always             bool      
+	always             bool    
+    # 警用脚本
+    disable   bool  
+    # 循环执行。 2次开始执行的间隔时间(s)
+    loop  int
     # 禁止报警        
 	disableAlert       bool   
     # 设置环境变量， 如果是PATH 就会追加， 其他的都是覆盖          
@@ -52,7 +56,7 @@
 	version            string            服务的版本， 用户scsctl status 上的显示
 ```
 ```
- https://127.0.0.1:11111/script/delete/<pname>  POST <删除>  
+ https://127.0.0.1:11111/delete/<pname>  POST <删除>  
 ```
 这里的pname 就是配置文件中的name , scsctl status 中的panme
 

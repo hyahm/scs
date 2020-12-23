@@ -1,3 +1,10 @@
+# v2.2.2(2020-12-23)
+```
+新增loop 和 disable 选项
+loop: 类似定时器， 多少秒执行一次
+disable: 是否禁用脚本
+```
+
 # v1.2.4(2020-10-20)
 ```
 移除command $PNAME $NAME $PORT的替换， 并添加到环境变量中， PNAME NAME PORT

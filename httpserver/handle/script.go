@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"scs/config"
 	"scs/internal"
-	"scs/probe"
-	"scs/script"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -36,26 +34,23 @@ func DelScript(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	if reloadKey {
-		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
-		return
-	} else {
-		w.Write([]byte(`{"code": 201, "msg": "waiting config file reloaded"}`))
-	}
-	probe.GlobalProbe.Exit <- true
+	// if reloadKey {
+	// 	w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
+	// 	return
+	// }
 
-	script.Reloadlocker.Lock()
-	defer script.Reloadlocker.Unlock()
-	reloadKey = true
-	// 拷贝一份到当前的脚本
-	script.Copy()
-	if err := config.Load(); err != nil {
-		w.Write([]byte(err.Error()))
-		reloadKey = false
-		return
-	}
-	script.StopUnUseScript()
-	reloadKey = false
+	// script.Reloadlocker.Lock()
+	// defer script.Reloadlocker.Unlock()
+	// reloadKey = true
+	// // 拷贝一份到当前的脚本
+	// script.Copy()
+	// if err := config.Load(); err != nil {
+	// 	w.Write([]byte(err.Error()))
+	// 	reloadKey = false
+	// 	return
+	// }
+	// script.StopUnUseScript()
+	// reloadKey = false
 	w.Write([]byte(`{"code": 200, "msg": "already delete script"}`))
 	return
 }

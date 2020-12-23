@@ -12,8 +12,15 @@ import (
 	"scs/public"
 	"time"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
 )
+
+func GetExecTime(handle func(http.ResponseWriter, *http.Request), w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	handle(w, r)
+	golog.Infof("url: %s -- addr: %s -- method: %s -- exectime: %f\n", r.URL.Path, r.RemoteAddr, r.Method, time.Since(start).Seconds())
+}
 
 // var dir := "key"
 func HttpServer() {
@@ -22,7 +29,8 @@ func HttpServer() {
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
 	router.AddModule(midware.CheckToken)
-
+	// 增加请求时间
+	router.MiddleWare(GetExecTime)
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 		return
@@ -65,7 +73,7 @@ func HttpServer() {
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
 	router.Post("/script", handle.AddScript).Bind(&internal.Script{}).AddModule(midware.Unmarshal)
-	router.Post("/script/delete/{pname}", handle.DelScript)
+	router.Post("/delete/{pname}", handle.DelScript)
 
 	svc := &http.Server{
 		ReadTimeout: 5 * time.Second,

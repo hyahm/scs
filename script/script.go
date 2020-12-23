@@ -34,6 +34,7 @@ type Script struct {
 	ContinuityInterval time.Duration
 	AI                 *alert.AlertInfo // 报警规则
 	exit               bool             // 判断是否是主动退出的
+	Exit               chan bool
 	ctx                context.Context
 	cancel             context.CancelFunc
 	Email              []string
@@ -43,11 +44,13 @@ type Script struct {
 
 func (s *Script) Restart() {
 	s.Status.Status = WAITRESTART
+	golog.Info("stop")
 	s.Stop()
 	// 先要停止， 然后再启动
 	// 判断是否已经停止了
 	for {
 		if s.Status.Status == STOP {
+			golog.Info("stoped")
 			break
 		}
 		time.Sleep(s.KillTime)
@@ -68,7 +71,8 @@ func (s *Script) wait() error {
 	if err := s.cmd.Wait(); err != nil {
 		// 执行脚本后环境的错误
 		s.cmd = nil
-		golog.Info("time error")
+		golog.Infof("%s error", s.Name)
+		golog.Infof("s.exit: %t", s.exit)
 		time.Sleep(1 * time.Second)
 		s.cancel()
 		if !s.exit && !s.DisableAlert {
@@ -95,14 +99,12 @@ func (s *Script) wait() error {
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
-		golog.Info(s.exit)
 		if !s.exit && s.Loop > 0 {
+			golog.Info("go to loop")
 			goto loop
 		}
 		if !s.exit && s.Always {
-			golog.Info(time.Now())
 			// 失败了， 每秒启动一次
-			golog.Info("restart")
 			time.Sleep(s.KillTime)
 			s.Status.RestartCount++
 			s.Start()
@@ -112,16 +114,25 @@ func (s *Script) wait() error {
 		return err
 	}
 loop:
-	if s.Loop > 0 {
+	if s.Loop > 0 && !s.exit {
 		sleep := math.Ceil(float64(s.Loop) - time.Now().Sub(s.loopTime).Seconds())
 		if sleep > 0 {
 			// 允许循环， 每s.Loop秒启动一次
-			time.Sleep(time.Duration(sleep) * time.Second)
+			select {
+			case <-time.After(time.Duration(sleep) * time.Second):
+				golog.Infof("%s have been loop at %v", s.Name, time.Now())
+				s.Start()
+				s.exit = false
+				return nil
+			case <-s.Exit:
+			}
+		} else {
+			golog.Infof("%s have been loop at %v", s.Name, time.Now())
+			s.Start()
+			s.exit = false
+			return nil
 		}
 
-		s.Start()
-		s.exit = false
-		return nil
 	}
 	s.stopStatus()
 	return nil
