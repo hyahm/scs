@@ -123,6 +123,10 @@ POST /status/{pname}/{name}
 POST /status/{pname}
 POST /status/all
 
+# 启动脚本的api 
+POST /start/{pname}/{name}
+POST /start/{pname}
+POST /start/all
 # 停止脚本的api 
 POST /stop/{pname}/{name}
 POST /stop/{pname}
@@ -183,6 +187,9 @@ group:
 scsctl status 
 scsctl status pname
 scsctl status pname name
+scsctl start 
+scsctl start pname
+scsctl start pname name
 scsctl restart --all
 scsctl restart pname 
 scsctl restart pname name
