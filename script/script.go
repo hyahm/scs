@@ -115,15 +115,19 @@ loop:
 		sleep := math.Ceil(float64(s.Loop) - time.Now().Sub(s.loopTime).Seconds())
 		if sleep > 0 {
 			// 允许循环， 每s.Loop秒启动一次
-			time.Sleep(time.Duration(sleep) * time.Second)
-		}
-		select {
-		case <-time.After(time.Duration(sleep) * time.Second):
-			golog.Info("%s have been loop at %v", s.Name, time.Now())
+			select {
+			case <-time.After(time.Duration(sleep) * time.Second):
+				golog.Infof("%s have been loop at %v", s.Name, time.Now())
+				s.Start()
+				s.exit = false
+				return nil
+			case <-s.Exit:
+			}
+		} else {
+			golog.Infof("%s have been loop at %v", s.Name, time.Now())
 			s.Start()
 			s.exit = false
 			return nil
-		case <-s.Exit:
 		}
 
 	}
