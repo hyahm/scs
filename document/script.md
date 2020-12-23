@@ -34,7 +34,11 @@
     #  开启的副本数       
 	replicate          int      
     #  如果异常退出会相差    killTime 的时间退出     
-	always             bool      
+	always             bool    
+    # 警用脚本
+    disable   bool  
+    # 循环执行。 2次开始执行的间隔时间(s)
+    loop  int
     # 禁止报警        
 	disableAlert       bool   
     # 设置环境变量， 如果是PATH 就会追加， 其他的都是覆盖          

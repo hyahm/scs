@@ -260,7 +260,10 @@ func (c *config) updateConfig(s internal.Script, index int) {
 			c.SC[index].Env[k] = v
 		}
 	}
-	c.SC[index].Replicate = s.Replicate
+	if s.Replicate != 0 {
+		c.SC[index].Replicate = s.Replicate
+	}
+
 	c.SC[index].Always = s.Always
 	c.SC[index].DisableAlert = s.DisableAlert
 	if s.ContinuityInterval != 0 {
@@ -292,10 +295,6 @@ func (c *config) AddScript(s internal.Script) error {
 	if _, ok := script.SS.Infos[s.Name]; !ok {
 		script.SS.Infos[s.Name] = make(map[string]*script.Script)
 	}
-	// 默认配置
-	if s.Replicate < 1 {
-		s.Replicate = 1
-	}
 
 	golog.Infof("%+v", s)
 	// 添加到配置文件
@@ -315,6 +314,11 @@ func (c *config) AddScript(s internal.Script) error {
 		}
 	}
 	// 添加
+	// 默认配置
+	if s.Replicate < 1 {
+		s.Replicate = 1
+	}
+
 	if s.ContinuityInterval == 0 {
 		s.ContinuityInterval = time.Minute * 10
 	}
