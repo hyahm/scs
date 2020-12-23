@@ -69,7 +69,8 @@ func (s *Script) wait() error {
 	if err := s.cmd.Wait(); err != nil {
 		// 执行脚本后环境的错误
 		s.cmd = nil
-		golog.Info("time error")
+		golog.Infof("%s error", s.Name)
+		golog.Infof("s.exit: %b", s.exit)
 		time.Sleep(1 * time.Second)
 		s.cancel()
 		if !s.exit && !s.DisableAlert {
@@ -98,6 +99,7 @@ func (s *Script) wait() error {
 		s.stopStatus()
 		golog.Info(s.exit)
 		if !s.exit && s.Loop > 0 {
+			golog.Info("go to loop")
 			goto loop
 		}
 		if !s.exit && s.Always {
