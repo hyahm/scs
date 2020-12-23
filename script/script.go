@@ -118,7 +118,7 @@ loop:
 			// 允许循环， 每s.Loop秒启动一次
 			time.Sleep(time.Duration(sleep) * time.Second)
 		}
-
+		golog.Info("%s have been loop at %v", s.Name, time.Now())
 		s.Start()
 		s.exit = false
 		return nil
