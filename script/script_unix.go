@@ -55,6 +55,7 @@ func (s *Script) Stop() {
 		time.Sleep(time.Millisecond * 10)
 		if !s.Status.CanNotStop {
 			s.exit = true
+			s.Exit <- true
 			s.cancel()
 			err := syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
 			if err != nil {
@@ -78,7 +79,7 @@ func (s *Script) Kill() {
 	// s.cancel()
 	s.exit = true
 	var err error
-
+	s.Exit <- true
 	err = syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
 	// err = s.cmd.Process.Kill()
 	// err = exec.Command("kill", "-9", fmt.Sprint(s.cmd.Process.Pid)).Run()
