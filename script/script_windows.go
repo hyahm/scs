@@ -38,7 +38,6 @@ func Shell(command string, env map[string]string) error {
 	return cmd.Wait()
 }
 func (s *Script) Stop() {
-	s.Loop = 0
 	if s.Status.Status == RUNNING {
 		s.Status.Status = WAITSTOP
 	}

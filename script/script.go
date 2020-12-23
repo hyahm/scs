@@ -97,7 +97,6 @@ func (s *Script) wait() error {
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
-		golog.Info(s.exit)
 		if !s.exit && s.Loop > 0 {
 			golog.Info("go to loop")
 			goto loop
@@ -113,7 +112,7 @@ func (s *Script) wait() error {
 		return err
 	}
 loop:
-	if s.Loop > 0 {
+	if s.Loop > 0 && !s.exit {
 		sleep := math.Ceil(float64(s.Loop) - time.Now().Sub(s.loopTime).Seconds())
 		if sleep > 0 {
 			// 允许循环， 每s.Loop秒启动一次
