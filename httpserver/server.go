@@ -66,7 +66,7 @@ func HttpServer() {
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
 	router.Post("/script", handle.AddScript).Bind(&internal.Script{}).AddModule(midware.Unmarshal)
-	router.Post("/script/delete/{pname}", handle.DelScript)
+	router.Post("/delete/{pname}", handle.DelScript)
 
 	svc := &http.Server{
 		ReadTimeout: 5 * time.Second,

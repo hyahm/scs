@@ -56,7 +56,7 @@
 	version            string            服务的版本， 用户scsctl status 上的显示
 ```
 ```
- https://127.0.0.1:11111/script/delete/<pname>  POST <删除>  
+ https://127.0.0.1:11111/delete/<pname>  POST <删除>  
 ```
 这里的pname 就是配置文件中的name , scsctl status 中的panme
 
