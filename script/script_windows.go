@@ -51,7 +51,9 @@ func (s *Script) Stop() {
 		if !s.Status.CanNotStop {
 			s.exit = true
 			s.cancel()
-			s.Exit <- true
+			if s.Loop > 0 {
+				s.Exit <- true
+			}
 			err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(s.cmd.Process.Pid)).Run()
 			if err != nil {
 				// 正常来说，不会进来的，特殊问题以后再说

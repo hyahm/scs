@@ -57,7 +57,10 @@ func (s *Script) Stop() {
 
 			s.exit = true
 			golog.Info("stop")
-			s.Exit <- true
+			if s.Loop > 0 {
+				s.Exit <- true
+			}
+
 			s.cancel()
 			err := syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
 			if err != nil {
