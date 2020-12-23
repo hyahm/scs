@@ -212,7 +212,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 
 	script.SetUseScript(subname, c.SC[index].Name)
 	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
-		strings.Trim(c.SC[index].Dir, " ") != "" && !c.SC[index].Disable {
+		!c.SC[index].Disable {
 		script.SS.Infos[c.SC[index].Name][subname].Start()
 	}
 
@@ -239,7 +239,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	script.SS.Infos[c.SC[index].Name][subname].KillTime = c.SC[index].KillTime
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
-		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && strings.Trim(c.SC[index].Dir, " ") != "" && !c.SC[index].Disable {
+		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && !c.SC[index].Disable {
 			script.SS.Infos[c.SC[index].Name][subname].Start()
 		}
 
