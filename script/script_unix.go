@@ -54,7 +54,9 @@ func (s *Script) Stop() {
 	for {
 		time.Sleep(time.Millisecond * 10)
 		if !s.Status.CanNotStop {
+
 			s.exit = true
+			golog.Info("stop")
 			s.Exit <- true
 			s.cancel()
 			err := syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)

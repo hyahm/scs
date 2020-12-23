@@ -44,11 +44,13 @@ type Script struct {
 
 func (s *Script) Restart() {
 	s.Status.Status = WAITRESTART
+	golog.Info("stop")
 	s.Stop()
 	// 先要停止， 然后再启动
 	// 判断是否已经停止了
 	for {
 		if s.Status.Status == STOP {
+			golog.Info("stoped")
 			break
 		}
 		time.Sleep(s.KillTime)
