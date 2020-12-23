@@ -52,6 +52,7 @@ func (s *Script) Stop() {
 		if !s.Status.CanNotStop {
 			s.exit = true
 			s.cancel()
+			s.Exit <- true
 			err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(s.cmd.Process.Pid)).Run()
 			if err != nil {
 				// 正常来说，不会进来的，特殊问题以后再说
@@ -73,7 +74,7 @@ func (s *Script) Kill() {
 	// s.Log = make([]string, Config.LogCount)
 	// s.cancel()
 	s.exit = true
-
+	s.Exit <- true
 	err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(s.cmd.Process.Pid)).Run()
 	// err = s.cmd.Process.Kill()
 	// err = exec.Command("kill", "-9", fmt.Sprint(s.cmd.Process.Pid)).Run()

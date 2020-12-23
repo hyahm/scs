@@ -34,6 +34,7 @@ type Script struct {
 	ContinuityInterval time.Duration
 	AI                 *alert.AlertInfo // 报警规则
 	exit               bool             // 判断是否是主动退出的
+	Exit               chan bool
 	ctx                context.Context
 	cancel             context.CancelFunc
 	Email              []string
@@ -100,9 +101,7 @@ func (s *Script) wait() error {
 			goto loop
 		}
 		if !s.exit && s.Always {
-			golog.Info(time.Now())
 			// 失败了， 每秒启动一次
-			golog.Info("restart")
 			time.Sleep(s.KillTime)
 			s.Status.RestartCount++
 			s.Start()
@@ -118,10 +117,15 @@ loop:
 			// 允许循环， 每s.Loop秒启动一次
 			time.Sleep(time.Duration(sleep) * time.Second)
 		}
-		golog.Info("%s have been loop at %v", s.Name, time.Now())
-		s.Start()
-		s.exit = false
-		return nil
+		select {
+		case <-time.After(time.Duration(sleep) * time.Second):
+			golog.Info("%s have been loop at %v", s.Name, time.Now())
+			s.Start()
+			s.exit = false
+			return nil
+		case <-s.Exit:
+		}
+
 	}
 	s.stopStatus()
 	return nil

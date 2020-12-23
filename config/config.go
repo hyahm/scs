@@ -196,6 +196,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		ContinuityInterval: c.SC[index].ContinuityInterval,
 		Always:             c.SC[index].Always,
 		Disable:            c.SC[index].Disable,
+		Exit:               make(chan bool),
 		AI:                 &alert.AlertInfo{},
 		Port:               port,
 		AT:                 c.SC[index].AT,
