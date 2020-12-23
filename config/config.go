@@ -13,6 +13,7 @@ import (
 	"scs/script"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -339,12 +340,23 @@ func (c *config) AddScript(s internal.Script) error {
 }
 
 func (c *config) DelScript(pname string) error {
+	del := make(chan bool)
 	if _, ok := script.SS.Infos[pname]; ok {
-		for name := range script.SS.Infos[pname] {
-			if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
-				go script.SS.Infos[pname][name].Stop()
+
+		go func() {
+			wg := &sync.WaitGroup{}
+			script.Reloadlocker.Lock()
+			for name := range script.SS.Infos[pname] {
+				if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
+					wg.Add(1)
+					script.SS.Infos[pname][name].Stop()
+					wg.Done()
+
+				}
 			}
-		}
+			wg.Wait()
+			del <- true
+		}()
 
 	} else {
 		return errors.New("not found this pname:" + pname)
@@ -352,6 +364,13 @@ func (c *config) DelScript(pname string) error {
 	for i, s := range c.SC {
 		if s.Name == pname {
 			c.SC = append(c.SC[:i], c.SC[i+1:]...)
+			go func() {
+				<-del
+				delete(script.SS.Infos, pname)
+				script.Reloadlocker.Unlock()
+
+			}()
+			break
 		}
 	}
 	b, err := yaml.Marshal(c)
