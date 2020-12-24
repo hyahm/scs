@@ -361,18 +361,8 @@ func (c *config) DelScript(pname string) error {
 		// go func() {
 		// wg := &sync.WaitGroup{}
 		for name := range script.SS.Infos[pname] {
-			if script.SS.Infos[pname][name].Status.Status != script.WAITRESTART {
-				// wg.Add(1)
-				go script.SS.Infos[pname][name].Remove()
-				// wg.Done()
-			} else {
-				<-script.SS.Infos[pname][name].Exit
-				script.SS.Infos[pname][name].Stop()
-			}
+			script.SS.Infos[pname][name].Remove()
 		}
-		// wg.Wait()
-		// del <- true
-		// }()
 
 	} else {
 		return errors.New("not found this pname:" + pname)

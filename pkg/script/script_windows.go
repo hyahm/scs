@@ -55,6 +55,9 @@ func (s *Script) stop() {
 				s.Status.RestartCount = 0
 				return
 			}
+		case <-s.EndStop:
+			// 如果收到结束的信号，直接结束停止的goroutine
+			return
 		}
 	}
 }

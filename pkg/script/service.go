@@ -33,6 +33,7 @@ type Script struct {
 	ContinuityInterval time.Duration
 	AI                 *alert.AlertInfo // 报警规则
 	Exit               chan int         // 判断是否是主动退出的
+	EndStop            chan bool
 	Ctx                context.Context
 	Cancel             context.CancelFunc
 	Email              []string
@@ -66,7 +67,29 @@ func (s *Script) Restart() {
 	s.stop()
 }
 
-func (s *Script) Remove() {
+func (s Script) Remove() {
+	switch SS.Infos[s.Name][s.SubName].Status.Status {
+	case WAITRESTART, WAITSTOP:
+		// 结束发送的退出错误发出的信号
+		<-SS.Infos[s.Name][s.SubName].Exit
+		// 结束停止的goroutine， 转为删除处理
+		SS.Infos[s.Name][s.SubName].EndStop <- true
+		go SS.Infos[s.Name][s.SubName].remove()
+	case STOP:
+		// 直接删除
+		delete(SS.Infos[s.Name], s.SubName)
+		if len(SS.Infos[s.Name]) == 0 {
+			delete(SS.Infos, s.Name)
+		}
+	case RUNNING:
+		go SS.Infos[s.Name][s.SubName].remove()
+	default:
+		golog.Error("error status")
+	}
+}
+
+func (s *Script) remove() {
+
 	s.Stop()
 	delete(SS.Infos[s.Name], s.SubName)
 	if len(SS.Infos[s.Name]) == 0 {
@@ -140,13 +163,9 @@ func (s *Script) wait() error {
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
-		if s.Loop > 0 {
-			goto loop
-		}
 		// s.Status.Last = false
 		return err
 	}
-loop:
 	if s.Loop > 0 {
 		sleep := math.Ceil(float64(s.Loop) - time.Now().Sub(s.loopTime).Seconds())
 		if sleep > 0 {
