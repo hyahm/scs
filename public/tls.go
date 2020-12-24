@@ -6,15 +6,15 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"math/big"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/hyahm/golog"
 )
 
 func CreateTLS() {
@@ -58,7 +58,7 @@ func CreateTLS() {
 	hosts := make([]net.IP, 0)
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		fmt.Println(err)
+		golog.Error(err)
 		return
 	}
 	for _, value := range addrs {
@@ -78,7 +78,6 @@ func CreateTLS() {
 	}
 	for _, ip := range hosts {
 		server.IPAddresses = append(server.IPAddresses, ip)
-
 	}
 
 	privSer, _ := rsa.GenerateKey(rand.Reader, 1024)
@@ -110,11 +109,10 @@ func CreateCertificateFile(name string, cert *x509.Certificate, key *rsa.Private
 	}
 	ca_b, err := x509.CreateCertificate(rand.Reader, cert, caCert, pub, privPm)
 	if err != nil {
-		log.Println("create failed", err)
+		golog.Error("create failed ", err)
 		return
 	}
 	ca_f := name + ".pem"
-	log.Println("write to pem", ca_f)
 	var certificate = &pem.Block{Type: "CERTIFICATE",
 		Headers: map[string]string{},
 		Bytes:   ca_b}
@@ -123,7 +121,6 @@ func CreateCertificateFile(name string, cert *x509.Certificate, key *rsa.Private
 
 	priv_f := name + ".key"
 	priv_b := x509.MarshalPKCS1PrivateKey(priv)
-	log.Println("write to key", priv_f)
 	ioutil.WriteFile(priv_f, priv_b, 0777)
 	var privateKey = &pem.Block{Type: "PRIVATE KEY",
 		Headers: map[string]string{},

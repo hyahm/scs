@@ -183,6 +183,11 @@ func (c *config) fill(index int, reload bool) {
 		command := strings.ReplaceAll(c.SC[index].Command, "$NAME", subname)
 		command = strings.ReplaceAll(command, "$PNAME", c.SC[index].Name)
 		command = strings.ReplaceAll(command, "$PORT", strconv.Itoa(c.SC[index].Port+i))
+		// 新增的时候
+		if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
+			golog.Error(err)
+			return
+		}
 		if _, ok := script.SS.Infos[c.SC[index].Name][subname]; ok {
 			// 修改
 			c.update(index, subname, command, baseEnv)
@@ -222,12 +227,6 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 
 		AT:       c.SC[index].AT,
 		KillTime: c.SC[index].KillTime,
-	}
-
-	// 新增的时候
-	if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
-		golog.Error(err)
-		return
 	}
 
 	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
