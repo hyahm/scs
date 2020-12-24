@@ -183,11 +183,7 @@ func (c *config) fill(index int, reload bool) {
 		command := strings.ReplaceAll(c.SC[index].Command, "$NAME", subname)
 		command = strings.ReplaceAll(command, "$PNAME", c.SC[index].Name)
 		command = strings.ReplaceAll(command, "$PORT", strconv.Itoa(c.SC[index].Port+i))
-		// 新增的时候
-		if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
-			golog.Error(err)
-			return
-		}
+
 		if _, ok := script.SS.Infos[c.SC[index].Name][subname]; ok {
 			// 修改
 			c.update(index, subname, command, baseEnv)
@@ -200,7 +196,6 @@ func (c *config) fill(index int, reload bool) {
 }
 
 func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
-	golog.Info(command)
 	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
 		Name:      c.SC[index].Name,
 		LookPath:  c.SC[index].LookPath,
@@ -228,7 +223,11 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		AT:       c.SC[index].AT,
 		KillTime: c.SC[index].KillTime,
 	}
-
+	// 新增的时候
+	if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
+		golog.Error(err)
+		return
+	}
 	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
 		!c.SC[index].Disable {
 		script.SS.Infos[c.SC[index].Name][subname].Start()
@@ -255,6 +254,11 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	script.SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
 	script.SS.Infos[c.SC[index].Name][subname].Status.Version = c.SC[index].Version
 	script.SS.Infos[c.SC[index].Name][subname].KillTime = c.SC[index].KillTime
+	// 更新的时候
+	if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
+		golog.Error(err)
+		return
+	}
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
 		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && !c.SC[index].Disable {

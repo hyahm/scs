@@ -44,6 +44,7 @@ type Script struct {
 // Start  启动服务
 func (s *Script) Start() error {
 	s.Exit = make(chan int, 2)
+	s.EndStop = make(chan bool, 2)
 	s.Ctx, s.Cancel = context.WithCancel(context.Background())
 	golog.Info("start")
 	if s.Loop > 0 {
