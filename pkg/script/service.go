@@ -147,7 +147,6 @@ func (s *Script) wait() error {
 		return err
 	}
 loop:
-	golog.Info("000000000")
 	if s.Loop > 0 {
 		sleep := math.Ceil(float64(s.Loop) - time.Now().Sub(s.loopTime).Seconds())
 		if sleep > 0 {
@@ -158,7 +157,6 @@ loop:
 		s.Start()
 		return nil
 	}
-	golog.Info("normal exit")
 	s.stopStatus()
 	return nil
 

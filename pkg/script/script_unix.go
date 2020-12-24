@@ -42,27 +42,25 @@ func Shell(command string, env map[string]string) error {
 	return cmd.Wait()
 }
 
-func (s *Script) Stop() {
+func (s *Script) stop() {
 	if s.Status.Status == RUNNING {
 		s.Status.Status = WAITSTOP
 	}
 
 	for {
-		time.Sleep(time.Millisecond * 10)
-		if !s.Status.CanNotStop {
-			s.exit = true
-			s.cancel()
-			err := syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
-			if err != nil {
-				// 正常来说，不会进来的，特殊问题以后再说
-				golog.Error(err)
-			}
+		select {
+		case <-time.After(time.Millisecond * 10):
+			if !s.Status.CanNotStop {
+				err := syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
+				if err != nil {
+					// 如果pid已经被杀掉了， 那么就报错
+					golog.Warnf("pid already be killed, err: %v", err)
+				}
 
-			golog.Infof("stop %s\n", s.SubName)
-			s.Status.RestartCount = 0
-			// 默认预留1秒代码退出的时间
-			time.Sleep(s.KillTime)
-			return
+				golog.Debugf("stop %s\n", s.SubName)
+				s.Status.RestartCount = 0
+				return
+			}
 		}
 	}
 

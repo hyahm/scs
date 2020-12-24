@@ -40,11 +40,7 @@ func (s *Script) stop() {
 	if s.Status.Status == RUNNING {
 		s.Status.Status = WAITSTOP
 	}
-	defer func() {
-		if err := recover(); err != nil {
-			golog.Info("脚本已经停止了")
-		}
-	}()
+
 	for {
 		select {
 		case <-time.After(time.Millisecond * 10):
@@ -64,15 +60,9 @@ func (s *Script) stop() {
 }
 
 func (s *Script) kill() {
-	// 数组存日志
-	// s.Log = make([]string, Config.LogCount)
-	// s.cancel()
 	s.Exit <- 9
 
 	err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(s.cmd.Process.Pid)).Run()
-	// err = s.cmd.Process.Kill()
-	// err = exec.Command("kill", "-9", fmt.Sprint(s.cmd.Process.Pid)).Run()
-	// err := s.cmd.Process.Kill()
 
 	if err != nil {
 		// 正常来说，不会进来的，特殊问题以后再说
