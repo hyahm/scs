@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// 用户操作的数据
+// 配置文件的数据
 type Script struct {
 	Name               string            `yaml:"name,omitempty" json:"name"`
 	Dir                string            `yaml:"dir,omitempty" json:"dir"`

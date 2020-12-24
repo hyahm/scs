@@ -3,7 +3,7 @@ package install
 import (
 	"errors"
 	"scs/internal"
-	"scs/script"
+	"scs/pkg/script"
 	"strings"
 )
 

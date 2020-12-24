@@ -20,7 +20,8 @@ func (s *Script) read() {
 	if err != nil {
 		golog.Error(err)
 	}
-
+	s.Msg = make(chan string, 1000)
+	go s.appendLog()
 	//实时循环读取输出流中的一行内容
 	go s.appendRead(stderr, true)
 
@@ -30,20 +31,18 @@ func (s *Script) read() {
 
 func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 	readout := bufio.NewReader(stdout)
-	s.Msg = make(chan string, 100)
+
 	for {
 		select {
 		case <-s.Ctx.Done():
 			golog.Info("stop")
-
 			return
 		default:
 			line, err := readout.ReadString('\n')
 			if err != nil || io.EOF == err {
 				stdout.Close()
-				break
+				return
 			}
-
 			if cap(s.Log) == 0 {
 				if iserr {
 					golog.Error(line)
@@ -94,12 +93,22 @@ func appendRead(stdout io.ReadCloser, iserr bool) {
 	}
 }
 
-func (s *Script) appendLog(line string) {
+func (s *Script) appendLog() {
 	t := time.Now().Format("2006/1/2 15:04:05")
 	for {
 		select {
 		case <-s.Ctx.Done():
 			close(s.Msg)
+			for line := range s.Msg {
+				line = t + " -- " + line
+				if len(s.Log) >= global.LogCount {
+					copy(s.Log, s.Log[1:])
+					s.Log[global.LogCount-1] = line
+				} else {
+					s.Log = append(s.Log, line)
+				}
+			}
+			return
 		case line := <-s.Msg:
 			line = t + " -- " + line
 			if len(s.Log) >= global.LogCount {
@@ -108,6 +117,7 @@ func (s *Script) appendLog(line string) {
 			} else {
 				s.Log = append(s.Log, line)
 			}
+
 		}
 	}
 

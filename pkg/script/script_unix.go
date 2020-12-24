@@ -46,11 +46,7 @@ func (s *Script) Stop() {
 	if s.Status.Status == RUNNING {
 		s.Status.Status = WAITSTOP
 	}
-	defer func() {
-		if err := recover(); err != nil {
-			golog.Info("脚本已经停止了")
-		}
-	}()
+
 	for {
 		time.Sleep(time.Millisecond * 10)
 		if !s.Status.CanNotStop {
@@ -72,27 +68,22 @@ func (s *Script) Stop() {
 
 }
 
-func (s *Script) Kill() {
+func (s *Script) kill() {
 	// 数组存日志
 	// s.Log = make([]string, Config.LogCount)
 	// s.cancel()
-	s.exit = true
 	var err error
-
 	err = syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
 	// err = s.cmd.Process.Kill()
 	// err = exec.Command("kill", "-9", fmt.Sprint(s.cmd.Process.Pid)).Run()
 	// err := s.cmd.Process.Kill()
-
 	if err != nil {
 		// 正常来说，不会进来的，特殊问题以后再说
 		golog.Error(err)
 		// return
 	}
 	s.stopStatus()
-
 	return
-
 }
 
 func (s *Script) start() error {
@@ -130,31 +121,3 @@ func (s *Script) start() error {
 	}
 	return nil
 }
-
-func (s *Script) Start() error {
-	s.exit = false
-	s.Status.Status = RUNNING
-	// index := strings.Index(s.Command, " ")
-	// s.cmd = exec.Command(s.Command[:index], s.Command[index:])
-	if err := s.start(); err != nil {
-		return err
-	}
-	// 等待初始化完成完成后向后执行
-
-	s.Status.Up = time.Now().Unix() // 设置启动状态是成功的
-	s.Status.Ppid = s.cmd.Process.Pid
-	go s.wait()
-	return nil
-
-}
-
-// func (s *Script) Install(command string) {
-// 	s.exit = false
-// 	golog.Info(s.Log)
-// 	// index := strings.Index(s.Command, " ")
-// 	// s.cmd = exec.Command(s.Command[:index], s.Command[index:])
-// 	s.start(command)
-// 	// 等待初始化完成完成后向后执行
-
-// 	go s.waitinstall()
-// }

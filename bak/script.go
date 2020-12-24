@@ -1,4 +1,4 @@
-package script
+package bak
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/hyahm/golog"
 )
 
-// 脚本的信息
+// 脚本的信息状态
 type Script struct {
 	LookPath           []*internal.LoopPath
 	Name               string
@@ -104,7 +104,7 @@ func (s *Script) wait() error {
 			goto loop
 		}
 		if !s.exit && s.Always {
-			// 失败了， 每秒启动一次
+			// 失败了， 每s.KillTime秒启动一次
 			time.Sleep(s.KillTime)
 			s.Status.RestartCount++
 			s.Start()
@@ -115,6 +115,7 @@ func (s *Script) wait() error {
 	}
 loop:
 	if s.Loop > 0 && !s.exit {
+		// time.after 不支持浮点数，向上取整
 		sleep := math.Ceil(float64(s.Loop) - time.Now().Sub(s.loopTime).Seconds())
 		if sleep > 0 {
 			// 允许循环， 每s.Loop秒启动一次

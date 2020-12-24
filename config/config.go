@@ -9,11 +9,10 @@ import (
 	"scs/global"
 	"scs/internal"
 	"scs/logger"
+	"scs/pkg/script"
 	"scs/probe"
-	"scs/script"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -37,10 +36,10 @@ type config struct {
 	SC          []internal.Script `yaml:"scripts"`
 }
 
-// 保存的全局的配置
-
 // 保存的配置文件路径
 var cfgfile string
+
+// 保存的全局的配置
 var Cfg *config
 
 // 保存配置文件
@@ -53,33 +52,38 @@ func saveConfig(filename string) {
 func Start(filename string) {
 	// 保存配置文件
 	saveConfig(filename)
-	if err := Load(); err != nil {
+	if err := Load(false); err != nil {
 		// 第一次报错直接退出
 		log.Fatal(err)
 	}
 }
 
-func Load() error {
+func Load(reload bool) error {
+
 	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
 	if err := readConfig(); err != nil {
 		golog.Error(err)
 		return err
 	}
-	// 检测配置文件
+	// 检测配置文件的name是否重复
 	if err := Cfg.checkName(); err != nil {
 		golog.Error(err)
 		return err
 	}
-	// 装载配置
+
+	// 装载全局配置
 	global.Token = Cfg.Token
 	global.Listen = Cfg.Listen
 	global.IgnoreToken = Cfg.IgnoreToken
 	// 初始化报警信息
 	Cfg.Alert.InitAlert()
+	// 初始化硬件检测
 	Cfg.Probe.InitHWAlert()
+	// 初始化日志
 	golog.InitLogger(Cfg.Log.Path, Cfg.Log.Size, Cfg.Log.Day)
 	// 设置所有级别的日志都显示
 	golog.Level = golog.All
+
 	for index := range Cfg.SC {
 		if Cfg.SC[index].Replicate < 1 {
 			Cfg.SC[index].Replicate = 1
@@ -94,10 +98,20 @@ func Load() error {
 		if Cfg.SC[index].KillTime == 0 {
 			Cfg.SC[index].KillTime = time.Second * 1
 		}
-		Cfg.fill(index)
+		// 重新加载配置文件的时候
+
+		// 第一次启动的时候
+		Cfg.fill(index, reload)
+
+	}
+	if reload {
+		// 删除多余的
+		script.StopUnUseScript()
+		b, _ := yaml.Marshal(Cfg)
+		// 跟新配置文件
+		return ioutil.WriteFile(cfgfile, b, 0644)
 	}
 	return nil
-	// 启动多余的服务
 }
 
 // 读取配置文件
@@ -148,14 +162,20 @@ func (c *config) checkName() error {
 	return nil
 }
 
-func (c *config) fill(index int) {
+func (c *config) fill(index int, reload bool) {
 	baseEnv := make(map[string]string)
 	for k, v := range c.SC[index].Env {
 		baseEnv[k] = v
 	}
 	for i := 0; i < c.SC[index].Replicate; i++ {
 		// 根据副本数提取子名称
+
 		subname := fmt.Sprintf("%s_%d", c.SC[index].Name, i)
+		if reload {
+			// 如果是加载配置文件， 那么删除已经有的
+			script.DelDelScript(subname)
+		}
+
 		baseEnv["TOKEN"] = c.Token
 		baseEnv["PNAME"] = c.SC[index].Name
 		baseEnv["NAME"] = subname
@@ -197,20 +217,19 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		ContinuityInterval: c.SC[index].ContinuityInterval,
 		Always:             c.SC[index].Always,
 		Disable:            c.SC[index].Disable,
-		Exit:               make(chan bool),
 		AI:                 &alert.AlertInfo{},
 		Port:               port,
-		AT:                 c.SC[index].AT,
-		KillTime:           c.SC[index].KillTime,
-	}
-	// 新增的时候
 
+		AT:       c.SC[index].AT,
+		KillTime: c.SC[index].KillTime,
+	}
+
+	// 新增的时候
 	if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
 		golog.Error(err)
 		return
 	}
 
-	script.SetUseScript(subname, c.SC[index].Name)
 	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
 		!c.SC[index].Disable {
 		script.SS.Infos[c.SC[index].Name][subname].Start()
@@ -219,7 +238,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 }
 
 func (c *config) update(index int, subname, command string, baseEnv map[string]string) {
-	// 添加到
+	// 修改
 	for k, v := range baseEnv {
 		script.SS.Infos[c.SC[index].Name][subname].Env[k] = v
 	}
@@ -244,8 +263,6 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 		}
 
 	}
-	// 删除需要删除的服务
-	script.DelDelScript(subname)
 
 }
 
@@ -297,7 +314,6 @@ func (c *config) AddScript(s internal.Script) error {
 	if _, ok := script.SS.Infos[s.Name]; !ok {
 		script.SS.Infos[s.Name] = make(map[string]*script.Script)
 	}
-
 	golog.Infof("%+v", s)
 	// 添加到配置文件
 	for i, v := range c.SC {
@@ -305,7 +321,7 @@ func (c *config) AddScript(s internal.Script) error {
 			// 修改
 			c.updateConfig(s, i)
 
-			c.fill(i)
+			c.fill(i, true)
 
 			b, err := yaml.Marshal(c)
 			if err != nil {
@@ -329,7 +345,7 @@ func (c *config) AddScript(s internal.Script) error {
 	}
 	c.SC = append(c.SC, s)
 	index := len(c.SC) - 1
-	c.fill(index)
+	c.fill(index, true)
 
 	b, err := yaml.Marshal(c)
 	if err != nil {
@@ -340,23 +356,23 @@ func (c *config) AddScript(s internal.Script) error {
 }
 
 func (c *config) DelScript(pname string) error {
-	del := make(chan bool)
+	// del := make(chan bool)
 	if _, ok := script.SS.Infos[pname]; ok {
-
-		go func() {
-			wg := &sync.WaitGroup{}
-			script.Reloadlocker.Lock()
-			for name := range script.SS.Infos[pname] {
-				if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
-					wg.Add(1)
-					script.SS.Infos[pname][name].Stop()
-					wg.Done()
-
-				}
+		// go func() {
+		// wg := &sync.WaitGroup{}
+		for name := range script.SS.Infos[pname] {
+			if script.SS.Infos[pname][name].Status.Status != script.WAITRESTART {
+				// wg.Add(1)
+				go script.SS.Infos[pname][name].Remove()
+				// wg.Done()
+			} else {
+				<-script.SS.Infos[pname][name].Exit
+				script.SS.Infos[pname][name].Stop()
 			}
-			wg.Wait()
-			del <- true
-		}()
+		}
+		// wg.Wait()
+		// del <- true
+		// }()
 
 	} else {
 		return errors.New("not found this pname:" + pname)
@@ -364,12 +380,7 @@ func (c *config) DelScript(pname string) error {
 	for i, s := range c.SC {
 		if s.Name == pname {
 			c.SC = append(c.SC[:i], c.SC[i+1:]...)
-			go func() {
-				<-del
-				delete(script.SS.Infos, pname)
-				script.Reloadlocker.Unlock()
-
-			}()
+			delete(script.SS.Infos, pname)
 			break
 		}
 	}

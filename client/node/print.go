@@ -2,7 +2,7 @@ package node
 
 import (
 	"fmt"
-	"scs/script"
+	"scs/pkg/script"
 	"strconv"
 )
 
@@ -46,7 +46,7 @@ func (st status) sortAndPrint(name, url string) {
 		spaceLen[&maxspace1] = len(v.PName)
 		spaceLen[&maxspace2] = len(v.Name)
 		spaceLen[&maxspace3] = len(v.Status)
-		spaceLen[&maxspace4] = len(strconv.Itoa(v.Ppid))
+		spaceLen[&maxspace4] = len(strconv.Itoa(v.Pid))
 		spaceLen[&maxspace5] = len(v.Start)
 		spaceLen[&maxspace6] = len(v.Version)
 		spaceLen[&maxspace7] = len("CanNotStop")
@@ -96,7 +96,7 @@ func (st status) sortAndPrint(name, url string) {
 			v.PName, maxspace1-space(len(v.PName)),
 			v.Name, maxspace2-space(len(v.Name)),
 			v.Status, maxspace3-space(len(v.Status)),
-			v.Ppid, maxspace4-space(len(strconv.Itoa(v.Ppid))),
+			v.Pid, maxspace4-space(len(strconv.Itoa(v.Pid))),
 			v.Start, maxspace5-space(len(v.Start)),
 			v.Version, maxspace6-space(len(v.Version)),
 			v.CanNotStop, maxspace7-canNotStopSpace,

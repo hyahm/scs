@@ -2,7 +2,7 @@ package handle
 
 import (
 	"net/http"
-	"scs/script"
+	"scs/pkg/script"
 
 	"github.com/hyahm/xmux"
 )

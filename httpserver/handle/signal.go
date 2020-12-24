@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"scs/script"
+	"scs/pkg/script"
 
 	"github.com/hyahm/golog"
 )

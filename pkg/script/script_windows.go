@@ -2,7 +2,6 @@
 package script
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -38,7 +37,6 @@ func Shell(command string, env map[string]string) error {
 	return cmd.Wait()
 }
 func (s *Script) stop() {
-	s.Loop = 0
 	if s.Status.Status == RUNNING {
 		s.Status.Status = WAITSTOP
 	}
@@ -48,30 +46,28 @@ func (s *Script) stop() {
 		}
 	}()
 	for {
-		time.Sleep(time.Millisecond * 10)
-		if !s.Status.CanNotStop {
-			s.exit = true
-			err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(s.cmd.Process.Pid)).Run()
-			if err != nil {
-				// 正常来说，不会进来的，特殊问题以后再说
-				golog.Error(err)
-			}
+		select {
+		case <-time.After(time.Millisecond * 10):
+			if !s.Status.CanNotStop {
+				err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(s.cmd.Process.Pid)).Run()
+				if err != nil {
+					// 如果pid已经被杀掉了， 那么就报错
+					golog.Warnf("pid already be killed, err: %v", err)
+				}
 
-			golog.Infof("stop %s\n", s.SubName)
-			s.Status.RestartCount = 0
-			// 预留3秒代码退出的时间
-			time.Sleep(s.KillTime)
-			return
+				golog.Debugf("stop %s\n", s.SubName)
+				s.Status.RestartCount = 0
+				return
+			}
 		}
 	}
-
 }
 
-func (s *Script) Kill() {
+func (s *Script) kill() {
 	// 数组存日志
 	// s.Log = make([]string, Config.LogCount)
 	// s.cancel()
-	s.exit = true
+	s.Exit <- 9
 
 	err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(s.cmd.Process.Pid)).Run()
 	// err = s.cmd.Process.Kill()
@@ -83,15 +79,16 @@ func (s *Script) Kill() {
 		golog.Error(err)
 		// return
 	}
+
 	s.stopStatus()
 
 	return
 
 }
 
-func (s *Script) run() error {
+func (s *Script) start() error {
 	s.cmd = exec.Command("cmd", "/C", s.Command)
-
+	// 需要单独抽出去>>
 	baseEnv := make(map[string]string)
 	for _, v := range os.Environ() {
 		kv := strings.Split(v, "=")
@@ -104,6 +101,7 @@ func (s *Script) run() error {
 			baseEnv[k] = v
 		}
 	}
+	// 需要单独抽出去<<
 	for k, v := range baseEnv {
 		s.cmd.Env = append(s.cmd.Env, k+"="+v)
 	}
@@ -119,24 +117,5 @@ func (s *Script) run() error {
 		return err
 	}
 
-	if s.cmd.Process == nil {
-		s.stopStatus()
-		return errors.New("not start")
-	}
-	return nil
-}
-
-func (s *Script) start() error {
-	golog.Info("start")
-	if s.Loop > 0 {
-		s.loopTime = time.Now()
-	}
-	s.exit = false
-	s.Status.Status = RUNNING
-	if err := s.run(); err != nil {
-		return err
-	}
-	s.Status.Ppid = s.cmd.Process.Pid
-	go s.wait()
 	return nil
 }

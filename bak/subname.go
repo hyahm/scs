@@ -1,4 +1,4 @@
-package script
+package bak
 
 import (
 	"sync"

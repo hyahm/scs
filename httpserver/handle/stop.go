@@ -3,8 +3,9 @@ package handle
 import (
 	"fmt"
 	"net/http"
-	"scs/script"
+	"scs/pkg/script"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
 )
 
@@ -39,6 +40,7 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 	if _, ok := script.SS.Infos[pname]; ok {
 		for name := range script.SS.Infos[pname] {
 			if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
+				golog.Info("send stop")
 				go script.SS.Infos[pname][name].Stop()
 			}
 		}

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"scs/internal"
-	"scs/script"
+	"scs/pkg/script"
 	"sync"
 
 	"github.com/hyahm/golog"

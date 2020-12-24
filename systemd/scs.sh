@@ -32,6 +32,7 @@ else
     fi
 fi
 cd scs
+git checkout v2.2.3
 export GOPROXY=https://goproxy.cn
 $gobin build -o scsd cmd/scs/main.go
 $gobin build -o /usr/local/bin/scsctl cmd/scsctl/main.go

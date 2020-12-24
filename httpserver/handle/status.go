@@ -3,7 +3,7 @@ package handle
 import (
 	"encoding/json"
 	"net/http"
-	"scs/script"
+	"scs/pkg/script"
 	"time"
 
 	"github.com/hyahm/xmux"
