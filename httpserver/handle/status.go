@@ -15,10 +15,10 @@ func Status(w http.ResponseWriter, r *http.Request) {
 	statuss := make([]*script.ServiceStatus, 0)
 	if _, pok := script.SS.Infos[pname]; pok {
 		if s, ok := script.SS.Infos[pname][name]; ok {
-			if s.Status.Up > 0 {
-				s.Status.Start = (time.Duration(time.Now().Unix()-s.Status.Up) * time.Second).String()
+			if s.Status.Status != script.STOP {
+				s.Status.Start = int64(time.Since(s.Status.Up).Seconds())
 			} else {
-				s.Status.Start = "0s"
+				s.Status.Start = 0
 			}
 			statuss = append(statuss, s.Status)
 
@@ -34,10 +34,10 @@ func StatusPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	statuss := make([]*script.ServiceStatus, 0)
 	for _, s := range script.SS.Infos[pname] {
-		if s.Status.Up > 0 {
-			s.Status.Start = (time.Duration(time.Now().Unix()-s.Status.Up) * time.Second).String()
+		if s.Status.Status != script.STOP {
+			s.Status.Start = int64(time.Since(s.Status.Up).Seconds())
 		} else {
-			s.Status.Start = "0s"
+			s.Status.Start = 0
 		}
 		statuss = append(statuss, s.Status)
 	}

@@ -292,5 +292,4 @@ func (s *Script) stopStatus() {
 	s.Status.RestartCount = 0
 	s.Status.Pid = 0
 	s.cmd = nil
-	s.Status.Up = 0
 }

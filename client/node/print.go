@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"scs/pkg/script"
 	"strconv"
+	"time"
 )
 
 // 打印数据相关
@@ -46,7 +47,7 @@ func (st status) sortAndPrint(name, url string) {
 		spaceLen[&maxspace2] = len(v.Name)
 		spaceLen[&maxspace3] = len(v.Status)
 		spaceLen[&maxspace4] = len(strconv.Itoa(v.Pid))
-		spaceLen[&maxspace5] = len(v.Start)
+		spaceLen[&maxspace5] = len(string(v.Start))
 		spaceLen[&maxspace6] = len(v.Version)
 		spaceLen[&maxspace7] = len("CanNotStop")
 		spaceLen[&maxspace7] = len("Failed")
@@ -96,7 +97,7 @@ func (st status) sortAndPrint(name, url string) {
 			v.Name, maxspace2-space(len(v.Name)),
 			v.Status, maxspace3-space(len(v.Status)),
 			v.Pid, maxspace4-space(len(strconv.Itoa(v.Pid))),
-			v.Start, maxspace5-space(len(v.Start)),
+			(time.Second * time.Duration(v.Start)).String(), maxspace5-space(len(string(v.Start))),
 			v.Version, maxspace6-space(len(v.Version)),
 			v.CanNotStop, maxspace7-canNotStopSpace,
 			v.RestartCount, maxspace8-space(len(strconv.Itoa(v.RestartCount))),

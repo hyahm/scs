@@ -98,7 +98,7 @@ func (s *Script) start() error {
 
 	// 等待初始化完成完成后向后执行
 	s.read()
-	s.Status.Up = time.Now().Unix() // 设置启动状态是成功的
+	s.Status.Up = time.Now() // 设置启动状态是成功的
 	if err := s.cmd.Start(); err != nil {
 		// 执行脚本前的错误, 改变状态
 		golog.Error(err)
