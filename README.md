@@ -93,6 +93,7 @@ hardware:
 scripts:
   # 环境变量PNAME=u5, NAME=u5_1
   - name: u5
+    # 查看是否存在文件或命令, 不存在就执行install的命令, 执行时存在env定义的环境变量
     lookPath
     - path: git
       install: yum -y install git
@@ -105,7 +106,7 @@ scripts:
     # 设置环境变量
     env:
       key: value
-    # 支持变量$PORT, 当replicate大于1时， 命令的$PORT会递增1
+    # 环境变量PORT, 支持变量$PORT, 当replicate大于1时， 命令的$PORT会递增1
     port: 8080
     command: "python .\\test.py signal"
     # replicate， 开启副本数， 默认 1, 如果大于1并且需要特殊条件才能停止， 请在脚本参数后添加 $NAME   
