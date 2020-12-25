@@ -83,7 +83,7 @@ func Load(reload bool) error {
 	golog.InitLogger(Cfg.Log.Path, Cfg.Log.Size, Cfg.Log.Day)
 	// 设置所有级别的日志都显示
 	golog.Level = golog.All
-
+	golog.Name = "scs.log"
 	for index := range Cfg.SC {
 		if Cfg.SC[index].Replicate < 1 {
 			Cfg.SC[index].Replicate = 1
