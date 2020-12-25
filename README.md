@@ -24,8 +24,7 @@ service control service or script
 - [x] 支持启动所有脚本  
 - [x] 自带硬件检测  
 - [x] 一键可启动(linux)  
-- [x] 支持邮箱报警
-- [x] 支持rocket.chat报警 （https://rocket.chat/install/?gclid=undefined 此处下载app, 也可以直接浏览器访问 https://chat.hyahm.com）
+- [x] 支持的报警渠道- 邮箱, rocket.chat报警, telegram, 企业微信
 
 
 不比docker， 此服务与宿主机其实就是一台服务器， 会有环境的冲突， 暂时没考虑安装一套服务  
