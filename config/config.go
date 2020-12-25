@@ -142,13 +142,6 @@ func (c *config) check() error {
 	// 配置信息填充至状态
 	checkrepeat := make(map[string]bool)
 	for index := range c.SC {
-		if c.SC[index].Cron != nil {
-			_, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
-			if err != nil {
-				return err
-			}
-
-		}
 		// 检查名字是否有重复的
 		if _, ok := checkrepeat[c.SC[index].Name]; ok {
 			return errors.New("配置文件的脚本名重复：" + c.SC[index].Name)
@@ -227,8 +220,10 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		AT: c.SC[index].AT,
 	}
 	if c.SC[index].Cron != nil {
-		// 前面已经验证过了，不需要再验证
-		start, _ := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
+		start, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
+		if err != nil {
+			start = time.Time{}
+		}
 		script.SS.Infos[c.SC[index].Name][subname].Cron = &script.Cron{
 			Start:   start,
 			IsMonth: c.SC[index].Cron.IsMonth,
@@ -255,8 +250,10 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 
 	script.SS.Infos[c.SC[index].Name][subname].LookPath = c.SC[index].LookPath
 	if c.SC[index].Cron != nil {
-		// 前面已经验证过了，不需要再验证
-		start, _ := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
+		start, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
+		if err != nil {
+			start = time.Time{}
+		}
 		script.SS.Infos[c.SC[index].Name][subname].Cron = &script.Cron{
 			Start:   start,
 			IsMonth: c.SC[index].Cron.IsMonth,

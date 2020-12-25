@@ -55,7 +55,6 @@ func (s *Script) cron() {
 			return
 		case <-time.After(-time.Since(s.Cron.Start)):
 			s.loopTime = time.Now()
-
 			if err := s.start(); err != nil {
 				golog.Error(err)
 				return
@@ -83,7 +82,8 @@ func (s *Script) Start() error {
 		s.EndStop = make(chan bool, 2)
 		s.Ctx, s.Cancel = context.WithCancel(context.Background())
 		if s.Cron != nil && s.Cron.Loop > 0 {
-			if time.Since(s.Cron.Start) < 0 {
+			// 如果时间没填， 或者已经过去的时间了， 那么就直接启动
+			if (s.Cron.Start != time.Time{}) && time.Since(s.Cron.Start) < 0 {
 				go s.cron()
 				return nil
 			}
