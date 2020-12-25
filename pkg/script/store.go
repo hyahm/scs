@@ -61,7 +61,6 @@ func All() []byte {
 	ss := make([]*ServiceStatus, 0)
 	for pname := range SS.Infos {
 		for _, s := range SS.Infos[pname] {
-			golog.Info(s.Status.Up)
 			if s.Status.Status != STOP {
 				s.Status.Start = int64(time.Since(s.Status.Up).Seconds())
 			} else {
