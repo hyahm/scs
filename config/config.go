@@ -66,7 +66,7 @@ func Load(reload bool) error {
 		return err
 	}
 	// 检测配置文件的name是否重复
-	if err := Cfg.checkName(); err != nil {
+	if err := Cfg.check(); err != nil {
 		golog.Error(err)
 		return err
 	}
@@ -94,9 +94,6 @@ func Load(reload bool) error {
 
 		if Cfg.SC[index].ContinuityInterval == 0 {
 			Cfg.SC[index].ContinuityInterval = time.Minute * 10
-		}
-		if Cfg.SC[index].KillTime == 0 {
-			Cfg.SC[index].KillTime = time.Second * 1
 		}
 		// 重新加载配置文件的时候
 
@@ -135,16 +132,23 @@ func readConfig() error {
 
 // 运行的时候， 返回状态 Service, 主要验证服务的有效性
 func (c *config) Run() {
-	c.checkName()
+	c.check()
 	script.SS.Start()
 }
 
 // 检测配置脚本是否
-func (c *config) checkName() error {
+func (c *config) check() error {
+	// 检查时间
 	// 配置信息填充至状态
 	checkrepeat := make(map[string]bool)
 	for index := range c.SC {
+		if c.SC[index].Cron != nil {
+			_, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
+			if err != nil {
+				return err
+			}
 
+		}
 		// 检查名字是否有重复的
 		if _, ok := checkrepeat[c.SC[index].Name]; ok {
 			return errors.New("配置文件的脚本名重复：" + c.SC[index].Name)
@@ -183,6 +187,7 @@ func (c *config) fill(index int, reload bool) {
 		command := strings.ReplaceAll(c.SC[index].Command, "$NAME", subname)
 		command = strings.ReplaceAll(command, "$PNAME", c.SC[index].Name)
 		command = strings.ReplaceAll(command, "$PORT", strconv.Itoa(c.SC[index].Port+i))
+
 		if _, ok := script.SS.Infos[c.SC[index].Name][subname]; ok {
 			// 修改
 			c.update(index, subname, command, baseEnv)
@@ -195,13 +200,12 @@ func (c *config) fill(index int, reload bool) {
 }
 
 func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
-	golog.Info(command)
+
 	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
 		Name:      c.SC[index].Name,
 		LookPath:  c.SC[index].LookPath,
 		Command:   command,
 		Env:       baseEnv,
-		Cron:      c.SC[index].Cron,
 		Dir:       c.SC[index].Dir,
 		Replicate: c.SC[index].Replicate,
 		Log:       make([]string, 0, c.LogCount),
@@ -220,16 +224,22 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		AI:                 &alert.AlertInfo{},
 		Port:               port,
 
-		AT:       c.SC[index].AT,
-		KillTime: c.SC[index].KillTime,
+		AT: c.SC[index].AT,
 	}
-
+	if c.SC[index].Cron != nil {
+		// 前面已经验证过了，不需要再验证
+		start, _ := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
+		script.SS.Infos[c.SC[index].Name][subname].Cron = &script.Cron{
+			Start:   start,
+			IsMonth: c.SC[index].Cron.IsMonth,
+			Loop:    c.SC[index].Cron.Loop,
+		}
+	}
 	// 新增的时候
 	if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
 		golog.Error(err)
 		return
 	}
-
 	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
 		!c.SC[index].Disable {
 		script.SS.Infos[c.SC[index].Name][subname].Start()
@@ -242,8 +252,18 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	for k, v := range baseEnv {
 		script.SS.Infos[c.SC[index].Name][subname].Env[k] = v
 	}
+
 	script.SS.Infos[c.SC[index].Name][subname].LookPath = c.SC[index].LookPath
-	script.SS.Infos[c.SC[index].Name][subname].Cron = c.SC[index].Cron
+	if c.SC[index].Cron != nil {
+		// 前面已经验证过了，不需要再验证
+		start, _ := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
+		script.SS.Infos[c.SC[index].Name][subname].Cron = &script.Cron{
+			Start:   start,
+			IsMonth: c.SC[index].Cron.IsMonth,
+			Loop:    c.SC[index].Cron.Loop,
+		}
+	}
+
 	script.SS.Infos[c.SC[index].Name][subname].Command = command
 	script.SS.Infos[c.SC[index].Name][subname].Dir = c.SC[index].Dir
 	script.SS.Infos[c.SC[index].Name][subname].Replicate = c.SC[index].Replicate
@@ -255,15 +275,17 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	script.SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
 	script.SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
 	script.SS.Infos[c.SC[index].Name][subname].Status.Version = c.SC[index].Version
-	script.SS.Infos[c.SC[index].Name][subname].KillTime = c.SC[index].KillTime
+	// 更新的时候
+	if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
+		golog.Error(err)
+		return
+	}
 	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
 		// 如果是停止的name就启动
 		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && !c.SC[index].Disable {
 			script.SS.Infos[c.SC[index].Name][subname].Start()
 		}
-
 	}
-
 }
 
 // 更新配置文件
@@ -296,15 +318,11 @@ func (c *config) updateConfig(s internal.Script, index int) {
 	if s.AT != nil {
 		c.SC[index].AT = s.AT
 	}
-	if s.KillTime != 0 {
-		c.SC[index].KillTime = s.KillTime
-	} else {
-		s.KillTime = time.Second * 1
-	}
 	if s.Version != "" {
 		c.SC[index].Version = s.Version
 	}
-	c.SC[index].Loop = s.Loop
+	c.SC[index].Cron = s.Cron
+
 	if len(s.LookPath) > 0 {
 		c.SC[index].LookPath = s.LookPath
 	}
@@ -340,9 +358,6 @@ func (c *config) AddScript(s internal.Script) error {
 	if s.ContinuityInterval == 0 {
 		s.ContinuityInterval = time.Minute * 10
 	}
-	if s.KillTime == 0 {
-		s.KillTime = time.Second * 1
-	}
 	c.SC = append(c.SC, s)
 	index := len(c.SC) - 1
 	c.fill(index, true)
@@ -361,18 +376,8 @@ func (c *config) DelScript(pname string) error {
 		// go func() {
 		// wg := &sync.WaitGroup{}
 		for name := range script.SS.Infos[pname] {
-			if script.SS.Infos[pname][name].Status.Status != script.WAITRESTART {
-				// wg.Add(1)
-				go script.SS.Infos[pname][name].Remove()
-				// wg.Done()
-			} else {
-				<-script.SS.Infos[pname][name].Exit
-				script.SS.Infos[pname][name].Stop()
-			}
+			script.SS.Infos[pname][name].Remove()
 		}
-		// wg.Wait()
-		// del <- true
-		// }()
 
 	} else {
 		return errors.New("not found this pname:" + pname)

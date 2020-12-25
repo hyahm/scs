@@ -5,4 +5,4 @@ var Token string
 var LogCount int
 var IgnoreToken []string
 
-const VERSION = "v2.3.0"
+const VERSION = "v2.4.0"

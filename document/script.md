@@ -19,7 +19,6 @@
 	"version": "v0.0.1",
     "disableAlert": true,
     "continuityInterval": 600, 
-    "killTime": 1 
 }
 ```
 
@@ -52,7 +51,6 @@
       email: []string
       rocket: []string
       telegram: []string     
-	killTime           time.Duration     json中单位是秒的整数，    yaml配置中是 1s的字符串 
 	version            string            服务的版本， 用户scsctl status 上的显示
 ```
 ```

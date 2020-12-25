@@ -17,7 +17,6 @@ type Script struct {
 	ContinuityInterval time.Duration     `yaml:"continuityInterval,omitempty" json:"continuityInterval"`
 	Port               int               `yaml:"port,omitempty" json:"port"`
 	AT                 *AlertTo          `yaml:"alert,omitempty" json:"alert"`
-	KillTime           time.Duration     `yaml:"killTime,omitempty" json:"killTime"`
 	Version            string            `yaml:"version,omitempty" json:"version"`
 	Loop               int               `yaml:"loop,omitempty" json:"loop"`
 	LookPath           []*LoopPath       `yaml:"lookPath,omitempty" json:"loopPath"`
@@ -30,7 +29,7 @@ type LoopPath struct {
 }
 
 type Cron struct {
-	// 开始执行的时间
+	// 开始执行的时间戳
 	Start string `yaml:"start,omitempty" json:"start"`
 	// 间隔的时间， 如果IsMonth 为true， loop 单位为月， 否则为秒
 	IsMonth bool `yaml:"isMonth,omitempty" json:"isMonth"`

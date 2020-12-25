@@ -110,7 +110,6 @@ scripts:
   #   # disableAlert: true
   #   # replicate， 开启副本数
   #   replicate: 1
-  #   killTime: 2s
   #   alert:
   #     email:
   #       - 727023885460@qq.com

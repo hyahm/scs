@@ -20,8 +20,8 @@ data = {
         "value": True
     }
 
-while True:
-    log(data)
+log(data)
+time.sleep(1)
 # log("port:" + os.getenv("PORT"))
 # while True:
 

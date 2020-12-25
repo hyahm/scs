@@ -24,14 +24,7 @@ func DelDelScript(key string) {
 func StopUnUseScript() {
 	// 停止无用的脚本， 并移除
 	for subname, name := range delScript {
-		if SS.Infos[name][subname].Status.Status != WAITRESTART {
-			// 停止服务, 先禁止always， 设置主动停止
-			go SS.Infos[name][subname].Remove()
-		} else {
-			<-SS.Infos[name][subname].Exit
-			SS.Infos[name][subname].Stop()
-		}
-
+		SS.Infos[name][subname].Remove()
 	}
 	delScript = nil
 }

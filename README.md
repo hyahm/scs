@@ -43,7 +43,7 @@ log:
   path: log
   day: true
   size: 0
-# 请求头认证， 脚本与服务器之间交互需要 Token： xxxx, 留空表示没认证
+# 请求头认证， 脚本与服务器之间交互需要 Token： xxxx,  环境变量TOKEN的值为此token的值
 token: 
 # 报警方式
 alert:
@@ -91,14 +91,22 @@ hardware:
   # 下次报警时间间隔， 如果恢复了就重置
   continuityInterval: 1h
 scripts:
+  # 环境变量PNAME=u5, NAME=u5_1
   - name: u5
+    lookPath
+    - path: git
+      install: yum -y install git
+    cron:
+      # 此行含义， 每个月的25号10:10:10 执行一次
+      start: "2020-12-25 10:10:10"
+      loop: 1
+      isMonth: true  # 如果这里是false， 那么没隔1秒执行一次
     dir: D:\\work\\u5
     # 设置环境变量
     env:
       key: value
     # 支持变量$PORT, 当replicate大于1时， 命令的$PORT会递增1
     port: 8080
-    # 脚本要加replicate 或 其他需要pname 和 name的名称， 可以直接参数传入脚本  $PNAME   $MAME  ,
     command: "python .\\test.py signal"
     # replicate， 开启副本数， 默认 1, 如果大于1并且需要特殊条件才能停止， 请在脚本参数后添加 $NAME   
     # 此参数是传递请求需要的name
