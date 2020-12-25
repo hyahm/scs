@@ -224,10 +224,7 @@ loop:
 			return nil
 		} else {
 			// start := math.Ceil(float64(s.Cron.Loop) - time.Now().Sub(s.loopTime).Seconds())
-			golog.Info(s.loopTime)
-			golog.Info(time.Duration(s.Cron.Loop) * time.Second)
 			start := time.Since(s.loopTime.Add(time.Duration(s.Cron.Loop) * time.Second))
-			golog.Info(start)
 			if start < 0 {
 				// 允许循环， 每s.Loop秒启动一次
 				for {

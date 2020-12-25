@@ -5,6 +5,7 @@ service control service or script
 2.  监控硬件信息， 主要是磁盘， cpu， 内存  
 3.  服务之间可以相互控制增删改查  
 4.  报警功能api  
+5.  支持定时器功能执行命令或脚本
 
 # 文档
 [安装](document/install.md)  
