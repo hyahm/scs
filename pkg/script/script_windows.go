@@ -37,10 +37,6 @@ func Shell(command string, env map[string]string) error {
 	return cmd.Wait()
 }
 func (s *Script) stop() {
-	if s.Status.Status == RUNNING {
-		s.Status.Status = WAITSTOP
-	}
-
 	for {
 		select {
 		case <-time.After(time.Millisecond * 10):

@@ -215,9 +215,10 @@ scsctl config reload
  git clone https://github.com/hyahm/scs.git
  cd scs
  go env -w GOPROXY=https://goproxy.cn,direct # 国外机器不需要这个
- go build -o scs cmd/scs/main.go
+ go build -o scsd cmd/scs/main.go
  go build -o /usr/local/bin/scsctl cmd/scsctl/main.go
- ./scs
+ cp default.yaml scs.yaml
+ ./scsd
  ```
 
 linux(需要 git tar命令， 关闭selinux),mac, windows 请按照上面自行编译安装

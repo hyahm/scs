@@ -16,11 +16,6 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	if v, pok := script.SS.Infos[pname]; pok {
 		if _, ok := v[name]; ok {
-			if script.SS.Infos[pname][name].Status.Status == script.RUNNING {
-				w.Write([]byte(`{"code": 201, "msg": "is running"}`))
-				return
-			}
-			script.SS.Infos[pname][name].Status.Status = script.RUNNING
 			script.SS.Infos[pname][name].Start()
 			w.Write([]byte(`{"code": 200, "msg": "already start"}`))
 			return
@@ -39,9 +34,7 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	if _, pok := script.SS.Infos[pname]; pok {
 		for name := range script.SS.Infos[pname] {
-			if script.SS.Infos[pname][name].Status.Status == script.STOP {
-				script.SS.Infos[pname][name].Start()
-			}
+			script.SS.Infos[pname][name].Start()
 		}
 
 	} else {
@@ -56,9 +49,7 @@ func StartAll(w http.ResponseWriter, r *http.Request) {
 
 	for pname := range script.SS.Infos {
 		for name := range script.SS.Infos[pname] {
-			if script.SS.Infos[pname][name].Status.Status == script.STOP {
-				script.SS.Infos[pname][name].Start()
-			}
+			script.SS.Infos[pname][name].Start()
 		}
 	}
 	w.Write([]byte(`{"code": 200, "msg": "already start"}`))

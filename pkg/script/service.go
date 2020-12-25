@@ -72,34 +72,56 @@ func (s *Script) cron() {
 
 // Start  启动服务
 func (s *Script) Start() error {
-
-	s.Exit = make(chan int, 2)
-	s.EndStop = make(chan bool, 2)
-	s.Ctx, s.Cancel = context.WithCancel(context.Background())
-	if s.Cron != nil && s.Cron.Loop > 0 {
-		if time.Since(s.Cron.Start) < 0 {
-			go s.cron()
-			return nil
+	switch s.Status.Status {
+	case WAITSTOP:
+		// 如果之前是等待停止的状态， 更改为重启状态
+		<-s.Exit
+		s.Exit <- 10
+		s.Status.Status = WAITRESTART
+	case STOP:
+		s.Exit = make(chan int, 2)
+		s.EndStop = make(chan bool, 2)
+		s.Ctx, s.Cancel = context.WithCancel(context.Background())
+		if s.Cron != nil && s.Cron.Loop > 0 {
+			if time.Since(s.Cron.Start) < 0 {
+				go s.cron()
+				return nil
+			}
+			s.loopTime = time.Now()
 		}
-		s.loopTime = time.Now()
-	}
 
-	s.Status.Status = RUNNING
-	if err := s.start(); err != nil {
-		return err
-	}
+		s.Status.Status = RUNNING
+		if err := s.start(); err != nil {
+			return err
+		}
 
-	go s.wait()
-	if s.cmd.Process != nil {
-		s.Status.Pid = s.cmd.Process.Pid
+		go s.wait()
+		if s.cmd.Process != nil {
+			s.Status.Pid = s.cmd.Process.Pid
+		}
+
 	}
 	return nil
 }
 
 // Restart  重动服务
 func (s *Script) Restart() {
-	s.Exit <- 10
-	s.stop()
+	switch s.Status.Status {
+	case WAITSTOP:
+		// 如果之前是等待停止的状态， 更改为重启状态
+		<-s.Exit
+		s.Exit <- 10
+		s.Status.Status = WAITRESTART
+		return
+	case RUNNING:
+		s.Exit <- 10
+		s.Status.Status = WAITRESTART
+		s.stop()
+		return
+	case STOP:
+		s.Start()
+	}
+
 }
 
 func (s Script) Remove() {
@@ -124,7 +146,6 @@ func (s Script) Remove() {
 }
 
 func (s *Script) remove() {
-
 	s.Stop()
 	delete(SS.Infos[s.Name], s.SubName)
 	if len(SS.Infos[s.Name]) == 0 {
@@ -134,14 +155,30 @@ func (s *Script) remove() {
 
 // Stop  停止服务
 func (s *Script) Stop() {
-	s.Exit <- 9
-	s.stop()
+	switch s.Status.Status {
+	case RUNNING:
+		s.Exit <- 9
+		s.Status.Status = WAITSTOP
+		s.stop()
+	case WAITRESTART:
+		<-s.Exit
+		s.Exit <- 9
+		s.Status.Status = WAITSTOP
+	}
 }
 
 // Stop  杀掉服务
 func (s *Script) Kill() {
-	s.Exit <- 9
-	s.kill()
+	switch s.Status.Status {
+	case RUNNING:
+		s.Exit <- 9
+		s.kill()
+	case WAITRESTART, WAITSTOP:
+		<-s.Exit
+		s.Exit <- 9
+		s.kill()
+	}
+
 }
 
 func (s *Script) wait() error {

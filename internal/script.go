@@ -6,7 +6,6 @@ import (
 
 // 配置文件的数据
 type Script struct {
-	Cron               *Cron             `yaml:"cron,omitempty" json:"cron"`
 	Name               string            `yaml:"name,omitempty" json:"name"`
 	Dir                string            `yaml:"dir,omitempty" json:"dir"`
 	Command            string            `yaml:"command,omitempty" json:"command"`
@@ -21,6 +20,7 @@ type Script struct {
 	Loop               int               `yaml:"loop,omitempty" json:"loop"`
 	LookPath           []*LoopPath       `yaml:"lookPath,omitempty" json:"loopPath"`
 	Disable            bool              `yaml:"disable,omitempty" json:"disable"`
+	Cron               *Cron             `yaml:"cron,omitempty" json:"cron"`
 }
 
 type LoopPath struct {
