@@ -6,6 +6,7 @@ import (
 
 // 配置文件的数据
 type Script struct {
+	Cron               *Cron             `yaml:"cron,omitempty" json:"cron"`
 	Name               string            `yaml:"name,omitempty" json:"name"`
 	Dir                string            `yaml:"dir,omitempty" json:"dir"`
 	Command            string            `yaml:"command,omitempty" json:"command"`
@@ -26,6 +27,14 @@ type Script struct {
 type LoopPath struct {
 	Path    string `yaml:"path,omitempty" json:"path"`
 	Install string `yaml:"install,omitempty" json:"install"`
+}
+
+type Cron struct {
+	// 开始执行的时间
+	Start string `yaml:"start,omitempty" json:"start"`
+	// 间隔的时间， 如果IsMonth 为true， loop 单位为月， 否则为秒
+	IsMonth bool `yaml:"isMonth,omitempty" json:"isMonth"`
+	Loop    int  `yaml:"loop,omitempty" json:"loop"`
 }
 
 // 优先执行的代码

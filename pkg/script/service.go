@@ -18,7 +18,7 @@ type Script struct {
 	Command            string
 	Replicate          int
 	Always             bool
-	Loop               int
+	Cron               *internal.Cron
 	loopTime           time.Time
 	DisableAlert       bool
 	Env                map[string]string
@@ -45,7 +45,7 @@ func (s *Script) Start() error {
 	s.Exit = make(chan int, 2)
 	s.Ctx, s.Cancel = context.WithCancel(context.Background())
 	golog.Info("start")
-	if s.Loop > 0 {
+	if s.Cron.Loop > 0 {
 		s.loopTime = time.Now()
 	}
 	s.Status.Status = RUNNING
@@ -140,16 +140,15 @@ func (s *Script) wait() error {
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
-		if s.Loop > 0 {
+		if s.Cron.Loop > 0 {
 			goto loop
 		}
 		// s.Status.Last = false
 		return err
 	}
 loop:
-	golog.Info("000000000")
-	if s.Loop > 0 {
-		sleep := math.Ceil(float64(s.Loop) - time.Now().Sub(s.loopTime).Seconds())
+	if s.Cron.Loop > 0 {
+		sleep := math.Ceil(float64(s.Cron.Loop) - time.Now().Sub(s.loopTime).Seconds())
 		if sleep > 0 {
 			// 允许循环， 每s.Loop秒启动一次
 			time.Sleep(time.Duration(sleep) * time.Second)
