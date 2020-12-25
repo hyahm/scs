@@ -78,7 +78,7 @@ func (st status) sortAndPrint(name, url string) {
 	fmt.Println("PName" + (maxspace1 - space(len("PName"))).String() +
 		"Name" + (maxspace2 - space(len("Name"))).String() +
 		"Status" + (maxspace3 - space(len("Status"))).String() +
-		"Ppid" + (maxspace4 - space(len("Ppid"))).String() +
+		"Ppid" + (maxspace4 - space(len("Pid"))).String() +
 		"UpTime" + (maxspace5 - space(len("UpTime"))).String() +
 		"Verion" + (maxspace6 - space(len("Version"))).String() +
 		"CanNotStop" + (maxspace7 - space(len("CanNotStop"))).String() +
