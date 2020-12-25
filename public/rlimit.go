@@ -5,6 +5,7 @@ package public
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"syscall"
 )
 
@@ -24,8 +25,13 @@ func init() {
 		fmt.Println("get rlimit error: " + err.Error())
 		os.Exit(1)
 	}
-	rlim.Cur = 6553500
-	rlim.Max = 6553500
+	var MaxRlimt uint64 = 1048576
+	if runtime.GOOS == "darwin" {
+		rlim.Cur = 102400
+	}
+
+	rlim.Cur = MaxRlimt
+	rlim.Max = MaxRlimt
 	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rlim)
 	if err != nil {
 		fmt.Println("set rlimit error: " + err.Error())
