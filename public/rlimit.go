@@ -27,7 +27,7 @@ func init() {
 	}
 	var MaxRlimt uint64 = 1048576
 	if runtime.GOOS == "darwin" {
-		rlim.Cur = 102400
+		MaxRlimt = 102400
 	}
 
 	rlim.Cur = MaxRlimt
