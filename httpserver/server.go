@@ -66,6 +66,7 @@ func HttpServer() {
 	router.Post("/env/{name}", handle.GetEnvName)
 
 	router.Post("/install/{name}", handle.InstallPackage)
+	router.Post("/install", handle.InstallScript)
 	router.Post("/set/alert", handle.Alert)
 	router.Post("/get/alert", handle.Alert)
 	// 监测点

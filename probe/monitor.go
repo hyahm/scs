@@ -116,7 +116,7 @@ func (at *AlterTimer) CheckServer() {
 				}
 
 			}
-			continue
+			return
 		}
 		if at.AT["server"].Broken {
 			am := &alert.Message{
@@ -190,18 +190,17 @@ func (at *AlterTimer) CheckDisk() {
 					at.AT["disk"].AlertTime = time.Now()
 					alert.AlertMessage(am, nil)
 				}
-
+				return
 			}
-			continue
-		}
-		if at.AT["disk"].Broken {
-			am := &alert.Message{
-				Title:      "硬盘空间已恢复正常",
-				BrokenTime: at.AT["disk"].Start.String(),
-				FixTime:    time.Now().Local().String(),
+			if at.AT["disk"].Broken {
+				am := &alert.Message{
+					Title:      "硬盘空间已恢复正常",
+					BrokenTime: at.AT["disk"].Start.String(),
+					FixTime:    time.Now().Local().String(),
+				}
+				alert.AlertMessage(am, nil)
+				at.AT["disk"].Broken = false
 			}
-			alert.AlertMessage(am, nil)
-			at.AT["disk"].Broken = false
 		}
 	}
 
