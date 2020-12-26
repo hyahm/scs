@@ -26,9 +26,6 @@ service control service or script
 - [x] 一键可启动(linux)  
 - [x] 支持的报警渠道- 邮箱, rocket.chat报警, telegram, 企业微信
 
-
-不比docker， 此服务与宿主机其实就是一台服务器， 会有环境的冲突， 暂时没考虑安装一套服务  
-
 [版本更新](update.md)
 
 # 配置文件说明  
