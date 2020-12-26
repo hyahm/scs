@@ -70,7 +70,6 @@ func Load(reload bool) error {
 		golog.Error(err)
 		return err
 	}
-	golog.Infof("%+v", Cfg.Probe)
 	// 装载全局配置
 	global.Token = Cfg.Token
 	global.Listen = Cfg.Listen
@@ -118,7 +117,6 @@ func readConfig() error {
 		return err
 	}
 	Cfg = &config{}
-	golog.Info(string(b))
 	err = yaml.Unmarshal(b, Cfg)
 	if err != nil {
 		return err

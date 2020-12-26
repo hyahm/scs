@@ -3,7 +3,6 @@ package probe
 import (
 	"time"
 
-	"github.com/hyahm/golog"
 	"github.com/shirou/gopsutil/disk"
 )
 
@@ -33,7 +32,6 @@ func (probe *Probe) InitHWAlert() {
 	if probe.ContinuityInterval == 0 {
 		probe.ContinuityInterval = time.Hour * 1
 	}
-	golog.Infof("%+v", probe)
 	if probe.Cpu == 0 {
 		probe.Cpu = 90
 	}
