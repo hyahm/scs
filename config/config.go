@@ -74,6 +74,7 @@ func Load(reload bool) error {
 	global.Token = Cfg.Token
 	global.Listen = Cfg.Listen
 	global.IgnoreToken = Cfg.IgnoreToken
+
 	// 初始化报警信息
 	Cfg.Alert.InitAlert()
 	// 初始化硬件检测

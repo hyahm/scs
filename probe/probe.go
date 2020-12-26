@@ -1,10 +1,15 @@
 package probe
 
 import (
+	"scs/global"
+	"strings"
 	"time"
 
+	"github.com/hyahm/golog"
 	"github.com/shirou/gopsutil/disk"
 )
+
+var Exit chan struct{}
 
 //  保存配置文件信息
 type Probe struct {
@@ -25,12 +30,17 @@ type Probe struct {
 }
 
 func (probe *Probe) InitHWAlert() {
-
+	Exit = make(chan struct{}, 2)
 	if probe.Interval == 0 {
 		probe.Interval = time.Second * 10
 	}
 	if probe.ContinuityInterval == 0 {
 		probe.ContinuityInterval = time.Hour * 1
+	}
+	if len(probe.Monitored) > 0 {
+		global.Monitored = probe.Monitored
+	} else {
+		global.Monitored = make([]string, 0)
 	}
 	if probe.Cpu == 0 {
 		probe.Cpu = 90
@@ -41,9 +51,81 @@ func (probe *Probe) InitHWAlert() {
 	if probe.Disk == 0 {
 		probe.Disk = 85
 	}
-	GlobalProbe.Probe = probe
 	if probe.Cpu > 0 || probe.Mem > 0 || probe.Disk > 0 || len(probe.Monitor) > 0 {
-		go CheckHardWare()
+		go probe.CheckHardWare()
 	}
 
+}
+
+func (probe *Probe) CheckHardWare() {
+
+	cps := make([]CheckPointer, 0)
+	if probe.Cpu > 0 {
+		cps = append(cps, NewCpu(probe.Cpu, probe.Interval, probe.ContinuityInterval))
+	}
+	if probe.Mem > 0 {
+		cps = append(cps, NewMem(probe.Mem, probe.Interval, probe.ContinuityInterval))
+	}
+	if probe.Disk > 0 {
+		cps = append(cps, NewDisk(probe.Disk, probe.getDisk(), probe.Interval, probe.ContinuityInterval))
+	}
+
+	if len(probe.Monitor) > 0 {
+		cps = append(cps, NewMonitor(probe.Monitor, probe.Interval, probe.ContinuityInterval))
+	}
+	for {
+		select {
+		case <-Exit:
+			golog.Info("exit check")
+			return
+		case <-time.After(probe.Interval):
+			for _, check := range cps {
+				check.Check()
+			}
+			// if GlobalProbe.Probe.Cpu > 0 {
+			// 	GlobalProbe.CheckCpu()
+			// }
+			// if GlobalProbe.Probe.Mem > 0 {
+			// 	GlobalProbe.CheckMem()
+			// }
+			// if GlobalProbe.Probe.Disk > 0 {
+			// 	GlobalProbe.CheckDisk()
+			// }
+			// if len(GlobalProbe.Probe.Monitor) > 0 {
+			// 	GlobalProbe.CheckServer()
+			// }
+		}
+	}
+
+}
+
+func (probe *Probe) getDisk() []disk.PartitionStat {
+	dp := make([]disk.PartitionStat, 0)
+	parts, err := disk.Partitions(true)
+	if err != nil {
+		golog.Error(err)
+		return dp
+	}
+	excludePath := make(map[string]int)
+	for _, he := range probe.ExcludeDisk {
+		excludePath[strings.ToUpper(he)] = 0
+	}
+
+	mountNames := make(map[string]string)
+	for _, part := range parts {
+		if _, ok := excludePath[strings.ToUpper(part.Mountpoint)]; ok {
+			continue
+		}
+
+		if _, ok := cludeType[strings.ToUpper(part.Fstype)]; ok {
+			mountNames[part.Mountpoint] = part.Fstype
+			dp = append(dp, part)
+			continue
+		}
+
+	}
+	for _, part := range dp {
+		golog.Infof("alert dist: --%s--, type: %s", part.Mountpoint, part.Fstype)
+	}
+	return dp
 }

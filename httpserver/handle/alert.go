@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"scs/alert"
 	"scs/global"
-	"scs/probe"
 	"strings"
 )
 
@@ -32,7 +31,7 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 	addr := strings.Split(r.RemoteAddr, ":")[0]
 	needToken := true
 	// 检查是否是被监控的
-	for _, v := range probe.GlobalProbe.Probe.Monitored {
+	for _, v := range global.Monitored {
 		if v == addr {
 			needToken = false
 			break

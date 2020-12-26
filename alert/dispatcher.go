@@ -25,13 +25,41 @@ func GetDispatcher() []byte {
 }
 
 type AlertInfo struct {
-	AlertTime  time.Time
-	Interval   int // 上次报警的时间
-	Broken     bool
-	Start      time.Time // 报警时间
-	BrokenTime time.Time
-	AM         *Message
-	To         *internal.AlertTo
+	AlertTime          time.Time
+	Interval           int // 上次报警的时间
+	Broken             bool
+	Start              time.Time // 报警时间
+	BrokenTime         time.Time
+	AM                 *Message
+	To                 *internal.AlertTo
+	ContinuityInterval time.Duration
+}
+
+func (ai *AlertInfo) BreakDown(title string) {
+	ai.AM.Title = title
+	if !ai.Broken {
+		// 第一次发送
+		AlertMessage(ai.AM, nil)
+		ai.Broken = true
+		ai.Start = time.Now()
+		ai.AlertTime = time.Now()
+	} else {
+		if time.Since(ai.AlertTime) >= ai.ContinuityInterval {
+			ai.AM.BrokenTime = ai.Start.String()
+			ai.AlertTime = time.Now()
+			AlertMessage(ai.AM, nil)
+		}
+	}
+}
+
+func (ai *AlertInfo) Recover(title string) {
+	if ai.Broken {
+		ai.AM.Title = title
+		ai.AM.BrokenTime = ai.Start.String()
+		ai.AM.FixTime = time.Now().Local().String()
+		AlertMessage(ai.AM, nil)
+		ai.Broken = false
+	}
 }
 
 type RespAlert struct {

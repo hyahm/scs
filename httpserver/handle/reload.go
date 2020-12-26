@@ -3,6 +3,7 @@ package handle
 import (
 	"net/http"
 	"scs/pkg/script"
+	"scs/probe"
 
 	"scs/config"
 )
@@ -16,7 +17,7 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return
 	}
-	// probe.GlobalProbe.Exit <- true
+	probe.Exit <- struct{}{}
 
 	// script.Reloadlocker.Lock()
 	// defer script.Reloadlocker.Unlock()
