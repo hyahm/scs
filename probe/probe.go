@@ -3,6 +3,7 @@ package probe
 import (
 	"time"
 
+	"github.com/hyahm/golog"
 	"github.com/shirou/gopsutil/disk"
 )
 
@@ -32,15 +33,15 @@ func (probe *Probe) InitHWAlert() {
 	if probe.ContinuityInterval == 0 {
 		probe.ContinuityInterval = time.Hour * 1
 	}
-
+	golog.Infof("%+v", probe)
 	if probe.Cpu == 0 {
 		probe.Cpu = 90
 	}
 	if probe.Mem == 0 {
-		probe.Cpu = 90
+		probe.Mem = 90
 	}
 	if probe.Disk == 0 {
-		probe.Cpu = 85
+		probe.Disk = 85
 	}
 	GlobalProbe.Probe = probe
 	if probe.Cpu > 0 || probe.Mem > 0 || probe.Disk > 0 || len(probe.Monitor) > 0 {

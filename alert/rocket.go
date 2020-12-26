@@ -28,7 +28,6 @@ var rocketFormat = "```\nTitle: {{.Title }} \nHostname: {{.HostName}} \nAddr: {{
 
 func (rocket *AlertRocket) Send(body *Message, to ...string) error {
 
-	golog.Infof("%+v", *body)
 	token, err := rocket.getToken()
 	if err != nil {
 		golog.Error(err)
