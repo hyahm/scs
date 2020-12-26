@@ -160,10 +160,10 @@ func InstallScript(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		select {
-		case <-interrupt:
-			log.Println("interrupt")
-			socket.Close()
-			return
+		// case <-interrupt:
+		// 	log.Println("interrupt")
+		// 	socket.Close()
+		// 	return
 		}
 	}
 
