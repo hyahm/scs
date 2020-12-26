@@ -61,10 +61,10 @@ func All() []byte {
 	ss := make([]*ServiceStatus, 0)
 	for pname := range SS.Infos {
 		for _, s := range SS.Infos[pname] {
-			if s.Status.Up > 0 {
-				s.Status.Start = (time.Duration(time.Now().Unix()-s.Status.Up) * time.Second).String()
+			if s.Status.Status != STOP {
+				s.Status.Start = int64(time.Since(s.Status.Up).Seconds())
 			} else {
-				s.Status.Start = "0s"
+				s.Status.Start = 0
 			}
 			s.Status.Command = s.Command
 			ss = append(ss, s.Status)

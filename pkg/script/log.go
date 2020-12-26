@@ -24,7 +24,6 @@ func (s *Script) read() {
 	go s.appendLog()
 	//实时循环读取输出流中的一行内容
 	go s.appendRead(stderr, true)
-
 	//实时循环读取输出流中的一行内容
 	go s.appendRead(stdout, false)
 }
