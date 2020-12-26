@@ -180,30 +180,30 @@ func (at *AlterTimer) CheckDisk() {
 			am.Total = di.Total / 1024 / 1024 / 1024
 			am.UsePercent = float64(di.Used / di.Total)
 			if !at.AT["disk"].Broken {
-				alert.AlertMessage(am, nil)
 				at.AT["disk"].Broken = true
 				at.AT["disk"].Start = time.Now()
 				at.AT["disk"].AlertTime = time.Now()
+				alert.AlertMessage(am, nil)
 
 			} else {
 				if time.Since(at.AT["disk"].AlertTime) >= at.Probe.ContinuityInterval {
 					at.AT["disk"].AlertTime = time.Now()
 					alert.AlertMessage(am, nil)
 				}
-				return
+
 			}
-			if at.AT["disk"].Broken {
-				am := &alert.Message{
-					Title:      "硬盘空间已恢复正常",
-					BrokenTime: at.AT["disk"].Start.String(),
-					FixTime:    time.Now().Local().String(),
-				}
-				alert.AlertMessage(am, nil)
-				at.AT["disk"].Broken = false
-			}
+			return
 		}
 	}
-
+	if at.AT["disk"].Broken {
+		am := &alert.Message{
+			Title:      "硬盘空间已恢复正常",
+			BrokenTime: at.AT["disk"].Start.String(),
+			FixTime:    time.Now().Local().String(),
+		}
+		alert.AlertMessage(am, nil)
+		at.AT["disk"].Broken = false
+	}
 }
 
 func (at *AlterTimer) CheckCpu() {
