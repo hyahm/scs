@@ -6,7 +6,7 @@ import (
 	"github.com/shirou/gopsutil/process"
 )
 
-// 计算cpu占用前5的进程
+// 计算cpu占用前1的进程
 type cpuInfo struct {
 	name    string
 	Pid     int32

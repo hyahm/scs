@@ -24,7 +24,6 @@ type Probe struct {
 	ExcludeDisk []string `yaml:"excludeDisk"`
 	// 检测间隔， 默认10秒
 	Interval time.Duration `yaml:"interval"`
-	dp       []disk.PartitionStat
 	// 下次报警时间间隔， 如果恢复了就重置
 	ContinuityInterval time.Duration `yaml:"continuityInterval"`
 }
@@ -58,7 +57,6 @@ func (probe *Probe) InitHWAlert() {
 }
 
 func (probe *Probe) CheckHardWare() {
-
 	cps := make([]CheckPointer, 0)
 	if probe.Cpu > 0 {
 		cps = append(cps, NewCpu(probe.Cpu, probe.Interval, probe.ContinuityInterval))
@@ -82,18 +80,6 @@ func (probe *Probe) CheckHardWare() {
 			for _, check := range cps {
 				check.Check()
 			}
-			// if GlobalProbe.Probe.Cpu > 0 {
-			// 	GlobalProbe.CheckCpu()
-			// }
-			// if GlobalProbe.Probe.Mem > 0 {
-			// 	GlobalProbe.CheckMem()
-			// }
-			// if GlobalProbe.Probe.Disk > 0 {
-			// 	GlobalProbe.CheckDisk()
-			// }
-			// if len(GlobalProbe.Probe.Monitor) > 0 {
-			// 	GlobalProbe.CheckServer()
-			// }
 		}
 	}
 

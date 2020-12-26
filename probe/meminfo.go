@@ -6,7 +6,7 @@ import (
 	"github.com/shirou/gopsutil/process"
 )
 
-// 计算 内存占用前5的进程
+// 计算 内存占用前1的进程
 type memInfo struct {
 	name    string
 	Pid     int32
