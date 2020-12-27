@@ -231,7 +231,6 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		}
 	}
 	// 新增的时候
-	golog.Info("55555")
 	if err := script.SS.Infos[c.SC[index].Name][subname].LookCommandPath(); err != nil {
 		golog.Error(err)
 		return

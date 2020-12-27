@@ -10,12 +10,11 @@ func (s *Script) LookCommandPath() error {
 	for _, v := range s.LookPath {
 		_, err := exec.LookPath(v.Path)
 		if err != nil {
-			golog.Info(v.Install)
 			if err := Shell(v.Install, s.Env); err != nil {
+				golog.Error(v.Install)
 				return err
 			}
 		}
 	}
-
 	return nil
 }
