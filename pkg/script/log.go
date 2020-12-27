@@ -66,7 +66,7 @@ func read(cmd *exec.Cmd, s *Script) {
 	if err != nil {
 		golog.Error(err)
 	}
-	go s.appendLog()
+
 	//实时循环读取输出流中的一行内容
 	go appendRead(stderr, s)
 
@@ -82,7 +82,7 @@ func appendRead(stdout io.ReadCloser, s *Script) {
 			stdout.Close()
 			break
 		}
-		s.Msg <- line
+		golog.Info(line)
 	}
 }
 

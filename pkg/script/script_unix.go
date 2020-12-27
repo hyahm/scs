@@ -11,21 +11,26 @@ import (
 	"github.com/hyahm/golog"
 )
 
-func Shell(command string, env []string) error {
+func (s *Script) shell(command string) error {
 	cmd := exec.Command("/bin/bash", "-c", command)
-	golog.Warn(env)
-	cmd.Env = env
+	cmd.Env = s.Env
 
-	read(cmd)
+	read(cmd, s)
+
 	err := cmd.Start()
 	if err != nil {
+
 		golog.Error(err)
 		return err
 	}
 	defer func() {
 		golog.Error(cmd.ProcessState.ExitCode())
 	}()
-	return cmd.Wait()
+	err = cmd.Wait()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Script) stop() {

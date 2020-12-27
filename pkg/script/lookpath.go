@@ -25,7 +25,7 @@ func (s *Script) LookCommandPath() error {
 			}
 		}
 		golog.Info("exec: ", v.Install)
-		if err := Shell(v.Install, s.Env); err != nil {
+		if err := s.shell(v.Install); err != nil {
 			golog.Error(v.Install)
 			return err
 		}
@@ -37,7 +37,7 @@ func (s *Script) LookCommandPath() error {
 			if err == os.ErrPermission && command != v.Path {
 				golog.Error(err)
 				golog.Info("exec: ", v.Install)
-				if err := s.start(v.Install); err != nil {
+				if err := s.shell(v.Install); err != nil {
 					golog.Error(v.Install)
 					return err
 				}
