@@ -21,7 +21,6 @@ data = {
     }
 
 while True:
-
     headers = {
         "Token": os.getenv("TOKEN")
     }
