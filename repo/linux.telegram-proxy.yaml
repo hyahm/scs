@@ -1,0 +1,28 @@
+name: telegram-proxy
+lookPath:
+  - path: git
+    install: yum -y install git
+  - path: go
+    install: >
+             curl -Ls https://dl.google.com/go/go1.15.6.linux-amd64.tar.gz -o /opt/go1.15.6.linux-amd64.tar.gz &&
+             cd /opt/ &&
+             tar -xf /opt/go1.15.6.linux-amd64.tar.gz
+  - path: /data/scs
+    install: > 
+             mkdir /data &&
+             cd /data &&
+             git clone https://github.com/hyahm/scs.git
+  - path: /data/scs/socks5
+    install: >
+             cd /data/scs/ &&
+             go build -o socks5 cmd/proxy/socks5.go
+  - path: /data/scs/telegram
+    install: >
+             cd /data/scs/ &&
+             go build -o telegram cmd/proxy/telegram.go
+dir: /data/scs
+env:
+  PATH: /opt/go/bin
+  GOPROXY: https://goproxy.cn
+command: ./telegram -l :8080 -u telegram -p 123456 -i https://api.telegram.org/bot<token>/sendMessage
+
