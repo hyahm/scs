@@ -9,10 +9,10 @@ import (
 	"github.com/hyahm/golog"
 )
 
-func Shell(command string, env []string) error {
+func (s *Script) shell(command string) error {
 	cmd := exec.Command("cmd", "/c", command)
-	cmd.Env = env
-	read(cmd)
+	cmd.Env = s.Env
+	read(cmd, s)
 	err := cmd.Start()
 	if err != nil {
 		golog.Error(err)

@@ -82,6 +82,7 @@ func (s *Script) Start() error {
 			s.Status.Status = INSTALL
 			if err := s.LookCommandPath(); err != nil {
 				golog.Error(err)
+				s.Status.Status = STOP
 				return
 			}
 			s.Exit = make(chan int, 2)

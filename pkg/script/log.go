@@ -56,7 +56,7 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 	}
 }
 
-func read(cmd *exec.Cmd) {
+func read(cmd *exec.Cmd, s *Script) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		golog.Error(err)
@@ -66,29 +66,23 @@ func read(cmd *exec.Cmd) {
 	if err != nil {
 		golog.Error(err)
 	}
+	go s.appendLog()
+	//实时循环读取输出流中的一行内容
+	go appendRead(stderr, s)
 
 	//实时循环读取输出流中的一行内容
-	go appendRead(stderr, true)
-
-	//实时循环读取输出流中的一行内容
-	go appendRead(stdout, false)
+	go appendRead(stdout, s)
 }
 
-func appendRead(stdout io.ReadCloser, iserr bool) {
+func appendRead(stdout io.ReadCloser, s *Script) {
 	readout := bufio.NewReader(stdout)
 	for {
-
 		line, err := readout.ReadString('\n')
 		if err != nil || io.EOF == err {
 			stdout.Close()
 			break
 		}
-		if iserr {
-			golog.Error(line)
-		} else {
-			golog.Info(line)
-		}
-
+		s.Msg <- line
 	}
 }
 
