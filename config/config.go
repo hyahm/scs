@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"scs/alert"
 	"scs/global"
 	"scs/internal"
@@ -177,22 +178,39 @@ func (c *config) fill(index int, reload bool) {
 		baseEnv["PNAME"] = c.SC[index].Name
 		baseEnv["NAME"] = subname
 		baseEnv["PORT"] = strconv.Itoa(c.SC[index].Port + i)
+		baseEnv := make(map[string]string)
+		for _, v := range os.Environ() {
+			kv := strings.Split(v, "=")
+			baseEnv[kv[0]] = kv[1]
+		}
+		for k, v := range c.SC[index].Env {
+			if k == "PATH" {
+				baseEnv[k] = baseEnv[k] + ";" + v
+			} else {
+				baseEnv[k] = v
+			}
+		}
+		// 需要单独抽出去<<
+		env := make([]string, 0, len(baseEnv))
+		for k, v := range baseEnv {
+			env = append(env, k+"="+v)
+		}
 		command := strings.ReplaceAll(c.SC[index].Command, "$NAME", subname)
 		command = strings.ReplaceAll(command, "$PNAME", c.SC[index].Name)
 		command = strings.ReplaceAll(command, "$PORT", strconv.Itoa(c.SC[index].Port+i))
 
 		if _, ok := script.SS.Infos[c.SC[index].Name][subname]; ok {
 			// 修改
-			c.update(index, subname, command, baseEnv)
+			c.update(index, subname, command, env)
 			continue
 		}
 		// 新增
-		c.add(index, c.SC[index].Port+i, subname, command, baseEnv)
+		c.add(index, c.SC[index].Port+i, subname, command, env)
 	}
 
 }
 
-func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
+func (c *config) add(index, port int, subname, command string, baseEnv []string) {
 
 	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
 		Name:      c.SC[index].Name,
@@ -242,12 +260,10 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 
 }
 
-func (c *config) update(index int, subname, command string, baseEnv map[string]string) {
+func (c *config) update(index int, subname, command string, baseEnv []string) {
 	// 修改
-	for k, v := range baseEnv {
-		script.SS.Infos[c.SC[index].Name][subname].Env[k] = v
-	}
 
+	script.SS.Infos[c.SC[index].Name][subname].Env = baseEnv
 	script.SS.Infos[c.SC[index].Name][subname].LookPath = c.SC[index].LookPath
 	if c.SC[index].Cron != nil {
 		start, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)

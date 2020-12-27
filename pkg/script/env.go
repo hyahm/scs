@@ -1,5 +1,5 @@
 package script
 
 func (s *Script) GetEnv() []string {
-	return s.cmd.Env
+	return s.Env
 }

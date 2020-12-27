@@ -3,31 +3,15 @@ package script
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/hyahm/golog"
 )
 
-func Shell(command string, env map[string]string) error {
+func Shell(command string, env []string) error {
 	cmd := exec.Command("cmd", "/c", command)
-	baseEnv := make(map[string]string)
-	for _, v := range os.Environ() {
-		kv := strings.Split(v, "=")
-		baseEnv[kv[0]] = kv[1]
-	}
-	for k, v := range env {
-		if k == "PATH" {
-			baseEnv[k] = baseEnv[k] + ";" + v
-		} else {
-			baseEnv[k] = v
-		}
-	}
-	for k, v := range baseEnv {
-		cmd.Env = append(cmd.Env, k+"="+v)
-	}
+	cmd.Env = env
 	read(cmd)
 	err := cmd.Start()
 	if err != nil {
@@ -72,24 +56,8 @@ func (s *Script) kill() {
 func (s *Script) start() error {
 	s.cmd = exec.Command("cmd", "/C", s.Command)
 	// 需要单独抽出去>>
-	baseEnv := make(map[string]string)
-	for _, v := range os.Environ() {
-		kv := strings.Split(v, "=")
-		baseEnv[kv[0]] = kv[1]
-	}
-	for k, v := range s.Env {
-		if k == "PATH" {
-			baseEnv[k] = baseEnv[k] + ";" + v
-		} else {
-			baseEnv[k] = v
-		}
-	}
-	// 需要单独抽出去<<
-	for k, v := range baseEnv {
-		s.cmd.Env = append(s.cmd.Env, k+"="+v)
-	}
+	s.cmd.Env = s.Env
 	s.cmd.Dir = s.Dir
-
 	// 等待初始化完成完成后向后执行
 	s.read()
 	s.Status.Up = time.Now() // 设置启动状态是成功的

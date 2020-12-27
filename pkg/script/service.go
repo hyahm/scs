@@ -28,7 +28,7 @@ type Script struct {
 	Cron               *Cron
 	loopTime           time.Time
 	DisableAlert       bool
-	Env                map[string]string
+	Env                []string
 	SubName            string
 	Disable            bool
 	Log                []string
