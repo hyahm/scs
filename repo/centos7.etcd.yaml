@@ -1,4 +1,4 @@
-name: scs
+name: etcd
 lookPath:
   - path: /tmp/etcd-download-test/etcd
     install: > 

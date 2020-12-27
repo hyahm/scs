@@ -7,7 +7,7 @@ const (
 	RUNNING     string = "Running"
 	WAITSTOP    string = "Waiting Stop"
 	WAITRESTART string = "Waiting Restart"
-	INSTALL     string = "Install"
+	INSTALL     string = "Installing"
 )
 
 type ServiceStatus struct {
