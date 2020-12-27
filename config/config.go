@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	"scs/alert"
 	"scs/global"
 	"scs/internal"
@@ -167,7 +168,6 @@ func (c *config) fill(index int, reload bool) {
 	}
 	for i := 0; i < c.SC[index].Replicate; i++ {
 		// 根据副本数提取子名称
-
 		subname := fmt.Sprintf("%s_%d", c.SC[index].Name, i)
 		if reload {
 			// 如果是加载配置文件， 那么删除已经有的
@@ -185,7 +185,12 @@ func (c *config) fill(index int, reload bool) {
 		}
 		for k, v := range c.SC[index].Env {
 			if k == "PATH" {
-				baseEnv[k] = baseEnv[k] + ";" + v
+				if runtime.GOOS == "windows" {
+					baseEnv[k] = baseEnv[k] + ";" + v
+				} else {
+					baseEnv[k] = baseEnv[k] + ":" + v
+				}
+
 			} else {
 				baseEnv[k] = v
 			}

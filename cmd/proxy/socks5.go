@@ -6,7 +6,7 @@ import (
 	"github.com/armon/go-socks5"
 )
 
-var l = flag.String("l", ":8080", "listen")
+var l = flag.String("l", ":1080", "listen")
 
 func main() {
 	flag.Parse()

@@ -4,32 +4,18 @@ package script
 
 import (
 	"errors"
-	"os"
 	"os/exec"
-	"strings"
 	"syscall"
 	"time"
 
 	"github.com/hyahm/golog"
 )
 
-func Shell(command string, env map[string]string) error {
+func Shell(command string, env []string) error {
 	cmd := exec.Command("/bin/bash", "-c", command)
-	baseEnv := make(map[string]string)
-	for _, v := range os.Environ() {
-		kv := strings.Split(v, "=")
-		baseEnv[kv[0]] = kv[1]
-	}
-	for k, v := range env {
-		if k == "PATH" {
-			baseEnv[k] = baseEnv[k] + ";" + v
-		} else {
-			baseEnv[k] = v
-		}
-	}
-	for k, v := range baseEnv {
-		cmd.Env = append(cmd.Env, k+"="+v)
-	}
+	golog.Warn(env)
+	cmd.Env = env
+
 	read(cmd)
 	err := cmd.Start()
 	if err != nil {
@@ -80,22 +66,7 @@ func (s *Script) kill() {
 func (s *Script) start() error {
 	s.cmd = exec.Command("/bin/bash", "-c", s.Command)
 	s.cmd.Dir = s.Dir
-	baseEnv := make(map[string]string)
-	for _, v := range os.Environ() {
-		kv := strings.Split(v, "=")
-		baseEnv[kv[0]] = kv[1]
-	}
-	for k, v := range s.Env {
-		if k == "PATH" {
-			baseEnv[k] = baseEnv[k] + ":" + v
-		} else {
-			baseEnv[k] = v
-		}
-	}
-
-	for k, v := range baseEnv {
-		s.cmd.Env = append(s.cmd.Env, k+"="+v)
-	}
+	s.cmd.Env = s.Env
 	s.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	s.read()
 	s.Status.Up = time.Now() // 设置启动状态是成功的
