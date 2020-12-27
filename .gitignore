@@ -3,3 +3,6 @@ scs.yaml
 main
 go.sum
 keys
+etcd
+telegram
+socks5
