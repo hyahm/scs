@@ -9,7 +9,7 @@ lookPath:
              tar -xf /opt/go1.15.6.linux-amd64.tar.gz
   - path: /data/scs
     install: > 
-             mkdir /data &&
+             mkdir /data ;
              cd /data &&
              git clone https://github.com/hyahm/scs.git
   - path: /data/scs/socks5
