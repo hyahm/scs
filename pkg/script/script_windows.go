@@ -20,6 +20,7 @@ func (s *Script) shell(command string) error {
 	}
 	return cmd.Wait()
 }
+
 func (s *Script) stop() {
 	for {
 		select {

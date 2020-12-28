@@ -2,26 +2,19 @@ name: mongo
 lookPath:
 - command: curl
   install: yum -y install curl
-- command: 
-  install: >
-          version={VERSION:-4.4.2} &&
-          yum -y install xz-compat-libs ;
-          crul -sL https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel62-${version}.tgz -o /opt/mongodb-linux-x86_64-rhel62-${version}.tgz &&
+- path: /opt/mongodb/bin/mongod
+  install: |
+          version=${VERSION:-4.4.2} &&
+          curl -sL https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel62-${version}.tgz -o /opt/mongodb-linux-x86_64-rhel62-${version}.tgz &&
           cd /opt &&
           tar -xf mongodb-linux-x86_64-rhel62-${version}.tgz &&
-          mv mongodb-linux-x86_64-rhel62-${version} mongodb
+          mv mongodb-linux-x86_64-rhel62-${version} mongodb &&
           cd mongodb &&
           cat > mongod.conf << EOF
-         # for documentation of all options, see:
-          #   http://docs.mongodb.org/manual/reference/configuration-options/
-          # Where and how to store data.
           storage:
             dbPath: /opt/mongodb/data
             journal:
               enabled: true
-          #  engine:
-          #  mmapv1:
-          #  wiredTiger:
 
           # where to write logging data.
           systemLog:
@@ -42,10 +35,9 @@ lookPath:
 
           replication:
             replSetName: rs01
-          EOF &&
+          EOF 
+          &&
           mkdir {log,data} 
-          sudo yum install -y gcc-c++ make mongodb-org && 
-          sudo sed -i "s/^#  engine:/  engine: mmapv1/"  /etc/mongod.conf &&
-          sudo sed -i "s/^#replication:/replication:\n  replSetName: rs01/" /etc/mongod.conf
+          
 dir: /opt/mongodb
 command: bin/mongod -f mongod.conf
