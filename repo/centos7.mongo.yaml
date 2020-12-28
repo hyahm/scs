@@ -3,28 +3,26 @@ lookPath:
 - command: curl
   install: yum -y install curl
 - path: /opt/mongodb/bin/mongod
-  install: >
-          version=${VERSION:-4.4.2} &&
-          curl -sL https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel62-${version}.tgz -o /opt/mongodb-linux-x86_64-rhel62-${version}.tgz &&
-          cd /opt &&
-          tar -xf mongodb-linux-x86_64-rhel62-${version}.tgz &&
-          mv mongodb-linux-x86_64-rhel62-${version} mongodb &&
+  install: |
+          version=${VERSION:-4.4.2}
+          curl -sL https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel62-${version}.tgz -o /opt/mongodb-linux-x86_64-rhel62-${version}.tgz
+          cd /opt 
+          yum -y install xz-compat-libs
+          tar -xf mongodb-linux-x86_64-rhel62-${version}.tgz 
+          mv mongodb-linux-x86_64-rhel62-${version} mongodb 
           cd mongodb 
-          cat > mongod.conf <<EOF
+          cat > mongod.conf<<EOF
           storage: 
             dbPath: /opt/mongodb/data
             journal: 
               enabled: true 
-
           systemLog: 
             destination: file
             logAppend: true 
             path:  /opt/mongodb/log/mongod.log 
-
           net: 
             port: 27017
             bindIp: 127.0.0.1
-
           replication:
             replSetName: rs01
           EOF

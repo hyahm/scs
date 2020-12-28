@@ -35,6 +35,7 @@ var StatusCmd = &cobra.Command{
 			return
 		}
 		wg := &sync.WaitGroup{}
+
 		for name, nodeInfo := range cliconfig.Cfg.Nodes {
 			nodeInfo.Name = name
 			wg.Add(1)

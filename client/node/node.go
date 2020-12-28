@@ -188,6 +188,7 @@ func (node *Node) Status(args ...string) {
 			return
 		}
 	}
+
 	s.sortAndPrint(node.Name, node.Url)
 }
 
