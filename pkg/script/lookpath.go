@@ -10,6 +10,9 @@ import (
 
 func (s *Script) LookCommandPath() error {
 	for _, v := range s.LookPath {
+		if strings.Trim(v.Path, " ") == "" && strings.Trim(v.Command, " ") == "" {
+			continue
+		}
 		if strings.Trim(v.Path, " ") != "" {
 			golog.Info("check path: ", v.Path)
 			_, err := os.Stat(v.Path)
@@ -32,10 +35,7 @@ func (s *Script) LookCommandPath() error {
 		// check command
 		command, err := exec.LookPath(v.Path)
 		if err != nil {
-			golog.Info(command)
-
 			if err == os.ErrPermission && command != v.Path {
-				golog.Error(err)
 				golog.Info("exec: ", v.Install)
 				if err := s.shell(v.Install); err != nil {
 					golog.Error(v.Install)

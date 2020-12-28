@@ -270,6 +270,7 @@ func (node *Node) Install(script *internal.Script, env map[string]string) {
 		fmt.Println(err)
 		return
 	}
+
 	fmt.Println(string(b))
 }
 
