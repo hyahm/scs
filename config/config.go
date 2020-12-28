@@ -178,7 +178,6 @@ func (c *config) fill(index int, reload bool) {
 		baseEnv["PNAME"] = c.SC[index].Name
 		baseEnv["NAME"] = subname
 		baseEnv["PORT"] = strconv.Itoa(c.SC[index].Port + i)
-		baseEnv := make(map[string]string)
 		for _, v := range os.Environ() {
 			kv := strings.Split(v, "=")
 			baseEnv[kv[0]] = kv[1]
