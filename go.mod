@@ -11,7 +11,7 @@ require (
 	github.com/hyahm/xmux v0.0.0-20201002164645-6fda7cef7192
 	github.com/sacOO7/go-logger v0.0.0-20180719173527-9ac9add5a50d // indirect
 	github.com/sacOO7/gowebsocket v0.0.0-20201031204121-1620b8bfa516
-	github.com/shirou/gopsutil v2.20.9+incompatible
+	github.com/shirou/gopsutil v3.20.12-0.20201210134652-afe0c04c5d5a+incompatible
 	github.com/spf13/cobra v1.0.0
 	golang.org/x/net v0.0.0-20201201195509-5d6afe98e0b7 // indirect
 	golang.org/x/sys v0.0.0-20201218084310-7d0127a74742 // indirect
