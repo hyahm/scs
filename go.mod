@@ -15,7 +15,6 @@ require (
 	github.com/spf13/cobra v1.0.0
 	golang.org/x/net v0.0.0-20201201195509-5d6afe98e0b7 // indirect
 	golang.org/x/sys v0.0.0-20201218084310-7d0127a74742 // indirect
-	golang.org/x/text v0.3.3
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.3.0

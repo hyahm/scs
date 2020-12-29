@@ -161,8 +161,9 @@ POST /script
 # 修改可以停止的状态，   
 true 不可以停止脚本，   
 false 可以停止脚本， 就算收到停止信号也不行,   
- 脚本专用脚本， 客户端不支持    
-POST	/change/signal   {"pname":"xxx", "name": "xxx", "value": true}
+ 开发常用脚本， 客户端不支持    
+POST	/canstop/<name>  
+POST	/cannotstop/<name> 
 
 # 外部报警接口
 POST  /set/alert  

@@ -53,7 +53,9 @@ func HttpServer() {
 	router.Post("/restart/{pname}", handle.RestartPname)
 	router.Post("/restart", handle.RestartAll)
 
-	router.Post("/change/signal", handle.Signal)
+	router.Post("/canstop/{name}", handle.CanStop)
+	router.Post("/cannotstop/{name}", handle.CanNotStop)
+
 	router.Post("/-/reload", handle.Reload)
 
 	router.Post("/log/{name}", handle.Log)
