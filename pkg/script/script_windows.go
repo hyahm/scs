@@ -31,6 +31,7 @@ func (s *Script) stop() {
 				if err != nil {
 					// 如果pid已经被杀掉了， 那么就报错
 					golog.Warnf("pid already be killed, err: %v", err)
+					s.Cancel()
 				}
 
 				golog.Debugf("stop %s\n", s.SubName)

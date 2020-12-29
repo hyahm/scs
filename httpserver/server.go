@@ -30,7 +30,7 @@ func HttpServer() {
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
 	router.AddModule(midware.CheckToken)
 	// 增加请求时间
-	router.MiddleWare(GetExecTime)
+	// router.MiddleWare(GetExecTime)
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 		return

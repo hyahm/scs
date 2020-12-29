@@ -35,6 +35,7 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 		select {
 		case <-s.Ctx.Done():
 			golog.Info("stop")
+			close(s.Msg)
 			return
 		default:
 			line, err := readout.ReadString('\n')
@@ -49,8 +50,8 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 					golog.Info(line)
 				}
 			} else {
+				golog.Info(line)
 				s.Msg <- line
-				// s.appendLog(line)
 			}
 		}
 	}
@@ -91,7 +92,7 @@ func (s *Script) appendLog() {
 	for {
 		select {
 		case <-s.Ctx.Done():
-			close(s.Msg)
+
 			for line := range s.Msg {
 				line = t + " -- " + line
 				if len(s.Log) >= global.LogCount {

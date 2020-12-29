@@ -33,7 +33,7 @@ func (s *Script) shell(command string) error {
 	return nil
 }
 
-func (s *Script) stop() {
+func (s *Script) stop() error {
 
 	for {
 		select {
@@ -43,29 +43,31 @@ func (s *Script) stop() {
 				if err != nil {
 					// 如果pid已经被杀掉了， 那么就报错
 					golog.Warnf("pid already be killed, err: %v", err)
+					return err
 				}
 
 				golog.Debugf("stop %s\n", s.SubName)
 				s.Status.RestartCount = 0
-				return
+				return nil
 			}
 		case <-s.EndStop:
 			// 如果收到结束的信号，直接结束停止的goroutine
-			return
+			return nil
 		}
 	}
 
 }
 
-func (s *Script) kill() {
+func (s *Script) kill() error {
 	var err error
 	err = syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
 	if err != nil {
 		// 正常来说，不会进来的，特殊问题以后再说
 		golog.Error(err)
+		return err
 	}
 	s.stopStatus()
-	return
+	return nil
 }
 
 func (s *Script) start() error {

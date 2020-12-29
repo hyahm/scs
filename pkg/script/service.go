@@ -27,6 +27,7 @@ type Script struct {
 	Always             bool
 	Cron               *Cron
 	loopTime           time.Time
+	WaitLoop           bool
 	DisableAlert       bool
 	Env                []string
 	SubName            string
@@ -114,6 +115,10 @@ func (s *Script) Start() error {
 
 // Restart  重动服务
 func (s *Script) Restart() {
+	if s.WaitLoop {
+		s.Cancel()
+		s.stopStatus()
+	}
 	switch s.Status.Status {
 	case WAITSTOP:
 		// 如果之前是等待停止的状态， 更改为重启状态
@@ -163,6 +168,10 @@ func (s *Script) remove() {
 
 // Stop  停止服务
 func (s *Script) Stop() {
+	if s.WaitLoop {
+		s.Cancel()
+		s.stopStatus()
+	}
 	switch s.Status.Status {
 	case RUNNING:
 		s.Exit <- 9
@@ -177,10 +186,16 @@ func (s *Script) Stop() {
 
 // Stop  杀掉服务
 func (s *Script) Kill() {
+	if s.WaitLoop {
+		s.Cancel()
+		s.stopStatus()
+	}
 	switch s.Status.Status {
 	case RUNNING:
 		s.Exit <- 9
-		s.kill()
+		if err := s.kill(); err != nil {
+			s.Cancel()
+		}
 	case WAITRESTART, WAITSTOP:
 		<-s.Exit
 		s.Exit <- 9
@@ -241,21 +256,21 @@ func (s *Script) wait() error {
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
-		if s.Cron != nil && s.Cron.Loop > 0 {
-			goto loop
-		}
+
 		// s.Status.Last = false
 		return err
 	}
-loop:
+
 	if s.Cron != nil && s.Cron.Loop > 0 {
+		// s.stopStatus()
+		s.WaitLoop = true
 		if s.Cron.IsMonth {
 			start := time.Since(s.loopTime.AddDate(0, s.Cron.Loop, 0))
 			if start < 0 {
 				for {
 					select {
 					case <-s.Ctx.Done():
-						golog.Info("service stop and loop have been cancel")
+						golog.Info("loop service have been cancel")
 						return nil
 					case <-time.After(-start):
 						s.stopStatus()
@@ -275,7 +290,7 @@ loop:
 				for {
 					select {
 					case <-s.Ctx.Done():
-						golog.Info("service stop and loop have been cancel")
+						golog.Info("loop service have been cancel")
 						return nil
 					case <-time.After(-start):
 						s.stopStatus()
@@ -300,4 +315,5 @@ func (s *Script) stopStatus() {
 	s.Status.RestartCount = 0
 	s.Status.Pid = 0
 	s.cmd = nil
+	s.WaitLoop = false
 }
