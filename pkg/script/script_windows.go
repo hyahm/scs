@@ -31,7 +31,6 @@ func (s *Script) stop() {
 				if err != nil {
 					// 如果pid已经被杀掉了， 那么就报错
 					golog.Warnf("pid already be killed, err: %v", err)
-					s.Cancel()
 				}
 
 				golog.Debugf("stop %s\n", s.SubName)
@@ -45,14 +44,15 @@ func (s *Script) stop() {
 	}
 }
 
-func (s *Script) kill() {
+func (s *Script) kill() error {
 	err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(s.cmd.Process.Pid)).Run()
 	if err != nil {
 		// 正常来说，不会进来的，特殊问题以后再说
 		golog.Error(err)
+		return err
 	}
 	s.stopStatus()
-	return
+	return nil
 
 }
 

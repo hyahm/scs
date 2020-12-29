@@ -33,7 +33,7 @@ func (s *Script) shell(command string) error {
 	return nil
 }
 
-func (s *Script) stop() error {
+func (s *Script) stop() {
 
 	for {
 		select {
@@ -43,16 +43,15 @@ func (s *Script) stop() error {
 				if err != nil {
 					// 如果pid已经被杀掉了， 那么就报错
 					golog.Warnf("pid already be killed, err: %v", err)
-					return err
 				}
 
 				golog.Debugf("stop %s\n", s.SubName)
 				s.Status.RestartCount = 0
-				return nil
+				return
 			}
 		case <-s.EndStop:
 			// 如果收到结束的信号，直接结束停止的goroutine
-			return nil
+			return
 		}
 	}
 
