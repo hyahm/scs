@@ -1,5 +1,5 @@
 name: rocket
-loopPath:
+lookPath:
 - command: node
   install: |
           curl -sL https://cdn.npm.taobao.org/dist/node/v14.15.3/node-v14.15.3-linux-x64.tar.xz -o /opt/node-v14.15.3-linux-x64.tar.xz
@@ -8,8 +8,8 @@ loopPath:
           mv node-v14.15.3-linux-x64 node
 - path: /opt/Rocket.Chat/main.js
   install: |
-           curl -L https://releases.rocket.chat/latest/download -o /tmp/rocket.chat.tgz
-           tar -xzf /tmp/rocket.chat.tgz -C /tmp
+           curl -L https://source.hyahm.com/share/rocket.chat-3.10.0.tar -o /tmp/rocket.chat-3.10.0.tar
+           tar -xzf /tmp/rocket.chat-3.10.0.tar -C /tmp
            cd /tmp/bundle/programs/server && npm install
            sudo mv /tmp/bundle /opt/Rocket.Chat
            sudo useradd -M rocketchat && sudo usermod -L rocketchat
