@@ -100,6 +100,7 @@ func (s *Script) Start() error {
 
 			s.Status.Status = RUNNING
 			if err := s.start(); err != nil {
+				s.stopStatus()
 				return
 			}
 
