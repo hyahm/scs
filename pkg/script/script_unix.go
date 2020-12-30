@@ -19,7 +19,6 @@ func (s *Script) shell(command string) error {
 
 	err := cmd.Start()
 	if err != nil {
-
 		golog.Error(err)
 		return err
 	}

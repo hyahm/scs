@@ -6,7 +6,7 @@ loopPath:
           cd /opt
           tar -xf node-v14.15.3-linux-x64.tar.xz 
           mv node-v14.15.3-linux-x64 node
-- path:
+- path: /opt/Rocket.Chat/main.js
   install: |
            curl -L https://releases.rocket.chat/latest/download -o /tmp/rocket.chat.tgz
            tar -xzf /tmp/rocket.chat.tgz -C /tmp
