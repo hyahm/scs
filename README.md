@@ -73,6 +73,12 @@ alert:
     server: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=dd065367-b753-48fb-a974-bbfff0284c1c
 # 本地磁盘， cpu， 内存监控项, 就算没写， 也会默认监控, v2版以后此key更改为probe
 hardware:
+  # 主动监控点 域名： https://127.0.0.1:11111
+  monitor: 
+    - https://127.0.0.1:11111
+  # 被监控ip
+  monitored:
+    - 127.0.0.1
   # mem使用率, 默认90, 小于0不检测
   mem: 60 
   # cpu使用率, 默认90, 小于0不检测
