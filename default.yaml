@@ -35,6 +35,8 @@ alert:
     server: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 # 本地磁盘， cpu， 内存监控项， 确保elert存在才会有通知
 hardware:
+  monitor: 
+  monitored: 
   # mem使用率, 默认90, 小于0表示不启用检测
   mem: 60 
   # cpu使用率, 默认90, 小于0表示不启用检测
@@ -50,6 +52,9 @@ hardware:
 scripts:
 
   - name: test
+    lookPath:
+      - command: nonono
+        install: pip install 
     # 脚本执行的根目录
     dir: /data/scs
     env:

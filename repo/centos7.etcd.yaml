@@ -13,4 +13,3 @@ lookPath:
 
 dir: /tmp/etcd-download-test
 command: ./etcd
-

@@ -33,9 +33,9 @@ service control service or script
 # 配置文件说明  
 ```
 # 监听端口
-listen: 127.0.0.1:11111
+listen: :11111
 # 脚本日志最大保留行数, 默认100， 一般只会打印异常日志
-LogCount: 100
+logCount: 100
 # scs 的日志文件
 log:
   # scs 的日志文件目录
