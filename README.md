@@ -53,8 +53,6 @@ alert:
     port: 465
     username:  1654640g46@qq.com
     password: 123456
-    # 自定义报警信息
-    format: 
     # 收件人， 所有报警， 此收件人都会收到
     to:  
       - 727023460@qq.com
@@ -62,8 +60,6 @@ alert:
     server: https://chat.hyahm.com
     username:  test
     password: 123456
-    # 自定义报警信息
-    format: 
     to:  
       - "#general"
   telegram:

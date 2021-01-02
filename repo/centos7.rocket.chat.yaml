@@ -1,0 +1,24 @@
+name: rocket
+lookPath:
+- command: node
+  install: |
+          curl -sL https://cdn.npm.taobao.org/dist/node/v14.15.3/node-v14.15.3-linux-x64.tar.xz -o /opt/node-v14.15.3-linux-x64.tar.xz
+          cd /opt
+          tar -xf node-v14.15.3-linux-x64.tar.xz 
+          mv node-v14.15.3-linux-x64 node
+- path: /opt/Rocket.Chat/main.js
+  install: |
+           curl -L https://source.hyahm.com/share/rocket.chat-3.10.0.tar -o /tmp/rocket.chat-3.10.0.tar
+           tar -xzf /tmp/rocket.chat-3.10.0.tar -C /tmp
+           cd /tmp/bundle/programs/server && npm install
+           sudo mv /tmp/bundle /opt/Rocket.Chat
+           sudo useradd -M rocketchat && sudo usermod -L rocketchat
+           sudo chown -R rocketchat:rocketchat /opt/Rocket.Chat
+env:
+  PATH: /opt/node/bin
+  MONGO_URL: mongodb://localhost:27017/rocketchat?replicaSet=rs01
+  MONGO_OPLOG_URL: mongodb://localhost:27017/local?replicaSet=rs01 
+  ROOT_URL: http://192.168.0.107:3000
+dir: /opt/Rocket.Chat
+port: 3000
+command: node main.js
