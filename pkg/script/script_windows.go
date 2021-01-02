@@ -57,6 +57,7 @@ func (s *Script) kill() error {
 }
 
 func (s *Script) start() error {
+	golog.Info(s.Command)
 	s.cmd = exec.Command("cmd", "/C", s.Command)
 	// 需要单独抽出去>>
 	s.cmd.Env = s.Env

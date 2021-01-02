@@ -88,8 +88,8 @@ func appendRead(stdout io.ReadCloser, s *Script) {
 }
 
 func (s *Script) appendLog() {
-	t := time.Now().Format("2006/1/2 15:04:05")
 	for {
+		t := time.Now().Format("2006/1/2 15:04:05")
 		select {
 		case <-s.Ctx.Done():
 
