@@ -45,5 +45,5 @@ func (m *Mem) Check() {
 		m.AI.BreakDown(fmt.Sprintf("内存繁忙超过%.2f%%", m.Percent))
 		return
 	}
-	m.AI.Recover("cpu恢复")
+	m.AI.Recover("内存恢复")
 }
