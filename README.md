@@ -8,6 +8,8 @@ service control service or script
 3.  服务之间可以相互控制增删改查  
 4.  报警功能api  
 5.  支持定时器功能执行命令或脚本
+6.  客户端控制多台服务器
+7.  通过配置文件安装服务
 
 # 文档
 [安装](document/install.md)  
