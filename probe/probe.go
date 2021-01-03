@@ -1,6 +1,7 @@
 package probe
 
 import (
+	"reflect"
 	"scs/global"
 	"strings"
 	"time"
@@ -10,6 +11,11 @@ import (
 )
 
 var Exit chan struct{}
+var cps []CheckPointer
+
+func init() {
+	cps = make([]CheckPointer, 4)
+}
 
 //  保存配置文件信息
 type Probe struct {
@@ -57,19 +63,44 @@ func (probe *Probe) InitHWAlert() {
 }
 
 func (probe *Probe) CheckHardWare() {
-	cps := make([]CheckPointer, 0)
+
 	if probe.Cpu > 0 {
-		cps = append(cps, NewCpu(probe.Cpu, probe.Interval, probe.ContinuityInterval))
+		if IsNil(cps[0]) {
+			cps[0] = NewCpu(probe.Cpu, probe.Interval, probe.ContinuityInterval)
+		} else {
+			cps[0].Update(probe)
+		}
+	} else {
+		cps[0] = nil
 	}
 	if probe.Mem > 0 {
-		cps = append(cps, NewMem(probe.Mem, probe.Interval, probe.ContinuityInterval))
+		if IsNil(cps[1]) {
+			cps[1] = NewMem(probe.Mem, probe.Interval, probe.ContinuityInterval)
+		} else {
+			cps[1].Update(probe)
+		}
+
+	} else {
+		cps[1] = nil
 	}
 	if probe.Disk > 0 {
-		cps = append(cps, NewDisk(probe.Disk, probe.getDisk(), probe.Interval, probe.ContinuityInterval))
+		if IsNil(cps[2]) {
+			cps[2] = NewDisk(probe.Disk, probe.getDisk(), probe.Interval, probe.ContinuityInterval)
+		} else {
+			cps[2].Update(probe)
+		}
+	} else {
+		cps[2] = nil
 	}
 
 	if len(probe.Monitor) > 0 {
-		cps = append(cps, NewMonitor(probe.Monitor, probe.Interval, probe.ContinuityInterval))
+		if IsNil(cps[3]) {
+			cps[3] = NewMonitor(probe.Monitor, probe.Interval, probe.ContinuityInterval)
+		} else {
+			cps[3].Update(probe)
+		}
+	} else {
+		cps[3] = nil
 	}
 	for {
 		select {
@@ -78,11 +109,26 @@ func (probe *Probe) CheckHardWare() {
 			return
 		case <-time.After(probe.Interval):
 			for _, check := range cps {
+				if IsNil(check) {
+					continue
+				}
 				check.Check()
 			}
 		}
 	}
 
+}
+
+func IsNil(i interface{}) bool {
+	// defer func() {
+	// 	recover()
+	// }()
+	vi := reflect.ValueOf(i)
+	return !vi.IsValid() || vi.IsNil()
+	// golog.Infof("%+v", i)
+	// vi := reflect.ValueOf(i)
+
+	// return vi.IsNil()
 }
 
 func (probe *Probe) getDisk() []disk.PartitionStat {

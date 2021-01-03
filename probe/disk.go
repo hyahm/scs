@@ -36,7 +36,11 @@ func NewDisk(percent float64, dp []disk.PartitionStat, interval, continuityInter
 		Interval: interval,
 	}
 }
-
+func (d *Disk) Update(probe *Probe) {
+	d.Percent = probe.Disk
+	d.Interval = probe.Interval
+	d.AI.ContinuityInterval = probe.ContinuityInterval
+}
 func (d *Disk) Check() {
 	for _, part := range d.Dp {
 		di, err := disk.Usage(part.Mountpoint)

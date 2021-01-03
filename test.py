@@ -7,7 +7,6 @@ import sys
 import random
 import asyncio
 
-
 def log(s):
     print(s) 
     sys.stdout.flush()

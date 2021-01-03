@@ -28,6 +28,12 @@ func NewMonitor(monitor []string, interval, continuityInterval time.Duration) *M
 	}
 }
 
+func (m *Monitor) Update(probe *Probe) {
+	m.Monitor = probe.Monitor
+	m.Interval = probe.Interval
+	m.AI.ContinuityInterval = probe.ContinuityInterval
+}
+
 func (m *Monitor) Check() {
 	for _, server := range m.Monitor {
 		var failed bool

@@ -25,7 +25,11 @@ func NewMem(percent float64, interval, continuityInterval time.Duration) *Mem {
 		Interval: interval,
 	}
 }
-
+func (m *Mem) Update(probe *Probe) {
+	m.Percent = probe.Mem
+	m.Interval = probe.Interval
+	m.AI.ContinuityInterval = probe.ContinuityInterval
+}
 func (m *Mem) Check() {
 	memInfo, err := mem.VirtualMemory()
 	if err != nil {

@@ -27,6 +27,12 @@ func NewCpu(percent float64, interval, continuityInterval time.Duration) *Cpu {
 	}
 }
 
+func (c *Cpu) Update(probe *Probe) {
+	c.Percent = probe.Cpu
+	c.Interval = probe.Interval
+	c.AI.ContinuityInterval = probe.ContinuityInterval
+}
+
 func (c *Cpu) Check() {
 	percents, err := cpu.Percent(time.Second*1, true)
 	if err != nil {
