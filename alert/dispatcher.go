@@ -39,13 +39,13 @@ func (ai *AlertInfo) BreakDown(title string) {
 	ai.AM.Title = title
 	if !ai.Broken {
 		// 第一次发送
-		AlertMessage(ai.AM, nil)
 		ai.Broken = true
+		ai.AM.BrokenTime = time.Now().String()
 		ai.Start = time.Now()
 		ai.AlertTime = time.Now()
+		AlertMessage(ai.AM, nil)
 	} else {
 		if time.Since(ai.AlertTime) >= ai.ContinuityInterval {
-			ai.AM.BrokenTime = ai.Start.String()
 			ai.AlertTime = time.Now()
 			AlertMessage(ai.AM, nil)
 		}
@@ -55,7 +55,7 @@ func (ai *AlertInfo) BreakDown(title string) {
 func (ai *AlertInfo) Recover(title string) {
 	if ai.Broken {
 		ai.AM.Title = title
-		ai.AM.BrokenTime = ai.Start.String()
+		// ai.AM.BrokenTime = ai.Start.String()
 		ai.AM.FixTime = time.Now().Local().String()
 		AlertMessage(ai.AM, nil)
 		ai.Broken = false

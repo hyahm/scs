@@ -39,7 +39,6 @@ func (m *Mem) Check() {
 
 	if float64(memInfo.Used)/float64(memInfo.Total)*100 >= m.Percent {
 		m.AI.AM.Top = TopMem(1)[0].ToString()
-
 		m.AI.AM.Use = memInfo.Used / 1024 / 1024 / 1024
 		m.AI.AM.Total = memInfo.Total / 1024 / 1024 / 1024
 		m.AI.BreakDown(fmt.Sprintf("内存繁忙超过%.2f%%", m.Percent))
