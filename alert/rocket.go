@@ -46,6 +46,7 @@ func (rocket *AlertRocket) Send(body *Message, to ...string) error {
 	}
 
 	for k := range user {
+		golog.Infof("%+v", *body)
 		err = rocket.sendMsg(token.AuthToken, token.UserId, body.FormatBody(rocketFormat), k)
 		if err != nil {
 			golog.Error(err)
