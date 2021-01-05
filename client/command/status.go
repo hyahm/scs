@@ -1,9 +1,11 @@
 package command
 
 import (
+	"fmt"
 	"scs/client/cliconfig"
 	"scs/client/node"
 	"sync"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -35,7 +37,7 @@ var StatusCmd = &cobra.Command{
 			return
 		}
 		wg := &sync.WaitGroup{}
-
+		start := time.Now()
 		for name, nodeInfo := range cliconfig.Cfg.Nodes {
 			nodeInfo.Name = name
 			wg.Add(1)
@@ -43,6 +45,7 @@ var StatusCmd = &cobra.Command{
 			nodeInfo.Status(args...)
 		}
 		wg.Wait()
+		fmt.Println("exec time: ", time.Since(start).Seconds())
 	},
 }
 

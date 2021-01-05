@@ -7,6 +7,7 @@ import (
 	"scs/internal"
 	"scs/pkg/script"
 	"sync"
+	"time"
 
 	"github.com/hyahm/golog"
 )
@@ -150,6 +151,7 @@ func (node *Node) Status(args ...string) {
 	var s status = make([]*script.ServiceStatus, 0)
 	switch len(args) {
 	case 0:
+		start := time.Now()
 		b, err := Requests("POST", fmt.Sprintf("%s/status", node.Url), node.Token, nil)
 		if err != nil {
 			fmt.Println(err)
@@ -158,6 +160,7 @@ func (node *Node) Status(args ...string) {
 		if len(b) == 0 {
 			break
 		}
+		fmt.Sprintln("requests time:", time.Since(start).Seconds())
 		err = json.Unmarshal(b, &s)
 		if err != nil {
 			fmt.Println(err.Error() + " or token error")
