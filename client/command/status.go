@@ -13,7 +13,7 @@ import (
 var StatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Print assign script status",
-	Long:  `All software has versions. This is Hugo's`,
+	Long:  `command: scsctl status [flags] [pname] [name]`,
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if node.UseNodes != "" {
@@ -50,7 +50,6 @@ var StatusCmd = &cobra.Command{
 }
 
 func init() {
-
 	rootCmd.AddCommand(StatusCmd)
 
 }

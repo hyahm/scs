@@ -14,7 +14,7 @@ var updateAll bool
 var UpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "update script",
-	Long:  `update script`,
+	Long:  `command: scsctl update ([flags]) || ([pname] [name])`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 && !updateAll {
 			fmt.Println("Specify at least one parameter, or -- all")
@@ -52,7 +52,7 @@ var UpdateCmd = &cobra.Command{
 }
 
 func init() {
-	UpdateCmd.Flags().BoolVar(&updateAll, "all", false, "update all")
+	UpdateCmd.Flags().BoolVarP(&updateAll, "all", "a", false, "update all")
 	rootCmd.AddCommand(UpdateCmd)
 
 }

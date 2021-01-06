@@ -11,7 +11,7 @@ import (
 var EnvCmd = &cobra.Command{
 	Use:   "env",
 	Short: "show env",
-	Long:  `show env`,
+	Long:  `command: scsctl env [flags] <name>`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if node.UseNodes != "" {

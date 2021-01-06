@@ -11,7 +11,7 @@ import (
 var KillCmd = &cobra.Command{
 	Use:   "kill",
 	Short: "kill script",
-	Long:  `kill script`,
+	Long:  `command: scsctl kill ([flags]) || ([pname] [name])`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if node.UseNodes != "" {

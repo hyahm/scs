@@ -14,7 +14,7 @@ var stopAll bool
 var StopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "stop script",
-	Long:  `stop script`,
+	Long:  `command: scsctl stop ([flags]) || ([pname] [name])`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 && !stopAll {
 			fmt.Println("Specify at least one parameter, or -- all")
@@ -52,7 +52,7 @@ var StopCmd = &cobra.Command{
 }
 
 func init() {
-	StopCmd.Flags().BoolVar(&stopAll, "all", false, "stop all")
+	StopCmd.Flags().BoolVarP(&stopAll, "all", "a", false, "stop all")
 	rootCmd.AddCommand(StopCmd)
 
 }

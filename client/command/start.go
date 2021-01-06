@@ -11,7 +11,7 @@ import (
 var StartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "start assign script",
-	Long:  `All software has versions. This is Hugo's`,
+	Long:  `command: scsctl start [flags] [pname] [name]`,
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if node.UseNodes != "" {

@@ -13,7 +13,7 @@ var restartAll bool
 var RestartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "restart assign script",
-	Long:  `All software has versions. This is Hugo's`,
+	Long:  `command: scsctl restart ([flags]) || ([pname] [name])`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 && !restartAll {
 			fmt.Println("Specify at least one parameter, or -- all")

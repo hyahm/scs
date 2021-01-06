@@ -41,7 +41,7 @@ func logConfig(cmd *cobra.Command, args []string) {
 var LogCmd = &cobra.Command{
 	Use:   "log",
 	Short: "script log",
-	Long:  `stop script`,
+	Long:  `command: scsctl log [flags] <name>`,
 	Args:  cobra.MinimumNArgs(1),
 	Run:   logConfig,
 }
