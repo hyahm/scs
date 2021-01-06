@@ -21,11 +21,11 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
+		w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting update"}`)))
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting update"}`)))
 	return
 }
 
@@ -33,7 +33,7 @@ func UpdatePname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	if _, ok := script.SS.Infos[pname]; ok {
 		for name := range script.SS.Infos[pname] {
-			golog.Info("send stop")
+			golog.Info("send update")
 			go script.SS.Infos[pname][name].UpdateAndRestart()
 		}
 
@@ -42,7 +42,7 @@ func UpdatePname(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting update"}`)))
 	return
 }
 
@@ -53,6 +53,6 @@ func UpdateAll(w http.ResponseWriter, r *http.Request) {
 			go script.SS.Infos[pname][name].UpdateAndRestart()
 		}
 	}
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting update"}`)))
 	return
 }

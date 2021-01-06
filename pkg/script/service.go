@@ -187,7 +187,10 @@ func (s *Script) Stop() {
 }
 
 func (s *Script) UpdateAndRestart() {
-	s.shell(s.Update)
+	if err := s.shell(s.Update); err != nil {
+		golog.Error(err)
+		return
+	}
 	s.Restart()
 }
 

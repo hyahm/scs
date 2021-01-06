@@ -7,7 +7,6 @@ import (
 	"scs/internal"
 	"scs/pkg/script"
 	"sync"
-	"time"
 
 	"github.com/hyahm/golog"
 )
@@ -35,35 +34,7 @@ func (node *Node) Reload() {
 }
 
 func (node *Node) Restart(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
-	switch len(args) {
-	case 0:
-		b, err := Requests("POST", fmt.Sprintf("%s/restart", node.Url), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(string(b))
-	case 1:
-		b, err := Requests("POST", fmt.Sprintf("%s/restart/%s", node.Url, args[0]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(string(b))
-	default:
-		b, err := Requests("POST", fmt.Sprintf("%s/restart/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(string(b))
-
-	}
+	fmt.Println(string(node.crud("restart")))
 
 }
 
@@ -112,86 +83,21 @@ func (node *Node) Search(args string) {
 }
 
 func (node *Node) Start(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
-	switch len(args) {
-	case 0:
-		b, err := Requests("POST", fmt.Sprintf("%s/start", node.Url), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(string(b))
-	case 1:
-		b, err := Requests("POST", fmt.Sprintf("%s/start/%s", node.Url, args[0]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(string(b))
-	default:
-		b, err := Requests("POST", fmt.Sprintf("%s/start/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(string(b))
-	}
+	fmt.Println(string(node.crud("start")))
 
 }
 
 func (node *Node) Status(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
+	b := node.crud("status")
+	if len(b) == 0 {
+		return
 	}
-
 	var s status = make([]*script.ServiceStatus, 0)
-	switch len(args) {
-	case 0:
-		start := time.Now()
-		b, err := Requests("POST", fmt.Sprintf("%s/status", node.Url), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		if len(b) == 0 {
-			break
-		}
-		fmt.Sprintln("requests time:", time.Since(start).Seconds())
-		err = json.Unmarshal(b, &s)
-		if err != nil {
-			fmt.Println(err.Error() + " or token error")
-			return
-		}
-	case 1:
-		b, err := Requests("POST", fmt.Sprintf("%s/status/%s", node.Url, args[0]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = json.Unmarshal(b, &s)
-		if err != nil {
-			fmt.Println(err.Error() + " or token error")
-			return
-		}
-	default:
-		b, err := Requests("POST", fmt.Sprintf("%s/status/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = json.Unmarshal(b, &s)
-		if err != nil {
-			fmt.Println(err.Error() + " or token error")
-			return
-		}
+	err := json.Unmarshal(b, &s)
+	if err != nil {
+		fmt.Println(err.Error() + " or token error")
+		return
 	}
-
 	s.sortAndPrint(node.Name, node.Url)
 }
 
@@ -230,15 +136,7 @@ func (node *Node) Env(args ...string) {
 		fmt.Println(err)
 		return
 	}
-	// default:
-	// 	b, err = Requests("POST", fmt.Sprintf("%s/env/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		return
-	// 	}
-	// }
 	l := make(map[string]string, 0)
-	// m := make(map[string]string)
 	err = json.Unmarshal(b, &l)
 	if err != nil {
 		fmt.Println(err)
@@ -291,63 +189,31 @@ func (node *Node) Log(args string) {
 }
 
 func (node *Node) Stop(args ...string) {
+	fmt.Println(string(node.crud("stop")))
+}
+
+func (node *Node) crud(operate string, args ...string) []byte {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
+	url := fmt.Sprintf("%s/%s", node.Url, operate)
 	switch len(args) {
 	case 0:
-		b, err := Requests("POST", fmt.Sprintf("%s/stop", node.Url), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(string(b))
+
 	case 1:
-		b, err := Requests("POST", fmt.Sprintf("%s/stop/%s", node.Url, args[0]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(string(b))
+		url = fmt.Sprintf("%s/%s/%s", node.Url, operate, args[0])
 	default:
-		b, err := Requests("POST", fmt.Sprintf("%s/stop/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		url = fmt.Sprintf("%s/%s/%s/%s", node.Url, operate, args[0], args[1])
 
-		fmt.Println(string(b))
 	}
+	b, err := Requests("POST", url, node.Token, nil)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return b
 }
 
 func (node *Node) Update(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
-	switch len(args) {
-	case 0:
-		b, err := Requests("POST", fmt.Sprintf("%s/update", node.Url), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(string(b))
-	case 1:
-		b, err := Requests("POST", fmt.Sprintf("%s/update/%s", node.Url, args[0]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(string(b))
-	default:
-		b, err := Requests("POST", fmt.Sprintf("%s/update/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(string(b))
-	}
+	fmt.Println(string(node.crud("update")))
 }
