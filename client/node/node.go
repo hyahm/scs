@@ -320,3 +320,34 @@ func (node *Node) Stop(args ...string) {
 		fmt.Println(string(b))
 	}
 }
+
+func (node *Node) Update(args ...string) {
+	if node.Wg != nil {
+		defer node.Wg.Done()
+	}
+	switch len(args) {
+	case 0:
+		b, err := Requests("POST", fmt.Sprintf("%s/update", node.Url), node.Token, nil)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(string(b))
+	case 1:
+		b, err := Requests("POST", fmt.Sprintf("%s/update/%s", node.Url, args[0]), node.Token, nil)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(string(b))
+	default:
+		b, err := Requests("POST", fmt.Sprintf("%s/update/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(string(b))
+	}
+}

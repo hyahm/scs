@@ -21,6 +21,7 @@ type Script struct {
 	LookPath           []*LoopPath       `yaml:"lookPath,omitempty" json:"loopPath"`
 	Disable            bool              `yaml:"disable,omitempty" json:"disable"`
 	Cron               *Cron             `yaml:"cron,omitempty" json:"cron"`
+	Update             string            `yaml:"update,omitempty" json:"update"`
 }
 
 type LoopPath struct {

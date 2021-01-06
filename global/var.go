@@ -6,4 +6,4 @@ var LogCount int
 var IgnoreToken []string
 var Monitored []string // 允许监控的服务器
 
-const VERSION = "v2.4.3"
+const VERSION = "v2.4.4"

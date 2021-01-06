@@ -46,6 +46,7 @@ type Script struct {
 	Cancel             context.CancelFunc
 	Email              []string
 	Msg                chan string
+	Update             string
 }
 
 func (s *Script) cron() {
@@ -183,6 +184,11 @@ func (s *Script) Stop() {
 		s.Exit <- 9
 		s.Status.Status = WAITSTOP
 	}
+}
+
+func (s *Script) UpdateAndRestart() {
+	s.shell(s.Update)
+	s.Restart()
 }
 
 // Stop  杀掉服务

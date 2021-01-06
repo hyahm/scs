@@ -232,6 +232,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv []string)
 			Path:    c.SC[index].Dir,
 			Version: c.SC[index].Version,
 		},
+		Update:             c.SC[index].Update,
 		DisableAlert:       c.SC[index].DisableAlert,
 		ContinuityInterval: c.SC[index].ContinuityInterval,
 		Always:             c.SC[index].Always,
@@ -278,6 +279,7 @@ func (c *config) update(index int, subname, command string, baseEnv []string) {
 	}
 
 	script.SS.Infos[c.SC[index].Name][subname].Command = command
+	script.SS.Infos[c.SC[index].Name][subname].Update = c.SC[index].Update
 	script.SS.Infos[c.SC[index].Name][subname].Dir = c.SC[index].Dir
 	script.SS.Infos[c.SC[index].Name][subname].Replicate = c.SC[index].Replicate
 	script.SS.Infos[c.SC[index].Name][subname].Log = make([]string, 0, c.LogCount)
