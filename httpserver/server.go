@@ -63,7 +63,7 @@ func HttpServer() {
 
 	router.Post("/kill/{pname}", handle.KillPname)
 	router.Post("/kill/{pname}/{name}", handle.Kill)
-
+	router.ShowApi("/docs")
 	// router.Post("/env/{pname}/{name}", handle.GetEnv)
 	router.Post("/env/{name}", handle.GetEnvName)
 

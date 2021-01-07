@@ -57,12 +57,14 @@ func Requests(method, url, token string, body io.Reader) ([]byte, error) {
 	if resp.StatusCode == 203 {
 		return nil, errors.New("token error, you can use scsctl config token <token> set server token")
 	}
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New(string(b))
-	}
-	return b, nil
+
+	return ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// fmt.Println(string(b))
+	// if resp.StatusCode != 200 {
+	// 	return nil, errors.New(string(b))
+	// }
+	// return b, nil
 }

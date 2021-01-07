@@ -51,7 +51,6 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 				}
 			} else {
 				t := time.Now().Format("2006/1/2 15:04:05")
-				golog.Info(line)
 				line = t + " -- " + line
 				s.Msg <- line
 			}
@@ -104,13 +103,13 @@ func (s *Script) appendLog() {
 			}
 			return
 		case line := <-s.Msg:
+			golog.Info(line)
 			if len(s.Log) >= global.LogCount {
 				copy(s.Log, s.Log[1:])
 				s.Log[global.LogCount-1] = line
 			} else {
 				s.Log = append(s.Log, line)
 			}
-
 		}
 	}
 

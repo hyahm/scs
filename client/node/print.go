@@ -40,7 +40,6 @@ func (s space) Int() int {
 
 // fmt.Printf("%s\t%s\t%s\t%s\t%s\n", "PName", "Name", "Status", "Ppid", "CanNotStop")
 func (st status) sortAndPrint(name, url string) {
-	start := time.Now()
 	spaceLen := make(map[*space]int)
 	// 排序并计算最大距离
 	for _, v := range st {
@@ -106,5 +105,4 @@ func (st status) sortAndPrint(name, url string) {
 		)
 	}
 	fmt.Println("--------------------------------------------------")
-	fmt.Println("sort time: ", time.Since(start).Seconds())
 }

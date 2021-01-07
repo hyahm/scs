@@ -5,6 +5,7 @@ import (
 	"scs/pkg/script"
 	"strings"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
 )
 
@@ -13,6 +14,7 @@ func Log(w http.ResponseWriter, r *http.Request) {
 	for _, v := range script.SS.Infos {
 		for n, script := range v {
 			if n == name {
+				golog.Info(script.Log)
 				w.Write([]byte(strings.Join(script.Log, "")))
 				return
 			}
