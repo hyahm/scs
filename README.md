@@ -176,10 +176,9 @@ POST  /set/alert
     "pname": "asdgasdgasdgfasdf",
     "name": "01358072011",
     "reason": " asdfasdg  \n ashdfljsdf",
-    "broken": true,  // 如果恢复了就设置成false, name 和panme 必须 其他的无视
-    "interval": 100,
-    "to": {
-        "rocket": ["#general"]
+    "continuityInterval": 100,  // 这里是间隔多少秒才会发生第二次报警， 默认1小时
+    "to": {  // 新增的发件人
+        "rocket": ["#general"] 
     }
 }
 ```
