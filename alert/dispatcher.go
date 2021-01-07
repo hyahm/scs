@@ -63,13 +63,13 @@ func (ai *AlertInfo) Recover(title string) {
 }
 
 type RespAlert struct {
-	Title    string            `json:"title"`
-	Pname    string            `json:"pname"`
-	Name     string            `json:"name"`
-	Reason   string            `json:"reason"`
-	Broken   bool              `json:"broken"`
-	Interval int               `json:"interval"`
-	To       *internal.AlertTo `json:"to"`
+	Title              string            `json:"title"`
+	Pname              string            `json:"pname"`
+	Name               string            `json:"name"`
+	Reason             string            `json:"reason"`
+	Broken             bool              `json:"broken"`
+	ContinuityInterval int               `json:"continuityInterval"`
+	To                 *internal.AlertTo `json:"to"`
 }
 
 func (ra *RespAlert) SendAlert() {
@@ -79,12 +79,17 @@ func (ra *RespAlert) SendAlert() {
 	if _, ok := dispatcher[ra.Pname]; !ok {
 		dispatcher[ra.Pname] = make(map[string]*AlertInfo)
 	}
-	if _, ok := dispatcher[ra.Pname][ra.Name]; !ok && ra.Broken {
+	// 如果收到了报警
+	if _, ok := dispatcher[ra.Pname][ra.Name]; !ok {
+		// 如果是第一次， 那么初始化值并直接发送报警
+		if ra.ContinuityInterval == 0 {
+			ra.ContinuityInterval = 60 * 60
+		}
 		dispatcher[ra.Pname][ra.Name] = &AlertInfo{
-			AlertTime:  time.Now().Add(-time.Duration(ra.Interval) * time.Second * 10),
-			Broken:     ra.Broken,
+			AlertTime:  time.Now(),
 			Start:      time.Now(),
 			BrokenTime: time.Now(),
+			Broken:     true,
 			AM: &Message{
 				Title:      ra.Title,
 				Pname:      ra.Pname,
@@ -92,39 +97,44 @@ func (ra *RespAlert) SendAlert() {
 				Reason:     ra.Reason,
 				BrokenTime: time.Now().String(),
 			},
-			To:       ra.To,
-			Interval: ra.Interval,
+			To:                 ra.To,
+			ContinuityInterval: time.Duration(ra.ContinuityInterval) * time.Second,
 		}
+		AlertMessage(dispatcher[ra.Pname][ra.Name].AM, dispatcher[ra.Pname][ra.Name].To)
+
 	} else {
-		// 如果存在这个报警器
-		if dispatcher[ra.Pname][ra.Name].Broken == ra.Broken {
-			return
+		// 否则的话， 检查上次报警的时间是否大于间隔时间
+		if time.Since(dispatcher[ra.Pname][ra.Name].AlertTime) > dispatcher[ra.Pname][ra.Name].ContinuityInterval {
+			AlertMessage(dispatcher[ra.Pname][ra.Name].AM, dispatcher[ra.Pname][ra.Name].To)
+			dispatcher[ra.Pname][ra.Name].AlertTime = time.Now()
 		}
-		dispatcher[ra.Pname][ra.Name].Broken = ra.Broken
-		dispatcher[ra.Pname][ra.Name].Interval = ra.Interval
 	}
 }
 
 func SendNetAlert() {
+	// 删除超过1天没发送信息的值
 	for {
 		dispatcherLock.Lock()
 		for pname := range dispatcher {
 			for name, di := range dispatcher[pname] {
-				if !di.Broken {
-					// 如果恢复了， 发完报警后删除key
-					di.AlertTime = time.Now()
-					di.AM.Title += "(已恢复)"
-					di.AM.FixTime = time.Now().String()
-					AlertMessage(di.AM, di.To)
-					di.AM.Reason = "问题已修复"
+				if time.Since(di.AlertTime) > time.Hour*10 {
 					delete(dispatcher[pname], name)
-				} else {
-					// 间隔时间内才发送报警
-					if time.Since(di.AlertTime) >= time.Duration(di.Interval)*time.Second {
-						di.AlertTime = time.Now()
-						AlertMessage(di.AM, di.To)
-					}
 				}
+				// if !di.Broken {
+				// 	// 如果恢复了， 发完报警后删除key
+				// 	di.AlertTime = time.Now()
+				// 	di.AM.Title += "(已恢复)"
+				// 	di.AM.FixTime = time.Now().String()
+				// 	AlertMessage(di.AM, di.To)
+				// 	di.AM.Reason = "问题已修复"
+				// 	delete(dispatcher[pname], name)
+				// } else {
+				// 	// 间隔时间内才发送报警
+				// 	if time.Since(di.AlertTime) >= time.Duration(di.Interval)*time.Second {
+				// 		di.AlertTime = time.Now()
+				// 		AlertMessage(di.AM, di.To)
+				// 	}
+				// }
 			}
 		}
 		dispatcherLock.Unlock()
