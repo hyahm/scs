@@ -19,7 +19,7 @@ type ServiceStatus struct {
 	Path         string    `json:"path"`
 	CanNotStop   bool      `json:"cannotStop"` //
 	Stoping      bool      `json:"stoping,omitempty"`
-	Up           time.Time `json:"up"`
+	Up           time.Time `json:"upTime"`
 	Start        int64     `json:"start"` // 启动的时间
 	Version      string    `json:"version"`
 	Always       bool
