@@ -324,6 +324,7 @@ func (s *Script) stopStatus() {
 	s.Status.Status = STOP
 	s.Status.RestartCount = 0
 	s.Status.Pid = 0
+	s.Status.Start = 0
 	s.cmd = nil
 	s.WaitLoop = false
 }

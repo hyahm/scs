@@ -3,7 +3,6 @@ package script
 import (
 	"encoding/json"
 	"sync"
-	"time"
 
 	"github.com/hyahm/golog"
 )
@@ -61,11 +60,6 @@ func All() []byte {
 	ss := make([]*ServiceStatus, 0)
 	for pname := range SS.Infos {
 		for _, s := range SS.Infos[pname] {
-			if s.Status.Status != STOP && s.Status.Status != INSTALL {
-				s.Status.Start = int64(time.Since(s.Status.Up).Seconds())
-			} else {
-				s.Status.Start = 0
-			}
 			s.Status.Command = s.Command
 			ss = append(ss, s.Status)
 		}

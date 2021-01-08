@@ -74,7 +74,7 @@ func (s *Script) start() error {
 	s.cmd.Env = s.Env
 	s.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	s.read()
-	s.Status.Up = time.Now() // 设置启动状态是成功的
+	s.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := s.cmd.Start(); err != nil {
 		// 执行脚本前的错误, 改变状态
 		golog.Error(err)
