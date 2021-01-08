@@ -92,9 +92,11 @@ func (node *Node) Status(args ...string) {
 	if len(b) == 0 {
 		return
 	}
+
 	var s status = make([]*script.ServiceStatus, 0)
 	err := json.Unmarshal(b, &s)
 	if err != nil {
+		fmt.Println(string(b))
 		fmt.Println(err.Error() + " or token error")
 		return
 	}
