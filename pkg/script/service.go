@@ -245,10 +245,12 @@ func (s *Script) wait() error {
 			switch ec {
 			case 9:
 				// 主动退出, kill， stop
+				s.Status.RestartCount = 0
 				s.stopStatus()
 				return nil
 			case 10:
 				// 重启 restart
+				s.Status.RestartCount = 0
 				s.stopStatus()
 				return s.Start()
 			}
@@ -277,6 +279,7 @@ func (s *Script) wait() error {
 				}
 			}
 			if s.Always {
+				s.stopStatus()
 				golog.Info(time.Now())
 				// 失败了， 每秒启动一次
 				s.Status.RestartCount++
@@ -286,7 +289,7 @@ func (s *Script) wait() error {
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
-
+		s.Status.RestartCount = 0
 		// s.Status.Last = false
 		return err
 	}
@@ -342,7 +345,6 @@ func (s *Script) wait() error {
 
 func (s *Script) stopStatus() {
 	s.Status.Status = STOP
-	s.Status.RestartCount = 0
 	s.Status.Pid = 0
 	s.Status.Start = 0
 	s.cmd = nil
