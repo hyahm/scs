@@ -15,13 +15,10 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	if _, ok := script.SS.Infos[pname]; ok {
 		if _, ok := script.SS.Infos[pname][name]; ok {
 			go script.SS.Infos[pname][name].UpdateAndRestart()
-		} else {
-			w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this script"}`)))
-			return
 		}
 
 	} else {
-		w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting update"}`)))
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this script"}`)))
 		return
 	}
 

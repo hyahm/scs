@@ -215,5 +215,5 @@ func (node *Node) crud(operate string, args ...string) []byte {
 }
 
 func (node *Node) Update(args ...string) {
-	fmt.Println(string(node.crud("update")))
+	fmt.Println(string(node.crud("update", args...)))
 }

@@ -15,9 +15,10 @@ var UpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "update script",
 	Long:  `command: scsctl update ([flags]) || ([pname] [name])`,
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 && !updateAll {
-			fmt.Println("Specify at least one parameter, or -- all")
+		if updateAll {
+			fmt.Println("waiting update")
 			return
 		}
 		if node.UseNodes != "" {

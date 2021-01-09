@@ -207,6 +207,7 @@ func (s *Script) Stop() {
 }
 
 func (s *Script) UpdateAndRestart() {
+	golog.Info(s.Update)
 	if err := s.shell(s.Update, "update"); err != nil {
 		golog.Error(err)
 		return
@@ -237,7 +238,7 @@ func (s *Script) Kill() {
 func (s *Script) wait() error {
 	go s.successAlert()
 	if err := s.cmd.Wait(); err != nil {
-		golog.Info("error stop")
+
 		s.Cancel()
 		// 执行脚本后环境的错误
 		select {
@@ -256,6 +257,7 @@ func (s *Script) wait() error {
 			}
 		default:
 			// 意外退出
+			golog.Info("error stop")
 			if !s.DisableAlert {
 				am := &alert.Message{
 					Title:  "service error stop",
