@@ -3,6 +3,7 @@ package script
 import (
 	"context"
 	"os/exec"
+	"runtime"
 	"scs/alert"
 	"scs/internal"
 	"sync"
@@ -49,6 +50,23 @@ type Script struct {
 	Msg                chan string
 	Update             string
 	LogLocker          *sync.RWMutex
+}
+
+func (s *Script) shell(command string, typ string) error {
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/c", command)
+	} else {
+		cmd = exec.Command("/bin/bash", "-c", command)
+	}
+	cmd.Env = s.Env
+	read(cmd, s, typ)
+	err := cmd.Start()
+	if err != nil {
+		golog.Error(err)
+		return err
+	}
+	return cmd.Wait()
 }
 
 func (s *Script) cron() {

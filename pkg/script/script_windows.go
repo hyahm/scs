@@ -10,18 +10,6 @@ import (
 	"github.com/hyahm/golog"
 )
 
-func (s *Script) shell(command string, typ string) error {
-	cmd := exec.Command("cmd", "/c", command)
-	cmd.Env = s.Env
-	read(cmd, s, typ)
-	err := cmd.Start()
-	if err != nil {
-		golog.Error(err)
-		return err
-	}
-	return cmd.Wait()
-}
-
 func (s *Script) stop() {
 	for {
 		select {
