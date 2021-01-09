@@ -205,11 +205,14 @@ scsctl start pname name
 scsctl restart --all
 scsctl restart pname 
 scsctl restart pname name
+scsctl kill --all
+scsctl kill pname 
+scsctl kill pname name
 scsctl stop --all
 scsctl stop pname 
 scsctl stop pname name
 
-scsctl log pname name
+scsctl log  name[:update|log|lookPath] # 不区分大小写
 # 加载配置文件
 scsctl config reload
 ```
