@@ -28,7 +28,7 @@ func (s *Script) LookCommandPath() error {
 			}
 		}
 		golog.Info("exec: ", v.Install)
-		if err := s.shell(v.Install); err != nil {
+		if err := s.shell(v.Install, "lookPath"); err != nil {
 			golog.Error(v.Install)
 			return err
 		}

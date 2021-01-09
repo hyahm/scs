@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"scs/alert"
 	"scs/internal"
+	"sync"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -32,7 +33,7 @@ type Script struct {
 	Env                []string
 	SubName            string
 	Disable            bool
-	Log                []string
+	Log                map[string][]string
 	cmd                *exec.Cmd
 	Status             *ServiceStatus
 	Alert              map[string]alert.SendAlerter
@@ -47,6 +48,7 @@ type Script struct {
 	Email              []string
 	Msg                chan string
 	Update             string
+	LogLocker          *sync.RWMutex
 }
 
 func (s *Script) cron() {
@@ -187,7 +189,7 @@ func (s *Script) Stop() {
 }
 
 func (s *Script) UpdateAndRestart() {
-	if err := s.shell(s.Update); err != nil {
+	if err := s.shell(s.Update, "update"); err != nil {
 		golog.Error(err)
 		return
 	}

@@ -43,7 +43,10 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 				stdout.Close()
 				return
 			}
-			if cap(s.Log) == 0 {
+			s.LogLocker.RLock()
+			logCap := cap(s.Log["log"])
+			s.LogLocker.RUnlock()
+			if logCap == 0 {
 				if iserr {
 					golog.Error(line)
 				} else {
@@ -58,7 +61,7 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 	}
 }
 
-func read(cmd *exec.Cmd, s *Script) {
+func read(cmd *exec.Cmd, s *Script, typ string) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		golog.Error(err)
@@ -70,13 +73,13 @@ func read(cmd *exec.Cmd, s *Script) {
 	}
 
 	//实时循环读取输出流中的一行内容
-	go appendRead(stderr, s)
+	go appendRead(stderr, s, typ)
 
 	//实时循环读取输出流中的一行内容
-	go appendRead(stdout, s)
+	go appendRead(stdout, s, typ)
 }
 
-func appendRead(stdout io.ReadCloser, s *Script) {
+func appendRead(stdout io.ReadCloser, s *Script, typ string) {
 	readout := bufio.NewReader(stdout)
 	for {
 		line, err := readout.ReadString('\n')
@@ -84,32 +87,43 @@ func appendRead(stdout io.ReadCloser, s *Script) {
 			stdout.Close()
 			break
 		}
-		golog.Info(line)
+		t := time.Now().Format("2006/1/2 15:04:05")
+		line = t + " -- " + line
+		s.LogLocker.Lock()
+		if len(s.Log[typ]) >= global.LogCount {
+			copy(s.Log[typ], s.Log[typ][1:])
+			s.Log[typ][global.LogCount-1] = line
+		} else {
+			s.Log[typ] = append(s.Log[typ], line)
+		}
+		s.LogLocker.Unlock()
 	}
 }
 
 func (s *Script) appendLog() {
 	for {
-
 		select {
 		case <-s.Ctx.Done():
 			for line := range s.Msg {
-				if len(s.Log) >= global.LogCount {
-					copy(s.Log, s.Log[1:])
-					s.Log[global.LogCount-1] = line
+				s.LogLocker.Lock()
+				if len(s.Log["log"]) >= global.LogCount {
+					copy(s.Log["log"], s.Log["log"][1:])
+					s.Log["log"][global.LogCount-1] = line
 				} else {
-					s.Log = append(s.Log, line)
+					s.Log["log"] = append(s.Log["log"], line)
 				}
+				s.LogLocker.Unlock()
 			}
 			return
 		case line := <-s.Msg:
-			golog.Info(line)
-			if len(s.Log) >= global.LogCount {
-				copy(s.Log, s.Log[1:])
-				s.Log[global.LogCount-1] = line
+			s.LogLocker.Lock()
+			if len(s.Log["log"]) >= global.LogCount {
+				copy(s.Log["log"], s.Log["log"][1:])
+				s.Log["log"][global.LogCount-1] = line
 			} else {
-				s.Log = append(s.Log, line)
+				s.Log["log"] = append(s.Log["log"], line)
 			}
+			s.LogLocker.Unlock()
 		}
 	}
 

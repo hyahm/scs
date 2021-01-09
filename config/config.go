@@ -15,6 +15,7 @@ import (
 	"scs/probe"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -223,7 +224,8 @@ func (c *config) add(index, port int, subname, command string, baseEnv []string)
 		Env:       baseEnv,
 		Dir:       c.SC[index].Dir,
 		Replicate: c.SC[index].Replicate,
-		Log:       make([]string, 0, c.LogCount),
+		Log:       make(map[string][]string),
+		LogLocker: &sync.RWMutex{},
 		SubName:   subname,
 		Status: &script.ServiceStatus{
 			Name:    subname,
@@ -232,6 +234,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv []string)
 			Path:    c.SC[index].Dir,
 			Version: c.SC[index].Version,
 		},
+
 		Update:             c.SC[index].Update,
 		DisableAlert:       c.SC[index].DisableAlert,
 		ContinuityInterval: c.SC[index].ContinuityInterval,
@@ -242,6 +245,9 @@ func (c *config) add(index, port int, subname, command string, baseEnv []string)
 
 		AT: c.SC[index].AT,
 	}
+	script.SS.Infos[c.SC[index].Name][subname].Log["log"] = make([]string, 0, global.LogCount)
+	script.SS.Infos[c.SC[index].Name][subname].Log["lookPath"] = make([]string, 0, global.LogCount)
+	script.SS.Infos[c.SC[index].Name][subname].Log["update"] = make([]string, 0, global.LogCount)
 	if c.SC[index].Cron != nil {
 		start, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
 		if err != nil {
@@ -282,7 +288,11 @@ func (c *config) update(index int, subname, command string, baseEnv []string) {
 	script.SS.Infos[c.SC[index].Name][subname].Update = c.SC[index].Update
 	script.SS.Infos[c.SC[index].Name][subname].Dir = c.SC[index].Dir
 	script.SS.Infos[c.SC[index].Name][subname].Replicate = c.SC[index].Replicate
-	script.SS.Infos[c.SC[index].Name][subname].Log = make([]string, 0, c.LogCount)
+	script.SS.Infos[c.SC[index].Name][subname].Log = make(map[string][]string)
+	script.SS.Infos[c.SC[index].Name][subname].LogLocker = &sync.RWMutex{}
+	script.SS.Infos[c.SC[index].Name][subname].Log["log"] = make([]string, 0, global.LogCount)
+	script.SS.Infos[c.SC[index].Name][subname].Log["lookPath"] = make([]string, 0, global.LogCount)
+	script.SS.Infos[c.SC[index].Name][subname].Log["update"] = make([]string, 0, global.LogCount)
 	script.SS.Infos[c.SC[index].Name][subname].DisableAlert = c.SC[index].DisableAlert
 	script.SS.Infos[c.SC[index].Name][subname].Always = c.SC[index].Always
 	script.SS.Infos[c.SC[index].Name][subname].ContinuityInterval = c.SC[index].ContinuityInterval
