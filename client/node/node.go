@@ -34,7 +34,7 @@ func (node *Node) Reload() {
 }
 
 func (node *Node) Restart(args ...string) {
-	fmt.Println(string(node.crud("restart")))
+	fmt.Println(string(node.crud("restart", args...)))
 
 }
 
@@ -83,8 +83,7 @@ func (node *Node) Search(args string) {
 }
 
 func (node *Node) Start(args ...string) {
-	fmt.Println(string(node.crud("start")))
-
+	fmt.Println(string(node.crud("start", args...)))
 }
 
 func (node *Node) Status(args ...string) {
@@ -92,7 +91,6 @@ func (node *Node) Status(args ...string) {
 	if len(b) == 0 {
 		return
 	}
-
 	var s status = make([]*script.ServiceStatus, 0)
 	err := json.Unmarshal(b, &s)
 	if err != nil {
@@ -191,17 +189,17 @@ func (node *Node) Log(args string) {
 }
 
 func (node *Node) Stop(args ...string) {
-	fmt.Println(string(node.crud("stop")))
+	fmt.Println(string(node.crud("stop", args...)))
 }
 
 func (node *Node) crud(operate string, args ...string) []byte {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	url := fmt.Sprintf("%s/%s", node.Url, operate)
+	var url string
 	switch len(args) {
 	case 0:
-
+		url = fmt.Sprintf("%s/%s", node.Url, operate)
 	case 1:
 		url = fmt.Sprintf("%s/%s/%s", node.Url, operate, args[0])
 	default:
