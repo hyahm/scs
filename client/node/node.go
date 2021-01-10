@@ -131,11 +131,13 @@ func (node *Node) Env(args ...string) {
 	var err error
 	// switch len(args) {
 	// case 1:
+
 	b, err = Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
 	l := make(map[string]string, 0)
 	err = json.Unmarshal(b, &l)
 	if err != nil {

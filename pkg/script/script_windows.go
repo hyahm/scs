@@ -47,13 +47,13 @@ func (s *Script) kill() error {
 
 func (s *Script) start() error {
 	golog.Info(s.Command)
-	s.cmd = exec.Command("cmd", "/C", s.Command)
+	s.cmd = exec.Command("cmd", "/c", s.Command)
 	if s.cmd.Env == nil {
 		s.cmd.Env = make([]string, 0, len(s.Env))
 	}
 
 	for k, v := range s.Env {
-		s.cmd.Env = append(s.cmd.Env, k+":"+v)
+		s.cmd.Env = append(s.cmd.Env, k+"="+v)
 		s.Command = strings.ReplaceAll(s.Command, "${"+k+"}", v)
 	}
 	// 需要单独抽出去>>

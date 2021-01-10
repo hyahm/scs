@@ -55,7 +55,7 @@ func (s *Script) start() error {
 		s.cmd.Env = make([]string, 0, len(s.Env))
 	}
 	for k, v := range s.Env {
-		s.cmd.Env = append(s.cmd.Env, k+":"+v)
+		s.cmd.Env = append(s.cmd.Env, k+"="+v)
 		s.Command = strings.ReplaceAll(s.Command, "${"+k+"}", v)
 	}
 	s.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
