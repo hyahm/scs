@@ -64,13 +64,13 @@ func (s *Script) shell(command string, typ string) error {
 	} else {
 		cmd = exec.Command("/bin/bash", "-c", command)
 	}
-	if s.cmd.Env == nil {
-		s.cmd.Env = make([]string, 0, len(s.Env))
+	if cmd.Env == nil {
+		cmd.Env = make([]string, 0, len(s.Env))
 	}
 
 	for k, v := range s.Env {
-		s.cmd.Env = append(s.cmd.Env, k+":"+v)
-		s.Command = strings.ReplaceAll(s.Command, "${"+k+"}", v)
+		cmd.Env = append(cmd.Env, k+":"+v)
+		command = strings.ReplaceAll(command, "${"+k+"}", v)
 	}
 	s.Log["typ"] = append(s.Log["typ"])
 	t := time.Now().Format("2006/1/2 15:04:05")
