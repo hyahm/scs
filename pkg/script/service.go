@@ -60,6 +60,7 @@ func (s *Script) shell(command string, typ string) error {
 		cmd = exec.Command("/bin/bash", "-c", command)
 	}
 	cmd.Env = s.Env
+	s.Log["typ"] = append(s.Log["typ"])
 	read(cmd, s, typ)
 	err := cmd.Start()
 	if err != nil {

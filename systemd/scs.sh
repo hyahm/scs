@@ -106,6 +106,8 @@ scripts:
   #   # 不写默认10分钟
   #   continuityInterval: 1h
   #   always: true
+  #   # update 时执行的操作，执行成功后会自动执行restart
+  #   update: git pull
   #   # 禁用报警， 默认启动
   #   # disableAlert: true
   #   # replicate， 开启副本数
