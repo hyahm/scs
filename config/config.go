@@ -196,26 +196,23 @@ func (c *config) fill(index int, reload bool) {
 			}
 		}
 		// 需要单独抽出去<<
-		env := make([]string, 0, len(baseEnv))
-		for k, v := range baseEnv {
-			env = append(env, k+"="+v)
-		}
-		command := strings.ReplaceAll(c.SC[index].Command, "$NAME", subname)
-		command = strings.ReplaceAll(command, "$PNAME", c.SC[index].Name)
-		command = strings.ReplaceAll(command, "$PORT", strconv.Itoa(c.SC[index].Port+i))
+		// env := make([]string, 0, len(baseEnv))
+		// for k, v := range baseEnv {
+		// 	env = append(env, k+"="+v)
+		// }
 
 		if _, ok := script.SS.Infos[c.SC[index].Name][subname]; ok {
 			// 修改
-			c.update(index, subname, command, env)
+			c.update(index, subname, c.SC[index].Command, baseEnv)
 			continue
 		}
 		// 新增
-		c.add(index, c.SC[index].Port+i, subname, command, env)
+		c.add(index, c.SC[index].Port+i, subname, c.SC[index].Command, baseEnv)
 	}
 
 }
 
-func (c *config) add(index, port int, subname, command string, baseEnv []string) {
+func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
 
 	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
 		Name:      c.SC[index].Name,
@@ -267,7 +264,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv []string)
 
 }
 
-func (c *config) update(index int, subname, command string, baseEnv []string) {
+func (c *config) update(index int, subname, command string, baseEnv map[string]string) {
 	// 修改
 
 	script.SS.Infos[c.SC[index].Name][subname].Env = baseEnv

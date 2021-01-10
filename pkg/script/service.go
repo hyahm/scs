@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"scs/alert"
 	"scs/internal"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,7 +32,7 @@ type Script struct {
 	loopTime           time.Time
 	WaitLoop           bool
 	DisableAlert       bool
-	Env                []string
+	Env                map[string]string
 	SubName            string
 	Disable            bool
 	Log                map[string][]string
@@ -54,12 +55,23 @@ type Script struct {
 
 func (s *Script) shell(command string, typ string) error {
 	var cmd *exec.Cmd
+
+	// s.co = strings.ReplaceAll(s.comm, "$NAME", subname)
+	// command = strings.ReplaceAll(command, "$PNAME", c.SC[index].Name)
+	// command = strings.ReplaceAll(command, "$PORT", strconv.Itoa(c.SC[index].Port+i))
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("cmd", "/c", command)
 	} else {
 		cmd = exec.Command("/bin/bash", "-c", command)
 	}
-	cmd.Env = s.Env
+	if s.cmd.Env == nil {
+		s.cmd.Env = make([]string, 0, len(s.Env))
+	}
+
+	for k, v := range s.Env {
+		s.cmd.Env = append(s.cmd.Env, k+":"+v)
+		s.Command = strings.ReplaceAll(s.Command, "${"+k+"}", v)
+	}
 	s.Log["typ"] = append(s.Log["typ"])
 	t := time.Now().Format("2006/1/2 15:04:05")
 	command = t + " -- " + command

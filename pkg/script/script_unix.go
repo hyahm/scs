@@ -5,6 +5,7 @@ package script
 import (
 	"errors"
 	"os/exec"
+	"strings"
 	"syscall"
 	"time"
 
@@ -50,7 +51,13 @@ func (s *Script) kill() error {
 func (s *Script) start() error {
 	s.cmd = exec.Command("/bin/bash", "-c", s.Command)
 	s.cmd.Dir = s.Dir
-	s.cmd.Env = s.Env
+	if s.cmd.Env == nil {
+		s.cmd.Env = make([]string, 0, len(s.Env))
+	}
+	for k, v := range s.Env {
+		s.cmd.Env = append(s.cmd.Env, k+":"+v)
+		s.Command = strings.ReplaceAll(s.Command, "${"+k+"}", v)
+	}
 	s.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	s.read()
 	s.Status.Start = time.Now().Unix() // 设置启动状态是成功的

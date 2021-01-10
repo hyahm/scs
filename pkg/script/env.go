@@ -1,5 +1,9 @@
 package script
 
 func (s *Script) GetEnv() []string {
-	return s.Env
+	env := make([]string, 0, len(s.Env))
+	for k, v := range s.Env {
+		env = append(env, k+":"+v)
+	}
+	return env
 }
