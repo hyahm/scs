@@ -6,6 +6,7 @@ import (
 	"scs/pkg/script"
 	"strings"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
 )
 
@@ -39,6 +40,7 @@ func GetEnvName(w http.ResponseWriter, r *http.Request) {
 		if _, ok := script.SS.Infos[pname][name]; ok {
 			env := make(map[string]string)
 			for _, v := range script.SS.Infos[pname][name].GetEnv() {
+				golog.Info(v)
 				start := strings.Index(v, "=")
 				env[v[:start]] = v[start+1:]
 			}
