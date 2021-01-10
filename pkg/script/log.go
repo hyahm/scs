@@ -61,7 +61,7 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 	}
 }
 
-func read(cmd *exec.Cmd, s *Script, typ string, command string) {
+func read(cmd *exec.Cmd, s *Script, typ string) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		golog.Error(err)
@@ -72,11 +72,6 @@ func read(cmd *exec.Cmd, s *Script, typ string, command string) {
 		golog.Error(err)
 	}
 
-	t := time.Now().Format("2006/1/2 15:04:05")
-	command = t + " -- " + command
-	s.LogLocker.Lock()
-	s.Log[typ] = append(s.Log[typ], command)
-	s.LogLocker.Unlock()
 	//实时循环读取输出流中的一行内容
 	go appendRead(stderr, s, typ)
 

@@ -61,6 +61,11 @@ func (s *Script) shell(command string, typ string) error {
 	}
 	cmd.Env = s.Env
 	s.Log["typ"] = append(s.Log["typ"])
+	t := time.Now().Format("2006/1/2 15:04:05")
+	command = t + " -- " + command
+	s.LogLocker.Lock()
+	s.Log[typ] = append(s.Log[typ], command)
+	s.LogLocker.Unlock()
 	read(cmd, s, typ)
 	err := cmd.Start()
 	if err != nil {
