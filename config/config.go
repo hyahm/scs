@@ -342,7 +342,6 @@ func (c *config) updateConfig(s internal.Script, index int) {
 	c.SC[index].Cron = s.Cron
 
 	if len(s.LookPath) > 0 {
-		golog.Info(s.LookPath)
 		c.SC[index].LookPath = s.LookPath
 	}
 }
@@ -356,10 +355,8 @@ func (c *config) AddScript(s internal.Script) error {
 	for i, v := range c.SC {
 		if v.Name == s.Name {
 			// 修改
-			golog.Info("0000")
 			c.updateConfig(s, i)
 			c.fill(i, true)
-			golog.Infof("%+v", *c)
 			b, err := yaml.Marshal(c)
 			if err != nil {
 				return err
