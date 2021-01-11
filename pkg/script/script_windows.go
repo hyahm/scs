@@ -54,7 +54,9 @@ func (s *Script) start() error {
 
 	for k, v := range s.Env {
 		s.cmd.Env = append(s.cmd.Env, k+"="+v)
+		s.Command = strings.ReplaceAll(s.Command, "$"+k, v)
 		s.Command = strings.ReplaceAll(s.Command, "${"+k+"}", v)
+
 	}
 	// 需要单独抽出去>>
 	s.cmd.Dir = s.Dir

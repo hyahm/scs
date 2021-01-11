@@ -16,9 +16,8 @@ while True:
     headers = {
         "Token": os.getenv("TOKEN")
     }
-
+    
     requests.packages.urllib3.disable_warnings()
-
     r = requests.post("https://127.0.0.1:11111/cannotstop/%s" % os.getenv("NAME"),  verify=False, headers=headers)
     log(r.status_code)
     log("can not stop it")

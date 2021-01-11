@@ -70,6 +70,7 @@ func (s *Script) shell(command string, typ string) error {
 
 	for k, v := range s.Env {
 		cmd.Env = append(cmd.Env, k+"="+v)
+		command = strings.ReplaceAll(command, "$"+k, v)
 		command = strings.ReplaceAll(command, "${"+k+"}", v)
 	}
 	s.Log["typ"] = append(s.Log["typ"])
