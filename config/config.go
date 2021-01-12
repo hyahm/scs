@@ -211,7 +211,7 @@ func (c *config) fill(index int, reload bool) {
 	go func() {
 		pname := c.SC[index].Name
 		if len(script.SS.Infos[pname]) > c.SC[index].Replicate {
-			for i := c.SC[index].Replicate; i < len(script.SS.Infos[pname]); i++ {
+			for i := len(script.SS.Infos[pname]) - 1; i > c.SC[index].Replicate; i-- {
 				ne := fmt.Sprintf("%s_%d", pname, i)
 				script.SS.Infos[pname][ne].Stop()
 				delete(script.SS.Infos[pname], ne)
