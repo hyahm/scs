@@ -18,9 +18,11 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 				script.SS.Infos[pname][name].Status.Status != script.INSTALL {
 				script.SS.Infos[pname][name].Status.CanNotStop = false
 			}
+			w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
+			return
 		}
 	}
-
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "not found this name"}`)))
 	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
 	return
 }
@@ -35,9 +37,11 @@ func CanNotStop(w http.ResponseWriter, r *http.Request) {
 				script.SS.Infos[pname][name].Status.Status != script.INSTALL {
 				script.SS.Infos[pname][name].Status.CanNotStop = true
 			}
+			w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
+			return
 		}
 	}
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
+	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "not found this name"}`)))
 	return
 }
