@@ -208,6 +208,16 @@ func (c *config) fill(index int, reload bool) {
 		// 新增
 		c.add(index, c.SC[index].Port+i, subname, c.SC[index].Command, baseEnv)
 	}
+	go func() {
+		pname := c.SC[index].Name
+		if len(script.SS.Infos[pname]) > c.SC[index].Replicate {
+			for i := c.SC[index].Replicate; i < len(script.SS.Infos[pname]); i++ {
+				ne := fmt.Sprintf("%s_%d", pname, i)
+				script.SS.Infos[pname][ne].Stop()
+				delete(script.SS.Infos[pname], ne)
+			}
+		}
+	}()
 
 }
 
