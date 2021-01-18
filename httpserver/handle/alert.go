@@ -14,11 +14,11 @@ func Alert(w http.ResponseWriter, r *http.Request) {
 	ra := &alert.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code":1, "msg": "%s"}`, err.Error())))
+		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
 		return
 	}
 	ra.SendAlert()
-	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf(`{"code":200, "msg": "send alert message"}`)))
 	return
 }
 
