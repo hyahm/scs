@@ -66,7 +66,7 @@ func (m Scan) Check() {
 			Timeout:   time.Second * 5,
 		}
 
-		resp, err := c.Get(server + "/probe")
+		resp, err := c.Post(server+"/probe", "application/json", nil)
 		if err != nil {
 			golog.Error(err)
 			failed = true
