@@ -1,14 +1,20 @@
 package command
 
 import (
+	"fmt"
 	"scs/client/cliconfig"
 	"scs/client/node"
 	"sync"
+	"time"
 
 	"github.com/spf13/cobra"
 )
 
 func logConfig(cmd *cobra.Command, args []string) {
+	start := time.Now()
+	defer func() {
+		fmt.Println(time.Since(start).Seconds())
+	}()
 	if node.UseNodes != "" {
 		if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
 			nodeInfo.Log(args[0])

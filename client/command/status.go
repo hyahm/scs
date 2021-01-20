@@ -1,9 +1,11 @@
 package command
 
 import (
+	"fmt"
 	"scs/client/cliconfig"
 	"scs/client/node"
 	"sync"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -14,6 +16,10 @@ var StatusCmd = &cobra.Command{
 	Long:  `command: scsctl status [flags] [pname] [name]`,
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
+		start := time.Now()
+		defer func() {
+			fmt.Println(time.Since(start).Seconds())
+		}()
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
 				nodeInfo.Name = node.UseNodes

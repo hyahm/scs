@@ -12,6 +12,10 @@ import (
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetData(r).Data.(*internal.Script)
 	golog.Infof("%+v", s)
+	if s.Name == "" {
+		w.Write([]byte(`{"code": 201, "msg": "name require"}`))
+		return
+	}
 	s.ContinuityInterval = s.ContinuityInterval * 1000000000
 	if err := config.Cfg.AddScript(*s); err != nil {
 		w.Write([]byte(`{"code": 201, "msg": "already exist script"}`))
