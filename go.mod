@@ -1,4 +1,4 @@
-module scs
+module github.com/hyahm/scs
 
 go 1.13
 
