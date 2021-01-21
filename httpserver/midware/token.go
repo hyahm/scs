@@ -2,8 +2,9 @@ package midware
 
 import (
 	"net/http"
-	"scs/global"
 	"strings"
+
+	"github.com/hyahm/scs/global"
 )
 
 func CheckToken(w http.ResponseWriter, r *http.Request) bool {

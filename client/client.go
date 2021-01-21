@@ -10,8 +10,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"scs/internal"
 	"time"
+
+	"github.com/hyahm/scs/internal"
 )
 
 type SCSClient struct {

@@ -4,11 +4,12 @@ import (
 	"context"
 	"os/exec"
 	"runtime"
-	"scs/alert"
-	"scs/internal"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/internal"
 
 	"github.com/hyahm/golog"
 )

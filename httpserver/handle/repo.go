@@ -3,7 +3,8 @@ package handle
 import (
 	"encoding/json"
 	"net/http"
-	"scs/config"
+
+	"github.com/hyahm/scs/config"
 
 	"github.com/hyahm/golog"
 )

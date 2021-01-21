@@ -2,10 +2,11 @@ package handle
 
 import (
 	"net/http"
-	"scs/pkg/script"
-	"scs/probe"
 
-	"scs/config"
+	"github.com/hyahm/scs/pkg/script"
+	"github.com/hyahm/scs/probe"
+
+	"github.com/hyahm/scs/config"
 )
 
 var reloadKey bool

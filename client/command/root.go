@@ -3,8 +3,9 @@ package command
 import (
 	"fmt"
 	"os"
-	"scs/client/node"
-	"scs/global"
+
+	"github.com/hyahm/scs/client/node"
+	"github.com/hyahm/scs/global"
 
 	"github.com/spf13/cobra"
 )

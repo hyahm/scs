@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"scs/client/cliconfig"
-	"scs/client/node"
-	"scs/internal"
 	"sync"
+
+	"github.com/hyahm/scs/client/cliconfig"
+	"github.com/hyahm/scs/client/node"
+	"github.com/hyahm/scs/internal"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"

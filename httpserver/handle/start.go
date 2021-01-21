@@ -3,7 +3,8 @@ package handle
 import (
 	"fmt"
 	"net/http"
-	"scs/pkg/script"
+
+	"github.com/hyahm/scs/pkg/script"
 
 	"github.com/hyahm/xmux"
 )

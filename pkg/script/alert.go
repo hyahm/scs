@@ -1,8 +1,9 @@
 package script
 
 import (
-	"scs/alert"
 	"time"
+
+	"github.com/hyahm/scs/alert"
 )
 
 func (s *Script) successAlert() {

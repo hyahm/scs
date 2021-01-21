@@ -4,8 +4,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"scs/client/node"
 	"time"
+
+	"github.com/hyahm/scs/client/node"
 
 	"gopkg.in/yaml.v2"
 )

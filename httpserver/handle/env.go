@@ -3,8 +3,9 @@ package handle
 import (
 	"encoding/json"
 	"net/http"
-	"scs/pkg/script"
 	"strings"
+
+	"github.com/hyahm/scs/pkg/script"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"

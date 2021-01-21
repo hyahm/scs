@@ -2,7 +2,8 @@ package alert
 
 import (
 	"os"
-	"scs/internal"
+
+	"github.com/hyahm/scs/internal"
 
 	"github.com/hyahm/golog"
 )

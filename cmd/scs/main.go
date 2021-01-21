@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"scs/alert"
-	"scs/config"
-	"scs/global"
-	"scs/httpserver"
+
+	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/config"
+	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/httpserver"
 
 	"github.com/hyahm/golog"
 )

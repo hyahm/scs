@@ -2,8 +2,9 @@ package probe
 
 import (
 	"fmt"
-	"scs/alert"
 	"time"
+
+	"github.com/hyahm/scs/alert"
 
 	"github.com/hyahm/golog"
 	"github.com/shirou/gopsutil/disk"

@@ -2,9 +2,10 @@ package probe
 
 import (
 	"reflect"
-	"scs/global"
 	"strings"
 	"time"
+
+	"github.com/hyahm/scs/global"
 
 	"github.com/hyahm/golog"
 	"github.com/shirou/gopsutil/disk"

@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"scs/alert"
-	"scs/global"
 	"strings"
+
+	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/global"
 )
 
 func Alert(w http.ResponseWriter, r *http.Request) {

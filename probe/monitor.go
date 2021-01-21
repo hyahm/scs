@@ -3,10 +3,11 @@ package probe
 import (
 	"encoding/json"
 	"fmt"
-	"scs/alert"
-	"scs/client"
-	"scs/internal"
 	"time"
+
+	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/client"
+	"github.com/hyahm/scs/internal"
 
 	"github.com/hyahm/golog"
 )

@@ -2,8 +2,9 @@ package handle
 
 import (
 	"net/http"
-	"scs/config"
-	"scs/internal"
+
+	"github.com/hyahm/scs/config"
+	"github.com/hyahm/scs/internal"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"

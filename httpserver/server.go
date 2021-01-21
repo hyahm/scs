@@ -5,12 +5,13 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"scs/global"
-	"scs/httpserver/handle"
-	"scs/httpserver/midware"
-	"scs/internal"
-	"scs/public"
 	"time"
+
+	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/httpserver/handle"
+	"github.com/hyahm/scs/httpserver/midware"
+	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/public"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"

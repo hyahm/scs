@@ -2,9 +2,10 @@ package install
 
 import (
 	"errors"
-	"scs/internal"
-	"scs/pkg/script"
 	"strings"
+
+	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/pkg/script"
 )
 
 type InstallConfig struct {

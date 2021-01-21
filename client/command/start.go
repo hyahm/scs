@@ -1,9 +1,10 @@
 package command
 
 import (
-	"scs/client/cliconfig"
-	"scs/client/node"
 	"sync"
+
+	"github.com/hyahm/scs/client/cliconfig"
+	"github.com/hyahm/scs/client/node"
 
 	"github.com/spf13/cobra"
 )

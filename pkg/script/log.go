@@ -4,8 +4,9 @@ import (
 	"bufio"
 	"io"
 	"os/exec"
-	"scs/global"
 	"time"
+
+	"github.com/hyahm/scs/global"
 
 	"github.com/hyahm/golog"
 )

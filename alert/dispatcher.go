@@ -2,9 +2,10 @@ package alert
 
 import (
 	"encoding/json"
-	"scs/internal"
 	"sync"
 	"time"
+
+	"github.com/hyahm/scs/internal"
 )
 
 // 分发器, 每个报警器间隔多久发一次

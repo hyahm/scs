@@ -2,9 +2,10 @@ package probe
 
 import (
 	"fmt"
-	"scs/alert"
 	"strconv"
 	"time"
+
+	"github.com/hyahm/scs/alert"
 
 	"github.com/hyahm/golog"
 	"github.com/shirou/gopsutil/cpu"
