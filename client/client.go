@@ -12,6 +12,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/hyahm/scs/alert"
 	"github.com/hyahm/scs/internal"
 )
 
@@ -78,14 +79,6 @@ func (sc *SCSClient) Requests(url string, body io.Reader) ([]byte, error) {
 		return nil, errors.New("token error")
 	}
 	return ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// fmt.Println(string(b))
-	// if resp.StatusCode != 200 {
-	// 	return nil, errors.New(string(b))
-	// }
-	// return b, nil
 }
 
 func (sc *SCSClient) CanNotStop(name ...string) ([]byte, error) {
@@ -205,4 +198,9 @@ func (sc *SCSClient) Status(args ...string) ([]byte, error) {
 
 func (sc *SCSClient) Probe() ([]byte, error) {
 	return sc.Requests("/probe", nil)
+}
+
+func (sc *SCSClient) Alert(alert *alert.RespAlert) ([]byte, error) {
+	send, _ := json.Marshal(alert)
+	return sc.Requests("/set/alert", bytes.NewReader(send))
 }
