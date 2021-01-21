@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/hyahm/scs/pkg/script"
@@ -12,30 +11,15 @@ import (
 func Status(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	statuss := make([]*script.ServiceStatus, 0)
-	if _, pok := script.SS.Infos[pname]; pok {
-		if s, ok := script.SS.Infos[pname][name]; ok {
-			statuss = append(statuss, s.Status)
-		}
-	}
 
-	s, _ := json.MarshalIndent(statuss, "", "\n")
-	w.Write(s)
+	w.Write(script.ScriptName(pname, name))
 	return
 }
 
 func StatusPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	statuss := make([]*script.ServiceStatus, 0)
-	for _, s := range script.SS.Infos[pname] {
-		statuss = append(statuss, s.Status)
-	}
-	s, err := json.MarshalIndent(statuss, "", "\n")
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write(s)
+
+	w.Write(script.ScriptPname(pname))
 	return
 }
 

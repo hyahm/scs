@@ -3,10 +3,11 @@ package node
 import (
 	"encoding/json"
 	"fmt"
-	"scs/client"
-	"scs/internal"
-	"scs/pkg/script"
 	"sync"
+
+	"github.com/hyahm/scs/client"
+	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/pkg/script"
 
 	"github.com/hyahm/golog"
 )
@@ -125,14 +126,19 @@ func (node *Node) Status(args ...string) {
 		fmt.Println(err)
 		return
 	}
+	sl := &script.StatusList{}
 	// fmt.Println(string(b))
-	var s status = make([]*script.ServiceStatus, 0)
-	err = json.Unmarshal(b, &s)
+	// var s status = make([]*script.ServiceStatus, 0)
+	err = json.Unmarshal(b, sl)
 	if err != nil {
-		fmt.Println(err.Error() + " or token error")
+		fmt.Println(err.Error())
 		return
 	}
-	s.sortAndPrint(node.Name, node.Url)
+	if sl.Code == 203 {
+		fmt.Println("token error")
+		return
+	}
+	status(sl.Data).sortAndPrint(node.Name, node.Url)
 }
 
 func (node *Node) Kill(args ...string) {

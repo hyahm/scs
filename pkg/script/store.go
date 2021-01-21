@@ -52,21 +52,70 @@ func Get(pname, name string) *ServiceStatus {
 	return nil
 }
 
+type StatusList struct {
+	Data []ServiceStatus `json:"data"`
+	Code int             `json:"code"`
+}
+
 func All() []byte {
 	if SS.mu == nil {
 		SS.mu = &sync.RWMutex{}
 	}
-
-	ss := make([]*ServiceStatus, 0)
+	statuss := &StatusList{
+		Data: make([]ServiceStatus, 0),
+	}
+	// ss := make([]*ServiceStatus, 0)
 	for pname := range SS.Infos {
 		for _, s := range SS.Infos[pname] {
 			s.Status.Command = s.Command
-			ss = append(ss, s.Status)
+			statuss.Data = append(statuss.Data, *s.Status)
 		}
 
 	}
+	statuss.Code = 200
+	send, err := json.MarshalIndent(statuss, "", "\t")
+	if err != nil {
+		golog.Error(err)
+	}
+	return send
+}
 
-	send, err := json.MarshalIndent(ss, "", "\t")
+func ScriptPname(pname string) []byte {
+	if SS.mu == nil {
+		SS.mu = &sync.RWMutex{}
+	}
+	statuss := &StatusList{
+		Data: make([]ServiceStatus, 0),
+	}
+	for _, s := range SS.Infos[pname] {
+		statuss.Data = append(statuss.Data, *s.Status)
+	}
+	statuss.Code = 200
+	send, err := json.MarshalIndent(statuss, "", "\n")
+
+	if err != nil {
+		golog.Error(err)
+	}
+	return send
+}
+
+func ScriptName(pname, name string) []byte {
+	if SS.mu == nil {
+		SS.mu = &sync.RWMutex{}
+	}
+
+	statuss := &StatusList{
+		Data: make([]ServiceStatus, 0),
+	}
+	// statuss := make([]*script.ServiceStatus, 0)
+	if _, pok := SS.Infos[pname]; pok {
+		if s, ok := SS.Infos[pname][name]; ok {
+			statuss.Data = append(statuss.Data, *s.Status)
+		}
+	}
+	statuss.Code = 200
+
+	send, err := json.MarshalIndent(statuss, "", "\t")
 	if err != nil {
 		golog.Error(err)
 	}

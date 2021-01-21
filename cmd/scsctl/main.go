@@ -1,8 +1,8 @@
 package main
 
 import (
-	"scs/client/cliconfig"
-	"scs/client/command"
+	"github.com/hyahm/scs/client/cliconfig"
+	"github.com/hyahm/scs/client/command"
 )
 
 func main() {

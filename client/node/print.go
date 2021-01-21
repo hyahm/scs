@@ -2,9 +2,10 @@ package node
 
 import (
 	"fmt"
-	"scs/pkg/script"
 	"strconv"
 	"time"
+
+	"github.com/hyahm/scs/pkg/script"
 )
 
 // 打印数据相关
@@ -20,7 +21,7 @@ var (
 	maxspace8 space = 10 // Failed
 )
 
-type status []*script.ServiceStatus
+type status []script.ServiceStatus
 
 const ds = 4 // 2个列的最近间距
 type space int
