@@ -21,6 +21,9 @@ var UpdateCmd = &cobra.Command{
 			fmt.Println("waiting update")
 			return
 		}
+		if updateAll {
+			args = nil
+		}
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
 				nodeInfo.Update(args...)

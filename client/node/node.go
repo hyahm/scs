@@ -1,9 +1,9 @@
 package node
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"scs/client"
 	"scs/internal"
 	"scs/pkg/script"
 	"sync"
@@ -15,17 +15,27 @@ var UseNodes string
 var GroupName string
 
 type Node struct {
-	Name  string
+	Name  string `yaml:"-"`
 	Url   string `yaml:"url"`
 	Token string `yaml:"token"`
-	Wg    *sync.WaitGroup
+	// Sc    *client.SCSClient
+	Wg *sync.WaitGroup
+}
+
+func (node *Node) NewSCSClient() *client.SCSClient {
+
+	return &client.SCSClient{
+		Domain: node.Url,
+		Token:  node.Token,
+	}
 }
 
 func (node *Node) Reload() {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := Requests("POST", fmt.Sprintf("%s/-/reload", node.Url), node.Token, nil)
+	b, err := node.NewSCSClient().Reload()
+	// b, err := Requests("POST", fmt.Sprintf("%s/-/reload", node.Url), node.Token, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -34,8 +44,16 @@ func (node *Node) Reload() {
 }
 
 func (node *Node) Restart(args ...string) {
-	fmt.Println(string(node.crud("restart", args...)))
-
+	if node.Wg != nil {
+		defer node.Wg.Done()
+	}
+	// fmt.Println(string(node.crud("restart", args...)))
+	b, err := node.NewSCSClient().Restart(args...)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
 }
 
 type SearchInfo struct {
@@ -47,7 +65,8 @@ func (node *Node) Search(args string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := Requests("POST", fmt.Sprintf("%s/get/repo", node.Url), node.Token, nil)
+	b, err := node.NewSCSClient().Repo()
+	// b, err := Requests("POST", fmt.Sprintf("%s/get/repo", node.Url), node.Token, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -63,7 +82,9 @@ func (node *Node) Search(args string) {
 	}
 	sl := make([]*SearchInfo, 0)
 	for _, url := range resp.Url {
-		b, err := Requests("POST", fmt.Sprintf("%s/search/%s/%s", url, resp.Derivative, args), node.Token, nil)
+		node.NewSCSClient().Domain = url
+		b, err := node.NewSCSClient().Search(resp.Derivative, args)
+		// b, err := Requests("POST", fmt.Sprintf("%s/search/%s/%s", url, resp.Derivative, args), node.Token, nil)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -83,18 +104,31 @@ func (node *Node) Search(args string) {
 }
 
 func (node *Node) Start(args ...string) {
-	fmt.Println(string(node.crud("start", args...)))
+	if node.Wg != nil {
+		defer node.Wg.Done()
+	}
+	b, err := node.NewSCSClient().Start(args...)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+	// fmt.Println(string(node.crud("start", args...)))
 }
 
 func (node *Node) Status(args ...string) {
-	b := node.crud("status")
-	if len(b) == 0 {
+	if node.Wg != nil {
+		defer node.Wg.Done()
+	}
+	b, err := node.NewSCSClient().Status(args...)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
+	// fmt.Println(string(b))
 	var s status = make([]*script.ServiceStatus, 0)
-	err := json.Unmarshal(b, &s)
+	err = json.Unmarshal(b, &s)
 	if err != nil {
-		fmt.Println(string(b))
 		fmt.Println(err.Error() + " or token error")
 		return
 	}
@@ -105,34 +139,41 @@ func (node *Node) Kill(args ...string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	switch len(args) {
-	case 1:
-		b, err := Requests("POST", fmt.Sprintf("%s/kill/%s", node.Url, args[0]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(string(b))
-	default:
-		b, err := Requests("POST", fmt.Sprintf("%s/kill/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(string(b))
+	b, err := node.NewSCSClient().Kill(args...)
+	// b, err := Requests("POST", fmt.Sprintf("%s/kill/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+	fmt.Println(string(b))
+	// switch len(args) {
+	// case 1:
+	// 	b, err := Requests("POST", fmt.Sprintf("%s/kill/%s", node.Url, args[0]), node.Token, nil)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		return
+	// 	}
+	// 	fmt.Println(string(b))
+	// default:
+	// 	b, err := Requests("POST", fmt.Sprintf("%s/kill/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		return
+	// 	}
+	// 	fmt.Println(string(b))
+	// }
 }
 
-func (node *Node) Env(args ...string) {
+func (node *Node) Env(args string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	var b []byte
-	var err error
+	// var b []byte
+	// var err error
 	// switch len(args) {
 	// case 1:
-
-	b, err = Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
+	b, err := node.NewSCSClient().Env(args)
+	// b, err = Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -148,28 +189,28 @@ func (node *Node) Env(args ...string) {
 	}
 }
 
-func (node *Node) getDependEnv(args ...string) {
-	// 获取依赖的env
-	b, err := Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(string(b))
-}
+// func (node *Node) getDependEnv(args ...string) {
+// 	// 获取依赖的env
+// 	b, err := Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return
+// 	}
+// 	fmt.Println(string(b))
+// }
 
 func (node *Node) Install(script *internal.Script, env map[string]string) {
 	// 先读取配置文件
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	body, err := json.Marshal(script)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	b, err := Requests("POST", fmt.Sprintf("%s/script", node.Url), node.Token, bytes.NewReader(body))
+	// body, err := json.Marshal(script)
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// 	return
+	// }
+	b, err := node.NewSCSClient().Script(script)
+	// b, err := Requests("POST", fmt.Sprintf("%s/script", node.Url), node.Token, bytes.NewReader(body))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -182,7 +223,8 @@ func (node *Node) Log(args string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := Requests("POST", fmt.Sprintf("%s/log/%s", node.Url, args), node.Token, nil)
+	b, err := node.NewSCSClient().Log(args)
+	// b, err := Requests("POST", fmt.Sprintf("%s/log/%s", node.Url, args), node.Token, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -191,31 +233,50 @@ func (node *Node) Log(args string) {
 }
 
 func (node *Node) Stop(args ...string) {
-	fmt.Println(string(node.crud("stop", args...)))
-}
-
-func (node *Node) crud(operate string, args ...string) []byte {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	var url string
-	switch len(args) {
-	case 0:
-		url = fmt.Sprintf("%s/%s", node.Url, operate)
-	case 1:
-		url = fmt.Sprintf("%s/%s/%s", node.Url, operate, args[0])
-	default:
-		url = fmt.Sprintf("%s/%s/%s/%s", node.Url, operate, args[0], args[1])
-
-	}
-	b, err := Requests("POST", url, node.Token, nil)
+	b, err := node.NewSCSClient().Stop(args...)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return
 	}
-	return b
+	fmt.Println(string(b))
+	// fmt.Println(string(node.crud("stop", args...)))
 }
 
+// func (node *Node) crud(operate string, args ...string) []byte {
+// 	if node.Wg != nil {
+// 		defer node.Wg.Done()
+// 	}
+// 	var url string
+// 	switch len(args) {
+// 	case 0:
+// 		url = fmt.Sprintf("%s/%s", node.Url, operate)
+// 	case 1:
+// 		url = fmt.Sprintf("%s/%s/%s", node.Url, operate, args[0])
+// 	default:
+// 		url = fmt.Sprintf("%s/%s/%s/%s", node.Url, operate, args[0], args[1])
+// 	}
+// 	b, err := Requests("POST", url, node.Token, nil)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return nil
+// 	}
+// 	return b
+// }
+
 func (node *Node) Update(args ...string) {
-	fmt.Println(string(node.crud("update", args...)))
+	if node.Wg != nil {
+		defer node.Wg.Done()
+	}
+	b, err := node.NewSCSClient().Update(args...)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+	// return string(b)
+	// return node.Update(args...)
+	// fmt.Println(string(node.crud("update", args...)))
 }

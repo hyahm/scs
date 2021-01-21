@@ -38,7 +38,8 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !needToken {
-		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"code": 200, "msg": "ok"}`))
+		// w.WriteHeader(http.StatusOK)
 		return
 	}
 	// 检查是否可以被忽略token
@@ -49,10 +50,11 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !needToken {
-		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"code": 200, "msg": "ok"}`))
+		// w.WriteHeader(http.StatusOK)
 		return
 	}
-
-	w.WriteHeader(http.StatusNetworkAuthenticationRequired)
+	w.Write([]byte(`{"code": 511, "msg": "StatusNetworkAuthenticationRequired"}`))
+	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 	return
 }

@@ -20,6 +20,9 @@ var StopCmd = &cobra.Command{
 			fmt.Println("Specify at least one parameter, or -- all")
 			return
 		}
+		if stopAll {
+			args = nil
+		}
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
 				nodeInfo.Stop(args...)

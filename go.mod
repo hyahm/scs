@@ -9,8 +9,8 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/hyahm/golog v0.0.0-20201226025654-0fd9dfd9cd10
 	github.com/hyahm/xmux v0.0.0-20210106020659-623ef4db850f
-	github.com/sacOO7/go-logger v0.0.0-20180719173527-9ac9add5a50d // indirect
-	github.com/sacOO7/gowebsocket v0.0.0-20201031204121-1620b8bfa516
+	// github.com/sacOO7/go-logger v0.0.0-20180719173527-9ac9add5a50d // indirect
+	// github.com/sacOO7/gowebsocket v0.0.0-20201031204121-1620b8bfa516
 	github.com/shirou/gopsutil v3.20.12-0.20201210134652-afe0c04c5d5a+incompatible
 	github.com/spf13/cobra v1.0.0
 	golang.org/x/net v0.0.0-20201201195509-5d6afe98e0b7 // indirect

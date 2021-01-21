@@ -19,9 +19,13 @@ var RestartCmd = &cobra.Command{
 			fmt.Println("Specify at least one parameter, or -- all")
 			return
 		}
+		if restartAll {
+			args = nil
+		}
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
 				nodeInfo.Restart(args...)
+
 				return
 			}
 		}

@@ -1,11 +1,11 @@
 package probe
 
 import (
-	"crypto/tls"
+	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/http/cookiejar"
 	"scs/alert"
+	"scs/client"
+	"scs/internal"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -52,27 +52,26 @@ func (m Scan) Update(probe *Probe) {
 }
 
 func (m Scan) Check() {
+	c := client.NewClient()
 	for server, mm := range m {
+		c.Domain = server
 		var failed bool
-		tr := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
 
 		//http cookie接口
-		cookieJar, _ := cookiejar.New(nil)
-		c := &http.Client{
-			Jar:       cookieJar,
-			Transport: tr,
-			Timeout:   time.Second * 5,
-		}
 
-		resp, err := c.Post(server+"/probe", "application/json", nil)
+		resp, err := c.Probe()
 		if err != nil {
 			golog.Error(err)
 			failed = true
 		} else {
-			if resp.StatusCode != 200 {
-				golog.Error(resp.StatusCode)
+			rest := &internal.Resp{}
+			err := json.Unmarshal(resp, rest)
+			if err != nil {
+				golog.Error(err)
+				break
+			}
+			if rest.Code != 200 {
+				golog.Error(rest.Msg)
 				failed = true
 			}
 		}
