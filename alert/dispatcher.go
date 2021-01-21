@@ -68,7 +68,6 @@ type RespAlert struct {
 	Pname              string            `json:"pname"`
 	Name               string            `json:"name"`
 	Reason             string            `json:"reason"`
-	Broken             bool              `json:"broken"`
 	ContinuityInterval int               `json:"continuityInterval"`
 	To                 *internal.AlertTo `json:"to"`
 }
@@ -121,21 +120,7 @@ func SendNetAlert() {
 				if time.Since(di.AlertTime) > time.Hour*10 {
 					delete(dispatcher[pname], name)
 				}
-				// if !di.Broken {
-				// 	// 如果恢复了， 发完报警后删除key
-				// 	di.AlertTime = time.Now()
-				// 	di.AM.Title += "(已恢复)"
-				// 	di.AM.FixTime = time.Now().String()
-				// 	AlertMessage(di.AM, di.To)
-				// 	di.AM.Reason = "问题已修复"
-				// 	delete(dispatcher[pname], name)
-				// } else {
-				// 	// 间隔时间内才发送报警
-				// 	if time.Since(di.AlertTime) >= time.Duration(di.Interval)*time.Second {
-				// 		di.AlertTime = time.Now()
-				// 		AlertMessage(di.AM, di.To)
-				// 	}
-				// }
+
 			}
 		}
 		dispatcherLock.Unlock()

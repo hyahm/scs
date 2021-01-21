@@ -74,7 +74,7 @@ func HttpServer() {
 	// router.Post("/install/{name}", handle.InstallPackage)
 	// router.Post("/install", handle.InstallScript)
 	router.Post("/set/alert", handle.Alert)
-	router.Post("/get/alert", handle.Alert)
+	router.Post("/get/alert", handle.GetAlert)
 	// 监测点
 	router.Post("/probe", handle.Probe).DelModule(midware.CheckToken)
 
