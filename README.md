@@ -10,6 +10,7 @@ service control service or script
 5.  支持定时器功能执行命令或脚本
 6.  客户端控制多台服务器
 7.  通过配置文件安装服务
+8.  可以将一些执行耗时的脚本托管给scs处理， 以便快速返回结果  
 
 # 文档
 [安装](document/install.md)  
