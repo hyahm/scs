@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/config"
 	"github.com/hyahm/scs/internal"
 
 	"github.com/hyahm/golog"
@@ -33,6 +34,7 @@ type Script struct {
 	loopTime           time.Time
 	WaitLoop           bool
 	DisableAlert       bool
+	DeleteWithExit     bool
 	Env                map[string]string
 	SubName            string
 	Disable            bool
@@ -309,6 +311,9 @@ func (s *Script) wait() error {
 
 			}
 		}
+		if s.DeleteWithExit {
+			return config.Cfg.DelScript(s.Name)
+		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
 		s.Status.RestartCount = 0
@@ -359,6 +364,9 @@ func (s *Script) wait() error {
 			return nil
 		}
 
+	}
+	if s.DeleteWithExit {
+		return config.Cfg.DelScript(s.Name)
 	}
 	s.stopStatus()
 	return nil

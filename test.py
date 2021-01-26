@@ -6,11 +6,13 @@ import json
 import sys
 import random
 import asyncio
+from pyscs.scs import SCS
 
 def log(s):
     print(s) 
     sys.stdout.flush()
 
+scs = SCS()
 log("token: " + os.getenv("TOKEN"))
 while True:
     headers = {

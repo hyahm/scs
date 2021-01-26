@@ -22,6 +22,7 @@ type Script struct {
 	Disable            bool              `yaml:"disable,omitempty" json:"disable"`
 	Cron               *Cron             `yaml:"cron,omitempty" json:"cron"`
 	Update             string            `yaml:"update,omitempty" json:"update"`
+	DeleteWithExit     bool              `yaml:"deleteWithExit,omitempty" json:"deleteWithExit"`
 }
 
 type LoopPath struct {
