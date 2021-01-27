@@ -18,9 +18,7 @@ var StatusCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		start := time.Now()
-		defer func() {
-			fmt.Println(time.Since(start).Seconds())
-		}()
+
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
 				nodeInfo.Name = node.UseNodes
@@ -50,6 +48,7 @@ var StatusCmd = &cobra.Command{
 			nodeInfo.Status(args...)
 		}
 		wg.Wait()
+		fmt.Println(time.Since(start).Seconds())
 	},
 }
 

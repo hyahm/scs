@@ -3,10 +3,9 @@ package handle
 import (
 	"net/http"
 
-	"github.com/hyahm/scs/config"
-	"github.com/hyahm/scs/internal"
-
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/script"
 	"github.com/hyahm/xmux"
 )
 
@@ -18,7 +17,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.ContinuityInterval = s.ContinuityInterval * 1000000000
-	if err := config.Cfg.AddScript(*s); err != nil {
+	if err := script.Cfg.AddScript(*s); err != nil {
 		w.Write([]byte(`{"code": 201, "msg": "already exist script"}`))
 		return
 	}
@@ -28,7 +27,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 
 func DelScript(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	if err := config.Cfg.DelScript(pname); err != nil {
+	if err := script.Cfg.DelScript(pname); err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}

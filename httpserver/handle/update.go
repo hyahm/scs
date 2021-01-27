@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hyahm/scs/pkg/script"
+	"github.com/hyahm/scs/script"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"

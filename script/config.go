@@ -1,4 +1,4 @@
-package config
+package script
 
 import (
 	"errors"
@@ -16,7 +16,6 @@ import (
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/logger"
-	"github.com/hyahm/scs/pkg/script"
 	"github.com/hyahm/scs/probe"
 
 	"github.com/hyahm/golog"
@@ -92,8 +91,8 @@ func Load(reload bool) error {
 		if Cfg.SC[index].Replicate < 1 {
 			Cfg.SC[index].Replicate = 1
 		}
-		if _, ok := script.SS.Infos[Cfg.SC[index].Name]; !ok {
-			script.SS.Infos[Cfg.SC[index].Name] = make(map[string]*script.Script)
+		if _, ok := SS.Infos[Cfg.SC[index].Name]; !ok {
+			SS.Infos[Cfg.SC[index].Name] = make(map[string]*Script)
 		}
 
 		if Cfg.SC[index].ContinuityInterval == 0 {
@@ -106,7 +105,7 @@ func Load(reload bool) error {
 	}
 	if reload {
 		// 删除多余的
-		script.StopUnUseScript()
+		StopUnUseScript()
 		b, _ := yaml.Marshal(Cfg)
 		// 跟新配置文件
 		return ioutil.WriteFile(cfgfile, b, 0644)
@@ -136,7 +135,7 @@ func readConfig() error {
 // 运行的时候， 返回状态 Service, 主要验证服务的有效性
 func (c *config) Run() {
 	c.check()
-	script.SS.Start()
+	SS.Start()
 }
 
 // 检测配置脚本是否
@@ -172,7 +171,7 @@ func (c *config) fill(index int, reload bool) {
 		subname := fmt.Sprintf("%s_%d", c.SC[index].Name, i)
 		if reload {
 			// 如果是加载配置文件， 那么删除已经有的
-			script.DelDelScript(subname)
+			DelDelScript(subname)
 		}
 
 		baseEnv["TOKEN"] = c.Token
@@ -201,7 +200,7 @@ func (c *config) fill(index int, reload bool) {
 		// 	env = append(env, k+"="+v)
 		// }
 
-		if _, ok := script.SS.Infos[c.SC[index].Name][subname]; ok {
+		if _, ok := SS.Infos[c.SC[index].Name][subname]; ok {
 			// 修改
 			c.update(index, subname, c.SC[index].Command, baseEnv)
 			continue
@@ -211,11 +210,11 @@ func (c *config) fill(index int, reload bool) {
 	}
 	go func() {
 		pname := c.SC[index].Name
-		if len(script.SS.Infos[pname]) > c.SC[index].Replicate {
-			for i := len(script.SS.Infos[pname]) - 1; i >= c.SC[index].Replicate; i-- {
+		if len(SS.Infos[pname]) > c.SC[index].Replicate {
+			for i := len(SS.Infos[pname]) - 1; i >= c.SC[index].Replicate; i-- {
 				ne := fmt.Sprintf("%s_%d", pname, i)
-				script.SS.Infos[pname][ne].Stop()
-				delete(script.SS.Infos[pname], ne)
+				SS.Infos[pname][ne].Stop()
+				delete(SS.Infos[pname], ne)
 			}
 		}
 	}()
@@ -224,7 +223,7 @@ func (c *config) fill(index int, reload bool) {
 
 func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
 
-	script.SS.Infos[c.SC[index].Name][subname] = &script.Script{
+	SS.Infos[c.SC[index].Name][subname] = &Script{
 		Name:      c.SC[index].Name,
 		LookPath:  c.SC[index].LookPath,
 		Command:   command,
@@ -234,10 +233,10 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		Log:       make(map[string][]string),
 		LogLocker: &sync.RWMutex{},
 		SubName:   subname,
-		Status: &script.ServiceStatus{
+		Status: &ServiceStatus{
 			Name:    subname,
 			PName:   c.SC[index].Name,
-			Status:  script.STOP,
+			Status:  STOP,
 			Path:    c.SC[index].Dir,
 			Version: c.SC[index].Version,
 		},
@@ -252,15 +251,15 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 
 		AT: c.SC[index].AT,
 	}
-	script.SS.Infos[c.SC[index].Name][subname].Log["log"] = make([]string, 0, global.LogCount)
-	script.SS.Infos[c.SC[index].Name][subname].Log["lookPath"] = make([]string, 0, global.LogCount)
-	script.SS.Infos[c.SC[index].Name][subname].Log["update"] = make([]string, 0, global.LogCount)
+	SS.Infos[c.SC[index].Name][subname].Log["log"] = make([]string, 0, global.LogCount)
+	SS.Infos[c.SC[index].Name][subname].Log["lookPath"] = make([]string, 0, global.LogCount)
+	SS.Infos[c.SC[index].Name][subname].Log["update"] = make([]string, 0, global.LogCount)
 	if c.SC[index].Cron != nil {
 		start, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
 		if err != nil {
 			start = time.Time{}
 		}
-		script.SS.Infos[c.SC[index].Name][subname].Cron = &script.Cron{
+		SS.Infos[c.SC[index].Name][subname].Cron = &Cron{
 			Start:   start,
 			IsMonth: c.SC[index].Cron.IsMonth,
 			Loop:    c.SC[index].Cron.Loop,
@@ -269,7 +268,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 
 	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
 		!c.SC[index].Disable {
-		script.SS.Infos[c.SC[index].Name][subname].Start()
+		SS.Infos[c.SC[index].Name][subname].Start()
 	}
 
 }
@@ -277,43 +276,43 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 func (c *config) update(index int, subname, command string, baseEnv map[string]string) {
 	// 修改
 
-	script.SS.Infos[c.SC[index].Name][subname].Env = baseEnv
-	script.SS.Infos[c.SC[index].Name][subname].LookPath = c.SC[index].LookPath
+	SS.Infos[c.SC[index].Name][subname].Env = baseEnv
+	SS.Infos[c.SC[index].Name][subname].LookPath = c.SC[index].LookPath
 	if c.SC[index].Cron != nil {
 		start, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
 		if err != nil {
 			start = time.Time{}
 		}
-		script.SS.Infos[c.SC[index].Name][subname].Cron = &script.Cron{
+		SS.Infos[c.SC[index].Name][subname].Cron = &Cron{
 			Start:   start,
 			IsMonth: c.SC[index].Cron.IsMonth,
 			Loop:    c.SC[index].Cron.Loop,
 		}
 	}
 
-	script.SS.Infos[c.SC[index].Name][subname].Command = command
-	script.SS.Infos[c.SC[index].Name][subname].DeleteWithExit = c.SC[index].DeleteWithExit
-	script.SS.Infos[c.SC[index].Name][subname].Update = c.SC[index].Update
-	script.SS.Infos[c.SC[index].Name][subname].Dir = c.SC[index].Dir
-	script.SS.Infos[c.SC[index].Name][subname].Replicate = c.SC[index].Replicate
-	script.SS.Infos[c.SC[index].Name][subname].Log = make(map[string][]string)
-	script.SS.Infos[c.SC[index].Name][subname].LogLocker = &sync.RWMutex{}
-	script.SS.Infos[c.SC[index].Name][subname].Log["log"] = make([]string, 0, global.LogCount)
-	script.SS.Infos[c.SC[index].Name][subname].Log["lookPath"] = make([]string, 0, global.LogCount)
-	script.SS.Infos[c.SC[index].Name][subname].Log["update"] = make([]string, 0, global.LogCount)
-	script.SS.Infos[c.SC[index].Name][subname].DisableAlert = c.SC[index].DisableAlert
-	script.SS.Infos[c.SC[index].Name][subname].Always = c.SC[index].Always
-	script.SS.Infos[c.SC[index].Name][subname].ContinuityInterval = c.SC[index].ContinuityInterval
-	script.SS.Infos[c.SC[index].Name][subname].Port = c.SC[index].Port + index
-	script.SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
-	script.SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
-	script.SS.Infos[c.SC[index].Name][subname].Status.Version = c.SC[index].Version
+	SS.Infos[c.SC[index].Name][subname].Command = command
+	SS.Infos[c.SC[index].Name][subname].DeleteWithExit = c.SC[index].DeleteWithExit
+	SS.Infos[c.SC[index].Name][subname].Update = c.SC[index].Update
+	SS.Infos[c.SC[index].Name][subname].Dir = c.SC[index].Dir
+	SS.Infos[c.SC[index].Name][subname].Replicate = c.SC[index].Replicate
+	SS.Infos[c.SC[index].Name][subname].Log = make(map[string][]string)
+	SS.Infos[c.SC[index].Name][subname].LogLocker = &sync.RWMutex{}
+	SS.Infos[c.SC[index].Name][subname].Log["log"] = make([]string, 0, global.LogCount)
+	SS.Infos[c.SC[index].Name][subname].Log["lookPath"] = make([]string, 0, global.LogCount)
+	SS.Infos[c.SC[index].Name][subname].Log["update"] = make([]string, 0, global.LogCount)
+	SS.Infos[c.SC[index].Name][subname].DisableAlert = c.SC[index].DisableAlert
+	SS.Infos[c.SC[index].Name][subname].Always = c.SC[index].Always
+	SS.Infos[c.SC[index].Name][subname].ContinuityInterval = c.SC[index].ContinuityInterval
+	SS.Infos[c.SC[index].Name][subname].Port = c.SC[index].Port + index
+	SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
+	SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
+	SS.Infos[c.SC[index].Name][subname].Status.Version = c.SC[index].Version
 	// 更新的时候
 
-	if script.SS.Infos[c.SC[index].Name][subname].Status.Status == script.STOP {
+	if SS.Infos[c.SC[index].Name][subname].Status.Status == STOP {
 		// 如果是停止的name就启动
 		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && !c.SC[index].Disable {
-			script.SS.Infos[c.SC[index].Name][subname].Start()
+			SS.Infos[c.SC[index].Name][subname].Start()
 		}
 	}
 }
@@ -359,8 +358,8 @@ func (c *config) updateConfig(s internal.Script, index int) {
 }
 
 func (c *config) AddScript(s internal.Script) error {
-	if _, ok := script.SS.Infos[s.Name]; !ok {
-		script.SS.Infos[s.Name] = make(map[string]*script.Script)
+	if _, ok := SS.Infos[s.Name]; !ok {
+		SS.Infos[s.Name] = make(map[string]*Script)
 	}
 	golog.Infof("%+v", s)
 	// 添加到配置文件
@@ -400,11 +399,11 @@ func (c *config) AddScript(s internal.Script) error {
 
 func (c *config) DelScript(pname string) error {
 	// del := make(chan bool)
-	if _, ok := script.SS.Infos[pname]; ok {
+	if _, ok := SS.Infos[pname]; ok {
 		// go func() {
 		// wg := &sync.WaitGroup{}
-		for name := range script.SS.Infos[pname] {
-			script.SS.Infos[pname][name].Remove()
+		for name := range SS.Infos[pname] {
+			SS.Infos[pname][name].Remove()
 		}
 
 	} else {
@@ -413,7 +412,7 @@ func (c *config) DelScript(pname string) error {
 	for i, s := range c.SC {
 		if s.Name == pname {
 			c.SC = append(c.SC[:i], c.SC[i+1:]...)
-			delete(script.SS.Infos, pname)
+			delete(SS.Infos, pname)
 			break
 		}
 	}

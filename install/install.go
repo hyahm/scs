@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/hyahm/scs/internal"
-	"github.com/hyahm/scs/pkg/script"
+	"github.com/hyahm/scs/script"
 )
 
 type InstallConfig struct {

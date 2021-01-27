@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/hyahm/scs/alert"
-	"github.com/hyahm/scs/config"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/httpserver"
+	"github.com/hyahm/scs/script"
 
 	"github.com/hyahm/golog"
 )
@@ -25,7 +25,7 @@ func main() {
 	}
 	// 报警器
 	go alert.SendNetAlert()
-	config.Start(cfg)
+	script.Start(cfg)
 
 	httpserver.HttpServer()
 	// 依次启动

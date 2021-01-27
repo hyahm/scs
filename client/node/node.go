@@ -7,7 +7,7 @@ import (
 
 	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/internal"
-	"github.com/hyahm/scs/pkg/script"
+	"github.com/hyahm/scs/script"
 
 	"github.com/hyahm/golog"
 )

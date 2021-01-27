@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hyahm/scs/pkg/script"
+	"github.com/hyahm/scs/script"
 )
 
 // 打印数据相关

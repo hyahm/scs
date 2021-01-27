@@ -3,10 +3,8 @@ package handle
 import (
 	"net/http"
 
-	"github.com/hyahm/scs/pkg/script"
 	"github.com/hyahm/scs/probe"
-
-	"github.com/hyahm/scs/config"
+	"github.com/hyahm/scs/script"
 )
 
 var reloadKey bool
@@ -25,7 +23,7 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 	reloadKey = true
 	// 拷贝一份到当前删除的脚本列表
 	script.Copy()
-	if err := config.Load(true); err != nil {
+	if err := script.Load(true); err != nil {
 		w.Write([]byte(err.Error()))
 		reloadKey = false
 		return

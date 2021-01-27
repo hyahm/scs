@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hyahm/scs/alert"
-	"github.com/hyahm/scs/config"
 	"github.com/hyahm/scs/internal"
 
 	"github.com/hyahm/golog"
@@ -312,7 +311,7 @@ func (s *Script) wait() error {
 			}
 		}
 		if s.DeleteWithExit {
-			return config.Cfg.DelScript(s.Name)
+			return Cfg.DelScript(s.Name)
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
 		s.stopStatus()
@@ -366,7 +365,7 @@ func (s *Script) wait() error {
 
 	}
 	if s.DeleteWithExit {
-		return config.Cfg.DelScript(s.Name)
+		return Cfg.DelScript(s.Name)
 	}
 	s.stopStatus()
 	return nil
