@@ -1,9 +1,7 @@
 package command
 
 import (
-	"fmt"
 	"sync"
-	"time"
 
 	"github.com/hyahm/scs/client/cliconfig"
 	"github.com/hyahm/scs/client/node"
@@ -17,8 +15,6 @@ var StatusCmd = &cobra.Command{
 	Long:  `command: scsctl status [flags] [pname] [name]`,
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		start := time.Now()
-
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
 				nodeInfo.Name = node.UseNodes
@@ -48,7 +44,6 @@ var StatusCmd = &cobra.Command{
 			nodeInfo.Status(args...)
 		}
 		wg.Wait()
-		fmt.Println(time.Since(start).Seconds())
 	},
 }
 

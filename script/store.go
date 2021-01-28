@@ -53,8 +53,8 @@ func Get(pname, name string) *ServiceStatus {
 }
 
 type StatusList struct {
-	Data []ServiceStatus `json:"data"`
-	Code int             `json:"code"`
+	Data []*ServiceStatus `json:"data"`
+	Code int              `json:"code"`
 }
 
 func All() []byte {
@@ -62,13 +62,13 @@ func All() []byte {
 		SS.mu = &sync.RWMutex{}
 	}
 	statuss := &StatusList{
-		Data: make([]ServiceStatus, 0),
+		Data: make([]*ServiceStatus, 0),
 	}
 	// ss := make([]*ServiceStatus, 0)
 	for pname := range SS.Infos {
 		for _, s := range SS.Infos[pname] {
 			s.Status.Command = s.Command
-			statuss.Data = append(statuss.Data, *s.Status)
+			statuss.Data = append(statuss.Data, s.Status)
 		}
 
 	}
@@ -85,10 +85,10 @@ func ScriptPname(pname string) []byte {
 		SS.mu = &sync.RWMutex{}
 	}
 	statuss := &StatusList{
-		Data: make([]ServiceStatus, 0),
+		Data: make([]*ServiceStatus, 0),
 	}
 	for _, s := range SS.Infos[pname] {
-		statuss.Data = append(statuss.Data, *s.Status)
+		statuss.Data = append(statuss.Data, s.Status)
 	}
 	statuss.Code = 200
 	send, err := json.MarshalIndent(statuss, "", "\n")
@@ -105,12 +105,12 @@ func ScriptName(pname, name string) []byte {
 	}
 
 	statuss := &StatusList{
-		Data: make([]ServiceStatus, 0),
+		Data: make([]*ServiceStatus, 0),
 	}
 	// statuss := make([]*script.ServiceStatus, 0)
 	if _, pok := SS.Infos[pname]; pok {
 		if s, ok := SS.Infos[pname][name]; ok {
-			statuss.Data = append(statuss.Data, *s.Status)
+			statuss.Data = append(statuss.Data, s.Status)
 		}
 	}
 	statuss.Code = 200
