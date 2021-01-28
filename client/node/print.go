@@ -35,7 +35,6 @@ func (s space) String() string {
 }
 
 func (s space) Int() int {
-
 	return int(s)
 }
 
@@ -45,6 +44,7 @@ func (st status) sortAndPrint(name, url string) {
 
 	// 排序并计算最大距离
 	for _, v := range st {
+
 		if v.Start > 0 {
 			v.Start = time.Now().Unix() - v.Start
 		}
@@ -61,15 +61,13 @@ func (st status) sortAndPrint(name, url string) {
 				*s = space(l + ds)
 			}
 		}
-
+		fmt.Printf("name: %s,%d\n", v.PName, v.Start)
 	}
 
 	for i := 0; i < len(st); i++ {
 		min := i
 		for j := i + 1; j < len(st); j++ {
 			if st[j].Name < st[min].Name {
-				// if st[j].PName[0] < st[min].PName[0] {
-				// fmt.Println(min)
 				min = j
 			}
 		}
@@ -90,6 +88,10 @@ func (st status) sortAndPrint(name, url string) {
 		"Failed" + (maxspace8 - space(len("Failed"))).String() +
 		"Command")
 	for _, v := range st {
+		if v.Start > 0 {
+			v.Start = time.Now().Unix() - v.Start
+		}
+		fmt.Printf("name: %s,%d\n", v.PName, v.Start)
 		var canNotStopSpace space
 		if v.CanNotStop {
 			canNotStopSpace = 4
