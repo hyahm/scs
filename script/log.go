@@ -31,7 +31,11 @@ func (s *Script) read() {
 
 func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 	readout := bufio.NewReader(stdout)
-
+	defer func() {
+		if err := recover(); err != nil {
+			golog.Error(err)
+		}
+	}()
 	for {
 		select {
 		case <-s.Ctx.Done():
