@@ -43,11 +43,13 @@ func (probe *Probe) InitHWAlert() {
 	if probe.ContinuityInterval == 0 {
 		probe.ContinuityInterval = time.Hour * 1
 	}
+	global.Monitored = make([]string, 0)
+
 	if len(probe.Monitored) > 0 {
 		global.Monitored = probe.Monitored
-	} else {
-		global.Monitored = make([]string, 0)
+
 	}
+	golog.Info(global.Monitored)
 	if probe.Cpu == 0 {
 		probe.Cpu = 90
 	}

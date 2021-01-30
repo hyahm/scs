@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/alert"
 	"github.com/hyahm/scs/global"
 )
@@ -55,6 +56,7 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 		// w.WriteHeader(http.StatusOK)
 		return
 	}
+	golog.Info(global.Monitored)
 	w.Write([]byte(`{"code": 511, "msg": "StatusNetworkAuthenticationRequired"}`))
 	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 	return

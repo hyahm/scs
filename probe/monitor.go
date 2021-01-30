@@ -66,6 +66,7 @@ func (m Scan) Check() {
 			failed = true
 		} else {
 			rest := &internal.Resp{}
+			golog.Info(string(resp))
 			err := json.Unmarshal(resp, rest)
 			if err != nil {
 				golog.Error(err)
