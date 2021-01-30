@@ -23,6 +23,7 @@ type Monitor struct {
 
 func NewMonitor(monitor []string, interval, continuityInterval time.Duration) Scan {
 	monitors := make(map[string]*Monitor)
+	golog.Info(monitors)
 	for _, v := range monitor {
 		monitors[v] = &Monitor{
 			AI: &alert.AlertInfo{
@@ -32,14 +33,20 @@ func NewMonitor(monitor []string, interval, continuityInterval time.Duration) Sc
 			Interval: interval,
 		}
 	}
+	golog.Info(monitors)
 	return monitors
 }
 
 func (m Scan) Update(probe *Probe) {
+	temp := make(map[string]struct{})
+	for k, _ := range m {
+		temp[k] = struct{}{}
+	}
 	for _, v := range probe.Monitor {
 		if _, ok := m[v]; ok {
 			m[v].Interval = probe.Interval
 			m[v].AI.ContinuityInterval = probe.ContinuityInterval
+			delete(temp, v)
 		} else {
 			m[v] = &Monitor{
 				AI: &alert.AlertInfo{
@@ -50,10 +57,14 @@ func (m Scan) Update(probe *Probe) {
 			}
 		}
 	}
+	for k, _ := range temp {
+		delete(m, k)
+	}
 }
 
 func (m Scan) Check() {
 	c := client.NewClient()
+	golog.Info(m)
 	for server, mm := range m {
 		c.Domain = server
 		var failed bool

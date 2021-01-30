@@ -36,6 +36,7 @@ type Probe struct {
 }
 
 func (probe *Probe) InitHWAlert() {
+	golog.Info("reload")
 	Exit = make(chan struct{}, 2)
 	if probe.Interval == 0 {
 		probe.Interval = time.Second * 10
@@ -49,7 +50,6 @@ func (probe *Probe) InitHWAlert() {
 		global.Monitored = probe.Monitored
 
 	}
-	golog.Info(global.Monitored)
 	if probe.Cpu == 0 {
 		probe.Cpu = 90
 	}
@@ -95,9 +95,10 @@ func (probe *Probe) CheckHardWare() {
 	} else {
 		cps[2] = nil
 	}
-
+	golog.Info(probe.Monitor)
 	if len(probe.Monitor) > 0 {
 		if IsNil(cps[3]) {
+			golog.Info("new")
 			cps[3] = NewMonitor(probe.Monitor, probe.Interval, probe.ContinuityInterval)
 		} else {
 			cps[3].Update(probe)
