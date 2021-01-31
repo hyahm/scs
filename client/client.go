@@ -12,7 +12,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/alert"
 	"github.com/hyahm/scs/internal"
 )
@@ -65,8 +64,6 @@ func client() *http.Client {
 }
 
 func (sc *SCSClient) Requests(url string, body io.Reader) ([]byte, error) {
-
-	golog.Info(sc.Domain + url)
 	req, err := http.NewRequest(http.MethodPost, sc.Domain+url, body)
 	if err != nil {
 		return nil, err
