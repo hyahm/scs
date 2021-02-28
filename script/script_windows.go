@@ -12,6 +12,11 @@ import (
 )
 
 func (s *Script) stop() {
+	defer func() {
+		if err := recover(); err != nil {
+			golog.Error(err)
+		}
+	}()
 	for {
 		select {
 		case <-time.After(time.Millisecond * 10):
