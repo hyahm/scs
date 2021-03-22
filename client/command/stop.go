@@ -25,27 +25,25 @@ var StopCmd = &cobra.Command{
 			args = nil
 		}
 		if node.UseNodes != "" {
-			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
+			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Stop(args...)
 				return
 			}
 		}
 		if node.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			for _, v := range cliconfig.Cfg.Group[node.GroupName] {
-				if nodeInfo, ok := cliconfig.Cfg.Nodes[v]; ok {
-					wg.Add(1)
-					nodeInfo.Wg = wg
-					nodeInfo.Stop(args...)
-				}
+			nodes := cliconfig.Cfg.GetNodesInGroup(node.GroupName)
+			for _, nodeInfo := range nodes {
+				wg.Add(1)
+				nodeInfo.Wg = wg
+				nodeInfo.Stop(args...)
 			}
 			wg.Wait()
 			return
 		}
-
 		wg := &sync.WaitGroup{}
-		for name, nodeInfo := range cliconfig.Cfg.Nodes {
-			nodeInfo.Name = name
+
+		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Stop(args...)

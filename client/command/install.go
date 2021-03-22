@@ -22,7 +22,7 @@ var InstallCmd = &cobra.Command{
 	Long:  `install package`,
 	Run: func(cmd *cobra.Command, args []string) {
 		condition := 0
-		sc := &internal.Script{}
+		sc := make([]*internal.Script, 0)
 		if len(args) > 1 {
 			condition++
 		}
@@ -33,7 +33,7 @@ var InstallCmd = &cobra.Command{
 				fmt.Println(err)
 				return
 			}
-			err = json.NewDecoder(resp.Body).Decode(sc)
+			err = json.NewDecoder(resp.Body).Decode(&sc)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -62,26 +62,25 @@ var InstallCmd = &cobra.Command{
 			return
 		}
 		if node.UseNodes != "" {
-			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
+			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Install(sc, env)
 				return
 			}
 		}
 		if node.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			for _, v := range cliconfig.Cfg.Group[node.GroupName] {
-				if nodeInfo, ok := cliconfig.Cfg.Nodes[v]; ok {
-					wg.Add(1)
-					nodeInfo.Wg = wg
-					nodeInfo.Install(sc, env)
-				}
+			nodes := cliconfig.Cfg.GetNodesInGroup(node.GroupName)
+			for _, nodeInfo := range nodes {
+				wg.Add(1)
+				nodeInfo.Wg = wg
+				nodeInfo.Install(sc, env)
 			}
 			wg.Wait()
 			return
 		}
 		wg := &sync.WaitGroup{}
-		for name, nodeInfo := range cliconfig.Cfg.Nodes {
-			nodeInfo.Name = name
+
+		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Install(sc, env)

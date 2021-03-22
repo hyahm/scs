@@ -240,7 +240,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 			PName:   c.SC[index].Name,
 			Status:  STOP,
 			Path:    c.SC[index].Dir,
-			Version: c.SC[index].Version,
+			Version: Command(c.SC[index].Version),
 		},
 		DeleteWithExit:     c.SC[index].DeleteWithExit,
 		Update:             c.SC[index].Update,
@@ -307,7 +307,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	SS.Infos[c.SC[index].Name][subname].Port = c.SC[index].Port + index
 	SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
 	SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
-	SS.Infos[c.SC[index].Name][subname].Status.Version = c.SC[index].Version
+	SS.Infos[c.SC[index].Name][subname].Status.Version = Command(c.SC[index].Version)
 	// 更新的时候
 
 	if SS.Infos[c.SC[index].Name][subname].Status.Status == STOP {
@@ -359,9 +359,11 @@ func (c *config) updateConfig(s internal.Script, index int) {
 }
 
 func (c *config) AddScript(s internal.Script) error {
+	SS.mu.RLock()
 	if _, ok := SS.Infos[s.Name]; !ok {
 		SS.Infos[s.Name] = make(map[string]*Script)
 	}
+	SS.mu.RUnlock()
 	golog.Infof("%+v", s)
 	// 添加到配置文件
 	for i, v := range c.SC {
@@ -400,6 +402,8 @@ func (c *config) AddScript(s internal.Script) error {
 
 func (c *config) DelScript(pname string) error {
 	// del := make(chan bool)
+	SS.mu.Lock()
+	defer SS.mu.Unlock()
 	if _, ok := SS.Infos[pname]; ok {
 		// go func() {
 		// wg := &sync.WaitGroup{}

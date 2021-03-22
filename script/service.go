@@ -55,6 +55,20 @@ type Script struct {
 	LogLocker          *sync.RWMutex
 }
 
+func Command(command string) string {
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/c", command)
+	} else {
+		cmd = exec.Command("/bin/bash", "-c", command)
+	}
+	out, err := cmd.Output()
+	if err != nil {
+		return ""
+	}
+	return string(out)
+}
+
 func (s *Script) shell(command string, typ string) error {
 	var cmd *exec.Cmd
 

@@ -16,29 +16,25 @@ var StatusCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if node.UseNodes != "" {
-			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
-				nodeInfo.Name = node.UseNodes
+			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Status(args...)
 				return
 			}
 		}
 		if node.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			for _, v := range cliconfig.Cfg.Group[node.GroupName] {
-				if nodeInfo, ok := cliconfig.Cfg.Nodes[v]; ok {
-					nodeInfo.Name = v
-					wg.Add(1)
-					nodeInfo.Wg = wg
-					nodeInfo.Status(args...)
-				}
+			nodes := cliconfig.Cfg.GetNodesInGroup(node.GroupName)
+			for _, nodeInfo := range nodes {
+				wg.Add(1)
+				nodeInfo.Wg = wg
+				nodeInfo.Status(args...)
 			}
 			wg.Wait()
 			return
 		}
 		wg := &sync.WaitGroup{}
 
-		for name, nodeInfo := range cliconfig.Cfg.Nodes {
-			nodeInfo.Name = name
+		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Status(args...)

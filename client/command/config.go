@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/hyahm/scs/client/cliconfig"
@@ -27,9 +26,8 @@ var ShowCmd = &cobra.Command{
 	Long:  `All software has versions. This is Hugo's`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		for name, v := range cliconfig.Cfg.Nodes {
-			fmt.Printf("name: %s \t url: %s \t token: %s \n", name, v.Url, v.Token)
-		}
+		cliconfig.Cfg.PrintNodes()
+
 	},
 }
 
@@ -40,26 +38,24 @@ var ReloadCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if node.UseNodes != "" {
-			if nodeInfo, ok := cliconfig.Cfg.Nodes[node.UseNodes]; ok {
+			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Reload()
 				return
 			}
 		}
 		if node.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			for _, v := range cliconfig.Cfg.Group[node.GroupName] {
-				if nodeInfo, ok := cliconfig.Cfg.Nodes[v]; ok {
-					wg.Add(1)
-					nodeInfo.Wg = wg
-					nodeInfo.Reload()
-				}
+			nodeinfos := cliconfig.Cfg.GetNodesInGroup(node.GroupName)
+			for _, nodeInfo := range nodeinfos {
+				wg.Add(1)
+				nodeInfo.Wg = wg
+				nodeInfo.Reload()
 			}
 			wg.Wait()
 			return
 		}
 		wg := &sync.WaitGroup{}
-		for name, nodeInfo := range cliconfig.Cfg.Nodes {
-			nodeInfo.Name = name
+		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Reload()
