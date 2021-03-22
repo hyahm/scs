@@ -259,7 +259,6 @@ func (s *Script) Kill() {
 func (s *Script) wait() error {
 	go s.successAlert()
 	if err := s.cmd.Wait(); err != nil {
-
 		s.Cancel()
 		// 执行脚本后环境的错误
 		select {

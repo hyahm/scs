@@ -210,6 +210,8 @@ func (c *config) fill(index int, reload bool) {
 	}
 	go func() {
 		pname := c.SC[index].Name
+		SS.mu.Lock()
+		defer SS.mu.Unlock()
 		if len(SS.Infos[pname]) > c.SC[index].Replicate {
 			for i := len(SS.Infos[pname]) - 1; i >= c.SC[index].Replicate; i-- {
 				ne := fmt.Sprintf("%s_%d", pname, i)
@@ -266,8 +268,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		}
 	}
 
-	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" &&
-		!c.SC[index].Disable {
+	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && !c.SC[index].Disable {
 		SS.Infos[c.SC[index].Name][subname].Start()
 	}
 
