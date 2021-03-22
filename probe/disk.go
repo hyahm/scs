@@ -57,6 +57,8 @@ func (d *Disk) Check() {
 			d.AI.BreakDown(fmt.Sprintf("硬盘使用率超过 %.2f%%", d.Percent))
 			return
 		}
+		d.AI.AM.Use = di.Used / 1024 / 1024 / 1024
 	}
+
 	d.AI.Recover("硬盘恢复")
 }

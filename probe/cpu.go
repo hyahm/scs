@@ -50,5 +50,6 @@ func (c *Cpu) Check() {
 		c.AI.BreakDown(fmt.Sprintf("cpu使用率超过 %.2f%%", c.Percent))
 		return
 	}
+	c.AI.AM.UsePercent, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", totalPercents), 64)
 	c.AI.Recover("cpu恢复")
 }
