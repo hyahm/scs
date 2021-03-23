@@ -33,7 +33,7 @@ type Script struct {
 	loopTime           time.Time
 	WaitLoop           bool
 	DisableAlert       bool
-	DeleteWithExit     bool
+	DeleteWhenExit     bool
 	Env                map[string]string
 	SubName            string
 	Disable            bool
@@ -323,7 +323,7 @@ func (s *Script) wait() error {
 
 			}
 		}
-		if s.DeleteWithExit {
+		if s.DeleteWhenExit {
 			return Cfg.DelScript(s.Name)
 		}
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", s.Name, s.SubName, err)
@@ -377,7 +377,7 @@ func (s *Script) wait() error {
 		}
 
 	}
-	if s.DeleteWithExit {
+	if s.DeleteWhenExit {
 		return Cfg.DelScript(s.Name)
 	}
 	s.stopStatus()

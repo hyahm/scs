@@ -12,7 +12,7 @@ import (
 
 var Addr string
 
-func init() {
+func GetIp() {
 	r, err := http.Get("http://ip.hyahm.com")
 	if err != nil {
 		return

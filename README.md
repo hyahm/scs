@@ -111,7 +111,7 @@ scripts:
     env:
       key: value
     # 执行完成后是否删除,  如果想执行的脚本完后自动删掉，可以启用， 多使用于挂载在后台执行
-    deleteWithExit: false
+    deleteWhenExit: false
     # 环境变量PORT, 支持变量$PORT, 当replicate大于1时， 命令的$PORT会递增1
     port: 8080
     command: "python .\\test.py signal"

@@ -36,7 +36,6 @@ type Probe struct {
 }
 
 func (probe *Probe) InitHWAlert() {
-	golog.Info("reload")
 	Exit = make(chan struct{}, 2)
 	if probe.Interval == 0 {
 		probe.Interval = time.Second * 10

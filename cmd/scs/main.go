@@ -14,6 +14,7 @@ import (
 
 func main() {
 	defer golog.Sync()
+	go alert.GetIp()
 	var cfg string
 	var showversion bool
 	flag.BoolVar(&showversion, "v", false, "get scs server version")

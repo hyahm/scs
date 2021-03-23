@@ -242,7 +242,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 			Path:    c.SC[index].Dir,
 			Version: Command(c.SC[index].Version),
 		},
-		DeleteWithExit:     c.SC[index].DeleteWithExit,
+		DeleteWhenExit:     c.SC[index].DeleteWhenExit,
 		Update:             c.SC[index].Update,
 		DisableAlert:       c.SC[index].DisableAlert,
 		ContinuityInterval: c.SC[index].ContinuityInterval,
@@ -292,7 +292,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	}
 
 	SS.Infos[c.SC[index].Name][subname].Command = command
-	SS.Infos[c.SC[index].Name][subname].DeleteWithExit = c.SC[index].DeleteWithExit
+	SS.Infos[c.SC[index].Name][subname].DeleteWhenExit = c.SC[index].DeleteWhenExit
 	SS.Infos[c.SC[index].Name][subname].Update = c.SC[index].Update
 	SS.Infos[c.SC[index].Name][subname].Dir = c.SC[index].Dir
 	SS.Infos[c.SC[index].Name][subname].Replicate = c.SC[index].Replicate
