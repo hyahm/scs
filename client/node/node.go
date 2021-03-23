@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/internal"
@@ -14,6 +15,7 @@ import (
 
 var UseNodes string
 var GroupName string
+var ReadTimeout time.Duration
 
 type Node struct {
 	Name  string `yaml:"-"`

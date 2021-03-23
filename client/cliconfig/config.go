@@ -84,7 +84,6 @@ func (cc *ClientConfig) PrintNodes() {
 }
 
 func ReadConfig() {
-
 	root, err := os.UserHomeDir()
 	if err != nil {
 		// 找不到就报错
