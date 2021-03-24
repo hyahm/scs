@@ -109,6 +109,8 @@ scripts:
       loop: 1
       isMonth: true  # 如果这里是false， 那么没隔1秒执行一次
     dir: D:\\work\\u5
+    # 是够禁用脚本， 为了保留配置又不想运行显示就启用
+    disable: true
     # 设置环境变量
     env:
       key: value
