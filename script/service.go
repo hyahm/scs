@@ -196,7 +196,10 @@ func (s *Script) Restart() {
 
 }
 
-func (s Script) Remove() {
+func (s *Script) Remove() {
+	if s == nil {
+		return
+	}
 	switch SS.Infos[s.Name][s.SubName].Status.Status {
 	case WAITRESTART, WAITSTOP:
 		// 结束发送的退出错误发出的信号
