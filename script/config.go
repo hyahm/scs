@@ -221,7 +221,7 @@ func (c *config) fill(index int, reload bool) {
 			replicate = 1
 		}
 		l := SS.Len()
-		if l > replicate {
+		if l > 0 && l > replicate {
 			for i := l - 1; i >= replicate; i-- {
 				subname := fmt.Sprintf("%s_%d", pname, i)
 				if reload {
