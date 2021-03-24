@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -25,6 +24,7 @@ func GetExecTime(handle func(http.ResponseWriter, *http.Request), w http.Respons
 
 // var dir := "key"
 func HttpServer() {
+	golog.Info("init http")
 	router := xmux.NewRouter()
 	router.SetHeader("Access-Control-Allow-Origin", "*")
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
@@ -89,7 +89,7 @@ func HttpServer() {
 	}
 
 	public.CreateTLS()
-	fmt.Println("listen on " + global.Listen + " over https")
+	golog.Info("listen on " + global.Listen + " over https")
 	if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
 		log.Fatal(err)
 	}

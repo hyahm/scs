@@ -21,9 +21,7 @@ func (s *Script) stop() {
 	for {
 		select {
 		case <-time.After(time.Millisecond * 10):
-
 			if !s.Status.CanNotStop {
-
 				err := syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
 				if err != nil {
 					// 如果pid已经被杀掉了， 那么就报错

@@ -16,6 +16,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"code": 201, "msg": "name require"}`))
 		return
 	}
+	// 将时间转化为秒
 	s.ContinuityInterval = s.ContinuityInterval * 1000000000
 	if err := script.Cfg.AddScript(*s); err != nil {
 		w.Write([]byte(`{"code": 201, "msg": "already exist script"}`))
@@ -46,7 +47,7 @@ func DelScript(w http.ResponseWriter, r *http.Request) {
 	// 	reloadKey = false
 	// 	return
 	// }
-	// script.StopUnUseScript()
+	// script.RemoveUnUseScript()
 	// reloadKey = false
 	w.Write([]byte(`{"code": 200, "msg": "already delete script"}`))
 	return

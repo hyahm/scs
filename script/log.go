@@ -60,6 +60,7 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 			} else {
 				t := time.Now().Format("2006/1/2 15:04:05")
 				line = t + " -- " + line
+				golog.Info(line)
 				s.Msg <- line
 			}
 		}

@@ -18,11 +18,10 @@ while True:
     headers = {
         "Token": os.getenv("TOKEN")
     }
-    
+    resp = scs.can_not_stop()
+    print(resp)
     requests.packages.urllib3.disable_warnings()
-    r = requests.post("https://127.0.0.1:11111/cannotstop/%s" % os.getenv("NAME"),  verify=False, headers=headers)
-    log(r.status_code)
     log("can not stop it")
     time.sleep(random.randint(10, 20))
-    resp = requests.post("https://127.0.0.1:11111/canstop/%s" % os.getenv("NAME"), verify=False, headers=headers)
+    scs.can_stop()
     log("can stop it")

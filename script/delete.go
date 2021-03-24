@@ -8,20 +8,21 @@ var delScript map[string]string // reload的时候，记录需要删除的
 var isreloading bool
 
 func Copy() {
-	delScript = make(map[string]string)
-	for pname, v := range SS.Infos {
-		for name := range v {
-			delScript[name] = pname
-		}
-
-	}
+	// delScript = make(map[string]string)
+	delScript = SS.Copy()
+	// delScript = make(map[string]string)
+	// for pname, v := range SS.Infos {
+	// 	for name := range v {
+	// 		delScript[name] = pname
+	// 	}
+	// }
 }
 
 func DelDelScript(key string) {
 	delete(delScript, key)
 }
 
-func StopUnUseScript() {
+func RemoveUnUseScript() {
 	// 停止无用的脚本， 并移除
 	for subname, name := range delScript {
 		SS.Infos[name][subname].Remove()

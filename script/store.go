@@ -2,6 +2,7 @@ package script
 
 import (
 	"encoding/json"
+	"strings"
 	"sync"
 
 	"github.com/hyahm/golog"
@@ -12,14 +13,117 @@ var SS *Service
 
 func init() {
 	SS = &Service{
+		// 由2层组成， 一级是name  二级是pname
 		Infos: make(map[string]map[string]*Script),
-		mu:    &sync.RWMutex{},
+		Mu:    &sync.RWMutex{},
 	}
 }
 
 type Service struct {
 	Infos map[string]map[string]*Script
-	mu    *sync.RWMutex
+	Mu    *sync.RWMutex
+}
+
+func getpname(subname string) string {
+	i := strings.LastIndex(subname, "_")
+	if i < 0 {
+		return ""
+	}
+	return subname[:i]
+}
+
+func (s *Service) HasKey(pname, name string) bool {
+	if s.Len() == 0 {
+		return false
+	}
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	if _, ok := s.Infos[pname]; !ok {
+		return false
+	}
+	if _, ok := s.Infos[pname][name]; ok {
+		return true
+	}
+	return false
+}
+
+func (s *Service) AddScript(subname string, script *Script) {
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	pname := getpname(subname)
+	if pname == "" {
+		return
+	}
+	if _, ok := s.Infos[pname]; !ok || s.Infos[pname] == nil {
+		s.Infos[pname] = make(map[string]*Script)
+	}
+	s.Infos[pname][subname] = script
+}
+
+func (s *Service) MakeSubStruct(pname string) {
+	if s.Len() == 0 {
+		s.Infos[pname] = make(map[string]*Script)
+		return
+	}
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	if _, ok := s.Infos[pname]; !ok {
+		s.Infos[pname] = make(map[string]*Script)
+	}
+}
+
+func (s *Service) Len() int {
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	return len(s.Infos)
+}
+
+// 从 SS 中删除某一个subname
+func (s *Service) DeleteSubname(subname string) {
+	if s.Len() == 0 {
+		return
+	}
+	s.Mu.Lock()
+	defer s.Mu.Unlock()
+	// 以最后一个下划线来分割出pname
+	i := strings.LastIndex(subname, "_")
+	if i < 0 {
+		golog.Error("not found this subname :" + subname)
+		return
+	}
+	pname := subname[:i]
+	if _, ok := s.Infos[pname]; ok {
+		delete(s.Infos[pname], subname)
+	}
+}
+
+// 从 SS 中删除某一个pname
+func (s *Service) DeletePname(pname string) {
+	if s.Len() == 0 {
+		return
+	}
+	s.Mu.Lock()
+	defer s.Mu.Unlock()
+	if _, ok := s.Infos[pname]; ok {
+		delete(s.Infos, pname)
+	}
+}
+
+// 从 SS 中删除某一个subname
+func (s *Service) GetScriptFromPnameAndSubname(pname, subname string) *Script {
+	if s.Len() == 0 {
+		return nil
+	}
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	// 以最后一个下划线来分割出pname
+	if _, ok := s.Infos[pname]; !ok {
+		return nil
+	}
+	if _, ok := s.Infos[pname][subname]; !ok {
+		return nil
+	}
+	return s.Infos[pname][subname]
 }
 
 type status struct {
@@ -28,17 +132,29 @@ type status struct {
 	name  string
 }
 
+func (s *Service) Copy() map[string]string {
+	keys := make(map[string]string)
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	for pname := range s.Infos {
+		for name := range s.Infos[pname] {
+			keys[name] = pname
+		}
+	}
+	return keys
+}
+
 // 第一次启动
 func (s *Service) Start() {
 	// 先无视有启动顺序的脚本
 	// 先启动无需顺序的脚本
-	s.mu.RLock()
+	s.Mu.RLock()
 	for pname := range SS.Infos {
 		for name := range SS.Infos[pname] {
 			SS.Infos[pname][name].Start()
 		}
 	}
-	s.mu.RUnlock()
+	s.Mu.RUnlock()
 
 }
 
@@ -58,8 +174,8 @@ type StatusList struct {
 }
 
 func All() []byte {
-	if SS.mu == nil {
-		SS.mu = &sync.RWMutex{}
+	if SS.Mu == nil {
+		SS.Mu = &sync.RWMutex{}
 	}
 	statuss := &StatusList{
 		Data: make([]*ServiceStatus, 0),
@@ -81,8 +197,8 @@ func All() []byte {
 }
 
 func ScriptPname(pname string) []byte {
-	if SS.mu == nil {
-		SS.mu = &sync.RWMutex{}
+	if SS.Mu == nil {
+		SS.Mu = &sync.RWMutex{}
 	}
 	statuss := &StatusList{
 		Data: make([]*ServiceStatus, 0),
@@ -100,8 +216,8 @@ func ScriptPname(pname string) []byte {
 }
 
 func ScriptName(pname, name string) []byte {
-	if SS.mu == nil {
-		SS.mu = &sync.RWMutex{}
+	if SS.Mu == nil {
+		SS.Mu = &sync.RWMutex{}
 	}
 
 	statuss := &StatusList{

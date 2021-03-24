@@ -114,6 +114,8 @@ scripts:
     deleteWhenExit: false
     # 环境变量PORT, 支持变量$PORT, 当replicate大于1时， 命令的$PORT会递增1
     port: 8080
+    # 版本号， 此处是一个命令的结果
+    version: "scsd -v"
     command: "python .\\test.py signal"
     # replicate， 开启副本数， 默认 1, 如果大于1并且需要特殊条件才能停止， 请在脚本参数后添加 $NAME   
     # 此参数是传递请求需要的name

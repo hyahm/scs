@@ -112,7 +112,7 @@ func (ra *RespAlert) SendAlert() {
 }
 
 func SendNetAlert() {
-	// 删除超过1天没发送信息的值
+	// 删除超过10小时没发送信息的值
 	for {
 		dispatcherLock.Lock()
 		for pname := range dispatcher {
@@ -124,7 +124,7 @@ func SendNetAlert() {
 			}
 		}
 		dispatcherLock.Unlock()
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Minute * 10)
 	}
 
 }

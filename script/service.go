@@ -31,7 +31,7 @@ type Script struct {
 	Always             bool
 	Cron               *Cron
 	loopTime           time.Time
-	WaitLoop           bool
+	IsLoop             bool // 如果是定时任务
 	DisableAlert       bool
 	DeleteWhenExit     bool
 	Env                map[string]string
@@ -46,7 +46,7 @@ type Script struct {
 	ContinuityInterval time.Duration
 	AI                 *alert.AlertInfo // 报警规则
 	Exit               chan int         // 判断是否是主动退出的
-	EndStop            chan bool
+	EndStop            chan bool        // 取消停止，重启的信号
 	Ctx                context.Context
 	Cancel             context.CancelFunc
 	Email              []string
@@ -71,7 +71,8 @@ func Command(command string) string {
 
 func (s *Script) shell(command string, typ string) error {
 	var cmd *exec.Cmd
-
+	golog.Info(command)
+	golog.Info(typ)
 	// s.co = strings.ReplaceAll(s.comm, "$NAME", subname)
 	// command = strings.ReplaceAll(command, "$PNAME", c.SC[index].Name)
 	// command = strings.ReplaceAll(command, "$PORT", strconv.Itoa(c.SC[index].Port+i))
@@ -146,6 +147,7 @@ func (s *Script) Start() error {
 			s.EndStop = make(chan bool, 2)
 			s.Ctx, s.Cancel = context.WithCancel(context.Background())
 			if s.Cron != nil && s.Cron.Loop > 0 {
+
 				// 如果时间没填， 或者已经过去的时间了， 那么就直接启动
 				if (s.Cron.Start != time.Time{}) && time.Since(s.Cron.Start) < 0 {
 					go s.cron()
@@ -172,7 +174,7 @@ func (s *Script) Start() error {
 
 // Restart  重动服务
 func (s *Script) Restart() {
-	if s.WaitLoop {
+	if s.IsLoop {
 		s.Cancel()
 		s.stopStatus()
 	}
@@ -225,7 +227,8 @@ func (s *Script) remove() {
 
 // Stop  停止服务
 func (s *Script) Stop() {
-	if s.WaitLoop {
+	if s.IsLoop {
+		// 如果是定时任务， 直接停止
 		s.Cancel()
 		s.stopStatus()
 	}
@@ -252,7 +255,7 @@ func (s *Script) UpdateAndRestart() {
 
 // Stop  杀掉服务
 func (s *Script) Kill() {
-	if s.WaitLoop {
+	if s.IsLoop {
 		s.Cancel()
 		s.stopStatus()
 	}
@@ -335,7 +338,7 @@ func (s *Script) wait() error {
 
 	if s.Cron != nil && s.Cron.Loop > 0 {
 		// s.stopStatus()
-		s.WaitLoop = true
+		s.IsLoop = true
 		if s.Cron.IsMonth {
 			start := time.Since(s.loopTime.AddDate(0, s.Cron.Loop, 0))
 			if start < 0 {
@@ -390,5 +393,5 @@ func (s *Script) stopStatus() {
 	s.Status.Pid = 0
 	s.Status.Start = 0
 	s.cmd = nil
-	s.WaitLoop = false
+	s.IsLoop = false
 }

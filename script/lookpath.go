@@ -21,7 +21,7 @@ func (s *Script) LookCommandPath() error {
 			}
 		}
 		if strings.Trim(v.Command, " ") != "" {
-			golog.Info("check command: ", v.Path)
+			golog.Info("check command: ", v.Command)
 			_, err := exec.LookPath(v.Command)
 			if err == nil {
 				continue

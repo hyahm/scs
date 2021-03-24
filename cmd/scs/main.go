@@ -21,13 +21,12 @@ func main() {
 	flag.StringVar(&cfg, "f", "scs.yaml", "set config file")
 	flag.Parse()
 	if showversion {
-		fmt.Println("version:", global.VERSION)
+		fmt.Println(global.VERSION)
 		return
 	}
-	// 报警器
+	// 自动清除全局报警器的值
 	go alert.SendNetAlert()
 	script.Start(cfg)
-
 	httpserver.HttpServer()
 	// 依次启动
 }
