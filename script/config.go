@@ -271,6 +271,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 
 		AT: c.SC[index].AT,
 	}
+	// 生成对应的文件类型
 	s.Log["log"] = make([]string, 0, global.LogCount)
 	s.Log["lookPath"] = make([]string, 0, global.LogCount)
 	s.Log["update"] = make([]string, 0, global.LogCount)

@@ -99,7 +99,9 @@ scripts:
   - name: u5
     # 查看是否存在文件或命令, 不存在就执行install的命令, 执行时存在env定义的环境变量
     lookPath
-    - path: git
+
+    - path: /home/git  # 这个条件表示目录或文件是否存在
+      command: git     # 这个条件是命令是否存在 二选一
       install: yum -y install git
     cron:
       # 此行含义， 每个月的25号10:10:10 执行一次
