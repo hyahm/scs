@@ -241,6 +241,7 @@ func main() {
 
 ### python 版本
 
+https://pypi.org/project/pyscs/
 ```
 pip install pyscs
 ```
