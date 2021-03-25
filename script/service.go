@@ -58,7 +58,7 @@ type Script struct {
 func Command(command string) string {
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
-		cmd = exec.Command("cmd", "/c", command)
+		cmd = exec.Command("powershell", "-c", command)
 	} else {
 		cmd = exec.Command("/bin/bash", "-c", command)
 	}
@@ -77,7 +77,7 @@ func (s *Script) shell(command string, typ string) error {
 	// command = strings.ReplaceAll(command, "$PNAME", c.SC[index].Name)
 	// command = strings.ReplaceAll(command, "$PORT", strconv.Itoa(c.SC[index].Port+i))
 	if runtime.GOOS == "windows" {
-		cmd = exec.Command("cmd", "/c", command)
+		cmd = exec.Command("powershell", "-c", command)
 	} else {
 		cmd = exec.Command("/bin/bash", "-c", command)
 	}
