@@ -84,7 +84,7 @@ func (s *Script) shell(command string, typ string) error {
 	if cmd.Env == nil {
 		cmd.Env = make([]string, 0, len(s.Env))
 	}
-
+	cmd.Dir = s.Dir
 	for k, v := range s.Env {
 		cmd.Env = append(cmd.Env, k+"="+v)
 		command = strings.ReplaceAll(command, "$"+k, v)
