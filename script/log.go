@@ -93,7 +93,7 @@ func appendRead(stdout io.ReadCloser, s *Script, typ string) {
 			stdout.Close()
 			break
 		}
-		golog.Info(line)
+		golog.Infof(line)
 		s.LogLocker.Lock()
 		if len(s.Log[typ]) >= global.LogCount {
 			copy(s.Log[typ], s.Log[typ][1:])
