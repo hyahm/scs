@@ -314,7 +314,11 @@ func (s *Script) wait() error {
 					alert.AlertMessage(am, s.AT)
 				} else {
 					// 间隔时间内才发送报警
-					if time.Since(s.AI.AlertTime) >= s.ContinuityInterval {
+					ci := s.ContinuityInterval
+					if ci == 0 {
+						ci = time.Hour * 1
+					}
+					if time.Since(s.AI.AlertTime) >= ci {
 						s.AI.AlertTime = time.Now()
 						alert.AlertMessage(am, s.AT)
 					}

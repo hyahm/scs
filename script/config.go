@@ -239,10 +239,6 @@ func (c *config) fill(index int, reload bool) {
 
 func (c *config) add(index, port int, subname, command string, baseEnv map[string]string) {
 
-	ci := Cfg.SC[index].ContinuityInterval
-	if ci == 0 {
-		ci = time.Minute * 10
-	}
 	s := &Script{
 		Name:      c.SC[index].Name,
 		LookPath:  c.SC[index].LookPath,
@@ -263,7 +259,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		DeleteWhenExit:     c.SC[index].DeleteWhenExit,
 		Update:             c.SC[index].Update,
 		DisableAlert:       c.SC[index].DisableAlert,
-		ContinuityInterval: ci,
+		ContinuityInterval: Cfg.SC[index].ContinuityInterval,
 		Always:             c.SC[index].Always,
 		Disable:            c.SC[index].Disable,
 		AI:                 &alert.AlertInfo{},
@@ -293,11 +289,6 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 
 func (c *config) update(index int, subname, command string, baseEnv map[string]string) {
 	// 修改
-	// 设置间隔时间默认值
-	ci := Cfg.SC[index].ContinuityInterval
-	if ci == 0 {
-		ci = time.Minute * 10
-	}
 
 	scriptInfo := SS.GetScriptFromPnameAndSubname(c.SC[index].Name, subname)
 
@@ -327,7 +318,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	SS.Infos[c.SC[index].Name][subname].Log["update"] = make([]string, 0, global.LogCount)
 	SS.Infos[c.SC[index].Name][subname].DisableAlert = c.SC[index].DisableAlert
 	SS.Infos[c.SC[index].Name][subname].Always = c.SC[index].Always
-	SS.Infos[c.SC[index].Name][subname].ContinuityInterval = ci
+	SS.Infos[c.SC[index].Name][subname].ContinuityInterval = Cfg.SC[index].ContinuityInterval
 	SS.Infos[c.SC[index].Name][subname].Port = c.SC[index].Port + index
 	SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
 	SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
@@ -361,11 +352,6 @@ func (c *config) updateConfig(s internal.Script, index int) {
 
 	c.SC[index].Always = s.Always
 	c.SC[index].DisableAlert = s.DisableAlert
-	if s.ContinuityInterval != 0 {
-		c.SC[index].ContinuityInterval = s.ContinuityInterval
-	} else {
-		c.SC[index].ContinuityInterval = time.Minute * 10
-	}
 	if s.Port != 0 {
 		c.SC[index].Port = s.Port
 	}
@@ -405,9 +391,6 @@ func (c *config) AddScript(s internal.Script) error {
 		s.Replicate = 1
 	}
 
-	if s.ContinuityInterval == 0 {
-		s.ContinuityInterval = time.Minute * 10
-	}
 	c.SC = append(c.SC, s)
 	index := len(c.SC) - 1
 	c.fill(index, true)
