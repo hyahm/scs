@@ -81,16 +81,26 @@ func HttpServer() {
 	// router.Get("/version/{pname}/{name}", handle.Version)
 	router.Post("/script", handle.AddScript).Bind(&internal.Script{}).AddModule(midware.Unmarshal)
 	router.Post("/delete/{pname}", handle.DelScript)
+	if global.DisableTls {
+		golog.Info("listen on " + global.Listen + " over http")
+		log.Fatal(router.Run(global.Listen))
+		return
+	}
 
 	svc := &http.Server{
 		ReadTimeout: 5 * time.Second,
 		Addr:        global.Listen,
 		Handler:     router,
 	}
-
-	public.CreateTLS()
-	golog.Info("listen on " + global.Listen + " over https")
-	if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
+	if global.Key == "" || global.Pem == "" {
+		public.CreateTLS()
+		golog.Info("listen on " + global.Listen + " over https")
+		if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+	if err := svc.ListenAndServeTLS(global.Pem, global.Key); err != nil {
 		log.Fatal(err)
 	}
 }

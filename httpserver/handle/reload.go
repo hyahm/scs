@@ -28,7 +28,6 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 		reloadKey = false
 		return
 	}
-	// script.RemoveUnUseScript()
 	reloadKey = false
 	w.Write([]byte(`{"code": 200, "msg": "config file reloaded"}`))
 }

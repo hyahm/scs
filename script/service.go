@@ -55,7 +55,7 @@ type Script struct {
 	LogLocker          *sync.RWMutex
 }
 
-func Command(command string) string {
+func getVersion(command string) string {
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("powershell", "-c", command)
@@ -66,7 +66,7 @@ func Command(command string) string {
 	if err != nil {
 		return ""
 	}
-	return string(out)
+	return strings.ReplaceAll(string(out), "\n", "")
 }
 
 func (s *Script) shell(command string, typ string) error {
@@ -200,6 +200,7 @@ func (s *Script) Remove() {
 	if s == nil {
 		return
 	}
+	golog.Info(SS.Infos[s.Name][s.SubName].Status.Status)
 	switch SS.Infos[s.Name][s.SubName].Status.Status {
 	case WAITRESTART, WAITSTOP:
 		// 结束发送的退出错误发出的信号
@@ -209,6 +210,7 @@ func (s *Script) Remove() {
 		go SS.Infos[s.Name][s.SubName].remove()
 	case STOP:
 		// 直接删除
+		golog.Info("aaa")
 		delete(SS.Infos[s.Name], s.SubName)
 		if len(SS.Infos[s.Name]) == 0 {
 			delete(SS.Infos, s.Name)

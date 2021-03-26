@@ -33,6 +33,7 @@ func (cc *ClientConfig) GetNode(name string) (*node.Node, bool) {
 	cc.mu.RLock()
 	defer cc.mu.RUnlock()
 	if v, ok := cc.Nodes[name]; ok {
+		v.Name = name
 		return v, true
 	} else {
 		return nil, false
@@ -46,7 +47,8 @@ func (cc *ClientConfig) GetNodes() []*node.Node {
 	}
 	cc.mu.RLock()
 	defer cc.mu.RUnlock()
-	for _, v := range cc.Nodes {
+	for name, v := range cc.Nodes {
+		v.Name = name
 		ns = append(ns, v)
 	}
 	return ns
@@ -62,6 +64,7 @@ func (cc *ClientConfig) GetNodesInGroup(group string) []*node.Node {
 	if v, ok := cc.Group[group]; ok {
 		for _, name := range v {
 			if node, ok := cc.GetNode(name); ok {
+				node.Name = name
 				ns = append(ns, node)
 			}
 		}

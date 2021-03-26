@@ -27,7 +27,7 @@ var StatusCmd = &cobra.Command{
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
 				nodeInfo.Wg = wg
-				nodeInfo.Status(args...)
+				go nodeInfo.Status(args...)
 			}
 			wg.Wait()
 			return
@@ -37,7 +37,7 @@ var StatusCmd = &cobra.Command{
 		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
-			nodeInfo.Status(args...)
+			go nodeInfo.Status(args...)
 		}
 		wg.Wait()
 	},

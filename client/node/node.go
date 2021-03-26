@@ -136,7 +136,7 @@ func (node *Node) Status(args ...string) {
 		return
 	}
 	if sl.Code == 203 {
-		fmt.Println("token error")
+		fmt.Printf("node: %s, token error \n", node.Name)
 		return
 	}
 	status(sl.Data).sortAndPrint(node.Name, node.Url)

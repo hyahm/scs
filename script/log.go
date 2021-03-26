@@ -48,6 +48,7 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 				stdout.Close()
 				return
 			}
+			golog.Info(line[:len(line)-1])
 			s.LogLocker.RLock()
 			logCap := cap(s.Log["log"])
 			s.LogLocker.RUnlock()
@@ -60,7 +61,6 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 			} else {
 				t := time.Now().Format("2006/1/2 15:04:05")
 				line = t + " -- " + line
-				golog.Info(line)
 				s.Msg <- line
 			}
 		}
@@ -93,7 +93,7 @@ func appendRead(stdout io.ReadCloser, s *Script, typ string) {
 			stdout.Close()
 			break
 		}
-		golog.Infof(line)
+		golog.Info(line[:len(line)-1])
 		s.LogLocker.Lock()
 		if len(s.Log[typ]) >= global.LogCount {
 			copy(s.Log[typ], s.Log[typ][1:])

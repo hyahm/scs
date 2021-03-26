@@ -20,7 +20,6 @@ package handle
 // 		reloadKey = false
 // 		return
 // 	}
-// 	script.RemoveUnUseScript()
 // 	reloadKey = false
 // }
 // 	defer script.Reloadlocker.Unlock()
@@ -32,6 +31,5 @@ package handle
 // 		reloadKey = false
 // 		return
 // 	}
-// 	script.RemoveUnUseScript()
 // 	reloadKey = false
 // }

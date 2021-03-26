@@ -30,6 +30,9 @@ type Repo struct {
 type config struct {
 	Listen      string            `yaml:"listen"`
 	Token       string            `yaml:"token"`
+	Key         string            `yaml:"key"`
+	Pem         string            `yaml:"pem"`
+	DisableTls  bool              `yaml:"disableTls"`
 	Log         logger.Logger     `yaml:"log"`
 	LogCount    int               `yaml:"logCount"`
 	IgnoreToken []string          `yaml:"ignoreToken"`
@@ -79,6 +82,9 @@ func Load(reload bool) error {
 	global.Token = Cfg.Token
 	global.Listen = Cfg.Listen
 	global.IgnoreToken = Cfg.IgnoreToken
+	global.DisableTls = Cfg.DisableTls
+	global.Key = Cfg.Key
+	global.Pem = Cfg.Pem
 
 	// 初始化报警器信息
 	Cfg.Alert.InitAlert()
@@ -254,7 +260,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 			PName:   c.SC[index].Name,
 			Status:  STOP,
 			Path:    c.SC[index].Dir,
-			Version: Command(c.SC[index].Version),
+			Version: getVersion(c.SC[index].Version),
 		},
 		DeleteWhenExit:     c.SC[index].DeleteWhenExit,
 		Update:             c.SC[index].Update,
@@ -322,7 +328,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	SS.Infos[c.SC[index].Name][subname].Port = c.SC[index].Port + index
 	SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
 	SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
-	SS.Infos[c.SC[index].Name][subname].Status.Version = Command(c.SC[index].Version)
+	SS.Infos[c.SC[index].Name][subname].Status.Version = getVersion(c.SC[index].Version)
 	// 更新的时候
 
 	if SS.Infos[c.SC[index].Name][subname].Status.Status == STOP {

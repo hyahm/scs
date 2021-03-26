@@ -12,7 +12,7 @@ def log(s):
     print(s) 
     sys.stdout.flush()
 
-scs = SCS()
+scs = SCS(domain = "http://127.0.0.1:11111")
 log("token: " + os.getenv("TOKEN"))
 while True:
     headers = {

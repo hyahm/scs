@@ -1,18 +1,22 @@
 package script
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/hyahm/golog"
+)
 
 // 记录加载配置文件前使用的脚本服务
 // 重新加载的时候， 有多余的就会删除
 
 // 记录这次所有使用的, 这个先只添加就可以了， key 是subname， value是name
 var delScript map[string]string // reload的时候，记录需要删除的
-var isreloading bool
 var slock sync.RWMutex
 
 func Copy() {
 	// delScript = make(map[string]string)
 	delScript = SS.Copy()
+	golog.Infof("%#v\n", delScript)
 	slock = sync.RWMutex{}
 	// delScript = make(map[string]string)
 	// for pname, v := range SS.Infos {
@@ -25,6 +29,7 @@ func Copy() {
 func DelDelScript(key string) {
 	slock.Lock()
 	defer slock.Unlock()
+	golog.Info(key)
 	delete(delScript, key)
 }
 
@@ -32,8 +37,10 @@ func RemoveUnUseScript() {
 	slock.RLock()
 	defer slock.RUnlock()
 	// 停止无用的脚本， 并移除
+	golog.Infof("%#v\n", delScript)
+	golog.Infof("%#v\n", SS.Infos)
 	for subname, name := range delScript {
-		SS.GetScriptFromPnameAndSubname(subname, name).Remove()
+		SS.GetScriptFromPnameAndSubname(name, subname).Remove()
 	}
 	delScript = nil
 }
