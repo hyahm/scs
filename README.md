@@ -124,7 +124,7 @@ scripts:
     # replicate， 开启副本数， 默认 1, 如果大于1并且需要特殊条件才能停止， 请在脚本参数后添加 $NAME   
     # 此参数是传递请求需要的name
     replicate: 10
-    # 不写默认10分钟
+    # 不写默认1小时
     continuityInterval: 1h
     # 报警收件人， 此脚本额外的收件人
     alert:
