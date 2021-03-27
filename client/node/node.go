@@ -2,6 +2,7 @@ package node
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -16,6 +17,7 @@ import (
 var UseNodes string
 var GroupName string
 var ReadTimeout time.Duration
+var TokenError = errors.New("Token error")
 
 type Node struct {
 	Name   string `yaml:"-"`
@@ -139,7 +141,7 @@ func (node *Node) Status(args ...string) error {
 	}
 	if resp.Code == 203 {
 		fmt.Printf("node: %s, token error \n", node.Name)
-		return err
+		return TokenError
 	}
 
 	if len(node.Filter) > 0 {
