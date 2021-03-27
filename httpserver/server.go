@@ -3,6 +3,7 @@ package httpserver
 import (
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -84,7 +85,6 @@ func HttpServer() {
 	if global.DisableTls {
 		golog.Info("listen on " + global.Listen + " over http")
 		log.Fatal(router.Run(global.Listen))
-		return
 	}
 
 	svc := &http.Server{
@@ -92,13 +92,18 @@ func HttpServer() {
 		Addr:        global.Listen,
 		Handler:     router,
 	}
-	if global.Key == "" || global.Pem == "" {
+
+	// 如果key文件不存在那么就自动生成
+	keyfile := filepath.Join("keys", "server.key")
+	pemfile := filepath.Join("keys", "server.pem")
+	_, err1 := os.Stat(keyfile)
+	_, err2 := os.Stat(pemfile)
+	if global.Key == "" || global.Pem == "" && os.IsNotExist(err1) || os.IsNotExist(err2) {
 		public.CreateTLS()
 		golog.Info("listen on " + global.Listen + " over https")
 		if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
 			log.Fatal(err)
 		}
-		return
 	}
 	if err := svc.ListenAndServeTLS(global.Pem, global.Key); err != nil {
 		log.Fatal(err)

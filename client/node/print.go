@@ -10,7 +10,11 @@ import (
 
 // 打印数据相关
 
-type status []*script.ServiceStatus
+type ScriptStatusNode struct {
+	Nodes []*script.ServiceStatus
+	Name  string
+	Url   string
+}
 
 const ds = 4 // 2个列的最近间距
 type space int
@@ -27,24 +31,24 @@ func (s space) Int() int {
 	return int(s)
 }
 
-func (st status) sortAndPrint(name, url string) {
+func (st *ScriptStatusNode) SortAndPrint() {
 	// spaceLen := make(map[*space]int)
 	// 安装 name 的顺序进行排序
-	for i := 0; i < len(st); i++ {
+	for i := 0; i < len(st.Nodes); i++ {
 		min := i
-		for j := i + 1; j < len(st); j++ {
-			if st[j].Name < st[min].Name {
+		for j := i + 1; j < len(st.Nodes); j++ {
+			if st.Nodes[j].Name < st.Nodes[min].Name {
 				min = j
 			}
 		}
 		if min != i {
-			st[i], st[min] = st[min], st[i]
+			st.Nodes[i], st.Nodes[min] = st.Nodes[min], st.Nodes[i]
 		}
 		// fmt.Println(st[i])
 	}
 	// 排序并计算最大距离
 	maxColumeLen := make([]int, 8)
-	for _, v := range st {
+	for _, v := range st.Nodes {
 
 		if v.Start > 0 {
 			v.Start = time.Now().Unix() - v.Start
@@ -86,11 +90,15 @@ func (st status) sortAndPrint(name, url string) {
 		// fmt.Println(spaceLen[&maxspace6])
 	}
 	for i := 0; i < 6; i++ {
+		if maxColumeLen[i] == 0 {
+			maxColumeLen[i] = 10
+			continue
+		}
 		maxColumeLen[i] += ds
 	}
 	maxColumeLen[6] = 15
 	maxColumeLen[7] = 15
-	fmt.Printf("<node: %s, url: %s>\n", name, url)
+	fmt.Printf("<node: %s, url: %s>\n", st.Name, st.Url)
 	fmt.Println("--------------------------------------------------")
 	fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
 		"Name" + (space(maxColumeLen[1] - len("Name"))).String() +
@@ -101,7 +109,7 @@ func (st status) sortAndPrint(name, url string) {
 		"CanNotStop" + (space(maxColumeLen[6] - len("CanNotStop"))).String() +
 		"Failed" + (space(maxColumeLen[7] - len("Failed"))).String() +
 		"Command")
-	for _, info := range st {
+	for _, info := range st.Nodes {
 
 		var canNotStopSpace int
 		if info.CanNotStop {

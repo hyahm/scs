@@ -64,7 +64,6 @@ func (cc *ClientConfig) GetNodesInGroup(group string) []*node.Node {
 	if v, ok := cc.Group[group]; ok {
 		for _, name := range v {
 			if node, ok := cc.GetNode(name); ok {
-				node.Name = name
 				ns = append(ns, node)
 			}
 		}
@@ -92,7 +91,7 @@ func ReadConfig() {
 		// 找不到就报错
 		panic(err)
 	}
-	configfile := filepath.Join(root, "scsctl.yaml")
+	configfile := filepath.Join(root, ".scsctl.yaml")
 	_, err = os.Stat(configfile)
 	if err != nil {
 		_, err = os.Create(configfile)

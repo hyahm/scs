@@ -173,6 +173,20 @@ type StatusList struct {
 	Code int              `json:"code"`
 }
 
+func (sl *StatusList) Filter(filter []string) {
+	temp := make([]*ServiceStatus, 0, len(sl.Data))
+
+	for _, s := range sl.Data {
+		for _, f := range filter {
+			if strings.Contains(s.Name, f) {
+				temp = append(temp, s)
+				break
+			}
+		}
+	}
+	sl.Data = temp
+}
+
 func All() []byte {
 	if SS.Mu == nil {
 		SS.Mu = &sync.RWMutex{}

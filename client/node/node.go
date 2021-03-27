@@ -18,9 +18,11 @@ var GroupName string
 var ReadTimeout time.Duration
 
 type Node struct {
-	Name  string `yaml:"-"`
-	Url   string `yaml:"url"`
-	Token string `yaml:"token"`
+	Name   string `yaml:"-"`
+	Url    string `yaml:"url"`
+	Token  string `yaml:"token"`
+	Filter []string
+	Result *ScriptStatusNode
 	// Sc    *client.SCSClient
 	Wg *sync.WaitGroup
 }
@@ -118,28 +120,37 @@ func (node *Node) Start(args ...string) {
 	// fmt.Println(string(node.crud("start", args...)))
 }
 
-func (node *Node) Status(args ...string) {
+func (node *Node) Status(args ...string) error {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
 	b, err := node.NewSCSClient().Status(args...)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
-	sl := &script.StatusList{}
+	resp := &script.StatusList{}
 	// fmt.Println(string(b))
 	// var s status = make([]*script.ServiceStatus, 0)
-	err = json.Unmarshal(b, sl)
+	err = json.Unmarshal(b, resp)
 	if err != nil {
 		fmt.Println(err.Error())
-		return
+		return err
 	}
-	if sl.Code == 203 {
+	if resp.Code == 203 {
 		fmt.Printf("node: %s, token error \n", node.Name)
-		return
+		return err
 	}
-	status(sl.Data).sortAndPrint(node.Name, node.Url)
+
+	if len(node.Filter) > 0 {
+		resp.Filter(node.Filter)
+	}
+	node.Result = &ScriptStatusNode{}
+	node.Result.Nodes = resp.Data
+	node.Result.Name = node.Name
+	node.Result.Url = node.Url
+	return nil
+	// status(resp.Data).sortAndPrint(node.Name, node.Url)
 }
 
 func (node *Node) Kill(args ...string) {
@@ -153,22 +164,6 @@ func (node *Node) Kill(args ...string) {
 		return
 	}
 	fmt.Println(string(b))
-	// switch len(args) {
-	// case 1:
-	// 	b, err := Requests("POST", fmt.Sprintf("%s/kill/%s", node.Url, args[0]), node.Token, nil)
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		return
-	// 	}
-	// 	fmt.Println(string(b))
-	// default:
-	// 	b, err := Requests("POST", fmt.Sprintf("%s/kill/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		return
-	// 	}
-	// 	fmt.Println(string(b))
-	// }
 }
 
 func (node *Node) Env(args string) {

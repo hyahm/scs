@@ -90,7 +90,6 @@ func (s *Script) shell(command string, typ string) error {
 		command = strings.ReplaceAll(command, "$"+k, v)
 		command = strings.ReplaceAll(command, "${"+k+"}", v)
 	}
-	s.Log["typ"] = append(s.Log["typ"])
 	t := time.Now().Format("2006/1/2 15:04:05")
 	command = t + " -- " + command
 	s.LogLocker.Lock()
