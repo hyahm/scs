@@ -128,18 +128,18 @@ func (node *Node) Status(args ...string) error {
 	}
 	b, err := node.NewSCSClient().Status(args...)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, err)
 		return err
 	}
 	resp := &script.StatusList{}
 	// fmt.Println(string(b))
 	err = json.Unmarshal(b, resp)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, err)
 		return err
 	}
 	if resp.Code == 203 {
-		fmt.Printf("node: %s, token error \n", node.Name)
+		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, ErrorToken)
 		return ErrorToken
 	}
 
@@ -190,16 +190,6 @@ func (node *Node) Env(args string) {
 		fmt.Println(k + ": " + v)
 	}
 }
-
-// func (node *Node) getDependEnv(args ...string) {
-// 	// 获取依赖的env
-// 	b, err := Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return
-// 	}
-// 	fmt.Println(string(b))
-// }
 
 func (node *Node) Install(scripts []*internal.Script, env map[string]string) {
 	// 先读取配置文件
