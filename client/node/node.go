@@ -17,7 +17,7 @@ import (
 var UseNodes string
 var GroupName string
 var ReadTimeout time.Duration
-var TokenError = errors.New("Token error")
+var ErrorToken = errors.New("Token error")
 
 type Node struct {
 	Name   string `yaml:"-"`
@@ -133,7 +133,6 @@ func (node *Node) Status(args ...string) error {
 	}
 	resp := &script.StatusList{}
 	// fmt.Println(string(b))
-	// var s status = make([]*script.ServiceStatus, 0)
 	err = json.Unmarshal(b, resp)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -141,7 +140,7 @@ func (node *Node) Status(args ...string) error {
 	}
 	if resp.Code == 203 {
 		fmt.Printf("node: %s, token error \n", node.Name)
-		return TokenError
+		return ErrorToken
 	}
 
 	if len(node.Filter) > 0 {
@@ -152,7 +151,6 @@ func (node *Node) Status(args ...string) error {
 	node.Result.Name = node.Name
 	node.Result.Url = node.Url
 	return nil
-	// status(resp.Data).sortAndPrint(node.Name, node.Url)
 }
 
 func (node *Node) Kill(args ...string) {
