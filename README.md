@@ -129,6 +129,7 @@ scripts:
     replicate: 10
     # 不写默认1小时
     continuityInterval: 1h
+    update: "git pull"
     # 报警收件人， 此脚本额外的收件人
     alert:
       email: 
