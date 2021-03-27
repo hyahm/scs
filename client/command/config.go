@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/hyahm/scs/client/cliconfig"
@@ -40,8 +41,11 @@ var ReloadCmd = &cobra.Command{
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Reload()
-				return
+
+			} else {
+				fmt.Println("not found this node")
 			}
+			return
 		}
 		if node.GroupName != "" {
 			wg := &sync.WaitGroup{}

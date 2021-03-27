@@ -59,6 +59,41 @@ func Start(filename string) {
 	golog.Info("complate")
 }
 
+func ReadConfig() error {
+	return readConfig()
+}
+
+func DeleteName(name string) {
+	// 检查时间
+	// 配置信息填充至状态
+	// 读取配置文件
+	temp := make([]internal.Script, 0)
+	for _, s := range Cfg.SC {
+		if s.Name != name {
+			temp = append(temp, s)
+		}
+	}
+	Cfg.SC = temp
+}
+
+func DeleteAll() {
+	// 检查时间
+	// 配置信息填充至状态
+	// 读取配置文件
+	Cfg.SC = nil
+}
+
+func WriteConfig() error {
+	// 检查时间
+	// 配置信息填充至状态
+	// 读取配置文件
+
+	b, _ := yaml.Marshal(Cfg)
+	// 跟新配置文件
+	return ioutil.WriteFile(cfgfile, b, 0644)
+
+}
+
 func Load(reload bool) error {
 	// reload: 第一次启动     还是 config reload
 	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
@@ -206,7 +241,7 @@ func (c *config) fill(index int, reload bool) {
 		// 	env = append(env, k+"="+v)
 		// }
 
-		if SS.HasKey(c.SC[index].Name, subname) {
+		if SS.HasSubName(c.SC[index].Name, subname) {
 			// 如果存在键值就修改
 			golog.Info("update")
 			c.update(index, subname, c.SC[index].Command, baseEnv)

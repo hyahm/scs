@@ -153,6 +153,11 @@ POST /stop/{pname}/{name}
 POST /stop/{pname}
 POST /stop
 
+# 删除脚本的api 
+POST /remove/{pname}/{name}
+POST /remove/{pname}
+POST /remove
+
 # 重启脚本的api
 POST /restart/{pname}/{name}
 POST /restart/{pname}

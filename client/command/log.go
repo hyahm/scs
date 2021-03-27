@@ -19,8 +19,11 @@ func logConfig(cmd *cobra.Command, args []string) {
 	if node.UseNodes != "" {
 		if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 			nodeInfo.Log(args[0])
-			return
+
+		} else {
+			fmt.Println("not found this node")
 		}
+		return
 	}
 	if node.GroupName != "" {
 		wg := &sync.WaitGroup{}

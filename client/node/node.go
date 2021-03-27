@@ -234,6 +234,19 @@ func (node *Node) Stop(args ...string) {
 	// fmt.Println(string(node.crud("stop", args...)))
 }
 
+func (node *Node) Remove(args ...string) {
+	if node.Wg != nil {
+		defer node.Wg.Done()
+	}
+	b, err := node.NewSCSClient().Remove(args...)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+	// fmt.Println(string(node.crud("stop", args...)))
+}
+
 // func (node *Node) crud(operate string, args ...string) []byte {
 // 	if node.Wg != nil {
 // 		defer node.Wg.Done()

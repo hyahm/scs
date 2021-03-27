@@ -51,6 +51,10 @@ func HttpServer() {
 	router.Post("/stop/{pname}", handle.StopPname)
 	router.Post("/stop", handle.StopAll)
 
+	router.Post("/remove/{pname}/{name}", handle.Remove)
+	router.Post("/remove/{pname}", handle.RemovePname)
+	router.Post("/remove", handle.RemoveAll)
+
 	router.Post("/restart/{pname}/{name}", handle.Restart)
 	router.Post("/restart/{pname}", handle.RestartPname)
 	router.Post("/restart", handle.RestartAll)

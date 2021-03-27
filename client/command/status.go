@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/hyahm/scs/client/cliconfig"
@@ -24,8 +25,11 @@ var StatusCmd = &cobra.Command{
 				if err := nodeInfo.Status(args...); err == nil {
 					nodeInfo.Result.SortAndPrint()
 				}
-				return
+
+			} else {
+				fmt.Println("not found this node")
 			}
+			return
 		}
 		ss := make([]*node.ScriptStatusNode, 0)
 		if node.GroupName != "" {

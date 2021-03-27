@@ -26,8 +26,11 @@ var RestartCmd = &cobra.Command{
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Restart(args...)
-				return
+
+			} else {
+				fmt.Println("not found this node")
 			}
+			return
 		}
 		if node.GroupName != "" {
 			wg := &sync.WaitGroup{}

@@ -32,7 +32,19 @@ func getpname(subname string) string {
 	return subname[:i]
 }
 
-func (s *Service) HasKey(pname, name string) bool {
+func (s *Service) HasName(name string) bool {
+	if s.Len() == 0 {
+		return false
+	}
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	if _, ok := s.Infos[name]; !ok {
+		return false
+	}
+	return false
+}
+
+func (s *Service) HasSubName(pname, name string) bool {
 	if s.Len() == 0 {
 		return false
 	}
@@ -76,6 +88,15 @@ func (s *Service) Len() int {
 	s.Mu.RLock()
 	defer s.Mu.RUnlock()
 	return len(s.Infos)
+}
+
+func (s *Service) PnameLen(name string) int {
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	if v, ok := s.Infos[name]; ok {
+		return len(v)
+	}
+	return 0
 }
 
 // 从 SS 中删除某一个subname

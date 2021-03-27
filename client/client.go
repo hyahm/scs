@@ -167,6 +167,18 @@ func (sc *SCSClient) Stop(args ...string) ([]byte, error) {
 	}
 }
 
+func (sc *SCSClient) Remove(args ...string) ([]byte, error) {
+	l := len(args)
+	switch l {
+	case 0:
+		return sc.Requests("/remove", nil)
+	case 1:
+		return sc.Requests("/remove/"+args[0], nil)
+	default:
+		return sc.Requests(fmt.Sprintf("/remove/%s/%s", args[0], args[1]), nil)
+	}
+}
+
 func (sc *SCSClient) Repo() ([]byte, error) {
 	return sc.Requests("/get/repo", nil)
 }

@@ -10,23 +10,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var stopAll bool
+var removeAll bool
 
-var StopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "stop script",
-	Long:  `command: scsctl stop ([flags]) || ([pname] [name])`,
+var RemoveCmd = &cobra.Command{
+	Use:   "remove",
+	Short: "remove script",
+	Long:  `command: scsctl remove ([flags]) || ([pname] [name])`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 && !stopAll {
+		if len(args) == 0 && !removeAll {
 			fmt.Println("Specify at least one parameter, or -- all")
 			return
 		}
-		if stopAll {
+		if removeAll {
 			args = nil
 		}
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
-				nodeInfo.Stop(args...)
+				nodeInfo.Remove(args...)
 
 			} else {
 				fmt.Println("not found this node")
@@ -39,7 +39,7 @@ var StopCmd = &cobra.Command{
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
 				nodeInfo.Wg = wg
-				nodeInfo.Stop(args...)
+				nodeInfo.Remove(args...)
 			}
 			wg.Wait()
 			return
@@ -49,7 +49,7 @@ var StopCmd = &cobra.Command{
 		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
-			nodeInfo.Stop(args...)
+			nodeInfo.Remove(args...)
 		}
 		wg.Wait()
 
@@ -57,7 +57,7 @@ var StopCmd = &cobra.Command{
 }
 
 func init() {
-	StopCmd.Flags().BoolVarP(&stopAll, "all", "a", false, "stop all")
-	rootCmd.AddCommand(StopCmd)
+	RemoveCmd.Flags().BoolVarP(&removeAll, "all", "a", false, "remove all")
+	rootCmd.AddCommand(RemoveCmd)
 
 }
