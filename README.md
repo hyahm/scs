@@ -39,6 +39,9 @@ service control service or script
 listen: :11111
 # 脚本日志最大保留行数, 默认100， 一般只会打印异常日志
 logCount: 100
+disableTls: true
+key: 
+pem: 
 # scs 的日志文件
 log:
   # scs 的日志文件目录
