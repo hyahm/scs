@@ -76,6 +76,18 @@ func DeleteName(name string) {
 	Cfg.SC = temp
 }
 
+func SetReplicate(name string, count int) {
+	// 检查时间
+	// 配置信息填充至状态
+	// 读取配置文件
+	for _, s := range Cfg.SC {
+		if s.Name != name {
+			s.Replicate = s.Replicate + count
+			return
+		}
+	}
+}
+
 func DeleteAll() {
 	// 检查时间
 	// 配置信息填充至状态

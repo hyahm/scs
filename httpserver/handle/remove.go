@@ -27,8 +27,13 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if script.SS.PnameLen(pname) == 1 {
-
 		script.DeleteName(pname)
+		if err := script.WriteConfig(); err != nil {
+			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
+			return
+		}
+	} else {
+		script.SetReplicate(pname, -1)
 		if err := script.WriteConfig(); err != nil {
 			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
 			return
