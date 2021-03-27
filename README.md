@@ -50,6 +50,9 @@ log:
   size: 0
 # 请求头认证， 脚本与服务器之间交互需要 Token： xxxx,  环境变量TOKEN的值为此token的值
 token: 
+# 客户端免token认证
+ignoreToken:
+- 127.0.0.1
 # 报警方式
 alert:
   email:
