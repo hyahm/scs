@@ -170,6 +170,10 @@ POST /restart/{pname}/{name}
 POST /restart/{pname}
 POST /restart
 
+# 启用禁用脚本
+POST /restart/{pname}
+POST /restart/{pname}
+
 # 脚本日志的api
 POST /log/{pname}/{name}
 
@@ -296,6 +300,11 @@ scsctl stop pname name
 scsctl update --all
 scsctl update pname 
 scsctl update pname name
+scsctl remove --all
+scsctl remove pname 
+scsctl remove pname name
+scsctl enable pname
+scsctl disable pname
 scsctl log  name[:update|log|lookPath] # 不区分大小写
 # 加载配置文件
 scsctl config reload
