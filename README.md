@@ -39,6 +39,9 @@ service control service or script
 listen: :11111
 # 脚本日志最大保留行数, 默认100， 一般只会打印异常日志
 logCount: 100
+disableTls: true
+key: 
+pem: 
 # scs 的日志文件
 log:
   # scs 的日志文件目录
@@ -47,6 +50,9 @@ log:
   size: 0
 # 请求头认证， 脚本与服务器之间交互需要 Token： xxxx,  环境变量TOKEN的值为此token的值
 token: 
+# 客户端免token认证
+ignoreToken:
+- 127.0.0.1
 # 报警方式
 alert:
   email:
@@ -126,6 +132,7 @@ scripts:
     replicate: 10
     # 不写默认1小时
     continuityInterval: 1h
+    update: "git pull"
     # 报警收件人， 此脚本额外的收件人
     alert:
       email: 

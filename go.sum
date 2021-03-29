@@ -190,6 +190,7 @@ github.com/hyahm/golog v0.0.0-20201212071038-b0712927aed5 h1:SX5121+XtsFJOAYshvR
 github.com/hyahm/golog v0.0.0-20201212071038-b0712927aed5/go.mod h1:5r6TkZlPqe63JSuVJXrGd62di17HIgkaHfJNzgTAmV4=
 github.com/hyahm/golog v0.0.0-20201226025654-0fd9dfd9cd10 h1:4jrSi6K9m+cyEg60Qy7QdlQnKWureWIgbxM5CQqMNZI=
 github.com/hyahm/golog v0.0.0-20201226025654-0fd9dfd9cd10/go.mod h1:5r6TkZlPqe63JSuVJXrGd62di17HIgkaHfJNzgTAmV4=
+github.com/hyahm/golog v0.0.0-20210205023406-67778c69934a h1:pkHrGq6tDTHfyQOTcy/i/8Y4T7OKwpa8v0HdIBTrF1c=
 github.com/hyahm/golog v0.0.0-20210205023406-67778c69934a/go.mod h1:5r6TkZlPqe63JSuVJXrGd62di17HIgkaHfJNzgTAmV4=
 github.com/hyahm/xmux v0.0.0-20201002164645-6fda7cef7192 h1:o1jM3kQbf/GIlgLtJAVu/ivqx/h/kGks6d1ReBUmX2Y=
 github.com/hyahm/xmux v0.0.0-20201002164645-6fda7cef7192/go.mod h1:UoEQtjCaA8OzZJPtmiflvZ+cFMlmZo7o7WSQ/VdkDmE=

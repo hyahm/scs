@@ -12,16 +12,15 @@ def log(s):
     print(s) 
     sys.stdout.flush()
 
-scs = SCS(domain = "http://127.0.0.1:11111")
-log("token: " + os.getenv("TOKEN"))
+scs = SCS()
 while True:
-    headers = {
-        "Token": os.getenv("TOKEN")
-    }
-    resp = scs.can_not_stop()
-    print(resp)
-    requests.packages.urllib3.disable_warnings()
-    log("can not stop it")
-    time.sleep(random.randint(10, 20))
+
+    scs.can_not_stop()
+    value = redis.spop("key")
+    # do something
+    for i in range(100000):
+        print(i)
+        time.sleep(1)
+
+    print("end")
     scs.can_stop()
-    log("can stop it")

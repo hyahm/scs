@@ -72,7 +72,6 @@ var StatusCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringArrayVarP(&filter, "filter", "f", []string{}, "filter name")
-
+	rootCmd.Flags().StringArrayVarP(&filter, "filter", "f", []string{}, "filter name")
 	rootCmd.AddCommand(StatusCmd)
 }

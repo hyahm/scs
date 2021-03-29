@@ -19,7 +19,6 @@ var EnvCmd = &cobra.Command{
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Env(args[0])
-
 			} else {
 				fmt.Println("not found this node")
 			}
