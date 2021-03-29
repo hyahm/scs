@@ -76,6 +76,31 @@ func DeleteName(name string) {
 	Cfg.SC = temp
 }
 
+func Enable(name string) {
+	// 检查时间
+	// 配置信息填充至状态
+	// 读取配置文件
+	for i, s := range Cfg.SC {
+		if s.Name == name {
+			Cfg.SC[i].Disable = false
+			return
+		}
+	}
+
+}
+
+func Disable(name string) {
+	// 检查时间
+	// 配置信息填充至状态
+	// 读取配置文件
+	for i, s := range Cfg.SC {
+		if s.Name == name {
+			Cfg.SC[i].Disable = true
+			return
+		}
+	}
+}
+
 func SetReplicate(name string, count int) {
 	// 检查时间
 	// 配置信息填充至状态
@@ -140,7 +165,7 @@ func Load(reload bool) error {
 
 	for index := range Cfg.SC {
 		// 如果名字为空， 或者 command 为空， 或者 disable=true 那么就跳过
-		if Cfg.SC[index].Name == "" || Cfg.SC[index].Command == "" || Cfg.SC[index].Disable {
+		if Cfg.SC[index].Name == "" || Cfg.SC[index].Command == "" {
 			continue
 		}
 
@@ -308,6 +333,7 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 			Status:  STOP,
 			Path:    c.SC[index].Dir,
 			Version: getVersion(c.SC[index].Version),
+			Disable: c.SC[index].Disable,
 		},
 		DeleteWhenExit:     c.SC[index].DeleteWhenExit,
 		Update:             c.SC[index].Update,
@@ -336,8 +362,10 @@ func (c *config) add(index, port int, subname, command string, baseEnv map[strin
 		}
 	}
 	SS.AddScript(subname, s)
-	s.Start()
 
+	if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && !c.SC[index].Disable {
+		s.Start()
+	}
 }
 
 func (c *config) update(index int, subname, command string, baseEnv map[string]string) {
@@ -376,6 +404,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 	SS.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
 	SS.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
 	SS.Infos[c.SC[index].Name][subname].Status.Version = getVersion(c.SC[index].Version)
+	SS.Infos[c.SC[index].Name][subname].Status.Disable = c.SC[index].Disable
 	// 更新的时候
 
 	if SS.Infos[c.SC[index].Name][subname].Status.Status == STOP {

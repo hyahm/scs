@@ -140,7 +140,7 @@ EOF"
 sudo setenforce 0
 systemctl daemon-reload
 sudo systemctl start scs
-cat > ~/scsctl.yaml <<EOF
+cat > ~/.scsctl.yaml <<EOF
 nodes:
   localhost:
     url: https://127.0.0.1:11111

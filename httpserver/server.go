@@ -76,6 +76,9 @@ func HttpServer() {
 	// router.Post("/env/{pname}/{name}", handle.GetEnv)
 	router.Post("/env/{name}", handle.GetEnvName)
 
+	router.Post("/enable/{pname}", handle.Enable)
+	router.Post("/disable/{pname}", handle.Disable)
+
 	// router.Post("/install/{name}", handle.InstallPackage)
 	// router.Post("/install", handle.InstallScript)
 	router.Post("/set/alert", handle.Alert)

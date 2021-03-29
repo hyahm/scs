@@ -150,6 +150,7 @@ func (node *Node) Status(args ...string) error {
 	node.Result.Nodes = resp.Data
 	node.Result.Name = node.Name
 	node.Result.Url = node.Url
+	node.Result.Filter = node.Filter
 	return nil
 }
 
@@ -239,6 +240,32 @@ func (node *Node) Remove(args ...string) {
 		defer node.Wg.Done()
 	}
 	b, err := node.NewSCSClient().Remove(args...)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+	// fmt.Println(string(node.crud("stop", args...)))
+}
+
+func (node *Node) Enable(pname string) {
+	if node.Wg != nil {
+		defer node.Wg.Done()
+	}
+	b, err := node.NewSCSClient().Enable(pname)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+	// fmt.Println(string(node.crud("stop", args...)))
+}
+
+func (node *Node) Disable(pname string) {
+	if node.Wg != nil {
+		defer node.Wg.Done()
+	}
+	b, err := node.NewSCSClient().Disable(pname)
 	if err != nil {
 		fmt.Println(err)
 		return

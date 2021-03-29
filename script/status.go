@@ -21,5 +21,6 @@ type ServiceStatus struct {
 	Version      string `json:"version"`
 	Always       bool
 	RestartCount int    `json:"restartCount"` // 记录失败重启的次数
+	Disable      bool   `json:"disable"`      // 是否禁用
 	Up           string `json:"-"`
 }

@@ -11,9 +11,10 @@ import (
 // 打印数据相关
 
 type ScriptStatusNode struct {
-	Nodes []*script.ServiceStatus
-	Name  string
-	Url   string
+	Nodes  []*script.ServiceStatus
+	Name   string
+	Url    string
+	Filter []string
 }
 
 const ds = 4 // 2个列的最近间距
@@ -32,6 +33,9 @@ func (s space) Int() int {
 }
 
 func (st *ScriptStatusNode) SortAndPrint() {
+	if len(st.Filter) > 0 && len(st.Nodes) == 0 {
+		return
+	}
 	// spaceLen := make(map[*space]int)
 	// 安装 name 的顺序进行排序
 	for i := 0; i < len(st.Nodes); i++ {
@@ -47,7 +51,7 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		// fmt.Println(st[i])
 	}
 	// 排序并计算最大距离
-	maxColumeLen := make([]int, 8)
+	maxColumeLen := make([]int, 9)
 	for _, v := range st.Nodes {
 
 		if v.Start > 0 {
@@ -96,8 +100,10 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		}
 		maxColumeLen[i] += ds
 	}
-	maxColumeLen[6] = 15
-	maxColumeLen[7] = 15
+	maxColumeLen[6] = 12
+	maxColumeLen[7] = 10
+	maxColumeLen[8] = 10
+
 	fmt.Printf("<node: %s, url: %s>\n", st.Name, st.Url)
 	fmt.Println("--------------------------------------------------")
 	fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
@@ -108,6 +114,7 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		"Verion" + (space(maxColumeLen[5] - len("Version"))).String() +
 		"CanNotStop" + (space(maxColumeLen[6] - len("CanNotStop"))).String() +
 		"Failed" + (space(maxColumeLen[7] - len("Failed"))).String() +
+		"Disable" + (space(maxColumeLen[8] - len("Disable"))).String() +
 		"Command")
 	for _, info := range st.Nodes {
 
@@ -117,11 +124,18 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		} else {
 			canNotStopSpace = 5
 		}
+
+		var disable int
+		if info.Disable {
+			disable = 4
+		} else {
+			disable = 5
+		}
 		cdpath := ""
 		if info.Path != "" {
 			cdpath = "cd " + info.Path + " && "
 		}
-		fmt.Printf("%s%s%s%s%s%s%d%s%s%s%s%s%t%s%d%s%s\n",
+		fmt.Printf("%s%s%s%s%s%s%d%s%s%s%s%s%t%s%d%s%t%s%s\n",
 			info.PName, space(maxColumeLen[0]-len(info.PName)),
 			info.Name, space(maxColumeLen[1]-len(info.Name)),
 			info.Status, space(maxColumeLen[2]-len(info.Status)),
@@ -130,6 +144,7 @@ func (st *ScriptStatusNode) SortAndPrint() {
 			info.Version, space(maxColumeLen[5]-len(info.Version)),
 			info.CanNotStop, space(maxColumeLen[6]-canNotStopSpace),
 			info.RestartCount, space(maxColumeLen[7]-len(strconv.Itoa(info.RestartCount))),
+			info.Disable, space(maxColumeLen[7]-disable),
 			cdpath+info.Command,
 		)
 	}

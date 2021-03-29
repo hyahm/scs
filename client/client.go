@@ -179,6 +179,14 @@ func (sc *SCSClient) Remove(args ...string) ([]byte, error) {
 	}
 }
 
+func (sc *SCSClient) Enable(args string) ([]byte, error) {
+	return sc.Requests("/enable/"+args, nil)
+}
+
+func (sc *SCSClient) Disable(args string) ([]byte, error) {
+	return sc.Requests("/disable/"+args, nil)
+}
+
 func (sc *SCSClient) Repo() ([]byte, error) {
 	return sc.Requests("/get/repo", nil)
 }
