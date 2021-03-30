@@ -66,7 +66,9 @@ func getVersion(command string) string {
 	if err != nil {
 		return ""
 	}
-	return strings.ReplaceAll(string(out), "\n", "")
+	output := strings.ReplaceAll(string(out), "\n", "")
+	output = strings.ReplaceAll(output, "\r", "")
+	return output
 }
 
 func (s *Script) shell(command string, typ string) error {
@@ -209,7 +211,6 @@ func (s *Script) Remove() {
 		go SS.Infos[s.Name][s.SubName].remove()
 	case STOP:
 		// 直接删除
-		golog.Info("aaa")
 		delete(SS.Infos[s.Name], s.SubName)
 		if len(SS.Infos[s.Name]) == 0 {
 			delete(SS.Infos, s.Name)

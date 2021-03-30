@@ -33,6 +33,7 @@ func (s space) Int() int {
 }
 
 func (st *ScriptStatusNode) SortAndPrint() {
+
 	if len(st.Filter) > 0 && len(st.Nodes) == 0 {
 		return
 	}
@@ -75,23 +76,6 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		if len(v.Version) > maxColumeLen[5] {
 			maxColumeLen[5] = len(v.Version)
 		}
-
-		// spaceLen[&maxspace1] = len(v.PName)
-		// maxColumeLen[0] = len(v.PName)
-		// spaceLen[&maxspace2] = len(v.Name)
-		// spaceLen[&maxspace3] = len(v.Status)
-		// spaceLen[&maxspace4] = len(strconv.Itoa(v.Pid))
-		// spaceLen[&maxspace5] = len((time.Second * time.Duration(v.Start)).String())
-		// spaceLen[&maxspace6] = len(v.Version)
-		// spaceLen[&maxspace7] = len("CanNotStop")
-		// spaceLen[&maxspace8] = len(strconv.Itoa(info.RestartCount)))
-
-		// for s, l := range spaceLen {
-		// 	if l+ds > s.Int() {
-		// 		*s = space(l + ds)
-		// 	}
-		// }
-		// fmt.Println(spaceLen[&maxspace6])
 	}
 	for i := 0; i < 6; i++ {
 		if maxColumeLen[i] == 0 {
@@ -144,7 +128,7 @@ func (st *ScriptStatusNode) SortAndPrint() {
 			info.Version, space(maxColumeLen[5]-len(info.Version)),
 			info.CanNotStop, space(maxColumeLen[6]-canNotStopSpace),
 			info.RestartCount, space(maxColumeLen[7]-len(strconv.Itoa(info.RestartCount))),
-			info.Disable, space(maxColumeLen[7]-disable),
+			info.Disable, space(maxColumeLen[8]-disable),
 			cdpath+info.Command,
 		)
 	}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/client/cliconfig"
 	"github.com/hyahm/scs/client/node"
 	"github.com/hyahm/scs/internal"
@@ -46,21 +47,18 @@ var InstallCmd = &cobra.Command{
 				fmt.Println(err)
 				return
 			}
-
-			err = yaml.Unmarshal(f, sc)
+			golog.Info(string(f))
+			err = yaml.Unmarshal(f, &sc)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 		}
-		if condition == 0 {
+		if condition != 1 {
 			fmt.Println("at lease one params : scsctl install <-f yaml> || <-u url> || <name>")
 			return
 		}
-		if condition > 1 {
-			fmt.Println("only one params : scsctl install <-f yaml> || <-u url> || <name>")
-			return
-		}
+
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Install(sc, env)
@@ -83,6 +81,7 @@ var InstallCmd = &cobra.Command{
 		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
+			golog.Info(2222)
 			nodeInfo.Install(sc, env)
 		}
 		wg.Wait()
