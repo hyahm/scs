@@ -16,11 +16,11 @@ scs = SCS()
 while True:
 
     scs.can_not_stop()
-    value = redis.spop("key")
+    log(os.getenv("path"))
     # do something
     for i in range(100000):
-        print(i)
+        log(i)
         time.sleep(1)
 
-    print("end")
+    log("end")
     scs.can_stop()

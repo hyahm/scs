@@ -231,9 +231,6 @@ func (c *config) fill(index int, reload bool) {
 
 	// 加载环境变量
 	baseEnv := make(map[string]string)
-	for k, v := range c.SC[index].Env {
-		baseEnv[k] = v
-	}
 
 	// 填充系统环境变量到
 	for _, v := range os.Environ() {
@@ -243,13 +240,12 @@ func (c *config) fill(index int, reload bool) {
 
 	for k, v := range c.SC[index].Env {
 		// path 环境单独处理， 可以多个值， 其他环境变量多个值请以此写完
-		if k == "PATH" {
+		if strings.ToUpper(k) == "PATH" {
 			if runtime.GOOS == "windows" {
-				baseEnv[k] = baseEnv[k] + ";" + v
+				baseEnv["Path"] = baseEnv["Path"] + v + ";"
 			} else {
 				baseEnv[k] = baseEnv[k] + ":" + v
 			}
-
 		} else {
 			baseEnv[k] = v
 		}
