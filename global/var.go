@@ -9,4 +9,4 @@ var DisableTls bool
 var Key string
 var Pem string
 
-const VERSION = "v2.7.0"
+const VERSION = "v2.7.1"

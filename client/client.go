@@ -265,13 +265,6 @@ func (sc *SCSClient) AddScript(s *Script) ([]byte, error) {
 	return sc.Requests("/script", bytes.NewReader(send))
 }
 
-func (sc *SCSClient) DelScript(pname string) ([]byte, error) {
-	if sc.Pname == "" {
-		return nil, ErrPnameIsEmpty
-	}
-	return sc.Requests("/delete/"+sc.Pname, nil)
-}
-
 func (sc *SCSClient) StatusAll() ([]byte, error) {
 	return sc.Requests("/status", nil)
 }
