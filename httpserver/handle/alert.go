@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/client/alert"
 	"github.com/hyahm/scs/global"
 )
 

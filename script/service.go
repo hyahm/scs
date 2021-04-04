@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hyahm/scs/alert"
-	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/client"
+	"github.com/hyahm/scs/client/alert"
 
 	"github.com/hyahm/golog"
 )
@@ -23,7 +23,7 @@ type Cron struct {
 }
 
 type Script struct {
-	LookPath           []*internal.LoopPath
+	LookPath           []*client.LoopPath
 	Name               string
 	Dir                string
 	Command            string
@@ -41,7 +41,7 @@ type Script struct {
 	cmd                *exec.Cmd
 	Status             *ServiceStatus
 	Alert              map[string]alert.SendAlerter
-	AT                 *internal.AlertTo
+	AT                 *alert.AlertTo
 	Port               int
 	ContinuityInterval time.Duration
 	AI                 *alert.AlertInfo // 报警规则

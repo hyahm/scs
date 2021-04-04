@@ -64,7 +64,7 @@ var StatusCmd = &cobra.Command{
 			}(nodeInfo)
 		}
 		wg.Wait()
-
+		fmt.Println("999999")
 		for _, s := range ss {
 			s.SortAndPrint()
 		}

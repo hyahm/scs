@@ -1,4 +1,4 @@
-package internal
+package client
 
 type Resp struct {
 	Code int    `json:"code"`

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/client/alert"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/httpserver"
 	"github.com/hyahm/scs/script"

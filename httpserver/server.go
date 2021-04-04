@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/httpserver/handle"
 	"github.com/hyahm/scs/httpserver/midware"
-	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/public"
 
 	"github.com/hyahm/golog"
@@ -87,7 +87,7 @@ func HttpServer() {
 	router.Post("/probe", handle.Probe).DelModule(midware.CheckToken)
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
-	router.Post("/script", handle.AddScript).Bind(&internal.Script{}).AddModule(midware.Unmarshal)
+	router.Post("/script", handle.AddScript).Bind(&client.Script{}).AddModule(midware.Unmarshal)
 	router.Post("/delete/{pname}", handle.DelScript)
 	if global.DisableTls {
 		golog.Info("listen on " + global.Listen + " over http")

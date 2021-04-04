@@ -8,9 +8,9 @@ import (
 	"sync"
 
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/client/cliconfig"
 	"github.com/hyahm/scs/client/node"
-	"github.com/hyahm/scs/internal"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -23,7 +23,7 @@ var InstallCmd = &cobra.Command{
 	Long:  `install package`,
 	Run: func(cmd *cobra.Command, args []string) {
 		condition := 0
-		sc := make([]*internal.Script, 0)
+		sc := make([]*client.Script, 0)
 		if len(args) > 1 {
 			condition++
 		}

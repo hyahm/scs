@@ -4,13 +4,13 @@ import (
 	"net/http"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/script"
 	"github.com/hyahm/xmux"
 )
 
 func AddScript(w http.ResponseWriter, r *http.Request) {
-	s := xmux.GetData(r).Data.(*internal.Script)
+	s := xmux.GetData(r).Data.(*client.Script)
 	golog.Infof("%+v", s)
 	if s.Name == "" {
 		w.Write([]byte(`{"code": 201, "msg": "name require"}`))

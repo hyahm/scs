@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/client/alert"
 
 	"github.com/hyahm/golog"
 	"github.com/shirou/gopsutil/cpu"

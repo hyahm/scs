@@ -3,9 +3,8 @@ package alert
 import (
 	"os"
 
-	"github.com/hyahm/scs/internal"
-
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/client"
 )
 
 // 暂时只支持邮箱
@@ -54,7 +53,7 @@ func (alert *Alert) InitAlert() {
 	}
 }
 
-func AlertMessage(msg *Message, at *internal.AlertTo) {
+func AlertMessage(msg *Message, at *client.AlertTo) {
 	for _, alert := range Alerts {
 		al := alert
 		msg.HostName, _ = os.Hostname()

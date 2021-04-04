@@ -1,6 +1,6 @@
 package probe
 
-import "github.com/hyahm/scs/alert"
+import "github.com/hyahm/scs/client/alert"
 
 var cache []*alert.AlertInfo
 

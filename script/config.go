@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/client"
+	"github.com/hyahm/scs/client/alert"
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/logger"
 	"github.com/hyahm/scs/probe"
 
@@ -28,18 +28,18 @@ type Repo struct {
 }
 
 type config struct {
-	Listen      string            `yaml:"listen"`
-	Token       string            `yaml:"token"`
-	Key         string            `yaml:"key"`
-	Pem         string            `yaml:"pem"`
-	DisableTls  bool              `yaml:"disableTls"`
-	Log         logger.Logger     `yaml:"log"`
-	LogCount    int               `yaml:"logCount"`
-	IgnoreToken []string          `yaml:"ignoreToken"`
-	Repo        *Repo             `yaml:"repo"`
-	Alert       alert.Alert       `yaml:"alert"`
-	Probe       probe.Probe       `yaml:"probe"`
-	SC          []internal.Script `yaml:"scripts"`
+	Listen      string          `yaml:"listen"`
+	Token       string          `yaml:"token"`
+	Key         string          `yaml:"key"`
+	Pem         string          `yaml:"pem"`
+	DisableTls  bool            `yaml:"disableTls"`
+	Log         logger.Logger   `yaml:"log"`
+	LogCount    int             `yaml:"logCount"`
+	IgnoreToken []string        `yaml:"ignoreToken"`
+	Repo        *Repo           `yaml:"repo"`
+	Alert       alert.Alert     `yaml:"alert"`
+	Probe       probe.Probe     `yaml:"probe"`
+	SC          []client.Script `yaml:"scripts"`
 }
 
 // 保存的配置文件路径
@@ -67,7 +67,7 @@ func DeleteName(name string) {
 	// 检查时间
 	// 配置信息填充至状态
 	// 读取配置文件
-	temp := make([]internal.Script, 0)
+	temp := make([]client.Script, 0)
 	for _, s := range Cfg.SC {
 		if s.Name != name {
 			temp = append(temp, s)
@@ -412,7 +412,7 @@ func (c *config) update(index int, subname, command string, baseEnv map[string]s
 }
 
 // 更新配置文件
-func (c *config) updateConfig(s internal.Script, index int) {
+func (c *config) updateConfig(s client.Script, index int) {
 	if s.Dir != "" {
 		c.SC[index].Dir = s.Dir
 	}
@@ -446,7 +446,7 @@ func (c *config) updateConfig(s internal.Script, index int) {
 	}
 }
 
-func (c *config) AddScript(s internal.Script) error {
+func (c *config) AddScript(s client.Script) error {
 
 	golog.Infof("%+v", s)
 	// 添加到配置文件

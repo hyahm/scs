@@ -4,14 +4,14 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/script"
 )
 
 type InstallConfig struct {
 	Depend []string          `yaml:"depend"` // 依赖其他的包， 引入环境变量， 读取script的env
 	Env    map[string]string `yaml:"env"`    // 外部定义的变量， 最后合并到env
-	Script *internal.Script  `yaml:"script"`
+	Script *client.Script  `yaml:"script"`
 }
 
 func (ic *InstallConfig) GetDependEnv() error {

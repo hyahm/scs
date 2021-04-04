@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"sync"
 	"time"
-
-	"github.com/hyahm/scs/internal"
 )
 
 // 分发器, 每个报警器间隔多久发一次
@@ -32,7 +30,7 @@ type AlertInfo struct {
 	Start              time.Time // 报警时间
 	BrokenTime         time.Time
 	AM                 *Message
-	To                 *internal.AlertTo
+	To                 *AlertTo
 	ContinuityInterval time.Duration
 }
 
@@ -64,12 +62,12 @@ func (ai *AlertInfo) Recover(title string) {
 }
 
 type RespAlert struct {
-	Title              string            `json:"title"`
-	Pname              string            `json:"pname"`
-	Name               string            `json:"name"`
-	Reason             string            `json:"reason"`
-	ContinuityInterval int               `json:"continuityInterval"`
-	To                 *internal.AlertTo `json:"to"`
+	Title              string   `json:"title"`
+	Pname              string   `json:"pname"`
+	Name               string   `json:"name"`
+	Reason             string   `json:"reason"`
+	ContinuityInterval int      `json:"continuityInterval"`
+	To                 *AlertTo `json:"to"`
 }
 
 func (ra *RespAlert) SendAlert() {

@@ -3,7 +3,7 @@ package script
 import (
 	"time"
 
-	"github.com/hyahm/scs/alert"
+	"github.com/hyahm/scs/client/alert"
 )
 
 func (s *Script) successAlert() {

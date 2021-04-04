@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hyahm/scs/alert"
 	"github.com/hyahm/scs/client"
-	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/client/alert"
 
 	"github.com/hyahm/golog"
 )
@@ -76,7 +75,7 @@ func (m Scan) Check() {
 			golog.Error(err)
 			failed = true
 		} else {
-			rest := &internal.Resp{}
+			rest := &client.Resp{}
 			golog.Info(string(resp))
 			err := json.Unmarshal(resp, rest)
 			if err != nil {

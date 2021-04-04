@@ -1,7 +1,9 @@
-package internal
+package client
 
 import (
 	"time"
+
+	"github.com/hyahm/scs/client/alert"
 )
 
 // 配置文件的数据
@@ -15,7 +17,7 @@ type Script struct {
 	Env                map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
 	ContinuityInterval time.Duration     `yaml:"continuityInterval,omitempty" json:"continuityInterval,omitempty"`
 	Port               int               `yaml:"port,omitempty" json:"port,omitempty"`
-	AT                 *AlertTo          `yaml:"alert,omitempty" json:"alert,omitempty"`
+	AT                 *alert.AlertTo    `yaml:"alert,omitempty" json:"alert,omitempty"`
 	Version            string            `yaml:"version,omitempty" json:"version,omitempty"`
 	Loop               int               `yaml:"loop,omitempty" json:"loop,omitempty"`
 	LookPath           []*LoopPath       `yaml:"lookPath,omitempty" json:"lookPath,omitempty"`

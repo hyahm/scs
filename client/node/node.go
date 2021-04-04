@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hyahm/scs/client"
-	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/script"
 
 	"github.com/hyahm/golog"
@@ -53,13 +52,26 @@ func (node *Node) Restart(args ...string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	// fmt.Println(string(node.crud("restart", args...)))
-	b, err := node.NewSCSClient().Restart(args...)
+	cli := node.NewSCSClient()
+	var b []byte
+	var err error
+	switch len(args) {
+	case 0:
+		b, err = cli.RestartAll()
+	case 1:
+		cli.Pname = args[0]
+		b, err = cli.RestartPname()
+	default:
+		cli.Pname = args[0]
+		cli.Name = args[1]
+		b, err = cli.RestartName()
+	}
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(string(b))
+	// fmt.Println(string(node.crud("stop", args...)))
 }
 
 type SearchInfo struct {
@@ -113,23 +125,45 @@ func (node *Node) Start(args ...string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Start(args...)
+	cli := node.NewSCSClient()
+	var b []byte
+	var err error
+	switch len(args) {
+	case 0:
+		b, err = cli.StartAll()
+	case 1:
+		cli.Pname = args[0]
+		b, err = cli.StartPname()
+	default:
+		cli.Pname = args[0]
+		cli.Name = args[1]
+		b, err = cli.StartName()
+	}
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(string(b))
-	// fmt.Println(string(node.crud("start", args...)))
+	// fmt.Println(string(node.crud("stop", args...)))
 }
 
 func (node *Node) Status(args ...string) error {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Status(args...)
-	if err != nil {
-		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, err)
-		return err
+	cli := node.NewSCSClient()
+	var b []byte
+	var err error
+	switch len(args) {
+	case 0:
+		b, err = cli.StatusAll()
+	case 1:
+		cli.Pname = args[0]
+		b, err = cli.StatusPname()
+	default:
+		cli.Pname = args[0]
+		cli.Name = args[1]
+		b, err = cli.StartName()
 	}
 	resp := &script.StatusList{}
 	// fmt.Println(string(b))
@@ -158,13 +192,25 @@ func (node *Node) Kill(args ...string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Kill(args...)
-	// b, err := Requests("POST", fmt.Sprintf("%s/kill/%s/%s", node.Url, args[0], args[1]), node.Token, nil)
+	cli := node.NewSCSClient()
+	var b []byte
+	var err error
+
+	switch len(args) {
+	case 2:
+		b, err = cli.KillName()
+	case 1:
+		cli.Pname = args[0]
+		b, err = cli.KillPname()
+	default:
+		return
+	}
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(string(b))
+	// fmt.Println(string(node.crud("stop", args...)))
 }
 
 func (node *Node) Env(args string) {
@@ -175,7 +221,9 @@ func (node *Node) Env(args string) {
 	// var err error
 	// switch len(args) {
 	// case 1:
-	b, err := node.NewSCSClient().Env(args)
+	cli := node.NewSCSClient()
+	cli.Name = args
+	b, err := cli.Env()
 	// b, err = Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -192,13 +240,14 @@ func (node *Node) Env(args string) {
 	}
 }
 
-func (node *Node) Install(scripts []*internal.Script, env map[string]string) {
+func (node *Node) Install(scripts []*client.Script, env map[string]string) {
 	// 先读取配置文件
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
 	for _, script := range scripts {
-		b, err := node.NewSCSClient().Script(script)
+		cli := node.NewSCSClient()
+		b, err := cli.AddScript(script)
 		// b, err := Requests("POST", fmt.Sprintf("%s/script", node.Url), node.Token, bytes.NewReader(body))
 		if err != nil {
 			fmt.Println(err)
@@ -213,7 +262,9 @@ func (node *Node) Log(args string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Log(args)
+	cli := node.NewSCSClient()
+	cli.Name = args
+	b, err := cli.Log()
 	// b, err := Requests("POST", fmt.Sprintf("%s/log/%s", node.Url, args), node.Token, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -226,7 +277,20 @@ func (node *Node) Stop(args ...string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Stop(args...)
+	cli := node.NewSCSClient()
+	var b []byte
+	var err error
+	switch len(args) {
+	case 0:
+		b, err = cli.StopAll()
+	case 1:
+		cli.Pname = args[0]
+		b, err = cli.StopPname()
+	default:
+		cli.Pname = args[0]
+		cli.Name = args[1]
+		b, err = cli.StopName()
+	}
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -239,7 +303,20 @@ func (node *Node) Remove(args ...string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Remove(args...)
+	cli := node.NewSCSClient()
+	var b []byte
+	var err error
+	switch len(args) {
+	case 0:
+		b, err = cli.RemoveAllScrip()
+	case 1:
+		cli.Pname = args[0]
+		b, err = cli.RemovePnameScrip()
+	default:
+		cli.Pname = args[0]
+		cli.Name = args[1]
+		b, err = cli.RemoveNameScrip()
+	}
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -252,7 +329,9 @@ func (node *Node) Enable(pname string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Enable(pname)
+	cli := node.NewSCSClient()
+	cli.Pname = pname
+	b, err := cli.Enable()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -265,7 +344,9 @@ func (node *Node) Disable(pname string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Disable(pname)
+	cli := node.NewSCSClient()
+	cli.Pname = pname
+	b, err := cli.Disable()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -274,32 +355,24 @@ func (node *Node) Disable(pname string) {
 	// fmt.Println(string(node.crud("stop", args...)))
 }
 
-// func (node *Node) crud(operate string, args ...string) []byte {
-// 	if node.Wg != nil {
-// 		defer node.Wg.Done()
-// 	}
-// 	var url string
-// 	switch len(args) {
-// 	case 0:
-// 		url = fmt.Sprintf("%s/%s", node.Url, operate)
-// 	case 1:
-// 		url = fmt.Sprintf("%s/%s/%s", node.Url, operate, args[0])
-// 	default:
-// 		url = fmt.Sprintf("%s/%s/%s/%s", node.Url, operate, args[0], args[1])
-// 	}
-// 	b, err := Requests("POST", url, node.Token, nil)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return nil
-// 	}
-// 	return b
-// }
-
 func (node *Node) Update(args ...string) {
 	if node.Wg != nil {
 		defer node.Wg.Done()
 	}
-	b, err := node.NewSCSClient().Update(args...)
+	cli := node.NewSCSClient()
+	var b []byte
+	var err error
+	switch len(args) {
+	case 0:
+		b, err = cli.UpdateAll()
+	case 1:
+		cli.Pname = args[0]
+		b, err = cli.UpdatePname()
+	default:
+		cli.Pname = args[0]
+		cli.Name = args[1]
+		b, err = cli.UpdateName()
+	}
 	if err != nil {
 		fmt.Println(err)
 		return
