@@ -9,8 +9,6 @@ import (
 
 	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/script"
-
-	"github.com/hyahm/golog"
 )
 
 var UseNodes string
@@ -110,7 +108,6 @@ func (node *Node) Search(args string) {
 		si := make([]*SearchInfo, 0)
 		err = json.Unmarshal(b, &si)
 		if err != nil {
-			golog.Error(err)
 			continue
 		}
 		sl = append(sl, si...)

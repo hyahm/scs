@@ -3,11 +3,10 @@ package alert
 // 用来组装body
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"text/template"
-
-	"github.com/hyahm/golog"
 )
 
 var Addr string
@@ -43,13 +42,13 @@ func (am *Message) FormatBody(format string) string {
 	buf := bytes.NewBuffer([]byte(""))
 	tmpl, err := template.New("test").Parse(format) //建立一个名字为test的模版"hello, {{.}}"
 	if err != nil {
-		golog.Error(err)
+		fmt.Println(err)
 		return ""
 	}
 
 	err = tmpl.Execute(buf, am) //将str的值合成到tmpl模版的{{.}}中，并将合成得到的文本输入到os.Stdout,返回hello, world
 	if err != nil {
-		golog.Error(err)
+		fmt.Println(err)
 		return ""
 	}
 	return buf.String()

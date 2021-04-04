@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/hyahm/golog"
 )
 
 type AlertTelegram struct {
@@ -41,22 +39,22 @@ func (telegram *AlertTelegram) Send(body *Message, to ...string) error {
 		)
 
 		if err != nil {
-			golog.Error(err)
+			fmt.Println(err)
 			continue
 		}
 		defer resp.Body.Close()
 
 		b, err := ioutil.ReadAll(resp.Body)
 		if err == nil {
-			golog.Error(err)
+			fmt.Println(err)
 			continue
 		}
 		if resp.StatusCode != 200 {
-			golog.Error(string(b))
+			fmt.Println(string(b))
 			continue
 		}
-		golog.Error(err)
-		golog.Info(string(b))
+		fmt.Println(err)
+		fmt.Println(string(b))
 	}
 	return nil
 }

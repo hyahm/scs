@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-
-	"github.com/hyahm/golog"
 )
 
 type AlertWeiXin struct {
@@ -24,17 +22,17 @@ func (weixin *AlertWeiXin) Send(body *Message, to ...string) error {
 		),
 	)
 	if err != nil {
-		golog.Error(err)
+		fmt.Println(err)
 		return err
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		golog.Error(err)
+		fmt.Println(err)
 		return err
 	}
 	if resp.StatusCode != 200 {
-		golog.Error(string(b))
+		fmt.Println(string(b))
 		return errors.New(string(b))
 	}
 	return nil

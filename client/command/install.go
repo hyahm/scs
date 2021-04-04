@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/client/cliconfig"
 	"github.com/hyahm/scs/client/node"
@@ -47,7 +46,6 @@ var InstallCmd = &cobra.Command{
 				fmt.Println(err)
 				return
 			}
-			golog.Info(string(f))
 			err = yaml.Unmarshal(f, &sc)
 			if err != nil {
 				fmt.Println(err)
@@ -81,7 +79,6 @@ var InstallCmd = &cobra.Command{
 		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
-			golog.Info(2222)
 			nodeInfo.Install(sc, env)
 		}
 		wg.Wait()

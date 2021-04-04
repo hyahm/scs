@@ -8,8 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-
-	"github.com/hyahm/golog"
 )
 
 type AlertRocket struct {
@@ -30,7 +28,7 @@ func (rocket *AlertRocket) Send(body *Message, to ...string) error {
 
 	token, err := rocket.getToken()
 	if err != nil {
-		golog.Error(err)
+		fmt.Println(err)
 		return err
 	}
 	user := make(map[string]bool)
@@ -48,7 +46,7 @@ func (rocket *AlertRocket) Send(body *Message, to ...string) error {
 	for k := range user {
 		err = rocket.sendMsg(token.AuthToken, token.UserId, body.FormatBody(rocketFormat), k)
 		if err != nil {
-			golog.Error(err)
+			fmt.Println(err)
 			continue
 		}
 	}
@@ -62,14 +60,14 @@ func (rocket *AlertRocket) getToken() (*Token, error) {
 	}`, rocket.Username, rocket.Password))
 	resp, err := http.Post(fmt.Sprintf("%s/api/v1/login", rocket.Server), "application/json", login)
 	if err != nil {
-		golog.Error(err)
+		fmt.Println(err)
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		golog.Error(err)
+		fmt.Println(err)
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
@@ -83,11 +81,11 @@ func (rocket *AlertRocket) getToken() (*Token, error) {
 	}{}
 	err = json.Unmarshal(b, rd)
 	if err != nil {
-		golog.Error(err)
+		fmt.Println(err)
 		return nil, err
 	}
 	if rd.Status == "error" {
-		golog.Error(rd.Message)
+		fmt.Println(rd.Message)
 		return nil, fmt.Errorf(rd.Message)
 	}
 	return &rd.Data, nil
@@ -103,12 +101,12 @@ func (rocket *AlertRocket) sendMsg(token, uid, body, to string) (err error) {
 	}
 	bt, err := json.Marshal(msg)
 	if err != nil {
-		golog.Info(err)
+		fmt.Println(err)
 		return
 	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/chat.postMessage", rocket.Server), bytes.NewReader(bt))
 	if err != nil {
-		golog.Info(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -117,12 +115,12 @@ func (rocket *AlertRocket) sendMsg(token, uid, body, to string) (err error) {
 	cli := &http.Client{}
 	r, err := cli.Do(req)
 	if err != nil {
-		golog.Info(err)
+		fmt.Println(err)
 		return
 	}
 	respmsg, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		golog.Info(err)
+		fmt.Println(err)
 		return
 	}
 	defer r.Body.Close()
@@ -133,7 +131,7 @@ func (rocket *AlertRocket) sendMsg(token, uid, body, to string) (err error) {
 
 	err = json.Unmarshal(respmsg, a)
 	if err != nil {
-		golog.Info(err)
+		fmt.Println(err)
 		return
 	}
 	return

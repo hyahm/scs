@@ -1,9 +1,8 @@
 package alert
 
 import (
+	"fmt"
 	"os"
-
-	"github.com/hyahm/golog"
 )
 
 // 报警相关配置
@@ -67,7 +66,7 @@ func AlertMessage(msg *Message, at *AlertTo) {
 		if at == nil {
 			alertErr := al.Send(msg)
 			if alertErr != nil {
-				golog.Error(alertErr)
+				fmt.Println(alertErr)
 			}
 			continue
 		}
@@ -77,7 +76,7 @@ func AlertMessage(msg *Message, at *AlertTo) {
 			go func() {
 				alertErr := al.Send(msg, at.Email...)
 				if alertErr != nil {
-					golog.Error(alertErr)
+					fmt.Println(alertErr)
 				}
 
 			}()
@@ -85,7 +84,7 @@ func AlertMessage(msg *Message, at *AlertTo) {
 			go func() {
 				alertErr := al.Send(msg, at.Rocket...)
 				if alertErr != nil {
-					golog.Error(alertErr)
+					fmt.Println(alertErr)
 				}
 
 			}()
@@ -93,7 +92,7 @@ func AlertMessage(msg *Message, at *AlertTo) {
 			go func() {
 				alertErr := al.Send(msg, at.Telegram...)
 				if alertErr != nil {
-					golog.Error(alertErr)
+					fmt.Println(alertErr)
 				}
 
 			}()
@@ -101,7 +100,7 @@ func AlertMessage(msg *Message, at *AlertTo) {
 			go func() {
 				alertErr := al.Send(msg, at.WeiXin...)
 				if alertErr != nil {
-					golog.Error(alertErr)
+					fmt.Println(alertErr)
 				}
 
 			}()
