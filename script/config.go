@@ -263,6 +263,7 @@ func (c *config) fill(index int, reload bool) {
 		subname := fmt.Sprintf("%s_%d", c.SC[index].Name, i)
 		if reload {
 			// 如果是加载配置文件， 那么删除已经有的
+			golog.Info("delete subname")
 			DelDelScript(subname)
 		}
 
@@ -465,9 +466,6 @@ func (c *config) AddScript(s client.Script) error {
 	}
 	// 添加
 	// 默认配置
-	if s.Replicate < 1 {
-		s.Replicate = 1
-	}
 
 	c.SC = append(c.SC, s)
 	index := len(c.SC) - 1

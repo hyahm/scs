@@ -52,6 +52,7 @@ func (s *Script) kill() error {
 
 func (s *Script) start() error {
 	golog.Info(s.Command)
+	golog.Info(s.Dir)
 
 	s.cmd = exec.Command("powershell", "-c", s.Command)
 	if s.cmd.Env == nil {

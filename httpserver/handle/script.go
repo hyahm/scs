@@ -17,6 +17,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 将时间转化为秒
+	golog.Infof("%#v\n", *s)
 	s.ContinuityInterval = s.ContinuityInterval * 1000000000
 	if err := script.Cfg.AddScript(*s); err != nil {
 		w.Write([]byte(`{"code": 201, "msg": "already exist script"}`))

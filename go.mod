@@ -7,6 +7,7 @@ require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
+	github.com/hyahm/goconfig v0.0.0-20210404042807-4f5600f37d4c // indirect
 	github.com/hyahm/golog v0.0.0-20210205023406-67778c69934a
 	github.com/hyahm/xmux v0.0.0-20210106020659-623ef4db850f
 	// github.com/sacOO7/go-logger v0.0.0-20180719173527-9ac9add5a50d // indirect
@@ -18,5 +19,5 @@ require (
 	golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
