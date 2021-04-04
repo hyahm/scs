@@ -38,7 +38,6 @@ func RemoveUnUseScript() {
 	defer slock.RUnlock()
 	// 停止无用的脚本， 并移除
 	golog.Infof("%#v\n", delScript)
-	golog.Infof("%#v\n", SS.Infos)
 	for subname, name := range delScript {
 		SS.GetScriptFromPnameAndSubname(name, subname).Remove()
 	}

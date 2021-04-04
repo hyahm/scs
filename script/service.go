@@ -130,6 +130,7 @@ func (s *Script) cron() {
 
 // Start  启动服务
 func (s *Script) Start() error {
+	golog.Info("start")
 	switch s.Status.Status {
 	case WAITSTOP:
 		// 如果之前是等待停止的状态， 更改为重启状态

@@ -53,19 +53,22 @@ func (s *Script) kill() error {
 func (s *Script) start() error {
 	golog.Info(s.Command)
 	golog.Info(s.Dir)
-
 	s.cmd = exec.Command("powershell", "-c", s.Command)
 	if s.cmd.Env == nil {
 		s.cmd.Env = make([]string, 0, len(s.Env))
 	}
 
 	for k, v := range s.Env {
+		if k == "" {
+			continue
+		}
+		// 需要单独抽出去>>
 		s.cmd.Env = append(s.cmd.Env, k+"="+v)
 		s.Command = strings.ReplaceAll(s.Command, "$"+k, v)
 		s.Command = strings.ReplaceAll(s.Command, "${"+k+"}", v)
 
 	}
-	// 需要单独抽出去>>
+
 	s.cmd.Dir = s.Dir
 	// 等待初始化完成完成后向后执行
 	s.read()

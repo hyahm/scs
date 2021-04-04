@@ -94,7 +94,6 @@ func (probe *Probe) CheckHardWare() {
 	} else {
 		cps[2] = nil
 	}
-	golog.Info(probe.Monitor)
 	if len(probe.Monitor) > 0 {
 		if IsNil(cps[3]) {
 			golog.Info("new")

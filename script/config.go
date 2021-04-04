@@ -233,8 +233,12 @@ func (c *config) fill(index int, reload bool) {
 	baseEnv := make(map[string]string)
 
 	// 填充系统环境变量到
+	pathEnvName := "PATH"
 	for _, v := range os.Environ() {
 		kv := strings.Split(v, "=")
+		if strings.ToUpper(kv[0]) == "PATH" {
+			pathEnvName = kv[0]
+		}
 		baseEnv[kv[0]] = kv[1]
 	}
 
@@ -242,7 +246,7 @@ func (c *config) fill(index int, reload bool) {
 		// path 环境单独处理， 可以多个值， 其他环境变量多个值请以此写完
 		if strings.ToUpper(k) == "PATH" {
 			if runtime.GOOS == "windows" {
-				baseEnv["Path"] = baseEnv["Path"] + v + ";"
+				baseEnv[pathEnvName] = baseEnv[pathEnvName] + v + ";"
 			} else {
 				baseEnv[k] = baseEnv[k] + ":" + v
 			}
@@ -261,11 +265,6 @@ func (c *config) fill(index int, reload bool) {
 	for i := 0; i < replica; i++ {
 		// 根据副本数提取子名称
 		subname := fmt.Sprintf("%s_%d", c.SC[index].Name, i)
-		if reload {
-			// 如果是加载配置文件， 那么删除已经有的
-			golog.Info("delete subname")
-			DelDelScript(subname)
-		}
 
 		baseEnv["NAME"] = subname
 		baseEnv["PORT"] = strconv.Itoa(c.SC[index].Port + i)
@@ -277,6 +276,11 @@ func (c *config) fill(index int, reload bool) {
 
 		if SS.HasSubName(c.SC[index].Name, subname) {
 			// 如果存在键值就修改
+			if reload && SS.Infos[c.SC[index].Name][subname].Status.Status == STOP {
+				// 如果是加载配置文件， 那么删除已经有的
+				golog.Info("delete subname")
+				DelDelScript(subname)
+			}
 			golog.Info("update")
 			c.update(index, subname, c.SC[index].Command, baseEnv)
 		} else {

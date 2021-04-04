@@ -16,7 +16,6 @@ var StartCmd = &cobra.Command{
 	Long:  `command: scsctl start [flags] [pname] [name]`,
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(args)
 		if node.UseNodes != "" {
 			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
 				nodeInfo.Start(args...)
