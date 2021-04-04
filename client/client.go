@@ -65,7 +65,7 @@ func client() *http.Client {
 
 }
 
-func (sc *SCSClient) Requests(url string, body io.Reader) ([]byte, error) {
+func (sc *SCSClient) requests(url string, body io.Reader) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodPost, sc.Domain+url, body)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (sc *SCSClient) CanNotStop() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests("/cannotstop/"+sc.Name, nil)
+	return sc.requests("/cannotstop/"+sc.Name, nil)
 }
 
 func (sc *SCSClient) CanStop() ([]byte, error) {
@@ -95,32 +95,32 @@ func (sc *SCSClient) CanStop() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests("/canstop/"+sc.Name, nil)
+	return sc.requests("/canstop/"+sc.Name, nil)
 }
 
 func (sc *SCSClient) Log() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests("/log/"+sc.Name, nil)
+	return sc.requests("/log/"+sc.Name, nil)
 }
 
 func (sc *SCSClient) Env() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests("/env/"+sc.Name, nil)
+	return sc.requests("/env/"+sc.Name, nil)
 }
 
 func (sc *SCSClient) Reload() ([]byte, error) {
-	return sc.Requests("/-/reload", nil)
+	return sc.requests("/-/reload", nil)
 }
 
 func (sc *SCSClient) KillPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/kill/"+sc.Pname, nil)
+	return sc.requests("/kill/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) KillName() ([]byte, error) {
@@ -130,18 +130,18 @@ func (sc *SCSClient) KillName() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests(fmt.Sprintf("/kill/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/kill/%s/%s", sc.Pname, sc.Name), nil)
 }
 
 func (sc *SCSClient) UpdateAll() ([]byte, error) {
-	return sc.Requests("/update", nil)
+	return sc.requests("/update", nil)
 }
 
 func (sc *SCSClient) UpdatePname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/update/"+sc.Pname, nil)
+	return sc.requests("/update/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) UpdateName() ([]byte, error) {
@@ -151,18 +151,18 @@ func (sc *SCSClient) UpdateName() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests(fmt.Sprintf("/update/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/update/%s/%s", sc.Pname, sc.Name), nil)
 }
 
 func (sc *SCSClient) RestartAll() ([]byte, error) {
-	return sc.Requests("/restart", nil)
+	return sc.requests("/restart", nil)
 }
 
 func (sc *SCSClient) RestartPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/restart/"+sc.Pname, nil)
+	return sc.requests("/restart/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) RestartName() ([]byte, error) {
@@ -172,18 +172,18 @@ func (sc *SCSClient) RestartName() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests(fmt.Sprintf("/restart/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/restart/%s/%s", sc.Pname, sc.Name), nil)
 }
 
 func (sc *SCSClient) StartAll() ([]byte, error) {
-	return sc.Requests("/start", nil)
+	return sc.requests("/start", nil)
 }
 
 func (sc *SCSClient) StartPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/start/"+sc.Pname, nil)
+	return sc.requests("/start/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) StartName() ([]byte, error) {
@@ -193,18 +193,18 @@ func (sc *SCSClient) StartName() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests(fmt.Sprintf("/start/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/start/%s/%s", sc.Pname, sc.Name), nil)
 }
 
 func (sc *SCSClient) StopAll() ([]byte, error) {
-	return sc.Requests("/stop", nil)
+	return sc.requests("/stop", nil)
 }
 
 func (sc *SCSClient) StopPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/stop/"+sc.Pname, nil)
+	return sc.requests("/stop/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) StopName() ([]byte, error) {
@@ -214,18 +214,18 @@ func (sc *SCSClient) StopName() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests(fmt.Sprintf("/stop/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/stop/%s/%s", sc.Pname, sc.Name), nil)
 }
 
 func (sc *SCSClient) RemoveAllScrip() ([]byte, error) {
-	return sc.Requests("/remove", nil)
+	return sc.requests("/remove", nil)
 }
 
 func (sc *SCSClient) RemovePnameScrip() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/remove/"+sc.Pname, nil)
+	return sc.requests("/remove/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) RemoveNameScrip() ([]byte, error) {
@@ -235,45 +235,45 @@ func (sc *SCSClient) RemoveNameScrip() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests(fmt.Sprintf("/remove/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/remove/%s/%s", sc.Pname, sc.Name), nil)
 }
 
 func (sc *SCSClient) Enable() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/enable/"+sc.Pname, nil)
+	return sc.requests("/enable/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) Disable() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/disable/"+sc.Pname, nil)
+	return sc.requests("/disable/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) Repo() ([]byte, error) {
-	return sc.Requests("/get/repo", nil)
+	return sc.requests("/get/repo", nil)
 }
 
 func (sc *SCSClient) Search(derivative, serviceName string) ([]byte, error) {
-	return sc.Requests(fmt.Sprintf("/search/%s/%s", derivative, serviceName), nil)
+	return sc.requests(fmt.Sprintf("/search/%s/%s", derivative, serviceName), nil)
 }
 
 func (sc *SCSClient) AddScript(s *Script) ([]byte, error) {
 	send, _ := json.Marshal(s)
-	return sc.Requests("/script", bytes.NewReader(send))
+	return sc.requests("/script", bytes.NewReader(send))
 }
 
 func (sc *SCSClient) StatusAll() ([]byte, error) {
-	return sc.Requests("/status", nil)
+	return sc.requests("/status", nil)
 }
 
 func (sc *SCSClient) StatusPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.Requests("/status/"+sc.Pname, nil)
+	return sc.requests("/status/"+sc.Pname, nil)
 }
 
 func (sc *SCSClient) StatusName() ([]byte, error) {
@@ -283,13 +283,13 @@ func (sc *SCSClient) StatusName() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.Requests(fmt.Sprintf("/status/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/status/%s/%s", sc.Pname, sc.Name), nil)
 }
 func (sc *SCSClient) Probe() ([]byte, error) {
-	return sc.Requests("/probe", nil)
+	return sc.requests("/probe", nil)
 }
 
 func (sc *SCSClient) Alert(alert *alert.RespAlert) ([]byte, error) {
 	send, _ := json.Marshal(alert)
-	return sc.Requests("/set/alert", bytes.NewReader(send))
+	return sc.requests("/set/alert", bytes.NewReader(send))
 }
