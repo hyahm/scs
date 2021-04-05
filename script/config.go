@@ -244,10 +244,11 @@ func (c *config) fill(index int, reload bool) {
 	golog.Info(pathEnvName)
 	for k, v := range c.SC[index].Env {
 		// path 环境单独处理， 可以多个值， 其他环境变量多个值请以此写完
-		if strings.ToLower(k) == pathEnvName {
+		if strings.ToLower(k) == strings.ToLower(pathEnvName) {
 			if runtime.GOOS == "windows" {
 				baseEnv[pathEnvName] = baseEnv[pathEnvName] + ";" + v
 			} else {
+				golog.Info(pathEnvName)
 				baseEnv[pathEnvName] = baseEnv[pathEnvName] + ":" + v
 			}
 		} else {
