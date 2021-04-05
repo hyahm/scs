@@ -236,7 +236,7 @@ func (c *config) fill(index int, reload bool) {
 	pathEnvName := "PATH"
 	for _, v := range os.Environ() {
 		kv := strings.Split(v, "=")
-		if strings.ToUpper(kv[0]) == "PATH" {
+		if strings.ToUpper(kv[0]) == pathEnvName {
 			pathEnvName = kv[0]
 		}
 		baseEnv[kv[0]] = kv[1]
@@ -246,7 +246,7 @@ func (c *config) fill(index int, reload bool) {
 		// path 环境单独处理， 可以多个值， 其他环境变量多个值请以此写完
 		if k == pathEnvName {
 			if runtime.GOOS == "windows" {
-				baseEnv[k] = baseEnv[k] + v + ";"
+				baseEnv[k] = baseEnv[k] + ";" + v
 			} else {
 				baseEnv[k] = baseEnv[k] + ":" + v
 			}
