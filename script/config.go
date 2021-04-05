@@ -265,7 +265,11 @@ func (c *config) fill(index int, reload bool) {
 	for i := 0; i < replica; i++ {
 		// 根据副本数提取子名称
 		subname := fmt.Sprintf("%s_%d", c.SC[index].Name, i)
-
+		if reload {
+			// 如果是加载配置文件， 那么删除已经有的
+			golog.Info("delete subname")
+			DelDelScript(subname)
+		}
 		baseEnv["NAME"] = subname
 		baseEnv["PORT"] = strconv.Itoa(c.SC[index].Port + i)
 		// 需要单独抽出去<<
@@ -276,11 +280,7 @@ func (c *config) fill(index int, reload bool) {
 
 		if SS.HasSubName(c.SC[index].Name, subname) {
 			// 如果存在键值就修改
-			if reload && SS.Infos[c.SC[index].Name][subname].Status.Status == STOP {
-				// 如果是加载配置文件， 那么删除已经有的
-				golog.Info("delete subname")
-				DelDelScript(subname)
-			}
+
 			golog.Info("update")
 			c.update(index, subname, c.SC[index].Command, baseEnv)
 		} else {
