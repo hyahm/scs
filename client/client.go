@@ -17,6 +17,11 @@ import (
 
 var ErrPnameIsEmpty = errors.New("pname is empty")
 var ErrNameIsEmpty = errors.New("name is empty")
+var ErrToken = errors.New("token error")
+var ErrStatusNetworkAuthenticationRequired = errors.New("StatusNetworkAuthenticationRequired")
+var ErrResponseData = errors.New("error response data")
+var ErrFoundPnameOrName = errors.New("not found pname or name")
+var ErrWaitReload = errors.New("waiting for last reload complete")
 
 type SCSClient struct {
 	Domain string
@@ -78,7 +83,19 @@ func (sc *SCSClient) requests(url string, body io.Reader) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == 203 {
-		return nil, errors.New("token error")
+		return nil, ErrToken
+	}
+	if resp.StatusCode == 500 {
+		return nil, ErrResponseData
+	}
+	if resp.StatusCode == 511 {
+		return nil, ErrStatusNetworkAuthenticationRequired
+	}
+	if resp.StatusCode == 404 {
+		return nil, ErrFoundPnameOrName
+	}
+	if resp.StatusCode == 201 {
+		return nil, ErrWaitReload
 	}
 	return ioutil.ReadAll(resp.Body)
 }

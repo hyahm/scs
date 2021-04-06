@@ -58,6 +58,6 @@ func GetEnvName(w http.ResponseWriter, r *http.Request) {
 		// return
 	}
 
-	w.Write([]byte("not found this name"))
+	w.Write([]byte(`{"code": 404, "msg": "not found this name"}`))
 	return
 }

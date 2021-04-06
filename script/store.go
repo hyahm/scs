@@ -192,6 +192,7 @@ func Get(pname, name string) *ServiceStatus {
 type StatusList struct {
 	Data []*ServiceStatus `json:"data"`
 	Code int              `json:"code"`
+	Msg  string           `json:"msg"`
 }
 
 func (sl *StatusList) Filter(filter []string) {
@@ -264,11 +265,11 @@ func ScriptName(pname, name string) []byte {
 			statuss.Data = append(statuss.Data, s.Status)
 		}
 	}
-	statuss.Code = 200
 
 	send, err := json.MarshalIndent(statuss, "", "\t")
 	if err != nil {
 		golog.Error(err)
 	}
+	statuss.Code = 200
 	return send
 }

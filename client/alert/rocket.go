@@ -60,14 +60,12 @@ func (rocket *AlertRocket) getToken() (*Token, error) {
 	}`, rocket.Username, rocket.Password))
 	resp, err := http.Post(fmt.Sprintf("%s/api/v1/login", rocket.Server), "application/json", login)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
@@ -81,7 +79,6 @@ func (rocket *AlertRocket) getToken() (*Token, error) {
 	}{}
 	err = json.Unmarshal(b, rd)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	if rd.Status == "error" {

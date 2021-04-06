@@ -2,7 +2,6 @@ package node
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -14,7 +13,6 @@ import (
 var UseNodes string
 var GroupName string
 var ReadTimeout time.Duration
-var ErrorToken = errors.New("Token error")
 
 type Node struct {
 	Name   string `yaml:"-"`

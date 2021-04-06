@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/hyahm/scs/script"
@@ -15,6 +16,9 @@ func Kill(w http.ResponseWriter, r *http.Request) {
 		if _, ok := script.SS.Infos[pname][name]; ok {
 			script.SS.Infos[pname][name].Kill()
 		}
+	} else {
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, name)))
+		return
 	}
 
 	w.Write([]byte(`{"code": 200, "msg": "already killed"}`))
@@ -27,6 +31,9 @@ func KillPname(w http.ResponseWriter, r *http.Request) {
 		for name := range script.SS.Infos[pname] {
 			script.SS.Infos[pname][name].Kill()
 		}
+	} else {
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s"}`, pname)))
+		return
 	}
 	w.Write([]byte(`{"code": 200, "msg": "already killed"}`))
 	return

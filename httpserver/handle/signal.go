@@ -24,7 +24,6 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "not found this name"}`)))
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
 	return
 }
 

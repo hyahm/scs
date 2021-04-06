@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -21,7 +22,7 @@ func Log(w http.ResponseWriter, r *http.Request) {
 		} else if strings.ToLower(ns[1]) == "log" {
 			key = "log"
 		} else {
-			w.Write([]byte("not found this log key: " + ns[1] + ", only support log | update | lookPath"))
+			w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this log key: %s, only support log | update | lookPath"}`, ns[1])))
 			return
 		}
 	}
@@ -36,6 +37,6 @@ func Log(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write([]byte("not found script"))
+	w.Write([]byte(`{"code": 404, "msg":"not found script"}`))
 	return
 }
