@@ -252,7 +252,11 @@ func (s *Script) Stop() {
 
 func (s *Script) UpdateAndRestart() {
 	golog.Info(s.Update)
-	if err := s.shell(s.Update, "update"); err != nil {
+	updateCommand := "git pull"
+	if s.Update != "" {
+		updateCommand = s.Update
+	}
+	if err := s.shell(updateCommand, "update"); err != nil {
 		golog.Error(err)
 		return
 	}
