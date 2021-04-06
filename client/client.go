@@ -82,22 +82,21 @@ func (sc *SCSClient) requests(url string, body io.Reader) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode == 203 {
+	switch resp.StatusCode {
+	case 203:
 		return nil, ErrToken
-	}
-	if resp.StatusCode == 500 {
+	case 500:
 		return nil, ErrResponseData
-	}
-	if resp.StatusCode == 511 {
+	case 511:
 		return nil, ErrStatusNetworkAuthenticationRequired
-	}
-	if resp.StatusCode == 404 {
+	case 404:
 		return nil, ErrFoundPnameOrName
-	}
-	if resp.StatusCode == 201 {
+	case 201:
 		return nil, ErrWaitReload
+	default:
+		return ioutil.ReadAll(resp.Body)
 	}
-	return ioutil.ReadAll(resp.Body)
+
 }
 
 func (sc *SCSClient) CanNotStop() ([]byte, error) {

@@ -168,8 +168,8 @@ func (node *Node) Status(args ...string) error {
 		return err
 	}
 	if resp.Code == 203 {
-		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, ErrorToken)
-		return ErrorToken
+		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, client.ErrToken)
+		return client.ErrToken
 	}
 
 	if len(node.Filter) > 0 {
