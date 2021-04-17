@@ -26,17 +26,12 @@ func Log(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	for _, v := range script.SS.Infos {
-		for n, script := range v {
-			if n == ns[0] {
-				script.LogLocker.RLock()
-				w.Write([]byte(strings.Join(script.Log[key], "")))
-				script.LogLocker.RUnlock()
-				return
-			}
-		}
-	}
 
-	w.Write([]byte(`{"code": 404, "msg":"not found script"}`))
-	return
+	svc, err := script.GetServerBySubname(name)
+	if err != nil {
+		w.Write([]byte(`{"code": 404, "msg":"not found script"}`))
+		return
+	}
+	w.Write([]byte(strings.Join(svc.Log[key], "")))
+
 }

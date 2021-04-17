@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/hyahm/scs/global"
@@ -11,36 +12,36 @@ import (
 	"github.com/hyahm/golog"
 )
 
-func (s *Script) read() {
-	stdout, err := s.cmd.StdoutPipe()
+func (svc *Server) read() {
+	stdout, err := svc.cmd.StdoutPipe()
 	if err != nil {
 		golog.Error(err)
 	}
 
-	stderr, err := s.cmd.StderrPipe()
+	stderr, err := svc.cmd.StderrPipe()
 	if err != nil {
 		golog.Error(err)
 	}
-	s.Msg = make(chan string, 1000)
-	go s.appendLog()
+	svc.Msg = make(chan string, 1000)
+	go svc.appendLog()
 	//实时循环读取输出流中的一行内容
-	go s.appendRead(stderr, true)
+	go svc.appendRead(stderr, true)
 	//实时循环读取输出流中的一行内容
-	go s.appendRead(stdout, false)
+	go svc.appendRead(stdout, false)
 }
 
-func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
+func (svc *Server) appendRead(stdout io.ReadCloser, iserr bool) {
 	readout := bufio.NewReader(stdout)
-	defer func() {
-		if err := recover(); err != nil {
-			golog.Error(err)
-		}
-	}()
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		golog.Error(err)
+	// 	}
+	// }()
 	for {
 		select {
-		case <-s.Ctx.Done():
+		case <-svc.Ctx.Done():
 			golog.Info("stop")
-			close(s.Msg)
+			close(svc.Msg)
 			return
 		default:
 			line, err := readout.ReadString('\n')
@@ -48,26 +49,25 @@ func (s *Script) appendRead(stdout io.ReadCloser, iserr bool) {
 				stdout.Close()
 				return
 			}
-			golog.Info(line[:len(line)-1])
-			s.LogLocker.RLock()
-			logCap := cap(s.Log["log"])
-			s.LogLocker.RUnlock()
-			if logCap == 0 {
-				if iserr {
-					golog.Error(line)
-				} else {
-					golog.Info(line)
-				}
-			} else {
-				t := time.Now().Format("2006/1/2 15:04:05")
-				line = t + " -- " + line
-				s.Msg <- line
+			if strings.Trim(line[:len(line)-1], " ") == "" {
+				return
 			}
+
+			svc.LogLocker.RLock()
+			svc.LogLocker.RUnlock()
+			if iserr {
+				golog.Error(line[:len(line)-1])
+			} else {
+				golog.Info(line[:len(line)-1])
+			}
+			t := time.Now().Format("2006/1/2 15:04:05")
+			line = t + " -- " + line
+			svc.Msg <- line
 		}
 	}
 }
 
-func read(cmd *exec.Cmd, s *Script, typ string) {
+func read(cmd *exec.Cmd, svc *Server, typ string) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		golog.Error(err)
@@ -79,13 +79,13 @@ func read(cmd *exec.Cmd, s *Script, typ string) {
 	}
 
 	//实时循环读取输出流中的一行内容
-	go appendRead(stderr, s, typ)
+	go appendRead(stderr, svc, typ)
 
 	//实时循环读取输出流中的一行内容
-	go appendRead(stdout, s, typ)
+	go appendRead(stdout, svc, typ)
 }
 
-func appendRead(stdout io.ReadCloser, s *Script, typ string) {
+func appendRead(stdout io.ReadCloser, svc *Server, typ string) {
 	readout := bufio.NewReader(stdout)
 	for {
 		line, err := readout.ReadString('\n')
@@ -94,41 +94,41 @@ func appendRead(stdout io.ReadCloser, s *Script, typ string) {
 			break
 		}
 		golog.Info(line[:len(line)-1])
-		s.LogLocker.Lock()
-		if len(s.Log[typ]) >= global.LogCount {
-			copy(s.Log[typ], s.Log[typ][1:])
-			s.Log[typ][global.LogCount-1] = line
+		svc.LogLocker.Lock()
+		if len(svc.Log[typ]) >= global.LogCount {
+			copy(svc.Log[typ], svc.Log[typ][1:])
+			svc.Log[typ][global.LogCount-1] = line
 		} else {
-			s.Log[typ] = append(s.Log[typ], line)
+			svc.Log[typ] = append(svc.Log[typ], line)
 		}
-		s.LogLocker.Unlock()
+		svc.LogLocker.Unlock()
 	}
 }
 
-func (s *Script) appendLog() {
+func (svc *Server) appendLog() {
 	for {
 		select {
-		case <-s.Ctx.Done():
-			for line := range s.Msg {
-				s.LogLocker.Lock()
-				if len(s.Log["log"]) >= global.LogCount {
-					copy(s.Log["log"], s.Log["log"][1:])
-					s.Log["log"][global.LogCount-1] = line
+		case <-svc.Ctx.Done():
+			for line := range svc.Msg {
+				svc.LogLocker.Lock()
+				if len(svc.Log["log"]) >= global.LogCount {
+					copy(svc.Log["log"], svc.Log["log"][1:])
+					svc.Log["log"][global.LogCount-1] = line
 				} else {
-					s.Log["log"] = append(s.Log["log"], line)
+					svc.Log["log"] = append(svc.Log["log"], line)
 				}
-				s.LogLocker.Unlock()
+				svc.LogLocker.Unlock()
 			}
 			return
-		case line := <-s.Msg:
-			s.LogLocker.Lock()
-			if len(s.Log["log"]) >= global.LogCount {
-				copy(s.Log["log"], s.Log["log"][1:])
-				s.Log["log"][global.LogCount-1] = line
+		case line := <-svc.Msg:
+			svc.LogLocker.Lock()
+			if len(svc.Log["log"]) >= global.LogCount {
+				copy(svc.Log["log"], svc.Log["log"][1:])
+				svc.Log["log"][global.LogCount-1] = line
 			} else {
-				s.Log["log"] = append(s.Log["log"], line)
+				svc.Log["log"] = append(svc.Log["log"], line)
 			}
-			s.LogLocker.Unlock()
+			svc.LogLocker.Unlock()
 		}
 	}
 

@@ -11,6 +11,7 @@ import (
 )
 
 func Disable(w http.ResponseWriter, r *http.Request) {
+	golog.Info("33333")
 	if reloadKey {
 		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return
@@ -20,32 +21,25 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 		reloadKey = false
 	}()
 	pname := xmux.Var(r)["pname"]
-	if err := script.ReadConfig(); err != nil {
-		w.Write([]byte(fmt.Sprint(`{"code": 500, "msg": "config file error"}`)))
-		return
-	}
-	script.Disable(pname)
-	golog.Info(pname)
-	if err := script.WriteConfig(); err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
-		return
-	}
-	if _, ok := script.SS.Infos[pname]; ok {
-		for name := range script.SS.Infos[pname] {
-			script.SS.Infos[pname][name].Disable = true
-			script.SS.Infos[pname][name].Status.Disable = true
-			go script.SS.Infos[pname][name].Stop()
-		}
-	} else {
+
+	s, err := script.GetScriptByPname(pname)
+	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
 		return
 	}
+	// 上面已经判断过是否存在了， 这里就忽略
+	s.DisableScript()
+	err = script.UpdateScriptToConfigFile(s)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s}`, err.Error())))
+		return
+	}
+	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
-	return
 }
 
 func Enable(w http.ResponseWriter, r *http.Request) {
+	golog.Info("33333")
 	if reloadKey {
 		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return
@@ -55,25 +49,16 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 		reloadKey = false
 	}()
 	pname := xmux.Var(r)["pname"]
-	if err := script.ReadConfig(); err != nil {
-		w.Write([]byte(fmt.Sprint(`{"code": 500, "msg": "config file error"}`)))
-		return
-	}
-	golog.Info("have pname")
-	script.Enable(pname)
-	if err := script.WriteConfig(); err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
-		return
-	}
-	if _, ok := script.SS.Infos[pname]; ok {
-		for name := range script.SS.Infos[pname] {
-			script.SS.Infos[pname][name].Disable = false
-			script.SS.Infos[pname][name].Status.Disable = false
-			go script.SS.Infos[pname][name].Start()
-		}
-
-	} else {
+	s, err := script.GetScriptByPname(pname)
+	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
+		return
+	}
+	// 上面已经判断过是否存在了， 这里就忽略
+	s.EnableScript()
+	err = script.UpdateScriptToConfigFile(s)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s}`, err.Error())))
 		return
 	}
 

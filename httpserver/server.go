@@ -1,17 +1,16 @@
 package httpserver
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/httpserver/handle"
 	"github.com/hyahm/scs/httpserver/midware"
 	"github.com/hyahm/scs/public"
+	"github.com/hyahm/scs/script"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
@@ -25,7 +24,6 @@ func GetExecTime(handle func(http.ResponseWriter, *http.Request), w http.Respons
 
 // var dir := "key"
 func HttpServer() {
-	golog.Info("init http")
 	router := xmux.NewRouter()
 	router.SetHeader("Access-Control-Allow-Origin", "*")
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
@@ -87,11 +85,11 @@ func HttpServer() {
 	router.Post("/probe", handle.Probe).DelModule(midware.CheckToken)
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
-	router.Post("/script", handle.AddScript).Bind(&client.Script{}).AddModule(midware.Unmarshal)
+	router.Post("/script", handle.AddScript).Bind(&script.Script{}).AddModule(midware.Unmarshal)
 	router.Post("/delete/{pname}", handle.DelScript)
 	if global.DisableTls {
 		golog.Info("listen on " + global.Listen + " over http")
-		log.Fatal(router.Run(global.Listen))
+		golog.Fatal(router.Run(global.Listen))
 	}
 
 	svc := &http.Server{
@@ -109,10 +107,10 @@ func HttpServer() {
 		public.CreateTLS()
 		golog.Info("listen on " + global.Listen + " over https")
 		if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
-			log.Fatal(err)
+			golog.Fatal(err)
 		}
 	}
 	if err := svc.ListenAndServeTLS(global.Pem, global.Key); err != nil {
-		log.Fatal(err)
+		golog.Fatal(err)
 	}
 }

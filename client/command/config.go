@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs/client/cliconfig"
-	"github.com/hyahm/scs/client/node"
+	"github.com/hyahm/scs/script"
 
 	"github.com/spf13/cobra"
 )
@@ -27,7 +26,7 @@ var ShowCmd = &cobra.Command{
 	Long:  `All software has versions. This is Hugo's`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		cliconfig.Cfg.PrintNodes()
+		script.CCfg.PrintNodes()
 
 	},
 }
@@ -38,8 +37,8 @@ var ReloadCmd = &cobra.Command{
 	Long:  `reload scs server config`,
 	Args:  cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		if node.UseNodes != "" {
-			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
+		if script.UseNodes != "" {
+			if nodeInfo, ok := script.CCfg.GetNode(script.UseNodes); ok {
 				nodeInfo.Reload()
 
 			} else {
@@ -47,9 +46,9 @@ var ReloadCmd = &cobra.Command{
 			}
 			return
 		}
-		if node.GroupName != "" {
+		if script.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			nodeinfos := cliconfig.Cfg.GetNodesInGroup(node.GroupName)
+			nodeinfos := script.CCfg.GetNodesInGroup(script.GroupName)
 			for _, nodeInfo := range nodeinfos {
 				wg.Add(1)
 				nodeInfo.Wg = wg
@@ -59,7 +58,7 @@ var ReloadCmd = &cobra.Command{
 			return
 		}
 		wg := &sync.WaitGroup{}
-		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
+		for _, nodeInfo := range script.CCfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Reload()

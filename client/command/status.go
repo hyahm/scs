@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs/client/cliconfig"
-	"github.com/hyahm/scs/client/node"
+	"github.com/hyahm/scs/script"
 
 	"github.com/spf13/cobra"
 )
@@ -19,8 +18,8 @@ var StatusCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if node.UseNodes != "" {
-			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
+		if script.UseNodes != "" {
+			if nodeInfo, ok := script.CCfg.GetNode(script.UseNodes); ok {
 				nodeInfo.Filter = filter
 				if err := nodeInfo.Status(args...); err == nil {
 					nodeInfo.Result.SortAndPrint()
@@ -31,15 +30,15 @@ var StatusCmd = &cobra.Command{
 			}
 			return
 		}
-		ss := make([]*node.ScriptStatusNode, 0)
-		if node.GroupName != "" {
+		ss := make([]*script.ScriptStatusNode, 0)
+		if script.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			nodes := cliconfig.Cfg.GetNodesInGroup(node.GroupName)
+			nodes := script.CCfg.GetNodesInGroup(script.GroupName)
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
 				nodeInfo.Wg = wg
 				nodeInfo.Filter = filter
-				go func(nodeInfo *node.Node) {
+				go func(nodeInfo *script.Node) {
 					if err := nodeInfo.Status(args...); err == nil {
 						ss = append(ss, nodeInfo.Result)
 					}
@@ -53,11 +52,11 @@ var StatusCmd = &cobra.Command{
 		}
 		wg := &sync.WaitGroup{}
 
-		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
+		for _, nodeInfo := range script.CCfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Filter = filter
-			go func(nodeInfo *node.Node) {
+			go func(nodeInfo *script.Node) {
 				if err := nodeInfo.Status(args...); err == nil {
 					ss = append(ss, nodeInfo.Result)
 				}

@@ -15,7 +15,7 @@ var slock sync.RWMutex
 
 func Copy() {
 	// delScript = make(map[string]string)
-	delScript = SS.Copy()
+	delScript = ss.Copy()
 	golog.Infof("%#v\n", delScript)
 	slock = sync.RWMutex{}
 	// delScript = make(map[string]string)
@@ -39,7 +39,7 @@ func RemoveUnUseScript() {
 	// 停止无用的脚本， 并移除
 	golog.Infof("%#v\n", delScript)
 	for subname, name := range delScript {
-		SS.GetScriptFromPnameAndSubname(name, subname).Remove()
+		ss.GetScriptFromPnameAndSubname(name, subname).Remove()
 	}
 	delScript = nil
 }

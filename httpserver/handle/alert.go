@@ -7,13 +7,13 @@ import (
 	"strings"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/client/alert"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/script"
 )
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 
-	ra := &alert.RespAlert{}
+	ra := &script.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
@@ -25,7 +25,7 @@ func Alert(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
-	w.Write(alert.GetDispatcher())
+	w.Write(script.GetDispatcher())
 	return
 }
 
@@ -62,3 +62,5 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 	return
 }
+
+// 报警相关配置

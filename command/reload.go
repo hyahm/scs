@@ -2,6 +2,6 @@ package command
 
 func init() {
 
-	// ConfigCmd.AddCommand(ReloadCmd)
+	ConfigCmd.AddCommand(ReloadCmd)
 
 }

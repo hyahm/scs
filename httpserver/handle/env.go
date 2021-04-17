@@ -2,12 +2,11 @@ package handle
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/hyahm/scs/script"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
 )
 
@@ -37,27 +36,18 @@ import (
 func GetEnvName(w http.ResponseWriter, r *http.Request) {
 	// 通过pname， name 获取， 因为可能port 不一样
 	name := xmux.Var(r)["name"]
-	for pname := range script.SS.Infos {
-		if _, ok := script.SS.Infos[pname][name]; ok {
-			env := make(map[string]string)
-			for _, v := range script.SS.Infos[pname][name].GetEnv() {
-				golog.Info(v)
-				start := strings.Index(v, "=")
-				env[v[:start]] = v[start+1:]
-			}
-			send, _ := json.Marshal(env)
-			w.Write(send)
-			return
-		}
-		// if len(script.SS.Infos[pname][name].Env) == 0 {
-		// 	w.Write(nil)
-		// 	return
-		// }
-		// send, _ := json.Marshal(script.SS.Infos[pname][name].Env)
-		// w.Write(send)
-		// return
+	svc, err := script.GetServerBySubname(name)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name %s"}`, name)))
+		return
 	}
+	// env := make(map[string]string)
+	// for k, v := range svc.Env {
+	// 	golog.Info(v)
+	// 	start := strings.Index(v, "=")
+	// 	env[k] = v[start+1:]
+	// }
+	send, _ := json.Marshal(svc.Env)
+	w.Write(send)
 
-	w.Write([]byte(`{"code": 404, "msg": "not found this name"}`))
-	return
 }

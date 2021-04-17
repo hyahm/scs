@@ -9,27 +9,21 @@ import (
 )
 
 // 保存的所有脚本相关的配置
-var SS *Service
+var ss *Service
 
 func init() {
-	SS = &Service{
+	ss = &Service{
 		// 由2层组成， 一级是name  二级是pname
-		Infos: make(map[string]map[string]*Script),
-		Mu:    &sync.RWMutex{},
+		Infos:   make(map[string]map[string]*Server),
+		Scripts: make(map[string]*Script), // 保存脚本
+		Mu:      &sync.RWMutex{},
 	}
 }
 
 type Service struct {
-	Infos map[string]map[string]*Script
-	Mu    *sync.RWMutex
-}
-
-func getpname(subname string) string {
-	i := strings.LastIndex(subname, "_")
-	if i < 0 {
-		return ""
-	}
-	return subname[:i]
+	Infos   map[string]map[string]*Server
+	Scripts map[string]*Script
+	Mu      *sync.RWMutex
 }
 
 func (s *Service) HasName(name string) bool {
@@ -44,7 +38,7 @@ func (s *Service) HasName(name string) bool {
 	return false
 }
 
-func (s *Service) HasSubName(pname, name string) bool {
+func (s *Service) HassubName(pname, name string) bool {
 	if s.Len() == 0 {
 		return false
 	}
@@ -59,28 +53,152 @@ func (s *Service) HasSubName(pname, name string) bool {
 	return false
 }
 
-func (s *Service) AddScript(subname string, script *Script) {
-	s.Mu.RLock()
-	defer s.Mu.RUnlock()
-	pname := getpname(subname)
-	if pname == "" {
-		return
+func GetServerBySubname(name string) (*Server, error) {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	for pname := range ss.Infos {
+		if _, ok := ss.Infos[pname][name]; ok {
+			return ss.Infos[pname][name], nil
+		}
 	}
-	if _, ok := s.Infos[pname]; !ok || s.Infos[pname] == nil {
-		s.Infos[pname] = make(map[string]*Script)
+	return nil, ErrFoundPnameOrName
+}
+
+func GetServersByName(name string) (map[string]*Server, error) {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Infos[name]; !ok {
+		return nil, ErrFoundPnameOrName
 	}
-	s.Infos[pname][subname] = script
+
+	return ss.Infos[name], ErrFoundPnameOrName
+}
+
+func GetServerByNameAndSubname(pname, name string) (*Server, error) {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Infos[pname]; !ok {
+		return nil, ErrFoundPnameOrName
+	}
+	if _, ok := ss.Infos[pname][name]; ok {
+		return ss.Infos[pname][name], nil
+	}
+
+	return nil, ErrFoundPnameOrName
+}
+
+func (s *Script) KillScript() error {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Infos[s.Name]; !ok {
+		return ErrFoundPnameOrName
+	}
+	for _, svc := range ss.Infos[s.Name] {
+		svc.kill()
+	}
+	return nil
+}
+
+func StopAllServer() {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	for _, s := range ss.Scripts {
+		err := s.StopScript()
+		if err != nil {
+			golog.Error(err)
+		}
+	}
+}
+func WaitStopAllServer() {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	for _, s := range ss.Scripts {
+		err := s.WaitStopScript()
+		if err != nil {
+			golog.Error(err)
+		}
+	}
+}
+
+func WaitKillAllServer() {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	for _, s := range ss.Scripts {
+		err := s.WaitKillScript()
+		if err != nil {
+			golog.Error(err)
+		}
+	}
+}
+
+// 通过pname删除script,  如果要删除server， 只能通过server.Stop() 成功后删除
+func DeleteServiceByName(pname string) {
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
+	delete(ss.Scripts, pname)
+}
+
+//
+func DeleteServiceBySubName(subname string) error {
+	// 删除server
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
+	index := strings.LastIndex(subname, "_")
+	name := subname[:index]
+	if _, ok := ss.Infos[name][subname]; ok {
+		delete(ss.Infos[name], subname)
+		if len(ss.Infos[name]) == 0 {
+			delete(ss.Scripts, name)
+			delete(ss.Infos, name)
+		}
+		return nil
+	} else {
+		return ErrFoundPnameOrName
+	}
+
+}
+
+func RestartAllServer() {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	for pname := range ss.Infos {
+		for _, svc := range ss.Infos[pname] {
+			svc.Restart()
+		}
+	}
+}
+
+func (s *Script) WriteToFile() error {
+	// 将script 写入文件
+	return AddScriptToConfigFile(s)
+}
+
+// 通过script 生成和启动服务
+func (s *Script) AddScript() error {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	// 添加一个script
+
+	// 先判断script 是否存在
+	if _, ok := ss.Scripts[s.Name]; ok {
+		golog.Info("已经存在此脚本")
+		return ErrFoundPnameOrName
+	}
+	// 值挂载给ss
+	ss.Scripts[s.Name] = s
+	// 通过script 生成server
+	s.MakeServer()
+
+	// s.StartServer()
+	return nil
+
 }
 
 func (s *Service) MakeSubStruct(pname string) {
-	if s.Len() == 0 {
-		s.Infos[pname] = make(map[string]*Script)
-		return
-	}
 	s.Mu.RLock()
 	defer s.Mu.RUnlock()
 	if _, ok := s.Infos[pname]; !ok {
-		s.Infos[pname] = make(map[string]*Script)
+		s.Infos[pname] = make(map[string]*Server)
 	}
 }
 
@@ -99,7 +217,7 @@ func (s *Service) PnameLen(name string) int {
 	return 0
 }
 
-// 从 SS 中删除某一个subname
+// 从 ss 中删除某一个subname
 func (s *Service) DeleteSubname(subname string) {
 	if s.Len() == 0 {
 		return
@@ -118,20 +236,18 @@ func (s *Service) DeleteSubname(subname string) {
 	}
 }
 
-// 从 SS 中删除某一个pname
+// 从 ss 中删除某一个pname
 func (s *Service) DeletePname(pname string) {
 	if s.Len() == 0 {
 		return
 	}
 	s.Mu.Lock()
 	defer s.Mu.Unlock()
-	if _, ok := s.Infos[pname]; ok {
-		delete(s.Infos, pname)
-	}
+	delete(s.Infos, pname)
 }
 
-// 从 SS 中删除某一个subname
-func (s *Service) GetScriptFromPnameAndSubname(pname, subname string) *Script {
+// 从 ss 中删除某一个subname
+func (s *Service) GetScriptFromPnameAndSubname(pname, subname string) *Server {
 	if s.Len() == 0 {
 		return nil
 	}
@@ -145,12 +261,6 @@ func (s *Service) GetScriptFromPnameAndSubname(pname, subname string) *Script {
 		return nil
 	}
 	return s.Infos[pname][subname]
-}
-
-type status struct {
-	s     bool
-	pname string
-	name  string
 }
 
 func (s *Service) Copy() map[string]string {
@@ -170,18 +280,17 @@ func (s *Service) Start() {
 	// 先无视有启动顺序的脚本
 	// 先启动无需顺序的脚本
 	s.Mu.RLock()
-	for pname := range SS.Infos {
-		for name := range SS.Infos[pname] {
-			SS.Infos[pname][name].Start()
+	defer s.Mu.RUnlock()
+	for pname := range ss.Infos {
+		for name := range ss.Infos[pname] {
+			ss.Infos[pname][name].Start()
 		}
 	}
-	s.Mu.RUnlock()
-
 }
 
 func Get(pname, name string) *ServiceStatus {
-	if _, ok := SS.Infos[pname]; ok {
-		if sv, ok := SS.Infos[pname][name]; ok {
+	if _, ok := ss.Infos[pname]; ok {
+		if sv, ok := ss.Infos[pname][name]; ok {
 			return sv.Status
 		}
 
@@ -210,15 +319,15 @@ func (sl *StatusList) Filter(filter []string) {
 }
 
 func All() []byte {
-	if SS.Mu == nil {
-		SS.Mu = &sync.RWMutex{}
+	if ss.Mu == nil {
+		ss.Mu = &sync.RWMutex{}
 	}
 	statuss := &StatusList{
 		Data: make([]*ServiceStatus, 0),
 	}
 	// ss := make([]*ServiceStatus, 0)
-	for pname := range SS.Infos {
-		for _, s := range SS.Infos[pname] {
+	for pname := range ss.Infos {
+		for _, s := range ss.Infos[pname] {
 			s.Status.Command = s.Command
 			statuss.Data = append(statuss.Data, s.Status)
 		}
@@ -233,13 +342,13 @@ func All() []byte {
 }
 
 func ScriptPname(pname string) []byte {
-	if SS.Mu == nil {
-		SS.Mu = &sync.RWMutex{}
+	if ss.Mu == nil {
+		ss.Mu = &sync.RWMutex{}
 	}
 	statuss := &StatusList{
 		Data: make([]*ServiceStatus, 0),
 	}
-	for _, s := range SS.Infos[pname] {
+	for _, s := range ss.Infos[pname] {
 		statuss.Data = append(statuss.Data, s.Status)
 	}
 	statuss.Code = 200
@@ -252,16 +361,16 @@ func ScriptPname(pname string) []byte {
 }
 
 func ScriptName(pname, name string) []byte {
-	if SS.Mu == nil {
-		SS.Mu = &sync.RWMutex{}
+	if ss.Mu == nil {
+		ss.Mu = &sync.RWMutex{}
 	}
 
 	statuss := &StatusList{
 		Data: make([]*ServiceStatus, 0),
 	}
 	// statuss := make([]*script.ServiceStatus, 0)
-	if _, pok := SS.Infos[pname]; pok {
-		if s, ok := SS.Infos[pname][name]; ok {
+	if _, pok := ss.Infos[pname]; pok {
+		if s, ok := ss.Infos[pname][name]; ok {
 			statuss.Data = append(statuss.Data, s.Status)
 		}
 	}

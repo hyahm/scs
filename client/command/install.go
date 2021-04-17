@@ -7,9 +7,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/hyahm/scs/client"
-	"github.com/hyahm/scs/client/cliconfig"
-	"github.com/hyahm/scs/client/node"
+	"github.com/hyahm/scs/script"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -22,7 +20,7 @@ var InstallCmd = &cobra.Command{
 	Long:  `install package`,
 	Run: func(cmd *cobra.Command, args []string) {
 		condition := 0
-		sc := make([]*client.Script, 0)
+		sc := make([]*script.Script, 0)
 		if len(args) > 1 {
 			condition++
 		}
@@ -57,15 +55,15 @@ var InstallCmd = &cobra.Command{
 			return
 		}
 
-		if node.UseNodes != "" {
-			if nodeInfo, ok := cliconfig.Cfg.GetNode(node.UseNodes); ok {
+		if script.UseNodes != "" {
+			if nodeInfo, ok := script.CCfg.GetNode(script.UseNodes); ok {
 				nodeInfo.Install(sc, env)
 				return
 			}
 		}
-		if node.GroupName != "" {
+		if script.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			nodes := cliconfig.Cfg.GetNodesInGroup(node.GroupName)
+			nodes := script.CCfg.GetNodesInGroup(script.GroupName)
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
 				nodeInfo.Wg = wg
@@ -76,7 +74,7 @@ var InstallCmd = &cobra.Command{
 		}
 		wg := &sync.WaitGroup{}
 
-		for _, nodeInfo := range cliconfig.Cfg.GetNodes() {
+		for _, nodeInfo := range script.CCfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Install(sc, env)

@@ -12,29 +12,26 @@ import (
 func Kill(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	if _, ok := script.SS.Infos[pname]; ok {
-		if _, ok := script.SS.Infos[pname][name]; ok {
-			script.SS.Infos[pname][name].Kill()
-		}
-	} else {
+	svc, err := script.GetServerByNameAndSubname(pname, name)
+	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, name)))
 		return
 	}
-
+	go svc.Kill()
 	w.Write([]byte(`{"code": 200, "msg": "already killed"}`))
-	return
 }
 
 func KillPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	if _, ok := script.SS.Infos[pname]; ok {
-		for name := range script.SS.Infos[pname] {
-			script.SS.Infos[pname][name].Kill()
-		}
-	} else {
-		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s"}`, pname)))
+	s, err := script.GetScriptByPname(pname)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, pname)))
+		return
+	}
+	err = s.KillScript()
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, pname)))
 		return
 	}
 	w.Write([]byte(`{"code": 200, "msg": "already killed"}`))
-	return
 }

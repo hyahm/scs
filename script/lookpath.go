@@ -8,8 +8,8 @@ import (
 	"github.com/hyahm/golog"
 )
 
-func (s *Script) LookCommandPath() error {
-	for _, v := range s.LookPath {
+func (svc *Server) LookCommandPath() error {
+	for _, v := range svc.LookPath {
 		if strings.Trim(v.Path, " ") == "" && strings.Trim(v.Command, " ") == "" {
 			continue
 		}
@@ -28,7 +28,7 @@ func (s *Script) LookCommandPath() error {
 			}
 		}
 		golog.Info("exec: ", v.Install)
-		if err := s.shell(v.Install, "lookPath"); err != nil {
+		if err := svc.shell(v.Install, "lookPath"); err != nil {
 			golog.Error(v.Install)
 			return err
 		}

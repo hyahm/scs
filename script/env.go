@@ -1,6 +1,8 @@
 package script
 
-import "github.com/hyahm/golog"
+import (
+	"github.com/hyahm/golog"
+)
 
 func (s *Script) GetEnv() []string {
 	env := make([]string, 0, len(s.Env))

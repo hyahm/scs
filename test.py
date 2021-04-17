@@ -13,14 +13,8 @@ def log(s):
     sys.stdout.flush()
 
 scs = SCS()
-while True:
 
-    scs.can_not_stop()
-    log(os.getenv("path"))
     # do something
-    for i in range(100000):
-        log(i)
-        time.sleep(1)
 
-    log("end")
-    scs.can_stop()
+
+log("end")

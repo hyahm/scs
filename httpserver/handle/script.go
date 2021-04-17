@@ -1,16 +1,16 @@
 package handle
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/script"
 	"github.com/hyahm/xmux"
 )
 
 func AddScript(w http.ResponseWriter, r *http.Request) {
-	s := xmux.GetData(r).Data.(*client.Script)
+	s := xmux.GetData(r).Data.(*script.Script)
 	golog.Infof("%+v", s)
 	if s.Name == "" {
 		w.Write([]byte(`{"code": 201, "msg": "name require"}`))
@@ -18,13 +18,29 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 	}
 	// 将时间转化为秒
 	golog.Infof("%#v\n", *s)
-	s.ContinuityInterval = s.ContinuityInterval * 1000000000
-	if err := script.Cfg.AddScript(*s); err != nil {
-		w.Write([]byte(`{"code": 201, "msg": "already exist script"}`))
-		return
+	if s.ContinuityInterval != 0 {
+		s.ContinuityInterval = s.ContinuityInterval * 1000000000
 	}
+
+	if script.HaveScript(s.Name) {
+		// 修改
+		err := script.UpdateScriptToConfigFile(s)
+		if err != nil {
+			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+			return
+		}
+		s.RemoveScript()
+	} else {
+		// 添加
+		err := script.AddScriptToConfigFile(s)
+		if err != nil {
+			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+			return
+		}
+
+	}
+	s.AddScript()
 	w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
-	return
 }
 
 func DelScript(w http.ResponseWriter, r *http.Request) {
@@ -33,22 +49,7 @@ func DelScript(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// if reloadKey {
-	// 	w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
-	// 	return
-	// }
 
-	// script.Reloadlocker.Lock()
-	// defer script.Reloadlocker.Unlock()
-	// reloadKey = true
-	// // 拷贝一份到当前的脚本
-	// script.Copy()
-	// if err := config.Load(); err != nil {
-	// 	w.Write([]byte(err.Error()))
-	// 	reloadKey = false
-	// 	return
-	// }
-	// reloadKey = false
 	w.Write([]byte(`{"code": 200, "msg": "already delete script"}`))
 	return
 }
