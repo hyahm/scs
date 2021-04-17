@@ -38,26 +38,6 @@ func NewClient() *SCSClient {
 }
 
 func client() *http.Client {
-	// var tr *http.Transport
-	// certs, err := tls.LoadX509KeyPair(rootCa, rootKey)
-	// if err != nil {
-	// 	tr = &http.Transport{
-	// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	// 	}
-	// } else {
-	// 	ca, err := x509.ParseCertificate(certs.Certificate[0])
-	// 	if err != nil {
-	// 		return &http.Client{Transport: tr}
-	// 	}
-	// 	pool := x509.NewCertPool()
-	// 	pool.AddCert(ca)
-
-	// 	tr = &http.Transport{
-	// 		TLSClientConfig: &tls.Config{RootCAs: pool},
-	// 	}
-
-	// }
-	// return &http.Client{Transport: tr}
 
 	return &http.Client{
 		Transport: &http.Transport{

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs"
 	"github.com/hyahm/xmux"
 )
@@ -37,7 +36,6 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 }
 
 func Enable(w http.ResponseWriter, r *http.Request) {
-	golog.Info("33333")
 	if reloadKey {
 		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return
@@ -60,6 +58,5 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
-	return
+	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 }

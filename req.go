@@ -16,7 +16,7 @@ var CCfg *ClientConfig
 type ClientConfig struct {
 	Nodes       map[string]*Node    `yaml:"nodes"`
 	Group       map[string][]string `yaml:"group"`
-	ReadTimeout time.Duration       `yaml:"readTimeout"`
+	ReadTimeout time.Duration       `yaml:"timeout"`
 	mu          *sync.RWMutex
 }
 
