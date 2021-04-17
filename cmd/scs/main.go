@@ -6,16 +6,16 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/hyahm/scs"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/httpserver"
-	"github.com/hyahm/scs/script"
 
 	"github.com/hyahm/golog"
 )
 
 func main() {
 	defer golog.Sync()
-	go script.GetIp()
+	go scs.GetIp()
 	var cfg string
 	var showversion bool
 	flag.BoolVar(&showversion, "v", false, "get scs server version")
@@ -32,13 +32,13 @@ func main() {
 		case <-single:
 			// 确保删除了server
 			fmt.Println("waiting stop all")
-			script.WaitKillAllServer()
+			scs.WaitKillAllServer()
 			os.Exit(1)
 		}
 	}()
 	// 自动清除全局报警器的值
-	go script.SendNetAlert()
-	script.Start(cfg)
+	go scs.SendNetAlert()
+	scs.Start(cfg)
 	golog.Info("starting httpd")
 	httpserver.HttpServer()
 

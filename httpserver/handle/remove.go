@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/script"
+	"github.com/hyahm/scs"
 
 	"github.com/hyahm/xmux"
 )
@@ -22,20 +22,20 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	// 读取配置文件
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	svc, err := script.GetServerByNameAndSubname(pname, name)
+	svc, err := scs.GetServerByNameAndSubname(pname, name)
 	if err != nil {
 		w.Write([]byte(`{"code": 500, "msg": "config file error"}`))
 		return
 	}
 
-	s, err := script.GetScriptByPname(pname)
+	s, err := scs.GetScriptByPname(pname)
 	if err != nil {
 		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
 		return
 	}
 	golog.Info(s.Replicate)
 	s.Replicate -= 1
-	err = script.UpdateScriptToConfigFile(s)
+	err = scs.UpdateScriptToConfigFile(s)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
 		return
@@ -56,12 +56,12 @@ func RemovePname(w http.ResponseWriter, r *http.Request) {
 	}()
 	pname := xmux.Var(r)["pname"]
 
-	s, err := script.GetScriptByPname(pname)
+	s, err := scs.GetScriptByPname(pname)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
 		return
 	}
-	err = script.DeleteScriptToConfigFile(s)
+	err = scs.DeleteScriptToConfigFile(s)
 	if err != nil {
 		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
 		return
@@ -81,8 +81,8 @@ func RemoveAll(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		reloadKey = false
 	}()
-	script.DeleteAllScriptToConfigFile()
-	script.RemoveAllScripts()
+	scs.DeleteAllScriptToConfigFile()
+	scs.RemoveAllScripts()
 
 	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
 	return

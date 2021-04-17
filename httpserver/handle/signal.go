@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hyahm/scs/script"
+	"github.com/hyahm/scs"
 
 	"github.com/hyahm/xmux"
 )
@@ -13,7 +13,7 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 
 	// golog.Info(string(res))
 	name := xmux.Var(r)["name"]
-	svc, err := script.GetServerBySubname(name)
+	svc, err := scs.GetServerBySubname(name)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
 		return
@@ -37,7 +37,7 @@ func CanNotStop(w http.ResponseWriter, r *http.Request) {
 
 	// golog.Info(string(res))
 	name := xmux.Var(r)["name"]
-	svc, err := script.GetServerBySubname(name)
+	svc, err := scs.GetServerBySubname(name)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
 		return

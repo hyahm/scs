@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs/script"
+	"github.com/hyahm/scs"
 
 	"github.com/spf13/cobra"
 )
@@ -26,7 +26,7 @@ var ShowCmd = &cobra.Command{
 	Long:  `All software has versions. This is Hugo's`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		script.CCfg.PrintNodes()
+		scs.CCfg.PrintNodes()
 
 	},
 }
@@ -37,17 +37,17 @@ var ReloadCmd = &cobra.Command{
 	Long:  `reload scs server config`,
 	Args:  cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		if script.UseNodes != "" {
-			if nodeInfo, ok := script.CCfg.GetNode(script.UseNodes); ok {
+		if scs.UseNodes != "" {
+			if nodeInfo, ok := scs.CCfg.GetNode(scs.UseNodes); ok {
 				nodeInfo.Reload()
 			} else {
 				fmt.Println("not found this node")
 			}
 			return
 		}
-		if script.GroupName != "" {
+		if scs.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			nodeinfos := script.CCfg.GetNodesInGroup(script.GroupName)
+			nodeinfos := scs.CCfg.GetNodesInGroup(scs.GroupName)
 			for _, nodeInfo := range nodeinfos {
 				wg.Add(1)
 				nodeInfo.Wg = wg
@@ -57,7 +57,7 @@ var ReloadCmd = &cobra.Command{
 			return
 		}
 		wg := &sync.WaitGroup{}
-		for _, nodeInfo := range script.CCfg.GetNodes() {
+		for _, nodeInfo := range scs.CCfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Reload()

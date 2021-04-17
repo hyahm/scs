@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs/script"
-
+	"github.com/hyahm/scs"
 	"github.com/spf13/cobra"
 )
 
@@ -15,8 +14,8 @@ var SearchCmd = &cobra.Command{
 	Long:  `search package`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if script.UseNodes != "" {
-			if nodeInfo, ok := script.CCfg.Nodes[script.UseNodes]; ok {
+		if scs.UseNodes != "" {
+			if nodeInfo, ok := scs.CCfg.Nodes[scs.UseNodes]; ok {
 				nodeInfo.Search(args[0])
 
 			} else {
@@ -24,10 +23,10 @@ var SearchCmd = &cobra.Command{
 			}
 			return
 		}
-		if script.GroupName != "" {
+		if scs.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			for _, v := range script.CCfg.Group[script.GroupName] {
-				if nodeInfo, ok := script.CCfg.Nodes[v]; ok {
+			for _, v := range scs.CCfg.Group[scs.GroupName] {
+				if nodeInfo, ok := scs.CCfg.Nodes[v]; ok {
 					wg.Add(1)
 					nodeInfo.Wg = wg
 					nodeInfo.Search(args[0])
@@ -37,7 +36,7 @@ var SearchCmd = &cobra.Command{
 			return
 		}
 		wg := &sync.WaitGroup{}
-		for name, nodeInfo := range script.CCfg.Nodes {
+		for name, nodeInfo := range scs.CCfg.Nodes {
 			nodeInfo.Name = name
 			wg.Add(1)
 			nodeInfo.Wg = wg

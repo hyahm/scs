@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/hyahm/scs"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/httpserver/handle"
 	"github.com/hyahm/scs/httpserver/midware"
 	"github.com/hyahm/scs/public"
-	"github.com/hyahm/scs/script"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
@@ -85,7 +85,7 @@ func HttpServer() {
 	router.Post("/probe", handle.Probe).DelModule(midware.CheckToken)
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
-	router.Post("/script", handle.AddScript).Bind(&script.Script{}).AddModule(midware.Unmarshal)
+	router.Post("/script", handle.AddScript).Bind(&scs.Script{}).AddModule(midware.Unmarshal)
 	router.Post("/delete/{pname}", handle.DelScript)
 	if global.DisableTls {
 		golog.Info("listen on " + global.Listen + " over http")
@@ -105,7 +105,9 @@ func HttpServer() {
 	_, err2 := os.Stat(pemfile)
 	if global.Key == "" || global.Pem == "" && os.IsNotExist(err1) || os.IsNotExist(err2) {
 		public.CreateTLS()
-		golog.Info("listen on " + global.Listen + " over https")
+		golog.Info(global.Listen)
+		on := "listen on " + global.Listen + " over https"
+		golog.Info(on)
 		if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
 			golog.Fatal(err)
 		}

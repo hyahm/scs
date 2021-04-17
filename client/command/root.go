@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/hyahm/scs"
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/script"
 
 	"github.com/spf13/cobra"
 )
@@ -23,8 +23,8 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	rootCmd.PersistentFlags().StringVarP(&script.UseNodes, "node", "n", "", "set nodes ,have priority over group")
-	rootCmd.PersistentFlags().StringVarP(&script.GroupName, "group", "g", "", "set group, if node group net set, all script will be use")
+	rootCmd.PersistentFlags().StringVarP(&scs.UseNodes, "node", "n", "", "set nodes ,have priority over group")
+	rootCmd.PersistentFlags().StringVarP(&scs.GroupName, "group", "g", "", "set group, if node group net set, all script will be use")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

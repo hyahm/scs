@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs/script"
-
+	"github.com/hyahm/scs"
 	"github.com/spf13/cobra"
 )
 
@@ -15,8 +14,8 @@ var StartCmd = &cobra.Command{
 	Long:  `command: scsctl start [flags] [pname] [name]`,
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		if script.UseNodes != "" {
-			if nodeInfo, ok := script.CCfg.GetNode(script.UseNodes); ok {
+		if scs.UseNodes != "" {
+			if nodeInfo, ok := scs.CCfg.GetNode(scs.UseNodes); ok {
 				nodeInfo.Start(args...)
 
 			} else {
@@ -24,9 +23,9 @@ var StartCmd = &cobra.Command{
 			}
 			return
 		}
-		if script.GroupName != "" {
+		if scs.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			nodes := script.CCfg.GetNodesInGroup(script.GroupName)
+			nodes := scs.CCfg.GetNodesInGroup(scs.GroupName)
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
 				nodeInfo.Wg = wg
@@ -37,7 +36,7 @@ var StartCmd = &cobra.Command{
 		}
 		wg := &sync.WaitGroup{}
 
-		for _, nodeInfo := range script.CCfg.GetNodes() {
+		for _, nodeInfo := range scs.CCfg.GetNodes() {
 			wg.Add(1)
 			nodeInfo.Wg = wg
 			nodeInfo.Start(args...)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs/script"
+	"github.com/hyahm/scs"
 
 	"github.com/spf13/cobra"
 )
@@ -19,8 +19,8 @@ var EnableCmd = &cobra.Command{
 			return
 		}
 
-		if script.UseNodes != "" {
-			if nodeInfo, ok := script.CCfg.GetNode(script.UseNodes); ok {
+		if scs.UseNodes != "" {
+			if nodeInfo, ok := scs.CCfg.GetNode(scs.UseNodes); ok {
 				nodeInfo.Enable(args[0])
 
 			} else {
@@ -28,9 +28,9 @@ var EnableCmd = &cobra.Command{
 			}
 			return
 		}
-		if script.GroupName != "" {
+		if scs.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			nodes := script.CCfg.GetNodesInGroup(script.GroupName)
+			nodes := scs.CCfg.GetNodesInGroup(scs.GroupName)
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
 				nodeInfo.Wg = wg
@@ -52,17 +52,17 @@ var DisableCmd = &cobra.Command{
 			fmt.Println("Specify at least one parameter, or -- all")
 			return
 		}
-		if script.UseNodes != "" {
-			if nodeInfo, ok := script.CCfg.GetNode(script.UseNodes); ok {
+		if scs.UseNodes != "" {
+			if nodeInfo, ok := scs.CCfg.GetNode(scs.UseNodes); ok {
 				nodeInfo.Disable(args[0])
 			} else {
 				fmt.Println("not found this node")
 			}
 			return
 		}
-		if script.GroupName != "" {
+		if scs.GroupName != "" {
 			wg := &sync.WaitGroup{}
-			nodes := script.CCfg.GetNodesInGroup(script.GroupName)
+			nodes := scs.CCfg.GetNodesInGroup(scs.GroupName)
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
 				nodeInfo.Wg = wg
