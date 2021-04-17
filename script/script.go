@@ -154,9 +154,6 @@ func (s *Script) StartServer() {
 
 func (s *Script) MakeServer() {
 	// 通过script 生成 server
-	ss.Mu.Lock()
-	defer ss.Mu.Unlock()
-	// 填充系统环境变量到
 	s.MakeEnv()
 
 	replica := s.Replicate

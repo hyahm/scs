@@ -6,7 +6,7 @@ import (
 
 type Cron struct {
 	// 开始执行的时间戳
-	First     chan bool     // 是否是start等于空时的第一次启动
+	First     chan bool     `yaml:"-" json:"-"` // 是否是start等于空时的第一次启动
 	loopTime  time.Duration `yaml:"-" json:"-"` // 循环的时间
 	Start     string        `yaml:"start,omitempty" json:"start,omitempty"`
 	StartTime time.Time     `yaml:"-" json:"-"` // 下次启动的时间

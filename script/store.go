@@ -178,7 +178,6 @@ func (s *Script) AddScript() error {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	// 添加一个script
-
 	// 先判断script 是否存在
 	if _, ok := ss.Scripts[s.Name]; ok {
 		golog.Info("已经存在此脚本")
@@ -188,8 +187,7 @@ func (s *Script) AddScript() error {
 	ss.Scripts[s.Name] = s
 	// 通过script 生成server
 	s.MakeServer()
-
-	// s.StartServer()
+	s.StartServer()
 	return nil
 
 }

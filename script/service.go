@@ -146,6 +146,9 @@ func (s *Server) cron() {
 
 // Start  启动服务
 func (svc *Server) Start() error {
+	if svc.Disable {
+		return nil
+	}
 	switch svc.Status.Status {
 	case WAITSTOP:
 		// 如果之前是等待停止的状态， 更改为重启状态
