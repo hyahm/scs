@@ -15,6 +15,23 @@ type Cron struct {
 	Loop    int  `yaml:"loop,omitempty" json:"loop,omitempty"`
 }
 
+// 比较cron的配置是否相等， 如果
+func (c *Cron) IsEqual(newc *Cron) bool {
+	if c == nil && newc == nil {
+		return true
+	}
+	if (c == nil && newc != nil) || (c != nil && newc == nil) {
+		return false
+	}
+
+	if c.Start != newc.Start ||
+		c.IsMonth != newc.IsMonth ||
+		c.Loop != newc.Loop {
+		return false
+	}
+	return true
+}
+
 // 计算下次启动时间
 func (c *Cron) ComputerStartTime() {
 	c.loopTime = time.Duration(c.Loop) * time.Second

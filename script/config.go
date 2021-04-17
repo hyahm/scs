@@ -56,6 +56,7 @@ func EqualMap(m1, m2 map[string]string) bool {
 
 // 判断2个[]string 的值是否相等
 func EqualStringArray(s1, s2 []string) bool {
+
 	if len(s1) == len(s2) {
 		if len(s1) == 0 {
 			return true

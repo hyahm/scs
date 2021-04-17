@@ -40,6 +40,24 @@ type AlertTo struct {
 	WeiXin   []string `yaml:"weixin"`
 }
 
+// 比较新的与之前的是否相等， 调用者必须是新的
+func (at *AlertTo) IsEqual(pname string) bool {
+	if at == nil && ss.Scripts[pname].AT == nil {
+		return true
+	}
+	if (at == nil && ss.Scripts[pname].AT != nil) || (at != nil && ss.Scripts[pname].AT == nil) {
+		return false
+	}
+	if !EqualStringArray(at.Email, ss.Scripts[pname].AT.Email) ||
+		!EqualStringArray(at.Rocket, ss.Scripts[pname].AT.Rocket) ||
+		!EqualStringArray(at.Telegram, ss.Scripts[pname].AT.Telegram) ||
+		!EqualStringArray(at.WeiXin, ss.Scripts[pname].AT.WeiXin) {
+		return false
+	}
+	return true
+
+}
+
 // 暂时只支持邮箱
 type Alert struct {
 	Email    *AlertEmail    `yaml:"email"`

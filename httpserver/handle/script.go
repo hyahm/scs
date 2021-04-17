@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/script"
 	"github.com/hyahm/xmux"
 )
@@ -18,12 +19,18 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 	if s.ContinuityInterval != 0 {
 		s.ContinuityInterval = s.ContinuityInterval * 1000000000
 	}
-
+	golog.Info("11111")
 	if script.HaveScript(s.Name) {
 		// 修改
+		// 需要判断是否相等
+
 		err := script.UpdateScriptToConfigFile(s)
 		if err != nil {
 			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+			return
+		}
+		if !s.NeedReStop() {
+			w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
 			return
 		}
 		s.RemoveScript()

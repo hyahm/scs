@@ -111,10 +111,10 @@ func (s *Script) add(port, replacate int, subname string) *Server {
 	return svc
 }
 
-func (s *Script) UpdateServer() {
+// 判断是否需要重启
+func (s *Script) NeedReStop() bool {
 	// 更新server
 	// 判断值是否相等
-
 	if s.Dir != ss.Scripts[s.Name].Dir ||
 		s.Command != ss.Scripts[s.Name].Command ||
 		s.Replicate != ss.Scripts[s.Name].Replicate ||
@@ -126,19 +126,14 @@ func (s *Script) UpdateServer() {
 		s.Disable != ss.Scripts[s.Name].Disable ||
 		s.Update != ss.Scripts[s.Name].Update ||
 		s.DeleteWhenExit != ss.Scripts[s.Name].DeleteWhenExit ||
-		s.Cron.Start != ss.Scripts[s.Name].Cron.Start ||
-		s.Cron.Loop != ss.Scripts[s.Name].Cron.Loop ||
-		s.Cron.IsMonth != ss.Scripts[s.Name].Cron.IsMonth ||
-		!EqualStringArray(s.AT.Email, ss.Scripts[s.Name].AT.Email) ||
-		!EqualStringArray(s.AT.Rocket, ss.Scripts[s.Name].AT.Rocket) ||
-		!EqualStringArray(s.AT.Telegram, ss.Scripts[s.Name].AT.Telegram) ||
-		!EqualStringArray(s.AT.WeiXin, ss.Scripts[s.Name].AT.WeiXin) {
+		!s.Cron.IsEqual(ss.Scripts[s.Name].Cron) ||
+		!s.AT.IsEqual(s.Name) {
 		// 如果值有变动， 那么需要重新server
 		// 先同步停止之前的server， 然后启动新的server
 		// server 是单独的， 在通知后需要同步更新server
-
+		return true
 	}
-
+	return false
 }
 
 // 启动方法， 异步执行
