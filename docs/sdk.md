@@ -3,7 +3,7 @@
 
 ## go版本， 本身就自带
 
-`go get github.com/hyahm/scs/client`
+`go get github.com/hyahm/scs`
 ```
 package main
 
@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hyahm/scs/client"
+	"github.com/hyahm/scs"
 )
 
 func main() {
