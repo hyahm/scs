@@ -2,7 +2,7 @@
 
 ![logo](_media/icon.svg)
 
-# docsify <small>3.5</small>
+# scs <small>3.0</small>
 
 > 一个服务管理加服务监控的进程管理工具。
 
