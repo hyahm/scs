@@ -1,3 +1,5 @@
 * [简介](/)
-* [中文](#/config)
-* [中文](#/sdk/)
+* [配置文件](config.md)
+* [sdk](sdk.md)
+* [api文档](api.md)
+* [安装](install.md)
