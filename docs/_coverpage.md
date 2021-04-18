@@ -13,5 +13,7 @@
 -  支持定时器功能执行命令或脚本
 -  客户端控制多台服务器
 
-[GitHub](https://github.com/hyahm/scs)
-[Get Started](#docsify)
+[Windows64下载](https://github.com/hyahm/scs)
+[linux64下载](https://github.com/hyahm/scs)
+[mac下载](https://github.com/hyahm/scs)
+[码云地址](https://gitee.com/cander/scs)

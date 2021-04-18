@@ -13,64 +13,6 @@ service control service or script
 8.  可以将一些执行耗时的脚本托管给scs处理， 以便快速返回结果  
 
 
-# 服务控制脚本
-类似supervisor,但是更高级，支持所有系统 
-自带监控及通知   
-服务控制脚本能否停止 最大程度防止脚本数据丢失  
-码云地址: https://gitee.com/cander/scs
-# 功能
-- [x] 跨平台  
-- [x] 支持启动所有脚本  
-- [x] 自带硬件检测  
-- [x] 一键可启动(linux)  
-- [x] 支持的报警渠道- 邮箱, rocket.chat报警, telegram, 企业微信
-
-[版本更新](update.md)
 
 
-
-
-
-
-# 客户端
-1.1.0 版开始， 配置文件必须要配置值， 不然什么也不会出来
-```yaml
-nodes:
-  localhost: 
-    url: https://127.0.0.1:11111
-    token:
-group:
-  local:
-    - localhost
-```
-
-```
-
-scsctl status 
-scsctl status pname
-scsctl status pname name
-scsctl start 
-scsctl start pname
-scsctl start pname name
-scsctl restart --all
-scsctl restart pname 
-scsctl restart pname name
-scsctl kill --all
-scsctl kill pname 
-scsctl kill pname name
-scsctl stop --all
-scsctl stop pname 
-scsctl stop pname name
-scsctl update --all
-scsctl update pname 
-scsctl update pname name
-scsctl remove --all
-scsctl remove pname 
-scsctl remove pname name
-scsctl enable pname
-scsctl disable pname
-scsctl log  name[:update|log|lookPath] # 不区分大小写
-# 加载配置文件
-scsctl config reload
-```
 
