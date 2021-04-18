@@ -88,6 +88,7 @@ func (sc *SCSClient) requests(url string, body io.Reader) ([]byte, error) {
 
 }
 
+// 标记当前副本不能停止
 func (sc *SCSClient) CanNotStop() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
@@ -95,6 +96,7 @@ func (sc *SCSClient) CanNotStop() ([]byte, error) {
 	return sc.requests("/cannotstop/"+sc.Name, nil)
 }
 
+// 标记当前副本可以停止
 func (sc *SCSClient) CanStop() ([]byte, error) {
 
 	if sc.Name == "" {
@@ -103,6 +105,7 @@ func (sc *SCSClient) CanStop() ([]byte, error) {
 	return sc.requests("/canstop/"+sc.Name, nil)
 }
 
+// 获取当前副本的错误日志
 func (sc *SCSClient) Log() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
@@ -110,6 +113,7 @@ func (sc *SCSClient) Log() ([]byte, error) {
 	return sc.requests("/log/"+sc.Name, nil)
 }
 
+//  获取当前副本的环境变量
 func (sc *SCSClient) Env() ([]byte, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
@@ -117,10 +121,12 @@ func (sc *SCSClient) Env() ([]byte, error) {
 	return sc.requests("/env/"+sc.Name, nil)
 }
 
+// 重新加载配置文件
 func (sc *SCSClient) Reload() ([]byte, error) {
 	return sc.requests("/-/reload", nil)
 }
 
+// 杀掉此脚本及其对应的所有副本
 func (sc *SCSClient) KillPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -128,6 +134,7 @@ func (sc *SCSClient) KillPname() ([]byte, error) {
 	return sc.requests("/kill/"+sc.Pname, nil)
 }
 
+// 杀掉此副本
 func (sc *SCSClient) KillName() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -138,10 +145,12 @@ func (sc *SCSClient) KillName() ([]byte, error) {
 	return sc.requests(fmt.Sprintf("/kill/%s/%s", sc.Pname, sc.Name), nil)
 }
 
+// 更新所有脚本
 func (sc *SCSClient) UpdateAll() ([]byte, error) {
 	return sc.requests("/update", nil)
 }
 
+// 更新此脚本
 func (sc *SCSClient) UpdatePname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -149,6 +158,7 @@ func (sc *SCSClient) UpdatePname() ([]byte, error) {
 	return sc.requests("/update/"+sc.Pname, nil)
 }
 
+// 更新此副本
 func (sc *SCSClient) UpdateName() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -159,10 +169,12 @@ func (sc *SCSClient) UpdateName() ([]byte, error) {
 	return sc.requests(fmt.Sprintf("/update/%s/%s", sc.Pname, sc.Name), nil)
 }
 
+// 重启所有脚本
 func (sc *SCSClient) RestartAll() ([]byte, error) {
 	return sc.requests("/restart", nil)
 }
 
+// 重启此脚本
 func (sc *SCSClient) RestartPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -170,6 +182,7 @@ func (sc *SCSClient) RestartPname() ([]byte, error) {
 	return sc.requests("/restart/"+sc.Pname, nil)
 }
 
+// 重启当前副本
 func (sc *SCSClient) RestartName() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -180,10 +193,12 @@ func (sc *SCSClient) RestartName() ([]byte, error) {
 	return sc.requests(fmt.Sprintf("/restart/%s/%s", sc.Pname, sc.Name), nil)
 }
 
+// 启动所有脚本
 func (sc *SCSClient) StartAll() ([]byte, error) {
 	return sc.requests("/start", nil)
 }
 
+// 启动当前脚本
 func (sc *SCSClient) StartPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -191,6 +206,7 @@ func (sc *SCSClient) StartPname() ([]byte, error) {
 	return sc.requests("/start/"+sc.Pname, nil)
 }
 
+// 启动当前副本
 func (sc *SCSClient) StartName() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -201,10 +217,12 @@ func (sc *SCSClient) StartName() ([]byte, error) {
 	return sc.requests(fmt.Sprintf("/start/%s/%s", sc.Pname, sc.Name), nil)
 }
 
+// 停止所有脚本
 func (sc *SCSClient) StopAll() ([]byte, error) {
 	return sc.requests("/stop", nil)
 }
 
+// 停止当前脚本
 func (sc *SCSClient) StopPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -212,6 +230,7 @@ func (sc *SCSClient) StopPname() ([]byte, error) {
 	return sc.requests("/stop/"+sc.Pname, nil)
 }
 
+// 停止当前副本
 func (sc *SCSClient) StopName() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -222,10 +241,12 @@ func (sc *SCSClient) StopName() ([]byte, error) {
 	return sc.requests(fmt.Sprintf("/stop/%s/%s", sc.Pname, sc.Name), nil)
 }
 
+// 移除所有脚本
 func (sc *SCSClient) RemoveAllScrip() ([]byte, error) {
 	return sc.requests("/remove", nil)
 }
 
+// 移除当前脚本
 func (sc *SCSClient) RemovePnameScrip() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -233,6 +254,7 @@ func (sc *SCSClient) RemovePnameScrip() ([]byte, error) {
 	return sc.requests("/remove/"+sc.Pname, nil)
 }
 
+// 移除当前副本
 func (sc *SCSClient) RemoveNameScrip() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -243,6 +265,7 @@ func (sc *SCSClient) RemoveNameScrip() ([]byte, error) {
 	return sc.requests(fmt.Sprintf("/remove/%s/%s", sc.Pname, sc.Name), nil)
 }
 
+// 启用脚本
 func (sc *SCSClient) Enable() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -250,6 +273,7 @@ func (sc *SCSClient) Enable() ([]byte, error) {
 	return sc.requests("/enable/"+sc.Pname, nil)
 }
 
+// 禁用脚本
 func (sc *SCSClient) Disable() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -271,12 +295,12 @@ func (sc *SCSClient) AddScript(s *Script) ([]byte, error) {
 	return sc.requests("/script", bytes.NewReader(send))
 }
 
-// 获取此所有的状态
+// 获取此所有脚本的状态
 func (sc *SCSClient) StatusAll() ([]byte, error) {
 	return sc.requests("/status", nil)
 }
 
-// 获取此pname的所有副本的状态
+// 获取此脚本的状态
 func (sc *SCSClient) StatusPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -305,11 +329,3 @@ func (sc *SCSClient) Alert(alert *RespAlert) ([]byte, error) {
 	send, _ := json.Marshal(alert)
 	return sc.requests("/set/alert", bytes.NewReader(send))
 }
-
-// type Cron struct {
-// 	// 开始执行的时间戳
-// 	Start string `yaml:"start,omitempty" json:"start,omitempty"`
-// 	// 间隔的时间， 如果IsMonth 为true， loop 单位为月， 否则为秒
-// 	IsMonth bool `yaml:"isMonth,omitempty" json:"isMonth,omitempty"`
-// 	Loop    int  `yaml:"loop,omitempty" json:"loop,omitempty"`
-// }
