@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/client"
 
 	"github.com/spf13/cobra"
@@ -45,7 +44,6 @@ var EnableCmd = &cobra.Command{
 		for _, nodeInfo := range client.CCfg.GetNodes() {
 			wg.Add(1)
 			go func() {
-				golog.Info("111111")
 				nodeInfo.Enable(args[0])
 				wg.Done()
 			}()
