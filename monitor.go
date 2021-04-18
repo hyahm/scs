@@ -60,7 +60,6 @@ func (m Scan) Update() {
 
 func (m Scan) Check() {
 	c := NewClient()
-	golog.Info(m)
 	for server, mm := range m {
 		c.Domain = server
 		var failed bool

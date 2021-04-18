@@ -24,28 +24,37 @@ var ErrFoundPnameOrName = errors.New("not found pname or name")
 var ErrWaitReload = errors.New("waiting for last reload complete")
 
 type SCSClient struct {
-	Domain string
-	Token  string
-	Pname  string
-	Name   string
+	Domain  string
+	Token   string
+	Pname   string
+	Name    string
+	Timeout time.Duration
 }
 
-func NewClient() *SCSClient {
+func NewClient(timeout ...time.Duration) *SCSClient {
+	var rto time.Duration
+	if len(timeout) > 0 {
+		rto = timeout[0]
+	}
+
 	return &SCSClient{
-		Domain: "https://127.0.0.1:11111",
-		Token:  os.Getenv("TOKEN"),
-		Pname:  os.Getenv("PNAME"),
-		Name:   os.Getenv("NAME"),
+		Domain:  "https://127.0.0.1:11111",
+		Token:   os.Getenv("TOKEN"),
+		Pname:   os.Getenv("PNAME"),
+		Name:    os.Getenv("NAME"),
+		Timeout: rto,
 	}
 }
 
-func client() *http.Client {
-
+func client(timeout time.Duration) *http.Client {
+	if timeout == 0 {
+		timeout = 3 * time.Second
+	}
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
-		Timeout: 5 * time.Second,
+		Timeout: timeout,
 	}
 
 }
@@ -57,7 +66,7 @@ func (sc *SCSClient) requests(url string, body io.Reader) ([]byte, error) {
 	}
 	req.Header.Set("Token", sc.Token)
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := client().Do(req)
+	resp, err := client(sc.Timeout).Do(req)
 	if err != nil {
 		return nil, err
 	}

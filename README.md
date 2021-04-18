@@ -230,7 +230,7 @@ import (
 )
 
 func main() {
-	cli := client.NewClient()
+	cli := scs.NewClient()
 	// 获取https://127.0.0.1:11111 的 脚本状态
 	b, err := cli.Status()
 	if err != nil {

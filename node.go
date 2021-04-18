@@ -3,15 +3,17 @@ package scs
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/hyahm/golog"
 )
 
 // 已经支持多服务器操作， 每台服务器相当于一个node
 type Node struct {
-	Name  string `yaml:"-"`
-	Url   string `yaml:"url"`
-	Token string `yaml:"token"`
+	Name    string        `yaml:"-"`
+	Url     string        `yaml:"url"`
+	Token   string        `yaml:"token"`
+	Timeout time.Duration `json:"timeout"`
 	// Filter []string
 	// Result *ScriptStatusNode
 	// // Sc    *client.SCSClient
@@ -20,8 +22,9 @@ type Node struct {
 
 func (node *Node) NewSCSClient() *SCSClient {
 	return &SCSClient{
-		Domain: node.Url,
-		Token:  node.Token,
+		Domain:  node.Url,
+		Token:   node.Token,
+		Timeout: node.Timeout,
 	}
 }
 

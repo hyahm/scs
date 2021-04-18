@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -46,7 +45,5 @@ group: `
 	if err != nil {
 		panic(err)
 	}
-	if CCfg.ReadTimeout == 0 {
-		CCfg.ReadTimeout = time.Second * 3
-	}
+
 }
