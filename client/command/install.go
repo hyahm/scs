@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/hyahm/scs"
-	"github.com/hyahm/scs/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -55,33 +54,18 @@ var InstallCmd = &cobra.Command{
 			return
 		}
 
-		if UseNodes != "" {
-			if nodeInfo, ok := client.CCfg.GetNode(UseNodes); ok {
-				nodeInfo.Install(sc, env)
-				return
-			}
-		}
-		if GroupName != "" {
-			wg := &sync.WaitGroup{}
-			nodes := client.CCfg.GetNodesInGroup(GroupName)
-			for _, nodeInfo := range nodes {
-				wg.Add(1)
-				go func() {
-					nodeInfo.Install(sc, env)
-					wg.Done()
-				}()
-			}
-			wg.Wait()
+		wg := &sync.WaitGroup{}
+		nodes := getNodes()
+		if len(nodes) == 0 {
+			fmt.Println("not found any nodes")
 			return
 		}
-		wg := &sync.WaitGroup{}
-
-		for _, nodeInfo := range client.CCfg.GetNodes() {
+		for _, node := range nodes {
 			wg.Add(1)
-			go func() {
-				nodeInfo.Install(sc, env)
+			go func(node *scs.Node) {
+				node.Install(sc, nil)
 				wg.Done()
-			}()
+			}(node)
 
 		}
 		wg.Wait()

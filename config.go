@@ -20,17 +20,17 @@ type Repo struct {
 
 type config struct {
 	Listen      string    `yaml:"listen"`
-	Token       string    `yaml:"token"`
-	Key         string    `yaml:"key"`
-	Pem         string    `yaml:"pem"`
+	Token       string    `yaml:"token,omitempty"`
+	Key         string    `yaml:"key,omitempty"`
+	Pem         string    `yaml:"pem,omitempty"`
 	DisableTls  bool      `yaml:"disableTls"`
-	Log         *Logger   `yaml:"log"`
-	LogCount    int       `yaml:"logCount"`
-	IgnoreToken []string  `yaml:"ignoreToken"`
+	Log         *Logger   `yaml:"log,omitempty"`
+	LogCount    int       `yaml:"logCount,omitempty"`
+	IgnoreToken []string  `yaml:"ignoreToken,omitempty"`
 	Repo        *Repo     `yaml:"repo"`
-	Alert       *Alert    `yaml:"alert"`
-	Probe       *Probe    `yaml:"probe"`
-	SC          []*Script `yaml:"scripts"`
+	Alert       *Alert    `yaml:"alert,omitempty"`
+	Probe       *Probe    `yaml:"probe,omitempty"`
+	SC          []*Script `yaml:"scripts,omitempty"`
 }
 
 // 判断2个map 的值是否相等

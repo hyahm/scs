@@ -40,19 +40,19 @@ type Config struct {
 
 //  保存配置文件信息
 type Probe struct {
-	Monitor   []string `yaml:"monitor"`
-	Monitored []string `yaml:"monitored"`
+	Monitor   []string `yaml:"monitor,omitempty"`
+	Monitored []string `yaml:"monitored,omitempty"`
 	// 内存使用率 默认90
-	Mem float64 `yaml:"mem"`
+	Mem float64 `yaml:"mem,omitempty"`
 	// cpu使用率, 默认90
-	Cpu float64 `yaml:"cpu"`
+	Cpu float64 `yaml:"cpu,omitempty"`
 	// 硬盘使用率， 默认90
-	Disk        float64  `yaml:"disk"`
-	ExcludeDisk []string `yaml:"excludeDisk"`
+	Disk        float64  `yaml:"disk,omitempty"`
+	ExcludeDisk []string `yaml:"excludeDisk,omitempty"`
 	// 检测间隔， 默认10秒
-	Interval time.Duration `yaml:"interval"`
+	Interval time.Duration `yaml:"interval,omitempty"`
 	// 下次报警时间间隔， 如果恢复了就重置
-	ContinuityInterval time.Duration `yaml:"continuityInterval"`
+	ContinuityInterval time.Duration `yaml:"continuityInterval,omitempty"`
 }
 
 func RunProbe(p *Probe) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs/client"
+	"github.com/hyahm/scs"
 	"github.com/spf13/cobra"
 )
 
@@ -14,38 +14,19 @@ var SearchCmd = &cobra.Command{
 	Long:  `search package`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if UseNodes != "" {
-			if nodeInfo, ok := client.CCfg.Nodes[UseNodes]; ok {
-				nodeInfo.Search(args[0])
-
-			} else {
-				fmt.Println("not found this node")
-			}
-			return
-		}
-		if GroupName != "" {
-			wg := &sync.WaitGroup{}
-			for _, v := range client.CCfg.Group[GroupName] {
-				if nodeInfo, ok := client.CCfg.Nodes[v]; ok {
-					wg.Add(1)
-					go func() {
-						nodeInfo.Search(args[0])
-						wg.Done()
-					}()
-
-				}
-			}
-			wg.Wait()
-			return
-		}
 		wg := &sync.WaitGroup{}
-		for name, nodeInfo := range client.CCfg.Nodes {
-			nodeInfo.Name = name
+		nodes := getNodes()
+		if len(nodes) == 0 {
+			fmt.Println("not found any nodes")
+			return
+		}
+		for _, node := range nodes {
 			wg.Add(1)
-			go func() {
-				nodeInfo.Search(args[0])
+			go func(node *scs.Node) {
+				node.Search(args[0])
 				wg.Done()
-			}()
+			}(node)
+
 		}
 		wg.Wait()
 	},

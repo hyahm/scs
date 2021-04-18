@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/global"
 
 	"github.com/spf13/cobra"
@@ -33,4 +35,20 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func getNodes() []*scs.Node {
+	nodes := make([]*scs.Node, 0)
+
+	if UseNodes != "" {
+		if nodeInfo, ok := client.CCfg.GetNode(UseNodes); ok {
+			nodes = append(nodes, nodeInfo)
+		}
+		return nodes
+
+	}
+	if GroupName != "" {
+		return client.CCfg.GetNodesInGroup(GroupName)
+	}
+	return client.CCfg.GetNodes()
 }

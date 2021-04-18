@@ -18,6 +18,8 @@ var ErrNameIsEmpty = errors.New("name is empty")
 var ErrToken = errors.New("token error")
 var ErrStatusNetworkAuthenticationRequired = errors.New("StatusNetworkAuthenticationRequired")
 var ErrResponseData = errors.New("error response data")
+var ErrFoundPname = errors.New("not found pname")
+var ErrFoundName = errors.New("not found name")
 var ErrFoundPnameOrName = errors.New("not found pname or name")
 var ErrWaitReload = errors.New("waiting for last reload complete")
 
@@ -254,15 +256,18 @@ func (sc *SCSClient) Search(derivative, serviceName string) ([]byte, error) {
 	return sc.requests(fmt.Sprintf("/search/%s/%s", derivative, serviceName), nil)
 }
 
+// 添加或修改脚本
 func (sc *SCSClient) AddScript(s *Script) ([]byte, error) {
 	send, _ := json.Marshal(s)
 	return sc.requests("/script", bytes.NewReader(send))
 }
 
+// 获取此所有的状态
 func (sc *SCSClient) StatusAll() ([]byte, error) {
 	return sc.requests("/status", nil)
 }
 
+// 获取此pname的所有副本的状态
 func (sc *SCSClient) StatusPname() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -270,6 +275,7 @@ func (sc *SCSClient) StatusPname() ([]byte, error) {
 	return sc.requests("/status/"+sc.Pname, nil)
 }
 
+// 获取此副本的状态
 func (sc *SCSClient) StatusName() ([]byte, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
@@ -279,19 +285,16 @@ func (sc *SCSClient) StatusName() ([]byte, error) {
 	}
 	return sc.requests(fmt.Sprintf("/status/%s/%s", sc.Pname, sc.Name), nil)
 }
+
+// 检测远程机器的健康探针
 func (sc *SCSClient) Probe() ([]byte, error) {
 	return sc.requests("/probe", nil)
 }
 
+// 发送报警
 func (sc *SCSClient) Alert(alert *RespAlert) ([]byte, error) {
 	send, _ := json.Marshal(alert)
 	return sc.requests("/set/alert", bytes.NewReader(send))
-}
-
-type LoopPath struct {
-	Path    string `yaml:"path,omitempty" json:"path,omitempty"`
-	Command string `yaml:"command,omitempty" json:"command,omitempty"`
-	Install string `yaml:"install,omitempty" json:"install,omitempty"`
 }
 
 // type Cron struct {

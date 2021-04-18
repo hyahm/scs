@@ -60,10 +60,10 @@ func (at *AlertTo) IsEqual(pname string) bool {
 
 // 暂时只支持邮箱
 type Alert struct {
-	Email    *AlertEmail    `yaml:"email"`
-	Rocket   *AlertRocket   `yaml:"rocket"`
-	Telegram *AlertTelegram `yaml:"telegram"`
-	WeiXin   *AlertWeiXin   `yaml:"weixin"`
+	Email    *AlertEmail    `yaml:"email,omitempty"`
+	Rocket   *AlertRocket   `yaml:"rocket,omitempty"`
+	Telegram *AlertTelegram `yaml:"telegram,omitempty"`
+	WeiXin   *AlertWeiXin   `yaml:"weixin,omitempty"`
 }
 type Alerter struct {
 	Alert        *Alert

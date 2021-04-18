@@ -114,14 +114,6 @@ func appendRead(stdout io.ReadCloser, svc *Server) {
 			break
 		}
 		golog.Info(line[:len(line)-1])
-		// svc.LogLocker.Lock()
-		// if len(svc.Log) >= global.LogCount {
-		// 	copy(svc.Log, svc.Log[1:])
-		// 	svc.Log[global.LogCount-1] = line
-		// } else {
-		// 	svc.Log = append(svc.Log, line)
-		// }
-		// svc.LogLocker.Unlock()
 	}
 }
 

@@ -3,6 +3,7 @@ package scs
 import (
 	"context"
 	"errors"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -87,7 +88,7 @@ func (s *Server) cron() {
 	for {
 		select {
 		case <-s.Ctx.Done():
-			golog.Info("end loop")
+			golog.Info("name:" + s.SubName + "end cron")
 			return
 		case <-time.After(-time.Since(s.Cron.StartTime)):
 			if err := s.start(); err != nil {
@@ -376,7 +377,6 @@ func (s *Script) WaitKillScript() error {
 		return ErrFoundPnameOrName
 	}
 	for subname := range ss.Infos[s.Name] {
-		golog.Info(subname)
 		ss.Infos[s.Name][subname].Kill()
 	}
 	return nil
@@ -499,6 +499,7 @@ func (svc *Server) wait() error {
 	if svc.Script.DeleteWhenExit {
 		return Cfg.DelScript(svc.Script.Name)
 	}
+	golog.Info(111111)
 	svc.stopStatus()
 	return nil
 
@@ -510,4 +511,32 @@ func (s *Server) stopStatus() {
 	s.Status.RestartCount = 0
 	s.Status.Start = 0
 	s.IsLoop = false
+}
+
+func (svc *Server) LookCommandPath() error {
+	for _, v := range svc.Script.LookPath {
+		if strings.Trim(v.Path, " ") == "" && strings.Trim(v.Command, " ") == "" {
+			continue
+		}
+		if strings.Trim(v.Path, " ") != "" {
+			golog.Info("check path: ", v.Path)
+			_, err := os.Stat(v.Path)
+			if !os.IsNotExist(err) {
+				continue
+			}
+		}
+		if strings.Trim(v.Command, " ") != "" {
+			golog.Info("check command: ", v.Command)
+			_, err := exec.LookPath(v.Command)
+			if err == nil {
+				continue
+			}
+		}
+		golog.Info("exec: ", v.Install)
+		if err := svc.shell(v.Install); err != nil {
+			golog.Error(v.Install)
+			return err
+		}
+	}
+	return nil
 }
