@@ -5,11 +5,12 @@ import (
 	"sync"
 
 	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 
 	"github.com/spf13/cobra"
 )
 
-var filter []string
+// var filter []string
 
 var StatusCmd = &cobra.Command{
 	Use:   "status",
@@ -18,11 +19,14 @@ var StatusCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if scs.UseNodes != "" {
-			if nodeInfo, ok := scs.CCfg.GetNode(scs.UseNodes); ok {
-				nodeInfo.Filter = filter
-				if err := nodeInfo.Status(args...); err == nil {
-					nodeInfo.Result.SortAndPrint()
+		if UseNodes != "" {
+			if nodeInfo, ok := client.CCfg.GetNode(UseNodes); ok {
+				// nodeInfo.Filter = filter
+				serverStatus, err := nodeInfo.Status(args...)
+				if err == nil {
+					serverStatus.SortAndPrint()
+				} else {
+					fmt.Println(err)
 				}
 
 			} else {
@@ -30,18 +34,20 @@ var StatusCmd = &cobra.Command{
 			}
 			return
 		}
+		wg := &sync.WaitGroup{}
 		ss := make([]*scs.ScriptStatusNode, 0)
-		if scs.GroupName != "" {
-			wg := &sync.WaitGroup{}
-			nodes := scs.CCfg.GetNodesInGroup(scs.GroupName)
+		if GroupName != "" {
+			nodes := client.CCfg.GetNodesInGroup(GroupName)
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
-				nodeInfo.Wg = wg
-				nodeInfo.Filter = filter
 				go func(nodeInfo *scs.Node) {
-					if err := nodeInfo.Status(args...); err == nil {
-						ss = append(ss, nodeInfo.Result)
+					serverStatus, err := nodeInfo.Status(args...)
+					if err == nil {
+						serverStatus.SortAndPrint()
+					} else {
+						fmt.Println(err)
 					}
+					wg.Done()
 				}(nodeInfo)
 			}
 			wg.Wait()
@@ -50,16 +56,17 @@ var StatusCmd = &cobra.Command{
 			}
 			return
 		}
-		wg := &sync.WaitGroup{}
 
-		for _, nodeInfo := range scs.CCfg.GetNodes() {
+		for _, nodeInfo := range client.CCfg.GetNodes() {
 			wg.Add(1)
-			nodeInfo.Wg = wg
-			nodeInfo.Filter = filter
 			go func(nodeInfo *scs.Node) {
-				if err := nodeInfo.Status(args...); err == nil {
-					ss = append(ss, nodeInfo.Result)
+				serverStatus, err := nodeInfo.Status(args...)
+				if err == nil {
+					serverStatus.SortAndPrint()
+				} else {
+					fmt.Println(err)
 				}
+				wg.Done()
 			}(nodeInfo)
 		}
 		wg.Wait()
@@ -70,6 +77,6 @@ var StatusCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.Flags().StringArrayVarP(&filter, "filter", "f", []string{}, "filter name")
+	// rootCmd.Flags().StringArrayVarP(&filter, "filter", "f", []string{}, "filter name")
 	rootCmd.AddCommand(StatusCmd)
 }

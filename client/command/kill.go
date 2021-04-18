@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 	"github.com/spf13/cobra"
 )
 
@@ -14,8 +14,8 @@ var KillCmd = &cobra.Command{
 	Long:  `command: scsctl kill (<pname> [name])`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if scs.UseNodes != "" {
-			if nodeInfo, ok := scs.CCfg.GetNode(scs.UseNodes); ok {
+		if UseNodes != "" {
+			if nodeInfo, ok := client.CCfg.GetNode(UseNodes); ok {
 				nodeInfo.Kill(args...)
 
 			} else {
@@ -23,23 +23,28 @@ var KillCmd = &cobra.Command{
 			}
 			return
 		}
-		if scs.GroupName != "" {
+		if GroupName != "" {
 			wg := &sync.WaitGroup{}
-			nodes := scs.CCfg.GetNodesInGroup(scs.GroupName)
+			nodes := client.CCfg.GetNodesInGroup(GroupName)
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
-				nodeInfo.Wg = wg
-				nodeInfo.Kill(args...)
+				go func() {
+					nodeInfo.Kill(args...)
+					wg.Done()
+				}()
 			}
 			wg.Wait()
 			return
 		}
 		wg := &sync.WaitGroup{}
 
-		for _, nodeInfo := range scs.CCfg.GetNodes() {
+		for _, nodeInfo := range client.CCfg.GetNodes() {
 			wg.Add(1)
-			nodeInfo.Wg = wg
-			nodeInfo.Kill(args...)
+			go func() {
+				nodeInfo.Kill(args...)
+				wg.Done()
+			}()
+
 		}
 		wg.Wait()
 

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 	"github.com/spf13/cobra"
 )
 
@@ -14,8 +14,8 @@ func logConfig(cmd *cobra.Command, args []string) {
 	defer func() {
 		fmt.Println(time.Since(start).Seconds())
 	}()
-	if scs.UseNodes != "" {
-		if nodeInfo, ok := scs.CCfg.GetNode(scs.UseNodes); ok {
+	if UseNodes != "" {
+		if nodeInfo, ok := client.CCfg.GetNode(UseNodes); ok {
 			nodeInfo.Log(args[0])
 
 		} else {
@@ -23,23 +23,28 @@ func logConfig(cmd *cobra.Command, args []string) {
 		}
 		return
 	}
-	if scs.GroupName != "" {
+	if GroupName != "" {
 		wg := &sync.WaitGroup{}
-		nodes := scs.CCfg.GetNodesInGroup(scs.GroupName)
+		nodes := client.CCfg.GetNodesInGroup(GroupName)
 		for _, nodeInfo := range nodes {
 			wg.Add(1)
-			nodeInfo.Wg = wg
-			nodeInfo.Log(args[0])
+			go func() {
+				nodeInfo.Log(args[0])
+				wg.Done()
+			}()
 		}
 		wg.Wait()
 		return
 	}
 	wg := &sync.WaitGroup{}
 
-	for _, nodeInfo := range scs.CCfg.GetNodes() {
+	for _, nodeInfo := range client.CCfg.GetNodes() {
 		wg.Add(1)
-		nodeInfo.Wg = wg
-		nodeInfo.Log(args[0])
+		go func() {
+			nodeInfo.Log(args[0])
+			wg.Done()
+		}()
+
 	}
 	wg.Wait()
 

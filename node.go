@@ -3,24 +3,19 @@ package scs
 import (
 	"encoding/json"
 	"fmt"
-	"sync"
-	"time"
 
 	"github.com/hyahm/golog"
 )
 
-var UseNodes string
-var GroupName string
-var ReadTimeout time.Duration
-
+// 已经支持多服务器操作， 每台服务器相当于一个node
 type Node struct {
-	Name   string `yaml:"-"`
-	Url    string `yaml:"url"`
-	Token  string `yaml:"token"`
-	Filter []string
-	Result *ScriptStatusNode
-	// Sc    *client.SCSClient
-	Wg *sync.WaitGroup
+	Name  string `yaml:"-"`
+	Url   string `yaml:"url"`
+	Token string `yaml:"token"`
+	// Filter []string
+	// Result *ScriptStatusNode
+	// // Sc    *client.SCSClient
+	// Wg *sync.WaitGroup
 }
 
 func (node *Node) NewSCSClient() *SCSClient {
@@ -31,9 +26,7 @@ func (node *Node) NewSCSClient() *SCSClient {
 }
 
 func (node *Node) Reload() {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	b, err := node.NewSCSClient().Reload()
 	// b, err := Requests("POST", fmt.Sprintf("%s/-/reload", node.Url), node.Token, nil)
 	if err != nil {
@@ -44,9 +37,7 @@ func (node *Node) Reload() {
 }
 
 func (node *Node) Restart(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	var b []byte
 	var err error
@@ -75,9 +66,7 @@ type SearchInfo struct {
 }
 
 func (node *Node) Search(args string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	b, err := node.NewSCSClient().Repo()
 	// b, err := Requests("POST", fmt.Sprintf("%s/get/repo", node.Url), node.Token, nil)
 	if err != nil {
@@ -116,9 +105,7 @@ func (node *Node) Search(args string) {
 }
 
 func (node *Node) Start(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	var b []byte
 	var err error
@@ -141,10 +128,8 @@ func (node *Node) Start(args ...string) {
 	// fmt.Println(string(node.crud("stop", args...)))
 }
 
-func (node *Node) Status(args ...string) error {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
+
 	cli := node.NewSCSClient()
 	var b []byte
 	var err error
@@ -161,35 +146,36 @@ func (node *Node) Status(args ...string) error {
 	}
 	if err != nil {
 		golog.Error(err)
-		return err
+		return nil, err
 	}
 	resp := &StatusList{}
 	// fmt.Println(string(b))
 	err = json.Unmarshal(b, resp)
 	if err != nil {
 		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, err)
-		return err
+		return nil, err
 	}
 	if resp.Code == 203 {
 		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, ErrToken)
-		return ErrToken
+		return nil, ErrToken
 	}
 
-	if len(node.Filter) > 0 {
-		resp.Filter(node.Filter)
-	}
-	node.Result = &ScriptStatusNode{}
-	node.Result.Nodes = resp.Data
-	node.Result.Name = node.Name
-	node.Result.Url = node.Url
-	node.Result.Filter = node.Filter
-	return nil
+	// if len(node.Filter) > 0 {
+	// 	resp.Filter(node.Filter)
+	// }
+	result := &ScriptStatusNode{}
+	result.Nodes = resp.Data
+	result.Name = node.Name
+	result.Url = node.Url
+	// node.Result.Nodes = resp.Data
+	// node.Result.Name = node.Name
+	// node.Result.Url = node.Url
+	// node.Result.Filter = node.Filter
+	return result, nil
 }
 
 func (node *Node) Kill(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	var b []byte
 	var err error
@@ -212,9 +198,7 @@ func (node *Node) Kill(args ...string) {
 }
 
 func (node *Node) Env(args string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	// var b []byte
 	// var err error
 	// switch len(args) {
@@ -240,9 +224,7 @@ func (node *Node) Env(args string) {
 
 func (node *Node) Install(scripts []*Script, env map[string]string) {
 	// 先读取配置文件
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	for _, script := range scripts {
 		cli := node.NewSCSClient()
 		b, err := cli.AddScript(script)
@@ -257,9 +239,7 @@ func (node *Node) Install(scripts []*Script, env map[string]string) {
 }
 
 func (node *Node) Log(args string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	cli.Name = args
 	b, err := cli.Log()
@@ -272,9 +252,7 @@ func (node *Node) Log(args string) {
 }
 
 func (node *Node) Stop(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	var b []byte
 	var err error
@@ -294,13 +272,10 @@ func (node *Node) Stop(args ...string) {
 		return
 	}
 	fmt.Println(string(b))
-	// fmt.Println(string(node.crud("stop", args...)))
 }
 
 func (node *Node) Remove(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	var b []byte
 	var err error
@@ -324,9 +299,7 @@ func (node *Node) Remove(args ...string) {
 }
 
 func (node *Node) Enable(pname string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	cli.Pname = pname
 	b, err := cli.Enable()
@@ -339,9 +312,7 @@ func (node *Node) Enable(pname string) {
 }
 
 func (node *Node) Disable(pname string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	cli.Pname = pname
 	b, err := cli.Disable()
@@ -354,9 +325,7 @@ func (node *Node) Disable(pname string) {
 }
 
 func (node *Node) Update(args ...string) {
-	if node.Wg != nil {
-		defer node.Wg.Done()
-	}
+
 	cli := node.NewSCSClient()
 	var b []byte
 	var err error

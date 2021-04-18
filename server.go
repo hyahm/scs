@@ -32,7 +32,6 @@ type Server struct {
 	StopSigle          chan bool  // 停止后发出的信号
 	Ctx                context.Context
 	Cancel             context.CancelFunc
-	Email              []string
 	Msg                chan string
 	Update             string
 	LogLocker          *sync.RWMutex
@@ -321,10 +320,9 @@ func (s *Script) EnableScript() error {
 	if _, ok := ss.Scripts[s.Name]; !ok {
 		return ErrFoundPnameOrName
 	}
-	s.Disable = false
+	ss.Scripts[s.Name].Disable = false
 	for name := range ss.Infos[s.Name] {
-		ss.Infos[s.Name][name].Script.Disable = false
-		go ss.Infos[s.Name][name].Stop()
+		go ss.Infos[s.Name][name].Start()
 	}
 	return nil
 }
@@ -336,9 +334,8 @@ func (s *Script) DisableScript() error {
 	if _, ok := ss.Scripts[s.Name]; !ok {
 		return ErrFoundPnameOrName
 	}
-	s.Disable = true
+	ss.Scripts[s.Name].Disable = true
 	for name := range ss.Infos[s.Name] {
-		ss.Infos[s.Name][name].Script.Disable = true
 		go ss.Infos[s.Name][name].Stop()
 	}
 	return nil

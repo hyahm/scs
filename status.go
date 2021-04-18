@@ -9,14 +9,14 @@ const (
 )
 
 type ServiceStatus struct {
-	Name         string `json:"name"`
-	Pid          int    `json:"ppid"`
-	Status       string `json:"status"`
-	Command      string `json:"command"`
-	PName        string `json:"pname"`
-	Path         string `json:"path"`
-	CanNotStop   bool   `json:"cannotStop"` //
-	Stoping      bool   `json:"stoping,omitempty"`
+	Name       string `json:"name"`
+	Pid        int    `json:"ppid"`
+	Status     string `json:"status"`
+	Command    string `json:"command"`
+	PName      string `json:"pname"`
+	Path       string `json:"path"`
+	CanNotStop bool   `json:"cannotStop"` //
+	// Stoping      bool   `json:"stoping,omitempty"`
 	Start        int64  `json:"start"` // 启动的时间
 	Version      string `json:"version"`
 	Always       bool

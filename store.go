@@ -327,6 +327,9 @@ func All() []byte {
 	for pname := range ss.Infos {
 		for _, s := range ss.Infos[pname] {
 			s.Status.Command = s.Command
+			s.Status.PName = ss.Scripts[pname].Name
+			s.Status.Always = ss.Scripts[pname].Always
+			s.Status.Disable = ss.Scripts[pname].Disable
 			statuss.Data = append(statuss.Data, s.Status)
 		}
 

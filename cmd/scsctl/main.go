@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs"
-	"github.com/hyahm/scs/command"
+	"github.com/hyahm/scs/client"
+	"github.com/hyahm/scs/client/command"
 )
 
 func main() {
@@ -11,6 +11,6 @@ func main() {
 	// 配置文件就放在 /etc/ 下面
 	// cliconfig.NewClientConfig()
 	defer golog.Sync()
-	scs.ReadClientConfig()
+	client.ReadClientConfig()
 	command.Execute()
 }

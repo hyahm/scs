@@ -58,5 +58,5 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
+	w.Write([]byte(`{"code": 200, "msg": "waiting start"}`))
 }

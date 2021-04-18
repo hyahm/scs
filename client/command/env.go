@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 	"github.com/spf13/cobra"
 )
 
@@ -14,31 +14,35 @@ var EnvCmd = &cobra.Command{
 	Long:  `command: scsctl env [flags] <name>`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if scs.UseNodes != "" {
-			if nodeInfo, ok := scs.CCfg.GetNode(scs.UseNodes); ok {
+		if UseNodes != "" {
+			if nodeInfo, ok := client.CCfg.GetNode(UseNodes); ok {
 				nodeInfo.Env(args[0])
 			} else {
 				fmt.Println("not found this node")
 			}
 			return
 		}
-		if scs.GroupName != "" {
-			wg := &sync.WaitGroup{}
-			nodes := scs.CCfg.GetNodesInGroup(scs.GroupName)
+		wg := &sync.WaitGroup{}
+		if GroupName != "" {
+			nodes := client.CCfg.GetNodesInGroup(GroupName)
 			for _, nodeInfo := range nodes {
 				wg.Add(1)
-				nodeInfo.Wg = wg
-				nodeInfo.Env(args[0])
+				go func() {
+					nodeInfo.Env(args[0])
+					wg.Done()
+				}()
 			}
 			wg.Wait()
 			return
 		}
-		wg := &sync.WaitGroup{}
 
-		for _, nodeInfo := range scs.CCfg.GetNodes() {
+		for _, nodeInfo := range client.CCfg.GetNodes() {
 			wg.Add(1)
-			nodeInfo.Wg = wg
-			nodeInfo.Env(args[0])
+			go func() {
+				nodeInfo.Env(args[0])
+				wg.Done()
+			}()
+
 		}
 		wg.Wait()
 
