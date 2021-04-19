@@ -4,7 +4,7 @@
 
 # scs <small>3.0</small>
 
-> 一个监控报警进程管理运维开发工具。
+> 一个监控, 报警, 进程管理运维开发工具。
 
 
 <!-- [Windows64下载](https://github.com/hyahm/scs)
