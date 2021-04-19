@@ -13,32 +13,62 @@ group:
 ```
 
 ```
+# scsctl 命令参数说明
 
-scsctl status 
-scsctl status pname
-scsctl status pname name
-scsctl start 
-scsctl start pname
-scsctl start pname name
-scsctl restart --all
-scsctl restart pname 
-scsctl restart pname name
-scsctl kill --all
-scsctl kill pname 
-scsctl kill pname name
-scsctl stop --all
-scsctl stop pname 
-scsctl stop pname name
-scsctl update --all
-scsctl update pname 
-scsctl update pname name
-scsctl remove --all
-scsctl remove pname 
-scsctl remove pname name
-scsctl enable pname
-scsctl disable pname
-scsctl log  name[:update|log|lookPath] # 不区分大小写
-# 加载配置文件
-scsctl config reload
+ 这里的pname, name 与scsctl status 中的对应  
+ 尖括号表示必须  
+ 中括号表示可选  
+ |  表示多选一
+```
+scsctl --help
+  config      scs server config  
+  env         env
+  help        Help about any command
+  install     install package(保留命令)
+  kill        kill script
+  log         script log
+  restart     restart assign script
+  search      search package(保留命令)
+  start       start assign script
+  status      Print assign script status
+  stop        stop script
+  tar         archive tar package(保留命令)
+  upload      upload package(保留命令)
+```
+###### 查看服务状态信息
+```
+scsctl status
 ```
 
+###### 重新加载配置文件
+```
+scsctl config reload
+```
+###### 显示某服务中的环境变量
+```
+scsctl env <name>
+```
+###### 查看某服务中的日志
+```
+scsctl log <name>
+```
+###### 强制停止某个服务，不管是否允许停止
+```
+scsctl kill <pname> [name]
+```
+
+###### 启动服务
+```
+scsctl start [pname] [name]
+```
+
+###### 停止服务
+```
+
+scsctl stop <pname>|<--all> [name] 
+```
+
+###### 重启服务
+```
+scsctl restart <pname>|<--all> [name] 
+```

@@ -1,10 +1,5 @@
-[安装](install.md)  
-[客户端scsctl使用](scsctl.md)  
-[报警](alert.md)  
-[服务添加删除接口](script.md)  
-[硬件监控配置说明](hardware.md)
+# 检测器
 
-# 硬件报警
 
 服务启动启动后默认就监控了 cpu, 内存, 硬盘
 > 这里是配置文件关于硬件监控项配置

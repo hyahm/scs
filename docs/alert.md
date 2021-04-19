@@ -1,8 +1,3 @@
-[安装](install.md)  
-[客户端scsctl使用](scsctl.md)  
-[报警](alert.md)  
-[服务添加删除接口](script.md)  
-[硬件监控配置说明](hardware.md)
 
 # 报警服务
 
