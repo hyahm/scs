@@ -65,7 +65,7 @@ type Alert struct {
 	Rocket   *AlertRocket   `yaml:"rocket,omitempty"`
 	Telegram *AlertTelegram `yaml:"telegram,omitempty"`
 	WeiXin   *AlertWeiXin   `yaml:"weixin,omitempty"`
-	Callback *Callback      `yaml:"weixin,omitempty"`
+	Callback *Callback      `yaml:"callback,omitempty"`
 }
 type Alerter struct {
 	Alert        *Alert
