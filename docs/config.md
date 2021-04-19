@@ -6,7 +6,7 @@
 # 监听端口
 listen: :11111
 # 脚本日志最大保留行数, 默认100， 一般只会打印异常日志
-logCount: 100
+
 disableTls: true
 key: 
 pem: 
@@ -16,6 +16,8 @@ log:
   path: log
   day: true
   size: 0
+# scsctl log 的最大长度
+logCount: 100
 # 请求头认证， 脚本与服务器之间交互需要 Token： xxxx,  环境变量TOKEN的值为此token的值
 token: 
 # 客户端免token认证
