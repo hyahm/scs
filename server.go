@@ -149,6 +149,7 @@ func (svc *Server) Start() error {
 			svc.stopStatus()
 			return err
 		}
+		golog.Info("install completed")
 		svc.Exit = make(chan int, 2)
 		svc.CancelProcess = make(chan bool, 2)
 		svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
