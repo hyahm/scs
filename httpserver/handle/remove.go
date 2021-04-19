@@ -84,6 +84,5 @@ func RemoveAll(w http.ResponseWriter, r *http.Request) {
 	scs.DeleteAllScriptToConfigFile()
 	scs.RemoveAllScripts()
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
-	return
+	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 }

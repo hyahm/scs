@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/hyahm/scs"
@@ -15,7 +14,7 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	svc, err := scs.GetServerBySubname(name)
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
+		w.Write([]byte(`{"code": 200, "msg": "not found this name"}`))
 		return
 	}
 	svc.Status.CanNotStop = false
@@ -29,8 +28,7 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 	// 		return
 	// 	}
 	// }
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "not found this name"}`)))
-	return
+	w.Write([]byte(`{"code": 200, "msg": "now can stop"}`))
 }
 
 func CanNotStop(w http.ResponseWriter, r *http.Request) {
@@ -39,11 +37,10 @@ func CanNotStop(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	svc, err := scs.GetServerBySubname(name)
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "update successed"}`)))
+		w.Write([]byte(`{"code": 200, "msg": "not found this name"}`))
 		return
 	}
 	svc.Status.CanNotStop = true
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "not found this name"}`)))
-	return
+	w.Write([]byte(`{"code": 200, "msg": "now can not stop"}`))
 }

@@ -15,6 +15,6 @@ def log(s):
 scs = SCS()
 
     # do something
-
-
-log("end")
+while True:
+    time.sleep(20)
+    log("end")

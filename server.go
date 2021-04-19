@@ -146,13 +146,15 @@ func (svc *Server) Start() error {
 		err := svc.LookCommandPath()
 		if err != nil {
 			golog.Error(err)
-			svc.Status.Status = STOP
+			svc.stopStatus()
 			return err
 		}
+		golog.Info("install completed")
 		svc.Exit = make(chan int, 2)
 		svc.CancelProcess = make(chan bool, 2)
 		svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
 		if svc.Cron != nil && svc.Cron.Loop > 0 {
+			golog.Info(svc.SubName + " is a loop service")
 			svc.IsLoop = true
 			// 循环的起止时间可以只设置时分秒， 自动补齐今天的日期
 			svc.Cron.Start = strings.Trim(svc.Cron.Start, " ")
@@ -186,7 +188,7 @@ func (svc *Server) Start() error {
 			go svc.cron()
 			return nil
 		}
-
+		golog.Info(svc.SubName + " is not a loop service")
 		if err := svc.start(); err != nil {
 			svc.stopStatus()
 			return err
@@ -270,8 +272,8 @@ func (s *Server) Stop() {
 }
 
 func GetScriptByPname(name string) (*Script, error) {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ScriptLocker.RLock()
+	defer ss.ScriptLocker.RUnlock()
 	if v, ok := ss.Scripts[name]; ok {
 		return v, nil
 	} else {
@@ -280,17 +282,17 @@ func GetScriptByPname(name string) (*Script, error) {
 }
 
 func UpdateAndRestartAllServer() {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ScriptLocker.RLock()
+	defer ss.ScriptLocker.RUnlock()
 	for _, s := range ss.Scripts {
 		s.UpdateAndRestartScript()
 	}
 }
 
 func StartAllServer() {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
-	for pname := range ss.Scripts {
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
+	for pname := range ss.Infos {
 		for _, svc := range ss.Infos[pname] {
 			svc.Start()
 		}
@@ -299,29 +301,31 @@ func StartAllServer() {
 }
 
 func (s *Script) RemoveScript() {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
 	for _, server := range ss.Infos[s.Name] {
 		server.Remove()
 	}
 }
 
 func (s *Script) UpdateAndRestartScript() {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
 	for _, server := range ss.Infos[s.Name] {
 		server.UpdateAndRestart()
 	}
 }
 
 func (s *Script) EnableScript() error {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Scripts[s.Name]; !ok {
+	if _, ok := ss.Infos[s.Name]; !ok {
 		return ErrFoundPnameOrName
 	}
+	ss.ScriptLocker.Lock()
 	ss.Scripts[s.Name].Disable = false
+	ss.ScriptLocker.Unlock()
 	for name := range ss.Infos[s.Name] {
 		go ss.Infos[s.Name][name].Start()
 	}
@@ -329,13 +333,15 @@ func (s *Script) EnableScript() error {
 }
 
 func (s *Script) DisableScript() error {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Scripts[s.Name]; !ok {
+	if _, ok := ss.Infos[s.Name]; !ok {
 		return ErrFoundPnameOrName
 	}
+	ss.ScriptLocker.Lock()
 	ss.Scripts[s.Name].Disable = true
+	ss.ScriptLocker.Unlock()
 	for name := range ss.Infos[s.Name] {
 		go ss.Infos[s.Name][name].Stop()
 	}
@@ -343,10 +349,10 @@ func (s *Script) DisableScript() error {
 }
 
 func (s *Script) StopScript() error {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Scripts[s.Name]; !ok {
+	if _, ok := ss.Infos[s.Name]; !ok {
 		return ErrFoundPnameOrName
 	}
 	for name := range ss.Infos[s.Name] {
@@ -356,10 +362,10 @@ func (s *Script) StopScript() error {
 }
 
 func (s *Script) WaitStopScript() error {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Scripts[s.Name]; !ok {
+	if _, ok := ss.Infos[s.Name]; !ok {
 		return ErrFoundPnameOrName
 	}
 	for subname := range ss.Infos[s.Name] {
@@ -370,10 +376,10 @@ func (s *Script) WaitStopScript() error {
 }
 
 func (s *Script) WaitKillScript() error {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Scripts[s.Name]; !ok {
+	if _, ok := ss.Infos[s.Name]; !ok {
 		return ErrFoundPnameOrName
 	}
 	for subname := range ss.Infos[s.Name] {
@@ -383,10 +389,10 @@ func (s *Script) WaitKillScript() error {
 }
 
 func (s *Script) RestartScript() error {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ServerLocker.RLock()
+	defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Scripts[s.Name]; !ok {
+	if _, ok := ss.Infos[s.Name]; !ok {
 		return ErrFoundPnameOrName
 	}
 	for name := range ss.Infos[s.Name] {

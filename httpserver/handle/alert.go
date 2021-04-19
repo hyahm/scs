@@ -20,20 +20,17 @@ func Alert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ra.SendAlert()
-	w.Write([]byte(fmt.Sprintf(`{"code":200, "msg": "send alert message"}`)))
-	return
+	w.Write([]byte(`{"code":200, "msg": "send alert message"}`))
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
 	w.Write(scs.GetDispatcher())
-	return
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
 	addr := strings.Split(r.RemoteAddr, ":")[0]
 	needToken := true
 	// 检查是否是被监控的
-	golog.Info(addr)
 	for _, v := range global.Monitored {
 		if v == addr {
 			needToken = false
@@ -60,7 +57,6 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 	golog.Info(global.Monitored)
 	w.Write([]byte(`{"code": 511, "msg": "StatusNetworkAuthenticationRequired"}`))
 	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
-	return
 }
 
 // 报警相关配置

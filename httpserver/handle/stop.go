@@ -32,8 +32,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
-	return
+	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 }
 
 func StopPname(w http.ResponseWriter, r *http.Request) {

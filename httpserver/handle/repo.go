@@ -22,5 +22,4 @@ func GetRepo(w http.ResponseWriter, r *http.Request) {
 	send, _ := json.Marshal(resp)
 	golog.Info(string(send))
 	w.Write(send)
-	return
 }
