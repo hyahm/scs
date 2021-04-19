@@ -19,16 +19,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 	svc.UpdateAndRestart()
 
-	// if _, ok := script.SS.Infos[pname]; ok {
-	// 	if _, ok := script.SS.Infos[pname][name]; ok {
-	// 		go script.SS.Infos[pname][name].UpdateAndRestart()
-	// 	}
-
-	// } else {
-	// w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this script"}`)))
-	// return
-	// }
-
 	w.Write([]byte(`{"code": 200, "msg": "waiting update"}`))
 }
 
@@ -40,16 +30,6 @@ func UpdatePname(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.UpdateAndRestartScript()
-	// if _, ok := script.SS.Infos[pname]; ok {
-	// 	for name := range script.SS.Infos[pname] {
-	// 		golog.Info("send update")
-	// 		go script.SS.Infos[pname][name].UpdateAndRestart()
-	// 	}
-
-	// } else {
-	// 	w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
-	// 	return
-	// }
 
 	w.Write([]byte(`{"code": 200, "msg": "waiting update"}`))
 }

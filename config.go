@@ -197,8 +197,14 @@ func ReLoad() error {
 	// 初始化硬件检测
 	RunProbe(Cfg.Probe)
 	// 这里也要判断修改
+	// 拷贝一份当前存在的所有的脚本
+	temp := make(map[string]struct{})
+	for name := range ss.Scripts {
+		temp[name] = struct{}{}
+	}
 	for index := range Cfg.SC {
-		// 将数据填充至 SS
+		// 将数据填充至 SS, 返回是否存在此脚本
+		delete(temp, Cfg.SC[index].Name)
 		ok := ReloadScripts(Cfg.SC[index])
 		if !ok {
 			if ss.Infos[Cfg.SC[index].Name] == nil {
@@ -211,7 +217,11 @@ func ReLoad() error {
 			// ss.Scripts[Cfg.SC[index].Name].StartServer()
 		}
 	}
+	// 删除已删除的
+	for name := range temp {
 
+		ss.Scripts[name].RemoveScript()
+	}
 	return nil
 }
 
@@ -269,8 +279,6 @@ func ReloadScripts(script *Script) bool {
 				}
 				golog.Info(time.Since(start).Seconds())
 			}
-
-			//
 			ss.Scripts[script.Name] = script
 		}()
 		return true
@@ -343,10 +351,10 @@ func readConfig() error {
 }
 
 // 运行的时候， 返回状态 Service, 主要验证服务的有效性
-func (c *config) Run() {
-	c.check()
-	ss.Start()
-}
+// func (c *config) Run() {
+// 	c.check()
+// 	ss.Start()
+// }
 
 // 检测配置脚本是否
 func (c *config) check() error {
@@ -650,8 +658,8 @@ func DeleteScriptToConfigFile(s *Script) error {
 }
 
 func HaveScript(pname string) bool {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.ScriptLocker.RLock()
+	defer ss.ScriptLocker.RUnlock()
 	_, ok := ss.Scripts[pname]
 	return ok
 }
@@ -681,8 +689,8 @@ func AddScriptToConfigFile(s *Script) error {
 
 func (c *config) DelScript(pname string) error {
 	// del := make(chan bool)
-	ss.Mu.Lock()
-	defer ss.Mu.Unlock()
+	ss.ServerLocker.Lock()
+	defer ss.ServerLocker.Unlock()
 	if _, ok := ss.Infos[pname]; ok {
 		// go func() {
 		// wg := &sync.WaitGroup{}
