@@ -14,11 +14,7 @@ type Logger struct {
 }
 
 func ReloadLogger(log *Logger) {
-	clear := log.Clear
-	if log.Clear == 0 {
-		clear = 7 * time.Hour * 24
-	}
-	golog.InitLogger(log.Path, log.Size, log.Day, clear)
+	golog.InitLogger(log.Path, log.Size, log.Day, log.Clear)
 	// 设置所有级别的日志都显示
 	golog.Level = golog.All
 	// 设置 日志名， 如果Cfg.Log.Path为空， 那么输出到控制台
