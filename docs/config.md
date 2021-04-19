@@ -5,8 +5,7 @@
 ```
 # 监听端口
 listen: :11111
-# 脚本日志最大保留行数, 默认100， 一般只会打印异常日志
-
+# ssl 配置
 disableTls: true
 key: 
 pem: 
@@ -14,8 +13,12 @@ pem:
 log:
   # scs 的日志文件目录
   path: log
+  # 每天切割日志
   day: true
+  # 按照文件大小来切割日志
   size: 0
+  # 清除超过多长时间的日志， 默认不清除日志
+  clean: 
 # scsctl log 的最大长度
 logCount: 100
 # 请求头认证， 脚本与服务器之间交互需要 Token： xxxx,  环境变量TOKEN的值为此token的值
@@ -23,10 +26,10 @@ token:
 # 客户端免token认证
 ignoreToken:
 - 127.0.0.1
-# 报警方式
+# 报警器
 alert:
   email:
-    # 别名
+    # 别名不一定生效
     nickname: "web administrator"
     host: smtp.qq.com
     port: 465
@@ -50,6 +53,16 @@ alert:
   # https://work.weixin.qq.com/help?person_id=1&doc_id=13376#markdown%E7%B1%BB%E5%9E%8B 固定mark格式
   weixin:
     server: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=dd065367-b753-48fb-a974-bbfff0284c1c
+  callback:
+    # 接受请求的url
+    urls: 
+      - http://127.0.0.1:8080
+    # 请求方式， 一定要大写的
+    method:  POST
+    # headers: 请求头
+        Content-Type: 
+          - application/json
+
 # 本地磁盘， cpu， 内存监控项, 就算没写， 也会默认监控, v2版以后此key更改为probe
 hardware:
   # 主动监控点 域名： https://127.0.0.1:11111
