@@ -33,7 +33,6 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 	addr := strings.Split(r.RemoteAddr, ":")[0]
 	needToken := true
 	// 检查是否是被监控的
-	golog.Info(addr)
 	for _, v := range global.Monitored {
 		if v == addr {
 			needToken = false
