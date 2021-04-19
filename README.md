@@ -16,5 +16,5 @@ service control service or script
 7.  通过配置文件安装服务
 8.  可以将一些执行耗时的脚本托管给scs处理， 以便快速返回结果  
 
-[文档地址]([document/install.md](https://api.hyahm.com/docs/scs/#/))  
+[文档地址](https://api.hyahm.com/docs/scs/#/))  
 
