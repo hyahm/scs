@@ -20,13 +20,11 @@ func Alert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ra.SendAlert()
-	w.Write([]byte(fmt.Sprintf(`{"code":200, "msg": "send alert message"}`)))
-	return
+	w.Write([]byte(`{"code":200, "msg": "send alert message"}`))
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
 	w.Write(scs.GetDispatcher())
-	return
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +57,6 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 	golog.Info(global.Monitored)
 	w.Write([]byte(`{"code": 511, "msg": "StatusNetworkAuthenticationRequired"}`))
 	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
-	return
 }
 
 // 报警相关配置

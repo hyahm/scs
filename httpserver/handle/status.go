@@ -13,18 +13,15 @@ func Status(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 
 	w.Write(scs.ScriptName(pname, name))
-	return
 }
 
 func StatusPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 
 	w.Write(scs.ScriptPname(pname))
-	return
 }
 
 func AllStatus(w http.ResponseWriter, r *http.Request) {
 	w.Write(scs.All())
-	return
 
 }

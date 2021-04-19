@@ -53,5 +53,4 @@ func DelScript(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(`{"code": 200, "msg": "already delete script"}`))
-	return
 }

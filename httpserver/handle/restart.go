@@ -57,7 +57,6 @@ func RestartPname(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	w.Write([]byte(`{"code": 200, "msg": "waiting restart"}`))
-	return
 }
 
 func RestartAll(w http.ResponseWriter, r *http.Request) {
@@ -71,5 +70,4 @@ func RestartAll(w http.ResponseWriter, r *http.Request) {
 
 	// }
 	w.Write([]byte(`{"code": 200, "msg": "waiting restart"}`))
-	return
 }

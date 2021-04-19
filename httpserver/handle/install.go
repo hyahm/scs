@@ -168,5 +168,4 @@ func InstallScript(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 	w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
-	return
 }

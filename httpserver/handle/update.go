@@ -14,7 +14,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	svc, err := scs.GetServerByNameAndSubname(pname, name)
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this script"}`)))
+		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
 		return
 	}
 	svc.UpdateAndRestart()
@@ -29,8 +29,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	// return
 	// }
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting update"}`)))
-	return
+	w.Write([]byte(`{"code": 200, "msg": "waiting update"}`))
 }
 
 func UpdatePname(w http.ResponseWriter, r *http.Request) {
@@ -52,13 +51,11 @@ func UpdatePname(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting update"}`)))
-	return
+	w.Write([]byte(`{"code": 200, "msg": "waiting update"}`))
 }
 
 func UpdateAll(w http.ResponseWriter, r *http.Request) {
 
 	scs.UpdateAndRestartAllServer()
-	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting update"}`)))
-	return
+	w.Write([]byte(`{"code": 200, "msg": "waiting update"}`))
 }
