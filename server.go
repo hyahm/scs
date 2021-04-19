@@ -188,7 +188,7 @@ func (svc *Server) Start() error {
 			go svc.cron()
 			return nil
 		}
-
+		golog.Info(svc.SubName + " is not a loop service")
 		if err := svc.start(); err != nil {
 			svc.stopStatus()
 			return err
