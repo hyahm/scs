@@ -51,6 +51,8 @@ func (svc *Server) kill() error {
 }
 
 func (svc *Server) start() error {
+	golog.Info("already start")
+	svc.Status.Status = RUNNING
 	for k, v := range svc.Env {
 		svc.Command = strings.ReplaceAll(svc.Command, "$"+k, v)
 		svc.Command = strings.ReplaceAll(svc.Command, "${"+k+"}", v)
@@ -64,6 +66,8 @@ func (svc *Server) start() error {
 		svc.cmd.Env = append(svc.cmd.Env, k+"="+v)
 	}
 	svc.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	golog.Warn(svc.cmd.Dir)
+	golog.Warn(svc.Command)
 	svc.read()
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.cmd.Start(); err != nil {
