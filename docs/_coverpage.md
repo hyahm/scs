@@ -2,7 +2,7 @@
 
 ![logo](_media/icon.svg)
 
-# scs <small>3.0</small>
+# scs <small> 3.0</small>
 
 > 一个监控, 报警, 进程管理运维开发工具。
 
