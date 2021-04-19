@@ -146,7 +146,7 @@ func (svc *Server) Start() error {
 		err := svc.LookCommandPath()
 		if err != nil {
 			golog.Error(err)
-			svc.Status.Status = STOP
+			svc.stopStatus()
 			return err
 		}
 		svc.Exit = make(chan int, 2)
