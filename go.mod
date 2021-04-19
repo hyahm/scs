@@ -7,12 +7,8 @@ require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/hyahm/goconfig v0.0.0-20210404042807-4f5600f37d4c // indirect
 	github.com/hyahm/golog v0.0.0-20210205023406-67778c69934a
 	github.com/hyahm/xmux v0.0.0-20210414085231-5b312307ca13
-	github.com/micro/go-micro v1.18.0
-	// github.com/sacOO7/go-logger v0.0.0-20180719173527-9ac9add5a50d // indirect
-	// github.com/sacOO7/gowebsocket v0.0.0-20201031204121-1620b8bfa516
 	github.com/shirou/gopsutil v3.20.12-0.20201210134652-afe0c04c5d5a+incompatible
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.4.0 // indirect

@@ -38,6 +38,7 @@ type AlertTo struct {
 	Rocket   []string `yaml:"rocket"`
 	Telegram []string `yaml:"telegram"`
 	WeiXin   []string `yaml:"weixin"`
+	Callback []string `yaml:"callback"`
 }
 
 // 比较新的与之前的是否相等， 调用者必须是新的
@@ -64,6 +65,7 @@ type Alert struct {
 	Rocket   *AlertRocket   `yaml:"rocket,omitempty"`
 	Telegram *AlertTelegram `yaml:"telegram,omitempty"`
 	WeiXin   *AlertWeiXin   `yaml:"weixin,omitempty"`
+	Callback *Callback      `yaml:"weixin,omitempty"`
 }
 type Alerter struct {
 	Alert        *Alert
@@ -122,6 +124,9 @@ func InitAlert() {
 	}
 	if alerter.Alert.WeiXin != nil {
 		alerter.Alerts["weixin"] = alerter.Alert.WeiXin
+	}
+	if alerter.Alert.Callback != nil {
+		alerter.Alerts["callback"] = alerter.Alert.Callback
 	}
 }
 
@@ -197,6 +202,14 @@ func AlertMessage(msg *Message, at *AlertTo) {
 		case *AlertWeiXin:
 			go func() {
 				alertErr := al.Send(msg, at.WeiXin...)
+				if alertErr != nil {
+					fmt.Println(alertErr)
+				}
+
+			}()
+		case *Callback:
+			go func() {
+				alertErr := al.Send(msg, at.Callback...)
 				if alertErr != nil {
 					fmt.Println(alertErr)
 				}
