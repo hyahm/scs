@@ -3,6 +3,8 @@
 * [快读开始](start.md)
 * [报警器](alert.md)
 * [检测器](probe.md)
+* [定时器](cron.md)
+* [多副本](replicate.md)
 * [脚本文件](script.md)
 * [配置文件](config.md)
 * [sdk](sdk.md)
