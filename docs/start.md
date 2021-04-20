@@ -27,7 +27,7 @@ scripts:
     command: python3 test.py
 ```
 
-> 使用呵护短命令执行
+> 使用命令执行
 ```bash
 scsctl config reload
 ```
@@ -53,3 +53,6 @@ CPU          此脚本cpu使用率
 MEM(kb)      此脚本内存的使用率
 Command      启动的命令  文件夹+命令
 ```
+
+### 程序异常退出自动拉起配置
+`always: true`

@@ -1,7 +1,11 @@
 
 # 报警服务
 
+
+## 报警器
 目前支持邮箱， rocket.chat,  telegram, 企业微信, 回调请求(3.0后新增)
+
+**有个额外配置在probe配置项里面： continuityInterval**
 ```
 alert:
   email:
@@ -44,6 +48,27 @@ alert:
 > > 因为脚本意外退出报警的时间保存到scs中，
 > > `scsctl config reload `  ` scsctl restart test ` 不会重置计数报警时间
 > > 只有重启服务才会
+
+
+将之前的脚本修改成异常退出
+```
+import os
+import sys
+import time
+
+def log(s):
+    print(s)
+    sys.stdout.flush()
+
+    # do something
+while True:
+    log("end")
+    time.sleep(1)
+    sys.exit(1)
+```
+
+# 重载配置文件就可以看到报警器发的报警
+`scsctl config reload`
 
 ### 自建rocket.chat
 参考官网： https://rocket.chat/install/?gclid=undefined
