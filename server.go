@@ -486,7 +486,11 @@ func (svc *Server) wait() error {
 				return errors.New("stoped")
 			}
 			if svc.Script.Always {
-				svc.stopStatus()
+				golog.Info("restart +1")
+				svc.Status.Status = STOP
+				svc.Status.Pid = 0
+				svc.Status.Start = 0
+				svc.IsLoop = false
 				// 失败了， 每秒启动一次
 				svc.Status.RestartCount++
 				return svc.Start()
