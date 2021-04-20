@@ -48,7 +48,7 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		// fmt.Println(st[i])
 	}
 	// 排序并计算最大距离
-	maxColumeLen := make([]int, 9)
+	maxColumeLen := make([]int, 11)
 	for _, v := range st.Nodes {
 
 		if v.Start > 0 {
@@ -83,6 +83,8 @@ func (st *ScriptStatusNode) SortAndPrint() {
 	maxColumeLen[6] = 12
 	maxColumeLen[7] = 10
 	maxColumeLen[8] = 10
+	maxColumeLen[9] = 10
+	maxColumeLen[10] = 10
 
 	fmt.Printf("<node: %s, url: %s>\n", st.Name, st.Url)
 	fmt.Println("--------------------------------------------------")
@@ -95,6 +97,8 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		"CanNotStop" + (space(maxColumeLen[6] - len("CanNotStop"))).String() +
 		"Failed" + (space(maxColumeLen[7] - len("Failed"))).String() +
 		"Disable" + (space(maxColumeLen[8] - len("Disable"))).String() +
+		"CPU" + (space(maxColumeLen[9] - len("CPU"))).String() +
+		"MEM(kb)" + (space(maxColumeLen[10] - len("MEM(kb)"))).String() +
 		"Command")
 	for _, info := range st.Nodes {
 
@@ -111,11 +115,14 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		} else {
 			disable = 5
 		}
+
+		cpu := fmt.Sprintf("%.2f", info.Cpu)
+		mem := fmt.Sprintf("%d", info.Mem/1024)
 		cdpath := ""
 		if info.Path != "" {
 			cdpath = "cd " + info.Path + " && "
 		}
-		fmt.Printf("%s%s%s%s%s%s%d%s%s%s%s%s%t%s%d%s%t%s%s\n",
+		fmt.Printf("%s%s%s%s%s%s%d%s%s%s%s%s%t%s%d%s%t%s%s%s%s%s%s\n",
 			info.PName, space(maxColumeLen[0]-len(info.PName)),
 			info.Name, space(maxColumeLen[1]-len(info.Name)),
 			info.Status, space(maxColumeLen[2]-len(info.Status)),
@@ -125,6 +132,8 @@ func (st *ScriptStatusNode) SortAndPrint() {
 			info.CanNotStop, space(maxColumeLen[6]-canNotStopSpace),
 			info.RestartCount, space(maxColumeLen[7]-len(strconv.Itoa(info.RestartCount))),
 			info.Disable, space(maxColumeLen[8]-disable),
+			cpu, space(maxColumeLen[9]-len(cpu)),
+			mem, space(maxColumeLen[10]-len(mem)),
 			cdpath+info.Command,
 		)
 	}

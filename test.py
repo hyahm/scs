@@ -13,7 +13,6 @@ def log(s):
     sys.stdout.flush()
 
 scs = SCS()
-sys.exit(1)
     # do something
 while True:
     time.sleep(20)

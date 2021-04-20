@@ -331,6 +331,7 @@ func All() []byte {
 	// ss := make([]*ServiceStatus, 0)
 	for pname := range ss.Infos {
 		for name := range ss.Infos[pname] {
+			ss.Infos[pname][name].Status.Cpu, ss.Infos[pname][name].Status.Mem, _ = GetProcessInfo(int32(ss.Infos[pname][name].cmd.Process.Pid))
 			ss.Infos[pname][name].Status.Command = ss.Scripts[pname].Command
 			ss.Infos[pname][name].Status.PName = ss.Scripts[pname].Name
 			ss.Infos[pname][name].Status.Always = ss.Scripts[pname].Always

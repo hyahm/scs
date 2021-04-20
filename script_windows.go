@@ -64,6 +64,7 @@ func (svc *Server) start() error {
 
 	}
 	svc.cmd.Dir = svc.Script.Dir
+
 	golog.Warn(svc.cmd.Dir)
 	golog.Warn(svc.Command)
 	// 等待初始化完成完成后向后执行

@@ -7,12 +7,30 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/process"
 )
 
 type Cpu struct {
 	Percent  float64
 	AI       *AlertInfo
 	Interval time.Duration
+}
+
+func GetProcessInfo(pid int32) (float64, uint64, error) {
+	p, err := process.NewProcess(pid)
+	if err != nil {
+		return 0, 0, err
+	}
+	ci, err := p.CPUPercent()
+	if err != nil {
+		return 0, 0, err
+	}
+	m, err := p.MemoryInfo()
+	if err != nil {
+		return ci, 0, err
+	}
+	return ci, m.RSS, err
+
 }
 
 func NewCpu() *Cpu {

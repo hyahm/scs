@@ -20,7 +20,9 @@ type ServiceStatus struct {
 	Start        int64  `json:"start"` // 启动的时间
 	Version      string `json:"version"`
 	Always       bool
-	RestartCount int    `json:"restartCount"` // 记录失败重启的次数
-	Disable      bool   `json:"disable"`      // 是否禁用
-	Up           string `json:"-"`
+	RestartCount int     `json:"restartCount"` // 记录失败重启的次数
+	Disable      bool    `json:"disable"`      // 是否禁用
+	Up           string  `json:"-"`
+	Cpu          float64 `json:"cpu"`
+	Mem          uint64  `json:"mem"`
 }
