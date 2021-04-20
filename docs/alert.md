@@ -1,7 +1,7 @@
 
 # 报警服务
 
-目前支持邮箱， rocket.chat,  telegram, 企业微信
+目前支持邮箱， rocket.chat,  telegram, 企业微信, 回调请求(3.0后新增)
 ```
 alert:
   email:
@@ -26,9 +26,24 @@ alert:
   # https://work.weixin.qq.com/help?person_id=1&doc_id=13376#markdown%E7%B1%BB%E5%9E%8B 固定mark格式
   weixin:
     server: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=dd065367-b753-48fb-a974-bbfff0284c1c
+  # 这个回调决定支持所有类型报警， 需要自己写
+  callback:
+    # 接受请求的url
+    urls:
+      - http://192.168.0.112:8080
+    # 请求方式， 一定要大写的
+    method:  POST
+    headers:
+      Content-Type:
+        - application/json
 ```
-### 自建发件邮箱服务器
-参考： https://gitee.com/cander/maddy
+
+
+
+> 重点
+> > 因为脚本意外退出报警的时间保存到scs中，
+> > `scsctl config reload `  ` scsctl restart test ` 不会重置计数报警时间
+> > 只有重启服务才会
 
 ### 自建rocket.chat
 参考官网： https://rocket.chat/install/?gclid=undefined
