@@ -171,6 +171,7 @@ func WriteConfig() error {
 }
 
 func ReLoad() error {
+	start := time.Now()
 	// reload: 第一次启动     还是 config reload
 	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
 	if err := readConfig(); err != nil {
@@ -205,85 +206,88 @@ func ReLoad() error {
 	for index := range Cfg.SC {
 		// 将数据填充至 SS, 返回是否存在此脚本
 		delete(temp, Cfg.SC[index].Name)
-		ok := ReloadScripts(Cfg.SC[index])
-		if !ok {
-			if ss.Infos[Cfg.SC[index].Name] == nil {
-				ss.Infos[Cfg.SC[index].Name] = make(map[string]*Server)
-			}
-			Cfg.SC[index].MakeServer()
-			for _, svc := range ss.Infos[Cfg.SC[index].Name] {
-				svc.Start()
-			}
-			// ss.Scripts[Cfg.SC[index].Name].StartServer()
-		}
+		ReloadScripts(Cfg.SC[index])
 	}
 	// 删除已删除的
 	for name := range temp {
-
 		ss.Scripts[name].RemoveScript()
 	}
+	golog.Info(time.Since(start).Seconds())
 	return nil
 }
 
-func ReloadScripts(script *Script) bool {
+func ReloadScripts(script *Script) {
 	// 对对碰， 处理存在的
 	if _, ok := ss.Scripts[script.Name]; ok {
 		// 对比
-		go func() {
-			// 需要重启的
-			if !CompareScript(script, ss.Scripts[script.Name]) {
-				ss.Scripts[script.Name] = script
-				err := script.RestartScript()
-				if err != nil {
-					golog.Error()
-				}
-			}
-			oldReplicate := ss.Scripts[script.Name].Replicate
-			if oldReplicate == 0 {
-				oldReplicate = 1
-			}
-
-			newReplicate := script.Replicate
-			if newReplicate == 0 {
-				newReplicate = 1
-			}
-			if oldReplicate == newReplicate {
-				return
-			}
-			if oldReplicate > newReplicate {
-				// 如果大于的话， 那么就删除多余的
-				for i := newReplicate; i < oldReplicate; i++ {
-					golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-					ss.Infos[script.Name][script.Name+fmt.Sprintf("_%d", i)].Remove()
-				}
-			} else {
-				script.MakeEnv()
-				start := time.Now()
-				portIndex := 0
-				for i := oldReplicate; i < newReplicate; i++ {
-					// 根据副本数提取子名称
-
-					subname := fmt.Sprintf("%s_%d", script.Name, i)
-					if script.Port > 0 {
-						portIndex += probePort(script.Port)
-						script.TempEnv["PORT"] = strconv.Itoa(script.Port + i + portIndex)
-						ss.Infos[script.Name][subname] = script.add(script.Port+i+portIndex, i, subname)
-					} else {
-						script.TempEnv["PORT"] = "0"
-						ss.Infos[script.Name][subname] = script.add(0, i, subname)
-					}
-					script.TempEnv["NAME"] = subname
-
-					ss.Infos[script.Name][subname].Start()
-
-				}
-				golog.Info(time.Since(start).Seconds())
-			}
+		start := time.Now()
+		// 需要重启的
+		if !CompareScript(script, ss.Scripts[script.Name]) {
+			// 如果不一样， 那么 就需要重新启动服务
 			ss.Scripts[script.Name] = script
-		}()
-		return true
+			err := script.RestartScript()
+			if err != nil {
+				golog.Error()
+			}
+		}
+		oldReplicate := ss.Scripts[script.Name].Replicate
+		if oldReplicate == 0 {
+			oldReplicate = 1
+		}
+
+		newReplicate := script.Replicate
+		if newReplicate == 0 {
+			newReplicate = 1
+		}
+		if oldReplicate == newReplicate {
+			// 如果一样的名字， 副本数一样的就直接跳过
+			golog.Info(time.Since(start).Seconds())
+			return
+		}
+		if oldReplicate > newReplicate {
+			// 如果大于的话， 那么就删除多余的
+			for i := newReplicate; i < oldReplicate; i++ {
+				golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
+				ss.Infos[script.Name][script.Name+fmt.Sprintf("_%d", i)].Remove()
+			}
+		} else {
+			script.MakeEnv()
+
+			portIndex := 0
+			for i := oldReplicate; i < newReplicate; i++ {
+				// 根据副本数提取子名称
+
+				subname := fmt.Sprintf("%s_%d", script.Name, i)
+				if script.Port > 0 {
+					portIndex += probePort(script.Port)
+					script.TempEnv["PORT"] = strconv.Itoa(script.Port + i + portIndex)
+					ss.Infos[script.Name][subname] = script.add(script.Port+i+portIndex, i, subname)
+				} else {
+					script.TempEnv["PORT"] = "0"
+					ss.Infos[script.Name][subname] = script.add(0, i, subname)
+				}
+				script.TempEnv["NAME"] = subname
+
+				ss.Infos[script.Name][subname].Start()
+
+			}
+			golog.Info(time.Since(start).Seconds())
+		}
+		ss.Scripts[script.Name].Replicate = script.Replicate
+
+		golog.Info(time.Since(start).Seconds())
+
 	} else {
-		return false
+		golog.Info(script.Name)
+		if ss.Infos[script.Name] == nil {
+			ss.Infos[script.Name] = make(map[string]*Server)
+		}
+		ss.Scripts[script.Name] = script
+		script.MakeServer()
+		for _, svc := range ss.Infos[script.Name] {
+			svc.Start()
+		}
+		golog.Info("load complete: ", script.Name)
 	}
 }
 

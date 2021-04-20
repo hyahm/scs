@@ -123,8 +123,8 @@ func WaitStopAllServer() {
 }
 
 func WaitKillAllServer() {
-	ss.ScriptLocker.RLock()
-	defer ss.ScriptLocker.RUnlock()
+	// ss.ScriptLocker.RLock()
+	// defer ss.ScriptLocker.RUnlock()
 	for _, s := range ss.Scripts {
 		err := s.WaitKillScript()
 		if err != nil {
@@ -331,14 +331,20 @@ func All() []byte {
 	// ss := make([]*ServiceStatus, 0)
 	for pname := range ss.Infos {
 		for name := range ss.Infos[pname] {
-			ss.Infos[pname][name].Status.Cpu, ss.Infos[pname][name].Status.Mem, _ = GetProcessInfo(int32(ss.Infos[pname][name].cmd.Process.Pid))
+			golog.Info(pname)
+			golog.Infof("%#v", ss.Scripts)
+			golog.Infof("%#v", ss.Infos[pname][name].Status)
+			golog.Infof("%#v", ss.Infos[pname][name].Status)
+			if ss.Infos[pname][name].cmd != nil && ss.Infos[pname][name].cmd.Process != nil {
+				ss.Infos[pname][name].Status.Cpu, ss.Infos[pname][name].Status.Mem, _ = GetProcessInfo(int32(ss.Infos[pname][name].cmd.Process.Pid))
+			}
+
 			ss.Infos[pname][name].Status.Command = ss.Scripts[pname].Command
 			ss.Infos[pname][name].Status.PName = ss.Scripts[pname].Name
 			ss.Infos[pname][name].Status.Always = ss.Scripts[pname].Always
 			ss.Infos[pname][name].Status.Disable = ss.Scripts[pname].Disable
 			statuss.Data = append(statuss.Data, ss.Infos[pname][name].Status)
 		}
-
 	}
 	statuss.Code = 200
 	send, err := json.MarshalIndent(statuss, "", "\t")

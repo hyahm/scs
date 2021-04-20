@@ -301,8 +301,6 @@ func StartAllServer() {
 }
 
 func (s *Script) RemoveScript() {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
 	for _, server := range ss.Infos[s.Name] {
 		server.Remove()
 	}
@@ -376,8 +374,8 @@ func (s *Script) WaitStopScript() error {
 }
 
 func (s *Script) WaitKillScript() error {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
+	// ss.ServerLocker.RLock()
+	// defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
 	if _, ok := ss.Infos[s.Name]; !ok {
 		return ErrFoundPnameOrName
