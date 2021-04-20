@@ -1,19 +1,14 @@
   
 import os
-import requests
-import time
-import json
 import sys
-import random
-import asyncio
-from pyscs.scs import SCS
+import time
 
 def log(s):
     print(s) 
     sys.stdout.flush()
 
-scs = SCS()
     # do something
 while True:
-    time.sleep(20)
     log("end")
+    time.sleep(1)
+    

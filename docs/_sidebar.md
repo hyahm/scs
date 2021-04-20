@@ -1,4 +1,5 @@
 * [简介](/)
+* [安装](install.md)
 * [快读开始](start.md)
 * [报警器](alert.md)
 * [检测器](probe.md)
@@ -7,5 +8,5 @@
 * [sdk](sdk.md)
 * [环境变量](env.md)
 * [api文档](api.md)
-* [安装](install.md)
+
 * [客户端scsctl](client.md)

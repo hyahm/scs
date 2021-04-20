@@ -1,45 +1,55 @@
-[安装](install.md)  
-[客户端scsctl使用](scsctl.md)  
-[报警](alert.md)  
-[服务添加删除接口](script.md)  
-[硬件监控配置说明](hardware.md)
 
 # 快速开始
 
-暂时没打包成二进制，需要自己编译
-### 依赖
-- git  敲下 git 如果有如初则安装完git
-- go >= 1.12
-从中文网下载对应系统的包，解压后将 go/bin 添加到环境变量， 敲下 go 如果有如初则安装完go  
+> 第一步： 这是我要启动的脚本
+```python
+# encoding=utf-8
+import os
+import sys
+import time
 
-### 下载源码
-```
-mkdir /data
-cd /data
-git clone https://github.com/hyahm/scs.git
+def log(s):
+    print(s)
+    sys.stdout.flush()
 
-```
-### 打包成二进制文件
-```
-cd scs
-export GOPROXY=https://goproxy.cn  # 国内需要加个代理
-go build -o scsd cmd/scs/main.go  # 服务器端
-go build -o /usr/local/bin/scsctl cmd/scsctl/main.go  # 服务器端
-```
-### 启动服务并自启
-```
-cp default.yaml /etc/scs.yaml  # 拷贝配置文件
-cp systemd/scs.service /etc/systemd/system/scsd.service   # 拷贝启动脚本
-systemctl start scsd  # 启动服务
-systemctl enable scsd   # 开机自启
+    # do something
+while True:
+    log("end")
+    time.sleep(1)
 ```
 
-### 验证
+
+> 第二部 修改配置文件如下
+```yaml
+scripts:
+  - name: test
+    dir: /root
+    command: python3 test.py
 ```
-# 等待1秒后， 查看状态，应该可以看到如下信息， 下面是一条测试的信息， 仅供参考  
-scsctl status
-<node: local, url: https://127.0.0.1:11111>
+
+> 使用呵护短命令执行
+```bash
+scsctl config reload
+```
+
+> 查看结果
+```
+[root@node1 scs]# scsctl status
+<node: localhost, url: https://127.0.0.1:11111>
 --------------------------------------------------
-PName     Name      Status     Ppid      UpTime    Verion   CanNotStop     Failed    Command
-test        test_0      Running    1469      3m49s               true           0         cd /data/scs && python3 test.py
+PName   Name      Status     Pid     UpTime   Verion   CanNotStop  Failed    Disable   CPU       MEM(kb)   Command
+test    test_0    Running    2345    2m51s              false       0         false     0.14      5784      cd /root && python3 test.py
+
+PName        脚本的唯一标识
+Name         副本的唯一标识 默认为脚本名 + "_<index>"
+Status       脚本的状态
+Pid          pid
+UpTime       运行的时间
+Verion       脚本版本
+CanNotStop   是否不能被停止
+Failed       失败重启的次数统计
+Disable      脚本是否禁用
+CPU          此脚本cpu使用率
+MEM(kb)      此脚本内存的使用率
+Command      启动的命令  文件夹+命令
 ```

@@ -1,6 +1,3 @@
-# 配置文件
-
-
 # 配置文件说明  
 ```
 # 监听端口
@@ -64,7 +61,7 @@ alert:
           - application/json
 
 # 本地磁盘， cpu， 内存监控项, 就算没写， 也会默认监控, v2版以后此key更改为probe
-hardware:
+probe:
   # 主动监控点 域名： https://127.0.0.1:11111
   monitor: 
     - https://127.0.0.1:11111
