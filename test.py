@@ -9,7 +9,7 @@ def log(s):
 
     # do something
 while True:
-    log("end")
     time.sleep(1)
+    sys.exit(1)
 
     

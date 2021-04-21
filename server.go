@@ -394,6 +394,7 @@ func (s *Script) RestartScript() error {
 		return ErrFoundPnameOrName
 	}
 	for name := range ss.Infos[s.Name] {
+		ss.Infos[s.Name][name].Script = s
 		go ss.Infos[s.Name][name].Restart()
 	}
 	return nil

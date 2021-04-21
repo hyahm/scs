@@ -220,9 +220,13 @@ func ReloadScripts(script *Script) {
 	if _, ok := ss.Scripts[script.Name]; ok {
 		// 对比
 		// 需要重启的
+		golog.Info(script.Always)
+		golog.Info(ss.Scripts[script.Name].Always)
 		oldReplicate := ss.Scripts[script.Name].Replicate
 		if !CompareScript(script, ss.Scripts[script.Name]) {
 			// 如果不一样， 那么 就需要重新启动服务
+
+			golog.Info("restart server")
 			ss.Scripts[script.Name] = script
 			err := script.RestartScript()
 			if err != nil {
