@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
-	"time"
 
 	"github.com/hyahm/scs/global"
 
@@ -171,7 +170,6 @@ func WriteConfig() error {
 }
 
 func ReLoad() error {
-	start := time.Now()
 	// reload: 第一次启动     还是 config reload
 	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
 	if err := readConfig(); err != nil {
@@ -197,6 +195,7 @@ func ReLoad() error {
 	RunAlert(Cfg.Alert)
 	// 初始化硬件检测
 	RunProbe(Cfg.Probe)
+
 	// 这里也要判断修改
 	// 拷贝一份当前存在的所有的脚本
 	temp := make(map[string]struct{})
@@ -206,13 +205,13 @@ func ReLoad() error {
 	for index := range Cfg.SC {
 		// 将数据填充至 SS, 返回是否存在此脚本
 		delete(temp, Cfg.SC[index].Name)
+		golog.Info(Cfg.SC[index].Name)
 		ReloadScripts(Cfg.SC[index])
 	}
 	// 删除已删除的
 	for name := range temp {
 		ss.Scripts[name].RemoveScript()
 	}
-	golog.Info(time.Since(start).Seconds())
 	return nil
 }
 
@@ -220,8 +219,8 @@ func ReloadScripts(script *Script) {
 	// 对对碰， 处理存在的
 	if _, ok := ss.Scripts[script.Name]; ok {
 		// 对比
-		start := time.Now()
 		// 需要重启的
+		oldReplicate := ss.Scripts[script.Name].Replicate
 		if !CompareScript(script, ss.Scripts[script.Name]) {
 			// 如果不一样， 那么 就需要重新启动服务
 			ss.Scripts[script.Name] = script
@@ -230,18 +229,22 @@ func ReloadScripts(script *Script) {
 				golog.Error()
 			}
 		}
-		oldReplicate := ss.Scripts[script.Name].Replicate
+
 		if oldReplicate == 0 {
 			oldReplicate = 1
 		}
-
+		//
+		if script.Replicate == 1 {
+			script.Replicate = 0
+		}
 		newReplicate := script.Replicate
+
 		if newReplicate == 0 {
 			newReplicate = 1
 		}
+
 		if oldReplicate == newReplicate {
 			// 如果一样的名字， 副本数一样的就直接跳过
-			golog.Info(time.Since(start).Seconds())
 			return
 		}
 		if oldReplicate > newReplicate {
@@ -271,11 +274,8 @@ func ReloadScripts(script *Script) {
 				ss.Infos[script.Name][subname].Start()
 
 			}
-			golog.Info(time.Since(start).Seconds())
 		}
 		ss.Scripts[script.Name].Replicate = script.Replicate
-
-		golog.Info(time.Since(start).Seconds())
 
 	} else {
 		golog.Info(script.Name)

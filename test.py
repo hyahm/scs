@@ -11,5 +11,5 @@ def log(s):
 while True:
     log("end")
     time.sleep(1)
-    sys.exit(1)
+
     

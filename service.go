@@ -331,10 +331,6 @@ func All() []byte {
 	// ss := make([]*ServiceStatus, 0)
 	for pname := range ss.Infos {
 		for name := range ss.Infos[pname] {
-			golog.Info(pname)
-			golog.Infof("%#v", ss.Scripts)
-			golog.Infof("%#v", ss.Infos[pname][name].Status)
-			golog.Infof("%#v", ss.Infos[pname][name].Status)
 			if ss.Infos[pname][name].cmd != nil && ss.Infos[pname][name].cmd.Process != nil {
 				ss.Infos[pname][name].Status.Cpu, ss.Infos[pname][name].Status.Mem, _ = GetProcessInfo(int32(ss.Infos[pname][name].cmd.Process.Pid))
 			}
