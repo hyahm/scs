@@ -63,6 +63,6 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 
 func StopAll(w http.ResponseWriter, r *http.Request) {
 
-	scs.StartAllServer()
+	scs.StopAllServer()
 	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 }

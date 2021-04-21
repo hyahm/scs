@@ -1,7 +1,43 @@
 
 #  通过api添加删除挂载的服务(所有接口请带上token请求头)
 
+
 可用于一个服务控制另外一个服务的作用， 请求后，配置文件自动更新配置文件  
+
+
+
+## 代码片段通过scs保证原子性的实例
+
+例如下面一段代码
+
+需要安装 pyscs
+`pip3 install pyscs`
+
+```python
+  
+import os
+import sys
+import time
+from pyscs import SCS
+
+def log(s):
+    print(s) 
+    sys.stdout.flush()
+
+
+scs = SCS()
+    # do something
+while True:
+    log("can stop")
+    scs.can_stop()
+    time.sleep(1)
+    log("can not stop")
+    scs.can_not_stop()
+    log("start")
+    time.sleep(5)
+    log("complete")
+
+```
 
 
 > https://127.0.0.1:11111/script  POST <添加>
