@@ -5,6 +5,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/hyahm/golog"
 )
 
 func (s *Server) successAlert() {
@@ -78,7 +80,6 @@ func RunAlert(a *Alert) {
 
 	if alerter == nil {
 		alerter = &Alerter{
-			Alert:        a,
 			Alerts:       make(map[string]SendAlerter),
 			alertsLocker: &sync.RWMutex{},
 		}
@@ -87,6 +88,10 @@ func RunAlert(a *Alert) {
 	// 运行报警器
 	// 启动goroutine
 	InitAlert()
+}
+
+func HaveAlert() bool {
+	return len(alerter.Alerts) > 0
 }
 
 // var Alerts map[string]SendAlerter
@@ -111,6 +116,7 @@ func InitAlert() {
 		}
 	}
 	if alerter.Alert.Rocket != nil {
+
 		if alerter.Alert.Rocket.Server != "" && alerter.Alert.Rocket.Username != "" &&
 			alerter.Alert.Rocket.Password != "" {
 			alerter.Alerts["rocket"] = alerter.Alert.Rocket
@@ -170,12 +176,14 @@ func AlertMessage(msg *Message, at *AlertTo) {
 		al := alert
 		msg.HostName, _ = os.Hostname()
 		if at == nil {
+			golog.Info("msg")
 			alertErr := al.Send(msg)
 			if alertErr != nil {
 				fmt.Println(alertErr)
 			}
 			continue
 		}
+
 		switch al.(type) {
 		// 目前只支持邮箱
 		case *AlertEmail:

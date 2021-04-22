@@ -26,7 +26,7 @@ type config struct {
 	Log         *Logger   `yaml:"log,omitempty"`
 	LogCount    int       `yaml:"logCount,omitempty"`
 	IgnoreToken []string  `yaml:"ignoreToken,omitempty"`
-	Repo        *Repo     `yaml:"repo"`
+	Repo        *Repo     `yaml:"repo,omitempty"`
 	Alert       *Alert    `yaml:"alert,omitempty"`
 	Probe       *Probe    `yaml:"probe,omitempty"`
 	SC          []*Script `yaml:"scripts,omitempty"`
@@ -205,7 +205,6 @@ func ReLoad() error {
 	for index := range Cfg.SC {
 		// 将数据填充至 SS, 返回是否存在此脚本
 		delete(temp, Cfg.SC[index].Name)
-		golog.Info(Cfg.SC[index].Name)
 		ReloadScripts(Cfg.SC[index])
 	}
 	// 删除已删除的
@@ -220,8 +219,6 @@ func ReloadScripts(script *Script) {
 	if _, ok := ss.Scripts[script.Name]; ok {
 		// 对比
 		// 需要重启的
-		golog.Info(script.Always)
-		golog.Info(ss.Scripts[script.Name].Always)
 		oldReplicate := ss.Scripts[script.Name].Replicate
 		if oldReplicate == 0 {
 			oldReplicate = 1

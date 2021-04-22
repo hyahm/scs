@@ -47,7 +47,6 @@ func (svc *Server) kill() error {
 }
 
 func (svc *Server) start() error {
-	golog.Info("already start")
 	svc.Status.Status = RUNNING
 	for k, v := range svc.Env {
 		// 替换command

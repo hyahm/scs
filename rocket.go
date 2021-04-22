@@ -25,7 +25,6 @@ type Token struct {
 var rocketFormat = "```\nTitle: {{.Title }} \nHostname: {{.HostName}} \nAddr: {{.Addr}} \n{{ if .Pname  }}Pname:{{.Pname}}\n{{end}}{{ if .Name }}Name:{{.Name}}\n{{end}}{{ if .DiskPath }}DiskPath:{{.DiskPath}}\n{{end}}{{ if .UsePercent }}UsePercent:{{.UsePercent}}% \n{{end}}{{ if .Use }}Use:{{.Use}}G \n{{end}}{{ if .Total }}Total:{{.Total}}G\n{{end}}{{ if .BrokenTime }}BrokenTime:{{.BrokenTime}} \n{{end}}{{ if .FixTime }}FixTime:{{.FixTime}}\n{{end}}{{ if .Reason }}Reason:{{.Reason}}\n {{end}}{{ if .Top }}Top1: {{.Top}}\n{{end}}```"
 
 func (rocket *AlertRocket) Send(body *Message, to ...string) error {
-
 	token, err := rocket.getToken()
 	if err != nil {
 		fmt.Println(err)

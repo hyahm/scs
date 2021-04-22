@@ -39,7 +39,6 @@ func main() {
 	// 自动清除全局报警器的值
 	go scs.SendNetAlert()
 	scs.Start(cfg)
-	golog.Info("starting httpd")
 	httpserver.HttpServer()
 
 	// 依次启动
