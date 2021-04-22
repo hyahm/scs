@@ -96,6 +96,9 @@ func RunAlert(a *Alert) {
 // }
 
 func InitAlert() {
+	if alerter.Alert == nil {
+		return
+	}
 	// 报警配置转移到了 Alerts
 	if alerter.Alert.Email != nil {
 		if alerter.Alert.Email.Host != "" && alerter.Alert.Email.UserName != "" &&
