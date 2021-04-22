@@ -223,17 +223,6 @@ func ReloadScripts(script *Script) {
 		golog.Info(script.Always)
 		golog.Info(ss.Scripts[script.Name].Always)
 		oldReplicate := ss.Scripts[script.Name].Replicate
-		if !CompareScript(script, ss.Scripts[script.Name]) {
-			// 如果不一样， 那么 就需要重新启动服务
-
-			golog.Info("restart server")
-			ss.Scripts[script.Name] = script
-			err := script.RestartScript()
-			if err != nil {
-				golog.Error()
-			}
-		}
-
 		if oldReplicate == 0 {
 			oldReplicate = 1
 		}
@@ -245,6 +234,26 @@ func ReloadScripts(script *Script) {
 
 		if newReplicate == 0 {
 			newReplicate = 1
+		}
+		if !CompareScript(script, ss.Scripts[script.Name]) {
+			// 如果不一样， 那么 就需要重新启动服务
+			golog.Info("restart server")
+			ss.Scripts[script.Name] = script
+			// 先停止脚本， 更新 server
+			err := script.StopScript()
+			if err != nil {
+				golog.Error()
+			}
+			script.MakeServer()
+			for _, svc := range ss.Infos[script.Name] {
+				svc.Start()
+			}
+			// 之前有多的副本就需要删除了
+			for i := newReplicate; i < oldReplicate; i++ {
+				golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
+				ss.Infos[script.Name][script.Name+fmt.Sprintf("_%d", i)].Remove()
+			}
+			return
 		}
 
 		if oldReplicate == newReplicate {

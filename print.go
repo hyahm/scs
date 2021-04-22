@@ -48,6 +48,7 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		// fmt.Println(st[i])
 	}
 	// 排序并计算最大距离
+
 	maxColumeLen := make([]int, 11)
 	for _, v := range st.Nodes {
 

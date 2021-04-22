@@ -12,4 +12,4 @@ var Key string
 var Pem string
 var ContinuityInterval time.Duration
 
-const VERSION = "v3.0.2"
+const VERSION = "v3.0.3"

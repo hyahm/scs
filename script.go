@@ -144,8 +144,9 @@ func (s *Script) StartServer() {
 	}
 }
 
+// 通过script 生成 server
 func (s *Script) MakeServer() {
-	// 通过script 生成 server
+
 	s.MakeEnv()
 
 	replica := s.Replicate
