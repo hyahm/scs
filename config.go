@@ -242,13 +242,19 @@ func ReloadScripts(script *Script) {
 				golog.Error()
 			}
 			script.MakeServer()
-			for _, svc := range ss.Infos[script.Name] {
-				svc.Start()
+			replicate := script.Replicate
+			if replicate == 0 {
+				replicate = 1
 			}
+			for i := 0; i < replicate; i++ {
+				subname := NewSubname(script.Name, i)
+				ss.Infos[subname].Start()
+			}
+
 			// 之前有多的副本就需要删除了
 			for i := newReplicate; i < oldReplicate; i++ {
 				golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-				ss.Infos[script.Name][script.Name+fmt.Sprintf("_%d", i)].Remove()
+				ss.Infos[NewSubname(script.Name, i)].Remove()
 			}
 			return
 		}
@@ -261,7 +267,7 @@ func ReloadScripts(script *Script) {
 			// 如果大于的话， 那么就删除多余的
 			for i := newReplicate; i < oldReplicate; i++ {
 				golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-				ss.Infos[script.Name][script.Name+fmt.Sprintf("_%d", i)].Remove()
+				ss.Infos[NewSubname(script.Name, i)].Remove()
 			}
 		} else {
 			script.MakeEnv()
@@ -270,18 +276,18 @@ func ReloadScripts(script *Script) {
 			for i := oldReplicate; i < newReplicate; i++ {
 				// 根据副本数提取子名称
 
-				subname := fmt.Sprintf("%s_%d", script.Name, i)
+				subname := NewSubname(script.Name, i)
 				if script.Port > 0 {
 					portIndex += probePort(script.Port)
 					script.TempEnv["PORT"] = strconv.Itoa(script.Port + i + portIndex)
-					ss.Infos[script.Name][subname] = script.add(script.Port+i+portIndex, i, subname)
+					ss.Infos[subname] = script.add(script.Port+i+portIndex, subname)
 				} else {
 					script.TempEnv["PORT"] = "0"
-					ss.Infos[script.Name][subname] = script.add(0, i, subname)
+					ss.Infos[subname] = script.add(0, subname)
 				}
-				script.TempEnv["NAME"] = subname
+				script.TempEnv["NAME"] = subname.String()
 
-				ss.Infos[script.Name][subname].Start()
+				ss.Infos[subname].Start()
 
 			}
 		}
@@ -289,13 +295,16 @@ func ReloadScripts(script *Script) {
 
 	} else {
 		golog.Info(script.Name)
-		if ss.Infos[script.Name] == nil {
-			ss.Infos[script.Name] = make(map[string]*Server)
-		}
+
 		ss.Scripts[script.Name] = script
 		script.MakeServer()
-		for _, svc := range ss.Infos[script.Name] {
-			svc.Start()
+		replicate := script.Replicate
+		if replicate == 0 {
+			replicate = 1
+		}
+		for i := 0; i < replicate; i++ {
+			subname := NewSubname(script.Name, i)
+			ss.Infos[subname].Start()
 		}
 		golog.Info("load complete: ", script.Name)
 	}
@@ -333,13 +342,17 @@ func Load() error {
 		// 将数据填充至 SS
 		ss.Scripts[Cfg.SC[index].Name] = Cfg.SC[index]
 		// 启动服务
-		if ss.Infos[Cfg.SC[index].Name] == nil {
-			ss.Infos[Cfg.SC[index].Name] = make(map[string]*Server)
-		}
 		ss.Scripts[Cfg.SC[index].Name].MakeServer()
-		for _, svc := range ss.Infos[Cfg.SC[index].Name] {
-			svc.Start()
+
+		replicate := Cfg.SC[index].Replicate
+		if replicate == 0 {
+			replicate = 1
 		}
+		for i := 0; i < replicate; i++ {
+			subname := NewSubname(Cfg.SC[index].Name, i)
+			ss.Infos[subname].Start()
+		}
+
 	}
 
 	return nil
@@ -672,8 +685,8 @@ func DeleteScriptToConfigFile(s *Script) error {
 }
 
 func HaveScript(pname string) bool {
-	ss.ScriptLocker.RLock()
-	defer ss.ScriptLocker.RUnlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	_, ok := ss.Scripts[pname]
 	return ok
 }
@@ -703,13 +716,20 @@ func AddScriptToConfigFile(s *Script) error {
 
 func (c *config) DelScript(pname string) error {
 	// del := make(chan bool)
-	ss.ServerLocker.Lock()
-	defer ss.ServerLocker.Unlock()
-	if _, ok := ss.Infos[pname]; ok {
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
+
+	if _, ok := ss.Scripts[pname]; ok {
 		// go func() {
 		// wg := &sync.WaitGroup{}
-		for name := range ss.Infos[pname] {
-			ss.Infos[pname][name].Remove()
+		replicate := ss.Scripts[pname].Replicate
+		if replicate == 0 {
+			replicate = 1
+		}
+
+		for i := 0; i < replicate; i++ {
+			subname := NewSubname(pname, i)
+			ss.Infos[subname].Remove()
 		}
 
 	} else {
@@ -718,7 +738,7 @@ func (c *config) DelScript(pname string) error {
 	for i, s := range c.SC {
 		if s.Name == pname {
 			c.SC = append(c.SC[:i], c.SC[i+1:]...)
-			delete(ss.Infos, pname)
+			delete(ss.Scripts, pname)
 			break
 		}
 	}

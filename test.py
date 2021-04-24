@@ -11,6 +11,9 @@ def log(s):
 
 scs = SCS(domain="http://127.0.0.1:11111")
 
+if len(sys.argv) > 1:
+    print("v1.1.1")
+    sys.exit(0)
 
     # do something
 while True:

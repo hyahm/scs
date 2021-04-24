@@ -14,96 +14,95 @@ var ss *Service
 func init() {
 	ss = &Service{
 		// 由2层组成， 一级是name  二级是pname
-		Infos:        make(map[string]map[string]*Server),
-		Scripts:      make(map[string]*Script), // 保存脚本
-		ServerLocker: &sync.RWMutex{},
-		ScriptLocker: &sync.RWMutex{},
+		Infos:   make(map[Subname]*Server),
+		Scripts: make(map[string]*Script), // 保存脚本
+		Mu:      &sync.RWMutex{},
 	}
 }
 
 type Service struct {
-	Infos        map[string]map[string]*Server
-	Scripts      map[string]*Script
-	ScriptLocker *sync.RWMutex
-	ServerLocker *sync.RWMutex
+	Infos   map[Subname]*Server // 根据subname存放server的
+	Scripts map[string]*Script  // 根据name存放脚本的
+	Mu      *sync.RWMutex
 }
 
-func (s *Service) HasName(name string) bool {
-	if s.Len() == 0 {
-		return false
-	}
-	s.ScriptLocker.RLock()
-	defer s.ScriptLocker.RUnlock()
-	if _, ok := s.Scripts[name]; !ok {
-		return false
-	}
-	return false
-}
-
-func (s *Service) HassubName(pname, name string) bool {
-	if s.Len() == 0 {
-		return false
-	}
-	s.ServerLocker.RLock()
-	defer s.ServerLocker.RUnlock()
-	if _, ok := s.Infos[pname]; !ok {
-		return false
-	}
-	if _, ok := s.Infos[pname][name]; ok {
+func HasName(name string) bool {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Scripts[name]; ok {
 		return true
 	}
 	return false
 }
 
-func GetServerBySubname(name string) (*Server, error) {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	for pname := range ss.Infos {
-		if _, ok := ss.Infos[pname][name]; ok {
-			return ss.Infos[pname][name], nil
-		}
+func HassubName(name Subname) bool {
+
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Infos[name]; ok {
+		return true
 	}
-	return nil, ErrFoundPnameOrName
+	return false
 }
 
-func GetServersByName(name string) (map[string]*Server, error) {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	if _, ok := ss.Infos[name]; !ok {
-		return nil, ErrFoundPnameOrName
+func GetServerBySubname(subname Subname) (*Server, error) {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Infos[subname]; ok {
+		return ss.Infos[subname], nil
 	}
-
-	return ss.Infos[name], ErrFoundPnameOrName
+	return nil, ErrFoundName
 }
 
-func GetServerByNameAndSubname(pname, name string) (*Server, error) {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	if _, ok := ss.Infos[pname]; !ok {
-		return nil, ErrFoundPnameOrName
+func GetServersByName(name string) (map[Subname]*Server, error) {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Scripts[name]; !ok {
+		return nil, ErrFoundPname
 	}
-	if _, ok := ss.Infos[pname][name]; ok {
-		return ss.Infos[pname][name], nil
+	servers := make(map[Subname]*Server)
+	replicate := ss.Scripts[name].Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(name, i)
+		servers[subname] = ss.Infos[subname]
 	}
 
-	return nil, ErrFoundPnameOrName
+	return servers, nil
 }
 
-func (s *Script) KillScript() error {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	if _, ok := ss.Infos[s.Name]; !ok {
-		return ErrFoundPnameOrName
+func GetServerByNameAndSubname(name string, subname Subname) (*Server, error) {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Scripts[name]; !ok {
+		return nil, ErrFoundPname
 	}
-	for _, svc := range ss.Infos[s.Name] {
-		svc.kill()
+	if _, ok := ss.Infos[subname]; ok {
+		return ss.Infos[subname], nil
 	}
-	return nil
+
+	return nil, ErrFoundName
+}
+
+func (s *Script) KillScript() {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		ss.Infos[subname].Kill()
+	}
 }
 
 func StopAllServer() {
-	ss.ScriptLocker.RLock()
-	defer ss.ScriptLocker.RUnlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	for _, s := range ss.Scripts {
 		err := s.StopScript()
 		if err != nil {
@@ -112,13 +111,10 @@ func StopAllServer() {
 	}
 }
 func WaitStopAllServer() {
-	ss.ScriptLocker.RLock()
-	defer ss.ScriptLocker.RUnlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	for _, s := range ss.Scripts {
-		err := s.WaitStopScript()
-		if err != nil {
-			golog.Error(err)
-		}
+		s.WaitStopScript()
 	}
 }
 
@@ -126,10 +122,7 @@ func WaitKillAllServer() {
 	// ss.ScriptLocker.RLock()
 	// defer ss.ScriptLocker.RUnlock()
 	for _, s := range ss.Scripts {
-		err := s.WaitKillScript()
-		if err != nil {
-			golog.Error(err)
-		}
+		s.WaitKillScript()
 	}
 }
 
@@ -141,32 +134,33 @@ func WaitKillAllServer() {
 // }
 
 // 只删除ss.infos 里面的额
-func DeleteServiceBySubName(subname string) error {
+func DeleteServiceBySubName(subname Subname) error {
 	// 删除server
-	ss.ServerLocker.Lock()
-	defer ss.ServerLocker.Unlock()
-	index := strings.LastIndex(subname, "_")
-	name := subname[:index]
-	if _, ok := ss.Infos[name][subname]; ok {
-		delete(ss.Infos[name], subname)
-		if len(ss.Infos[name]) == 0 {
-			delete(ss.Scripts, name)
-			delete(ss.Infos, name)
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
+	if _, ok := ss.Infos[subname]; ok {
+		delete(ss.Infos, subname)
+		// 同时script 里面也要删除
+		name := subname.GetName()
+		if _, ok := ss.Scripts[name]; ok {
+			ss.Scripts[name].Replicate--
+			// 开发中， replicate =0 或 1 其实都是1 的意思， 所以减一后 <= 0 的其实就是都删除干净了的意思
+			if ss.Scripts[name].Replicate < 1 {
+				delete(ss.Scripts, name)
+				delete(ss.Infos, subname)
+			}
 		}
 		return nil
-	} else {
-		return ErrFoundPnameOrName
 	}
+	return ErrFoundName
 
 }
 
 func RestartAllServer() {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	for pname := range ss.Infos {
-		for _, svc := range ss.Infos[pname] {
-			svc.Restart()
-		}
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	for _, svc := range ss.Infos {
+		go svc.Restart()
 	}
 }
 
@@ -177,14 +171,14 @@ func (s *Script) WriteToFile() error {
 
 // 通过script 生成和启动服务
 func (s *Script) AddScript() error {
-	ss.ScriptLocker.RLock()
-	defer ss.ScriptLocker.RUnlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	// 添加一个script
-	// 先判断script 是否存在
-	if _, ok := ss.Scripts[s.Name]; ok {
-		golog.Info("已经存在此脚本")
-		return ErrFoundPnameOrName
-	}
+	// 先判断script 是否存在, 不存在的话应该是修改的
+	// if _, ok := ss.Scripts[s.Name]; ok {
+	// 	golog.Info("已经存在此脚本")
+	// 	return ErrFoundPnameOrName
+	// }
 	// 值挂载给ss
 	ss.Scripts[s.Name] = s
 	// 通过script 生成server
@@ -194,110 +188,21 @@ func (s *Script) AddScript() error {
 
 }
 
-func (s *Service) MakeSubStruct(pname string) {
-	s.ServerLocker.RLock()
-	defer s.ServerLocker.RUnlock()
-	if _, ok := s.Infos[pname]; !ok {
-		s.Infos[pname] = make(map[string]*Server)
-	}
-}
-
-func (s *Service) Len() int {
-	s.ServerLocker.RLock()
-	defer s.ServerLocker.RUnlock()
-	return len(s.Scripts)
-}
-
-func (s *Service) PnameLen(name string) int {
-	s.ServerLocker.RLock()
-	defer s.ServerLocker.RUnlock()
-	if v, ok := s.Infos[name]; ok {
-		return len(v)
-	}
-	return 0
+func Len() int {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	return len(ss.Scripts)
 }
 
 // 从 ss 中删除某一个subname
-func (s *Service) DeleteSubname(subname string) {
-	if s.Len() == 0 {
-		return
-	}
-	s.ServerLocker.Lock()
-	defer s.ServerLocker.Unlock()
+func DeleteSubname(subname Subname) {
+
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
 	// 以最后一个下划线来分割出pname
-	i := strings.LastIndex(subname, "_")
-	if i < 0 {
-		golog.Error("not found this subname :" + subname)
-		return
+	if _, ok := ss.Infos[subname]; ok {
+		delete(ss.Infos, subname)
 	}
-	pname := subname[:i]
-	if _, ok := s.Infos[pname]; ok {
-		delete(s.Infos[pname], subname)
-	}
-}
-
-// 从 ss 中删除某一个pname
-// func (s *Service) DeletePname(pname string) {
-// 	if s.Len() == 0 {
-// 		return
-// 	}
-// 	s.ServerLocker.Lock()
-// 	defer s.ServerLocker.Unlock()
-// 	delete(s.Infos, pname)
-// }
-
-// 从 ss 中删除某一个subname
-func GetScriptFromPnameAndSubname(pname, subname string) *Server {
-	if ss.Len() == 0 {
-		return nil
-	}
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	// 以最后一个下划线来分割出pname
-	if _, ok := ss.Infos[pname]; !ok {
-		return nil
-	}
-	if _, ok := ss.Infos[pname][subname]; !ok {
-		return nil
-	}
-	return ss.Infos[pname][subname]
-}
-
-// func Copy() map[string]string {
-// 	keys := make(map[string]string)
-// 	ss.ServerLocker.RLock()
-// 	defer ss.ServerLocker.RUnlock()
-// 	for pname := range ss.Infos {
-// 		for name := range ss.Infos[pname] {
-// 			keys[name] = pname
-// 		}
-// 	}
-// 	return keys
-// }
-
-// 第一次启动
-// func (s *Service) Start() {
-// 	// 先无视有启动顺序的脚本
-// 	// 先启动无需顺序的脚本
-// 	ss.ServerLocker.RLock()
-// 	defer ss.ServerLocker.RUnlock()
-// 	for pname := range ss.Infos {
-// 		for name := range ss.Infos[pname] {
-// 			ss.Infos[pname][name].Start()
-// 		}
-// 	}
-// }
-
-func Get(pname, name string) *ServiceStatus {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	if _, ok := ss.Infos[pname]; ok {
-		if sv, ok := ss.Infos[pname][name]; ok {
-			return sv.Status
-		}
-
-	}
-	return nil
 }
 
 type StatusList struct {
@@ -320,27 +225,40 @@ func (sl *StatusList) Filter(filter []string) {
 	sl.Data = temp
 }
 
+// 获取所有服务的状态
 func All() []byte {
-	ss.ServerLocker.Lock()
-	ss.ScriptLocker.RLock()
-	defer ss.ScriptLocker.RUnlock()
-	defer ss.ServerLocker.Unlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	statuss := &StatusList{
 		Data: make([]*ServiceStatus, 0),
 	}
 	// ss := make([]*ServiceStatus, 0)
-	for pname := range ss.Infos {
-		for name := range ss.Infos[pname] {
-			if ss.Infos[pname][name].cmd != nil && ss.Infos[pname][name].cmd.Process != nil {
-				ss.Infos[pname][name].Status.Cpu, ss.Infos[pname][name].Status.Mem, _ = GetProcessInfo(int32(ss.Infos[pname][name].cmd.Process.Pid))
-			}
+	for subname := range ss.Infos {
 
-			ss.Infos[pname][name].Status.Command = ss.Scripts[pname].Command
-			ss.Infos[pname][name].Status.PName = ss.Scripts[pname].Name
-			ss.Infos[pname][name].Status.Always = ss.Scripts[pname].Always
-			ss.Infos[pname][name].Status.Disable = ss.Scripts[pname].Disable
-			statuss.Data = append(statuss.Data, ss.Infos[pname][name].Status)
+		if _, ok := ss.Scripts[subname.GetName()]; !ok {
+			continue
 		}
+
+		status := &ServiceStatus{
+			PName:        subname.GetName(),
+			Name:         subname.String(),
+			Command:      ss.Infos[subname].Command,
+			Always:       ss.Scripts[subname.GetName()].Always,
+			Version:      ss.Infos[subname].Version,
+			Status:       ss.Infos[subname].Status.Status,
+			CanNotStop:   ss.Infos[subname].Status.CanNotStop,
+			Path:         ss.Infos[subname].Script.Dir,
+			Start:        ss.Infos[subname].Status.Start,
+			RestartCount: ss.Infos[subname].Status.RestartCount,
+			Up:           ss.Infos[subname].Status.Up,
+			Disable:      ss.Scripts[subname.GetName()].Disable,
+		}
+		if ss.Infos[subname].cmd != nil && ss.Infos[subname].cmd.Process != nil {
+			status.Pid = ss.Infos[subname].Status.Pid
+			status.Cpu, status.Mem, _ = GetProcessInfo(int32(ss.Infos[subname].Status.Pid))
+
+		}
+		statuss.Data = append(statuss.Data, status)
 	}
 	statuss.Code = 200
 	send, err := json.MarshalIndent(statuss, "", "\t")
@@ -351,14 +269,48 @@ func All() []byte {
 }
 
 func ScriptPname(pname string) []byte {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	statuss := &StatusList{
 		Data: make([]*ServiceStatus, 0),
 	}
-	for _, s := range ss.Infos[pname] {
-		statuss.Data = append(statuss.Data, s.Status)
+	if _, ok := ss.Scripts[pname]; !ok {
+		statuss.Msg = "not found " + pname
+		send, err := json.MarshalIndent(statuss, "", "\n")
+
+		if err != nil {
+			golog.Error(err)
+		}
+		return send
 	}
+	replicate := ss.Scripts[pname].Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(pname, i)
+		status := &ServiceStatus{
+			PName:        subname.GetName(),
+			Name:         subname.String(),
+			Command:      ss.Infos[subname].Status.Command,
+			Always:       ss.Scripts[subname.GetName()].Always,
+			Version:      ss.Infos[subname].Status.Version,
+			CanNotStop:   ss.Infos[subname].Status.CanNotStop,
+			Path:         ss.Infos[subname].Status.Path,
+			Status:       ss.Infos[subname].Status.Status,
+			RestartCount: ss.Infos[subname].Status.RestartCount,
+			Up:           ss.Infos[subname].Status.Up,
+			Disable:      ss.Scripts[subname.GetName()].Disable,
+		}
+		if ss.Infos[subname].cmd != nil && ss.Infos[subname].cmd.Process != nil {
+			status.Pid = ss.Infos[subname].cmd.Process.Pid
+			status.Cpu, status.Mem, _ = GetProcessInfo(int32(ss.Infos[subname].cmd.Process.Pid))
+
+		}
+		statuss.Data = append(statuss.Data, status)
+	}
+
 	statuss.Code = 200
 	send, err := json.MarshalIndent(statuss, "", "\n")
 
@@ -368,19 +320,41 @@ func ScriptPname(pname string) []byte {
 	return send
 }
 
-func ScriptName(pname, name string) []byte {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
+func ScriptName(pname string, subname Subname) []byte {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	statuss := &StatusList{
 		Data: make([]*ServiceStatus, 0),
 	}
-	// statuss := make([]*script.ServiceStatus, 0)
-	if _, pok := ss.Infos[pname]; pok {
-		if s, ok := ss.Infos[pname][name]; ok {
-			statuss.Data = append(statuss.Data, s.Status)
+	if _, ok := ss.Scripts[pname]; !ok {
+		statuss.Msg = "not found " + pname
+		send, err := json.MarshalIndent(statuss, "", "\n")
+
+		if err != nil {
+			golog.Error(err)
 		}
+		return send
 	}
 
+	status := &ServiceStatus{
+		PName:        subname.GetName(),
+		Name:         subname.String(),
+		Command:      ss.Infos[subname].Status.Command,
+		Always:       ss.Scripts[subname.GetName()].Always,
+		Version:      ss.Infos[subname].Status.Version,
+		CanNotStop:   ss.Infos[subname].Status.CanNotStop,
+		Path:         ss.Infos[subname].Status.Path,
+		Status:       ss.Infos[subname].Status.Status,
+		RestartCount: ss.Infos[subname].Status.RestartCount,
+		Up:           ss.Infos[subname].Status.Up,
+		Disable:      ss.Scripts[subname.GetName()].Disable,
+	}
+	if ss.Infos[subname].cmd != nil && ss.Infos[subname].cmd.Process != nil {
+		status.Pid = ss.Infos[subname].cmd.Process.Pid
+		status.Cpu, status.Mem, _ = GetProcessInfo(int32(ss.Infos[subname].cmd.Process.Pid))
+
+	}
+	statuss.Data = append(statuss.Data, status)
 	send, err := json.MarshalIndent(statuss, "", "\t")
 	if err != nil {
 		golog.Error(err)

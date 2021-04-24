@@ -13,7 +13,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
 
-	svc, err := scs.GetServerByNameAndSubname(pname, name)
+	svc, err := scs.GetServerByNameAndSubname(pname, scs.Subname(name))
 	if err != nil {
 		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
 		return

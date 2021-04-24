@@ -12,7 +12,7 @@ func Status(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
 
-	w.Write(scs.ScriptName(pname, name))
+	w.Write(scs.ScriptName(pname, scs.Subname(name)))
 }
 
 func StatusPname(w http.ResponseWriter, r *http.Request) {

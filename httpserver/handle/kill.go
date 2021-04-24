@@ -11,7 +11,7 @@ import (
 func Kill(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	svc, err := scs.GetServerByNameAndSubname(pname, name)
+	svc, err := scs.GetServerByNameAndSubname(pname, scs.Subname(name))
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, name)))
 		return
@@ -27,10 +27,7 @@ func KillPname(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, pname)))
 		return
 	}
-	err = s.KillScript()
-	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, pname)))
-		return
-	}
+	s.KillScript()
+
 	w.Write([]byte(`{"code": 200, "msg": "already killed"}`))
 }

@@ -64,8 +64,6 @@ func (svc *Server) start() error {
 	}
 	svc.cmd.Dir = svc.Script.Dir
 
-	golog.Warn(svc.cmd.Dir)
-	golog.Warn(svc.Command)
 	// 等待初始化完成完成后向后执行
 	svc.read()
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的

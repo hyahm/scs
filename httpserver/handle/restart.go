@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs"
 
 	"github.com/hyahm/xmux"
@@ -13,13 +12,11 @@ import (
 func Restart(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	golog.Info(1111)
-	svc, err := scs.GetServerByNameAndSubname(pname, name)
+	svc, err := scs.GetServerByNameAndSubname(pname, scs.Subname(name))
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, name)))
 		return
 	}
-	golog.Info(1111)
 	go svc.Restart()
 	// if v, ok := script.SS.Infos[pname]; ok {
 	// 	if _, ok := v[name]; ok {

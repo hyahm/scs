@@ -21,7 +21,7 @@ func (s *Server) successAlert() {
 			am := &Message{
 				Title:      "service recover",
 				Pname:      s.Script.Name,
-				Name:       s.SubName,
+				Name:       s.SubName.String(),
 				BrokenTime: s.AI.Start.String(),
 				FixTime:    time.Now().String(),
 			}

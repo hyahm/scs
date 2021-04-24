@@ -81,6 +81,9 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		}
 		maxColumeLen[i] += ds
 	}
+	if maxColumeLen[4] < 10 {
+		maxColumeLen[4] = 10
+	}
 	maxColumeLen[6] = 12
 	maxColumeLen[7] = 10
 	maxColumeLen[8] = 10
@@ -116,7 +119,6 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		} else {
 			disable = 5
 		}
-
 		cpu := fmt.Sprintf("%.2f", info.Cpu)
 		mem := fmt.Sprintf("%d", info.Mem/1024)
 		cdpath := ""

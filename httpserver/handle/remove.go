@@ -22,7 +22,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	// 读取配置文件
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	svc, err := scs.GetServerByNameAndSubname(pname, name)
+	svc, err := scs.GetServerByNameAndSubname(pname, scs.Subname(name))
 	if err != nil {
 		w.Write([]byte(`{"code": 500, "msg": "config file error"}`))
 		return

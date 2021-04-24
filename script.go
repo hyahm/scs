@@ -68,26 +68,24 @@ func (s *Script) MakeEnv() {
 	s.TempEnv["PNAME"] = s.Name
 }
 
-func (s *Script) add(port, replacate int, subname string) *Server {
+func (s *Script) add(port int, subname Subname) *Server {
 	continuityInterval := s.ContinuityInterval
 	if continuityInterval == 0 {
 		continuityInterval = global.ContinuityInterval
 	}
 
 	svc := &Server{
-		Script: s,
 		// LookPath:  s.LookPath,
+		Script:    s,
 		Command:   s.Command,
 		Log:       make([]string, 0, global.LogCount),
 		LogLocker: &sync.RWMutex{},
 		SubName:   subname,
+		Version:   getVersion(s.Version),
 		Status: &ServiceStatus{
-			Name:    subname,
-			PName:   s.Name,
-			Status:  STOP,
-			Path:    s.Dir,
-			Version: getVersion(s.Version),
-			Disable: s.Disable,
+			Name:   subname.GetName(),
+			PName:  s.Name,
+			Status: STOP,
 		},
 		Update:             s.Update,
 		ContinuityInterval: continuityInterval,
@@ -103,7 +101,6 @@ func (s *Script) add(port, replacate int, subname string) *Server {
 			IsMonth: s.Cron.IsMonth,
 		}
 	}
-	// 生成对应的文件类型
 
 	return svc
 }
@@ -135,12 +132,15 @@ func (s *Script) NeedStop() bool {
 
 // 启动方法， 异步执行
 func (s *Script) StartServer() {
-
-	for _, svc := range ss.Infos[s.Name] {
-		err := svc.Start()
-		if err != nil {
-			golog.Error(err)
-		}
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		ss.Infos[subname].Start()
 	}
 }
 
@@ -150,12 +150,10 @@ func (s *Script) MakeServer() {
 	s.MakeEnv()
 
 	replica := s.Replicate
-	if replica == 1 || replica == 0 {
+	if replica == 0 {
 		replica = 1
 	}
-	if ss.Infos[s.Name] == nil {
-		ss.Infos[s.Name] = make(map[string]*Server)
-	}
+
 	portIndex := 0
 	for i := 0; i < replica; i++ {
 		// 根据副本数提取子名称
@@ -163,22 +161,22 @@ func (s *Script) MakeServer() {
 		for k, v := range s.TempEnv {
 			env[k] = v
 		}
-		subname := fmt.Sprintf("%s_%d", s.Name, i)
+		subname := NewSubname(s.Name, i)
 		var svc *Server
 		if s.Port > 0 {
 			portIndex += probePort(s.Port)
 			env["PORT"] = strconv.Itoa(s.Port + i + portIndex)
-			svc = s.add(s.Port+i+portIndex, replica, subname)
+			svc = s.add(s.Port+i+portIndex, subname)
 		} else {
 			env["PORT"] = "0"
-			svc = s.add(0, replica, subname)
+			svc = s.add(0, subname)
 		}
-		env["NAME"] = subname
+		env["NAME"] = subname.String()
 
 		// 检测端口是否被占用， 如果占用了
 
 		svc.Env = env
-		ss.Infos[s.Name][subname] = svc
+		ss.Infos[subname] = svc
 	}
 }
 

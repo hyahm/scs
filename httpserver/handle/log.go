@@ -24,7 +24,7 @@ func Log(w http.ResponseWriter, r *http.Request) {
 	// 	}
 	// }
 
-	svc, err := scs.GetServerBySubname(name)
+	svc, err := scs.GetServerBySubname(scs.Subname(name))
 	if err != nil {
 		w.Write([]byte(`{"code": 404, "msg":"not found script"}`))
 		return

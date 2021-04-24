@@ -16,10 +16,11 @@ import (
 type Server struct {
 	Script             *Script
 	Command            string
+	Version            string
 	Cron               *Cron // 这个cron是新生成的
 	IsLoop             bool  // 如果是定时任务
 	Env                map[string]string
-	SubName            string
+	SubName            Subname
 	Log                []string
 	cmd                *exec.Cmd
 	Status             *ServiceStatus
@@ -130,11 +131,15 @@ func (s *Server) cron() {
 	}
 }
 
-// Start  启动服务
+// Start  启动服务 异步的
 func (svc *Server) Start() error {
-	if svc.Script.Disable {
+
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Scripts[svc.SubName.GetName()]; ok && ss.Scripts[svc.SubName.GetName()].Disable {
 		return nil
 	}
+
 	switch svc.Status.Status {
 	case WAITSTOP:
 		// 如果之前是等待停止的状态， 更改为重启状态
@@ -186,6 +191,7 @@ func (svc *Server) Start() error {
 			go svc.cron()
 			return nil
 		}
+
 		if err := svc.start(); err != nil {
 			svc.stopStatus()
 			return err
@@ -200,7 +206,7 @@ func (svc *Server) Start() error {
 	return nil
 }
 
-// Restart  重动服务
+// Restart  重动服务, 同步执行的
 func (s *Server) Restart() {
 	if s.IsLoop {
 		s.Cancel()
@@ -224,6 +230,7 @@ func (s *Server) Restart() {
 
 }
 
+// 异步删除
 func (s *Server) Remove() {
 	switch s.Status.Status {
 	case WAITRESTART:
@@ -269,136 +276,177 @@ func (s *Server) Stop() {
 }
 
 func GetScriptByPname(name string) (*Script, error) {
-	ss.ScriptLocker.RLock()
-	defer ss.ScriptLocker.RUnlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	if v, ok := ss.Scripts[name]; ok {
 		return v, nil
-	} else {
-		return nil, ErrFoundPnameOrName
 	}
+	return nil, ErrFoundPname
+
 }
 
 func UpdateAndRestartAllServer() {
-	ss.ScriptLocker.RLock()
-	defer ss.ScriptLocker.RUnlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	for _, s := range ss.Scripts {
-		s.UpdateAndRestartScript()
+		go s.UpdateAndRestartScript()
 	}
 }
 
 func StartAllServer() {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	for pname := range ss.Infos {
-		for _, svc := range ss.Infos[pname] {
-			svc.Start()
-		}
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	for _, svc := range ss.Infos {
+		svc.Start()
 		// s.StartServer()
 	}
 }
 
-func (s *Script) RemoveScript() {
-	for _, server := range ss.Infos[s.Name] {
-		server.Remove()
+func (s *Script) RemoveScript() error {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Scripts[s.Name]; !ok {
+		return ErrFoundPname
 	}
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		ss.Infos[subname].Remove()
+	}
+	return nil
 }
 
-func (s *Script) UpdateAndRestartScript() {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	for _, server := range ss.Infos[s.Name] {
-		server.UpdateAndRestart()
+func (s *Script) UpdateAndRestartScript() error {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Scripts[s.Name]; !ok {
+		return ErrFoundPname
 	}
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		go ss.Infos[subname].UpdateAndRestart()
+	}
+	return nil
 }
 
 func (s *Script) EnableScript() error {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Infos[s.Name]; !ok {
-		return ErrFoundPnameOrName
+	if _, ok := ss.Scripts[s.Name]; !ok {
+		return ErrFoundPname
 	}
-	ss.ScriptLocker.Lock()
-	ss.Scripts[s.Name].Disable = false
-	ss.ScriptLocker.Unlock()
-	for name := range ss.Infos[s.Name] {
-		go ss.Infos[s.Name][name].Start()
+	ss.Scripts[s.Name].Disable = true
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		go ss.Infos[subname].Start()
 	}
 	return nil
 }
 
 func (s *Script) DisableScript() error {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Infos[s.Name]; !ok {
-		return ErrFoundPnameOrName
+	if _, ok := ss.Scripts[s.Name]; !ok {
+		return ErrFoundPname
 	}
-	ss.ScriptLocker.Lock()
 	ss.Scripts[s.Name].Disable = true
-	ss.ScriptLocker.Unlock()
-	for name := range ss.Infos[s.Name] {
-		go ss.Infos[s.Name][name].Stop()
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		go ss.Infos[subname].Stop()
 	}
 	return nil
 }
 
+// 异步执行停止脚本
 func (s *Script) StopScript() error {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
-	// 禁用 script 所在的所有server
-	if _, ok := ss.Infos[s.Name]; !ok {
-		return ErrFoundPnameOrName
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	if _, ok := ss.Scripts[s.Name]; !ok {
+		return ErrFoundPname
 	}
-	for name := range ss.Infos[s.Name] {
-		go ss.Infos[s.Name][name].Stop()
+	// 禁用 script 所在的所有server
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		go ss.Infos[subname].Stop()
 	}
 	return nil
 }
 
-func (s *Script) WaitStopScript() error {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
+// 同步停止
+func (s *Script) WaitStopScript() {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Infos[s.Name]; !ok {
-		return ErrFoundPnameOrName
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
 	}
-	for subname := range ss.Infos[s.Name] {
-		golog.Info(subname)
-		ss.Infos[s.Name][subname].Stop()
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		ss.Infos[subname].Stop()
 	}
-	return nil
 }
 
-func (s *Script) WaitKillScript() error {
+// 同步杀掉
+func (s *Script) WaitKillScript() {
 	// ss.ServerLocker.RLock()
 	// defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Infos[s.Name]; !ok {
-		return ErrFoundPnameOrName
-	}
-	for subname := range ss.Infos[s.Name] {
-		ss.Infos[s.Name][subname].Kill()
-	}
-	return nil
-}
-
-func (s *Script) RestartScript() error {
-	ss.ServerLocker.RLock()
-	defer ss.ServerLocker.RUnlock()
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Infos[s.Name]; !ok {
-		return ErrFoundPnameOrName
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
 	}
-	for name := range ss.Infos[s.Name] {
-		ss.Infos[s.Name][name].Script = s
-		go ss.Infos[s.Name][name].Restart()
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		ss.Infos[subname].Kill()
+	}
+}
+
+// 异步重启
+func (s *Script) RestartScript() error {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	// 禁用 script 所在的所有server
+	if _, ok := ss.Scripts[s.Name]; !ok {
+		return ErrFoundPname
+	}
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	for i := 0; i < replicate; i++ {
+		subname := NewSubname(s.Name, i)
+		ss.Infos[subname].Restart()
 	}
 	return nil
 }
 
+// 同步更新并重启
 func (s *Server) UpdateAndRestart() {
-	golog.Info(s.Update)
 	updateCommand := "git pull"
 	if s.Update != "" {
 		updateCommand = s.Update
@@ -410,7 +458,7 @@ func (s *Server) UpdateAndRestart() {
 	s.Restart()
 }
 
-// Stop  杀掉服务
+// Stop  杀掉服务, 没有产生goroutine， 直接杀死
 func (s *Server) Kill() {
 	if s.IsLoop {
 		s.Cancel()
@@ -457,7 +505,7 @@ func (svc *Server) wait() error {
 				am := &Message{
 					Title:  "service error stop",
 					Pname:  svc.Script.Name,
-					Name:   svc.SubName,
+					Name:   svc.SubName.String(),
 					Reason: err.Error(),
 				}
 				if !svc.AI.Broken {
@@ -505,7 +553,6 @@ func (svc *Server) wait() error {
 	if svc.Script.DeleteWhenExit {
 		return Cfg.DelScript(svc.Script.Name)
 	}
-	golog.Info(111111)
 	svc.stopStatus()
 	return nil
 
