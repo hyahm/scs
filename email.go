@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-04-25 19:08:58
- * @LastEditTime: 2021-04-25 19:31:48
+ * @LastEditTime: 2021-04-25 20:31:07
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /scs/email.go
@@ -29,8 +29,6 @@ var emailFormat = `<html><head>{{.Title}}</head><h5>hostname: {{.HostName}}</h5>
 // SendEmail body支持html格式字符串
 func (ae *AlertEmail) Send(body *Message, to ...string) error {
 	// 主题
-	golog.Info("send email")
-	golog.Infof("%#v", *body)
 	m := gomail.NewMessage()
 	receive := make([]string, 0, len(ae.To)+len(to))
 	// 去重收件人

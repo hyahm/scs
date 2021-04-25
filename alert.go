@@ -176,7 +176,6 @@ func AlertMessage(msg *Message, at *AlertTo) {
 		al := alert
 		msg.HostName, _ = os.Hostname()
 		if at == nil {
-			golog.Info("msg")
 			alertErr := al.Send(msg)
 			if alertErr != nil {
 				golog.Error(alertErr)
