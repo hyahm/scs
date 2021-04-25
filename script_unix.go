@@ -1,9 +1,18 @@
+/*
+ * @Author: cander
+ * @Date: 2021-04-25 19:08:58
+ * @LastEditTime: 2021-04-25 20:28:33
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /scs/script_unix.go
+ */
 // +build !windows
 
 package scs
 
 import (
 	"errors"
+	"os"
 	"os/exec"
 	"strings"
 	"syscall"
@@ -57,6 +66,10 @@ func (svc *Server) start() error {
 		svc.Command = strings.ReplaceAll(svc.Command, "${"+k+"}", v)
 	}
 	svc.cmd = exec.Command("/bin/bash", "-c", svc.Command)
+	if _, err := os.Stat(svc.Script.Dir); os.IsNotExist(err) {
+		golog.Error(err)
+		return err
+	}
 	svc.cmd.Dir = svc.Script.Dir
 	if svc.cmd.Env == nil {
 		svc.cmd.Env = make([]string, 0, len(svc.Env))
@@ -65,8 +78,6 @@ func (svc *Server) start() error {
 		svc.cmd.Env = append(svc.cmd.Env, k+"="+v)
 	}
 	svc.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	golog.Warn(svc.cmd.Dir)
-	golog.Warn(svc.Command)
 	svc.read()
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.cmd.Start(); err != nil {

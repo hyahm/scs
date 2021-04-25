@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2021-04-25 19:08:58
+ * @LastEditTime: 2021-04-25 19:32:56
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /scs/public/rlimit.go
+ */
 // +build !windows
 
 package public
@@ -27,7 +35,7 @@ func init() {
 	}
 	var MaxRlimt uint64 = 1048576
 	if runtime.GOOS == "darwin" {
-		MaxRlimt = 102400
+		MaxRlimt = 10240
 	}
 
 	rlim.Cur = MaxRlimt

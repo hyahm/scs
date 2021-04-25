@@ -179,8 +179,10 @@ func AlertMessage(msg *Message, at *AlertTo) {
 			golog.Info("msg")
 			alertErr := al.Send(msg)
 			if alertErr != nil {
-				fmt.Println(alertErr)
+				golog.Error(alertErr)
+				continue
 			}
+			golog.Info("send seccess")
 			continue
 		}
 

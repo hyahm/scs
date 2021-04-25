@@ -1,9 +1,18 @@
+/*
+ * @Author: your name
+ * @Date: 2021-04-25 19:08:58
+ * @LastEditTime: 2021-04-25 20:29:23
+ * @LastEditors: your name
+ * @Description: In User Settings Edit
+ * @FilePath: /scs/script_windows.go
+ */
 // +build windows
 
 package scs
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -53,6 +62,11 @@ func (svc *Server) start() error {
 		svc.Command = strings.ReplaceAll(svc.Command, "$"+k, v)
 		svc.Command = strings.ReplaceAll(svc.Command, "${"+k+"}", v)
 	}
+	if _, err := os.Stat(svc.Script.Dir); os.IsNotExist(err) {
+		golog.Error(err)
+		return err
+	}
+	svc.cmd.Dir = svc.Script.Dir
 	svc.cmd = exec.Command("powershell", "-c", svc.Command)
 	if svc.cmd.Env == nil {
 		svc.cmd.Env = make([]string, 0, len(svc.Env))
@@ -62,7 +76,6 @@ func (svc *Server) start() error {
 		svc.cmd.Env = append(svc.cmd.Env, k+"="+v)
 
 	}
-	svc.cmd.Dir = svc.Script.Dir
 
 	// 等待初始化完成完成后向后执行
 	svc.read()

@@ -18,7 +18,6 @@ if len(sys.argv) > 1:
     # do something
 while True:
     scs.can_stop()
-    # 一秒的停止间隔
     time.sleep(random.randint(5, 8))
     scs.can_not_stop()
     
