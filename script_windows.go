@@ -1,3 +1,5 @@
+// +build windows
+
 /*
  * @Author: your name
  * @Date: 2021-04-25 19:08:58
@@ -6,7 +8,6 @@
  * @Description: In User Settings Edit
  * @FilePath: /scs/script_windows.go
  */
-// +build windows
 
 package scs
 
@@ -66,7 +67,7 @@ func (svc *Server) start() error {
 		golog.Error(err)
 		return err
 	}
-	svc.cmd.Dir = svc.Script.Dir
+
 	svc.cmd = exec.Command("powershell", "-c", svc.Command)
 	if svc.cmd.Env == nil {
 		svc.cmd.Env = make([]string, 0, len(svc.Env))
@@ -76,7 +77,7 @@ func (svc *Server) start() error {
 		svc.cmd.Env = append(svc.cmd.Env, k+"="+v)
 
 	}
-
+	svc.cmd.Dir = svc.Script.Dir
 	// 等待初始化完成完成后向后执行
 	svc.read()
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的

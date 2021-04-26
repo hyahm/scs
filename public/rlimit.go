@@ -1,3 +1,5 @@
+// +build !windows
+
 /*
  * @Author: your name
  * @Date: 2021-04-25 19:08:58
@@ -6,7 +8,6 @@
  * @Description: In User Settings Edit
  * @FilePath: /scs/public/rlimit.go
  */
-// +build !windows
 
 package public
 

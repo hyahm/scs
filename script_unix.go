@@ -1,3 +1,5 @@
+// +build !windows
+
 /*
  * @Author: cander
  * @Date: 2021-04-25 19:08:58
@@ -6,7 +8,6 @@
  * @Description: In User Settings Edit
  * @FilePath: /scs/script_unix.go
  */
-// +build !windows
 
 package scs
 
@@ -65,11 +66,12 @@ func (svc *Server) start() error {
 		svc.Command = strings.ReplaceAll(svc.Command, "$"+k, v)
 		svc.Command = strings.ReplaceAll(svc.Command, "${"+k+"}", v)
 	}
-	svc.cmd = exec.Command("/bin/bash", "-c", svc.Command)
 	if _, err := os.Stat(svc.Script.Dir); os.IsNotExist(err) {
 		golog.Error(err)
 		return err
 	}
+	svc.cmd = exec.Command("/bin/bash", "-c", svc.Command)
+
 	svc.cmd.Dir = svc.Script.Dir
 	if svc.cmd.Env == nil {
 		svc.cmd.Env = make([]string, 0, len(svc.Env))
