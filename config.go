@@ -32,55 +32,6 @@ type config struct {
 	SC          []*Script `yaml:"scripts,omitempty"`
 }
 
-// 判断2个map 的值是否相等
-func EqualMap(m1, m2 map[string]string) bool {
-	if len(m1) == len(m2) {
-		if len(m1) == 0 {
-			return true
-		}
-
-		for k, v := range m1 {
-			if m2[k] != v {
-				return false
-			}
-		}
-		return true
-	} else {
-		return false
-	}
-
-}
-
-// 判断2个[]string 的值是否相等
-func EqualStringArray(s1, s2 []string) bool {
-
-	if len(s1) == len(s2) {
-		if len(s1) == 0 {
-			return true
-		}
-		// 先转map
-		sm1 := make(map[string]struct{})
-		for _, value := range s1 {
-			sm1[value] = struct{}{}
-		}
-
-		sm2 := make(map[string]struct{})
-		for _, value := range s2 {
-			sm2[value] = struct{}{}
-		}
-
-		for k := range sm1 {
-			if _, ok := sm2[k]; !ok {
-				return false
-			}
-		}
-		return true
-	} else {
-		return false
-	}
-
-}
-
 // 保存的配置文件路径
 var cfgfile string
 
@@ -141,32 +92,12 @@ func Disable(name string) {
 
 func SetReplicate(name string, count int) {
 	// 检查时间
-	// 配置信息填充至状态
-	// 读取配置文件
 	for _, s := range Cfg.SC {
 		if s.Name != name {
 			s.Replicate = s.Replicate + count
 			return
 		}
 	}
-}
-
-func DeleteAll() {
-	// 检查时间
-	// 配置信息填充至状态
-	// 读取配置文件
-	Cfg.SC = nil
-}
-
-func WriteConfig() error {
-	// 检查时间
-	// 配置信息填充至状态
-	// 读取配置文件
-
-	b, _ := yaml.Marshal(Cfg)
-	// 跟新配置文件
-	return ioutil.WriteFile(cfgfile, b, 0644)
-
 }
 
 func ReLoad() error {
@@ -339,6 +270,7 @@ func Load() error {
 	RunProbe(Cfg.Probe)
 
 	for index := range Cfg.SC {
+		golog.Info(Cfg.SC[index].Name)
 		// 将数据填充至 SS
 		ss.Scripts[Cfg.SC[index].Name] = Cfg.SC[index]
 		// 启动服务

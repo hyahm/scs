@@ -51,10 +51,10 @@ func (at *AlertTo) IsEqual(pname string) bool {
 	if (at == nil && ss.Scripts[pname].AT != nil) || (at != nil && ss.Scripts[pname].AT == nil) {
 		return false
 	}
-	if !EqualStringArray(at.Email, ss.Scripts[pname].AT.Email) ||
-		!EqualStringArray(at.Rocket, ss.Scripts[pname].AT.Rocket) ||
-		!EqualStringArray(at.Telegram, ss.Scripts[pname].AT.Telegram) ||
-		!EqualStringArray(at.WeiXin, ss.Scripts[pname].AT.WeiXin) {
+	if !CompareSlice(at.Email, ss.Scripts[pname].AT.Email) ||
+		!CompareSlice(at.Rocket, ss.Scripts[pname].AT.Rocket) ||
+		!CompareSlice(at.Telegram, ss.Scripts[pname].AT.Telegram) ||
+		!CompareSlice(at.WeiXin, ss.Scripts[pname].AT.WeiXin) {
 		return false
 	}
 	return true

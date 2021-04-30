@@ -114,7 +114,7 @@ func (s *Script) NeedStop() bool {
 		s.Replicate != ss.Scripts[s.Name].Replicate ||
 		s.Always != ss.Scripts[s.Name].Always ||
 		s.DisableAlert != ss.Scripts[s.Name].DisableAlert ||
-		!EqualMap(s.Env, ss.Scripts[s.Name].Env) ||
+		!CompareMap(s.Env, ss.Scripts[s.Name].Env) ||
 		s.Port != ss.Scripts[s.Name].Port ||
 		s.Version != ss.Scripts[s.Name].Version ||
 		s.Disable != ss.Scripts[s.Name].Disable ||

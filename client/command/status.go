@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs"
 
 	"github.com/spf13/cobra"
@@ -41,6 +42,7 @@ var StatusCmd = &cobra.Command{
 
 		}
 		wg.Wait()
+		golog.Infof("%#v", ss)
 		for _, s := range ss {
 			s.SortAndPrint()
 		}
