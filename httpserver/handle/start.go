@@ -47,7 +47,6 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartAll(w http.ResponseWriter, r *http.Request) {
-
 	scs.StartAllServer()
 	w.Write([]byte(`{"code": 200, "msg": "already start"}`))
 }

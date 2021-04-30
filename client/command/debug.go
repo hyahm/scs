@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs"
 	"github.com/spf13/cobra"
 )
@@ -23,17 +22,14 @@ var DebugCmd = &cobra.Command{
 			return
 		}
 
-		golog.Info("11111")
 		for _, node := range nodes {
 			wg.Add(1)
 			go func(node *scs.Node, flag string) {
-				golog.Info(flag)
 				switch flag {
 				case "scripts":
 					node.GetScripts()
 					wg.Done()
 				default:
-					golog.Info("1111")
 					node.GetServers()
 					wg.Done()
 				}

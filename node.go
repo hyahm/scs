@@ -329,11 +329,9 @@ func (node *Node) GetScripts() {
 	cli := node.NewSCSClient()
 	b, err := cli.GetScripts()
 	if err != nil {
-		golog.Info(err)
 		fmt.Println(err)
 		return
 	}
-	golog.Info("aaaaa")
 	fmt.Println(string(b))
 }
 

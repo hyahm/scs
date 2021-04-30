@@ -254,16 +254,17 @@ func All() []byte {
 	}
 	// ss := make([]*ServiceStatus, 0)
 	for subname := range ss.Infos {
-
-		if _, ok := ss.Scripts[subname.GetName()]; !ok {
+		pname := subname.GetName()
+		if _, ok := ss.Scripts[pname]; !ok {
+			golog.Debug("not found name: " + pname)
 			continue
 		}
 
 		status := &ServiceStatus{
-			PName:        subname.GetName(),
+			PName:        pname,
 			Name:         subname.String(),
 			Command:      ss.Infos[subname].Command,
-			Always:       ss.Scripts[subname.GetName()].Always,
+			Always:       ss.Scripts[pname].Always,
 			Version:      ss.Infos[subname].Version,
 			Status:       ss.Infos[subname].Status.Status,
 			CanNotStop:   ss.Infos[subname].Status.CanNotStop,
@@ -271,7 +272,7 @@ func All() []byte {
 			Start:        ss.Infos[subname].Status.Start,
 			RestartCount: ss.Infos[subname].Status.RestartCount,
 			Up:           ss.Infos[subname].Status.Up,
-			Disable:      ss.Scripts[subname.GetName()].Disable,
+			Disable:      ss.Scripts[pname].Disable,
 		}
 		if ss.Infos[subname].cmd != nil && ss.Infos[subname].cmd.Process != nil {
 			status.Pid = ss.Infos[subname].Status.Pid
