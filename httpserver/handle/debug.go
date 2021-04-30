@@ -31,10 +31,8 @@ import (
 
 func GetServers(w http.ResponseWriter, r *http.Request) {
 	w.Write(scs.GetServers())
-	return
 }
 
 func GetScripts(w http.ResponseWriter, r *http.Request) {
 	w.Write(scs.GetScripts())
-	return
 }
