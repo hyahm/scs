@@ -39,7 +39,6 @@ func Execute() {
 
 func getNodes() []*scs.Node {
 	nodes := make([]*scs.Node, 0)
-
 	if UseNodes != "" {
 		if nodeInfo, ok := client.CCfg.GetNode(UseNodes); ok {
 			nodes = append(nodes, nodeInfo)
