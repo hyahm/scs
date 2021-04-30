@@ -271,9 +271,8 @@ func Load() error {
 
 	for index := range Cfg.SC {
 		golog.Info(Cfg.SC[index].Name)
-		// 将数据填充至 SS
+		// 将数据填充至 SS的script中
 		ss.Scripts[Cfg.SC[index].Name] = Cfg.SC[index]
-		// 启动服务
 		ss.Scripts[Cfg.SC[index].Name].MakeServer()
 
 		replicate := Cfg.SC[index].Replicate

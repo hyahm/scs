@@ -164,6 +164,7 @@ func (s *Script) MakeServer() {
 		subname := NewSubname(s.Name, i)
 		var svc *Server
 		if s.Port > 0 {
+			// 检测端口是否被占用， 如果占用了
 			portIndex += probePort(s.Port)
 			env["PORT"] = strconv.Itoa(s.Port + i + portIndex)
 			svc = s.add(s.Port+i+portIndex, subname)
@@ -172,10 +173,8 @@ func (s *Script) MakeServer() {
 			svc = s.add(0, subname)
 		}
 		env["NAME"] = subname.String()
-
-		// 检测端口是否被占用， 如果占用了
-
 		svc.Env = env
+		golog.Debug(subname)
 		ss.Infos[subname] = svc
 	}
 }
