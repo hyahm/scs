@@ -273,6 +273,14 @@ func (sc *SCSClient) Enable() ([]byte, error) {
 	return sc.requests("/enable/"+sc.Pname, nil)
 }
 
+func (sc *SCSClient) GetServers() ([]byte, error) {
+	return sc.requests("/debug/servers", nil)
+}
+
+func (sc *SCSClient) GetScripts() ([]byte, error) {
+	return sc.requests("/debug/scripts", nil)
+}
+
 // 禁用脚本
 func (sc *SCSClient) Disable() ([]byte, error) {
 	if sc.Pname == "" {

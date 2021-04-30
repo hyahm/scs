@@ -26,6 +26,26 @@ type Service struct {
 	Mu      *sync.RWMutex
 }
 
+func GetServers() []byte {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	send, err := json.Marshal(ss.Infos)
+	if err != nil {
+		golog.Error(err)
+	}
+	return send
+}
+
+func GetScripts() []byte {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	send, err := json.Marshal(ss.Scripts)
+	if err != nil {
+		golog.Error(err)
+	}
+	return send
+}
+
 func HasName(name string) bool {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()

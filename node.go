@@ -311,7 +311,27 @@ func (node *Node) Enable(pname string) {
 		return
 	}
 	fmt.Println(string(b))
-	// fmt.Println(string(node.crud("stop", args...)))
+}
+
+func (node *Node) GetServers() {
+
+	cli := node.NewSCSClient()
+	b, err := cli.GetServers()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+}
+
+func (node *Node) GetScripts() {
+	cli := node.NewSCSClient()
+	b, err := cli.GetScripts()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
 }
 
 func (node *Node) Disable(pname string) {

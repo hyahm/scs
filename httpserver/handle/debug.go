@@ -1,5 +1,11 @@
 package handle
 
+import (
+	"net/http"
+
+	"github.com/hyahm/scs"
+)
+
 // func GetConfig(w http.ResponseWriter, r *http.Request) {
 // 	name := xmux.Var(r)["name"]
 // 	golog.Info(name)
@@ -22,3 +28,13 @@ package handle
 
 // 	return
 // }
+
+func GetServers(w http.ResponseWriter, r *http.Request) {
+	w.Write(scs.GetServers())
+	return
+}
+
+func GetScripts(w http.ResponseWriter, r *http.Request) {
+	w.Write(scs.GetScripts())
+	return
+}
