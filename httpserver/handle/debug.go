@@ -3,6 +3,7 @@ package handle
 import (
 	"net/http"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs"
 )
 
@@ -30,6 +31,7 @@ import (
 // }
 
 func GetServers(w http.ResponseWriter, r *http.Request) {
+	golog.Info("servers")
 	w.Write(scs.GetServers())
 }
 

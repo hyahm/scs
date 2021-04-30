@@ -14,29 +14,29 @@ import (
 )
 
 type Server struct {
-	Script             *Script
-	Command            string
-	Version            string
-	Cron               *Cron // 这个cron是新生成的
-	IsLoop             bool  // 如果是定时任务
-	Env                map[string]string
-	SubName            Subname
-	Log                []string
-	cmd                *exec.Cmd
-	Status             *ServiceStatus
-	Alert              map[string]SendAlerter
-	AT                 *AlertTo
-	Port               int
-	ContinuityInterval time.Duration
-	AI                 *AlertInfo // 报警规则
-	Exit               chan int   // 判断是否是主动退出的
-	CancelProcess      chan bool  // 取消操作，
-	StopSigle          chan bool  // 停止后发出的信号
-	Ctx                context.Context
-	Cancel             context.CancelFunc
-	Msg                chan string
-	Update             string
-	LogLocker          *sync.RWMutex
+	Script             *Script                `json:"-"`
+	Command            string                 `json:"command"`
+	Version            string                 `json:"version"`
+	Cron               *Cron                  `json:"-"` // 这个cron是新生成的
+	IsLoop             bool                   `json:"-"` // 如果是定时任务
+	Env                map[string]string      `json:"-"`
+	SubName            Subname                `json:"subname"`
+	Log                []string               `json:"-"`
+	cmd                *exec.Cmd              `json:"-"`
+	Status             *ServiceStatus         `json:"status"`
+	Alert              map[string]SendAlerter `json:"-"`
+	AT                 *AlertTo               `json:"at"`
+	Port               int                    `json:"port"`
+	ContinuityInterval time.Duration          `json:"continuityInterval"`
+	AI                 *AlertInfo             `json:"ai"` // 报警规则
+	Exit               chan int               `json:"-"`  // 判断是否是主动退出的
+	CancelProcess      chan bool              `json:"-"`  // 取消操作，
+	StopSigle          chan bool              `json:"-"`  // 停止后发出的信号
+	Ctx                context.Context        `json:"-"`
+	Cancel             context.CancelFunc     `json:"-"`
+	Msg                chan string            `json:"-"`
+	Update             string                 `json:"update"`
+	LogLocker          *sync.RWMutex          `json:"-"`
 }
 
 func getVersion(command string) string {
