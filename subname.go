@@ -16,9 +16,9 @@ func (s Subname) String() string {
 }
 
 func (s Subname) GetName() string {
-	sn := strings.Split(s.String(), "_")
-	if len(sn) < 2 {
+	end := strings.LastIndex(s.String(), "_")
+	if end < 0 {
 		return ""
 	}
-	return sn[0]
+	return s.String()[:end]
 }
