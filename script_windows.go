@@ -31,6 +31,7 @@ func (svc *Server) stop() {
 					golog.Error(err)
 					return
 				}
+				// 通知外部已经停止了
 				svc.StopSigle <- true
 				return
 			}

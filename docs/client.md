@@ -12,7 +12,6 @@ group:
     - localhost
 ```
 
-```
 # scsctl 命令参数说明
 
  这里的pname, name 与scsctl status 中的对应  
@@ -36,39 +35,47 @@ scsctl --help
   upload      upload package(保留命令)
 ```
 ###### 查看服务状态信息
+
 ```
 scsctl status
 ```
 
 ###### 重新加载配置文件
+
 ```
 scsctl config reload
 ```
 ###### 显示某服务中的环境变量
+
 ```
 scsctl env <name>
 ```
 ###### 查看某服务中的日志
+
 ```
 scsctl log <name>
 ```
 ###### 强制停止某个服务，不管是否允许停止
+
 ```
 scsctl kill <pname> [name]
 ```
 
 ###### 启动服务
+
 ```
 scsctl start [pname] [name]
 ```
 
 ###### 停止服务
+
 ```
 
 scsctl stop <pname>|<--all> [name] 
 ```
 
 ###### 重启服务
+
 ```
 scsctl restart <pname>|<--all> [name] 
 ```
