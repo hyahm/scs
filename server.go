@@ -212,7 +212,13 @@ func (svc *Server) Restart() {
 		return
 	}
 	switch svc.Status.Status {
-	case RUNNING, WAITSTOP:
+	case WAITSTOP:
+		// 如果之前是等待停止的状态， 更改为重启状态
+		<-svc.Exit
+		svc.Exit <- 10
+		svc.Status.Status = WAITRESTART
+		return
+	case RUNNING:
 		svc.Exit <- 10
 		svc.Status.Status = WAITRESTART
 		svc.stop()
