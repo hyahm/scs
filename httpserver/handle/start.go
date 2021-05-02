@@ -34,15 +34,6 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.StartServer()
-	// if _, pok := script.SS.Infos[pname]; pok {
-	// 	for name := range script.SS.Infos[pname] {
-	// 		script.SS.Infos[pname][name].Start()
-	// 	}
-
-	// } else {
-	// 	w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s"}`, pname)))
-	// 	return
-	// }
 	w.Write([]byte(`{"code": 200, "msg": "already start"}`))
 }
 

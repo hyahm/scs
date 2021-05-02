@@ -19,19 +19,6 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	go svc.Stop()
-	// if _, ok := script.SS.Infos[pname]; ok {
-	// 	if _, ok := script.SS.Infos[pname][name]; ok {
-	// 		go script.SS.Infos[pname][name].Stop()
-	// 	} else {
-	// 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this script"}`)))
-	// 		return
-	// 	}
-
-	// } else {
-	// 	w.Write([]byte(fmt.Sprintf(`{"code": 200, "msg": "waiting stop"}`)))
-	// 	return
-	// }
-
 	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 }
 
@@ -47,17 +34,6 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
 		return
 	}
-	// if _, ok := script.SS.Infos[pname]; ok {
-	// 	for name := range script.SS.Infos[pname] {
-	// 		golog.Info("send stop")
-	// 		go script.SS.Infos[pname][name].Stop()
-	// 	}
-
-	// } else {
-	// 	w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
-	// 	return
-	// }
-
 	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 }
 

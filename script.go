@@ -132,8 +132,6 @@ func (s *Script) NeedStop() bool {
 
 // 启动方法， 异步执行
 func (s *Script) StartServer() {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
@@ -174,7 +172,7 @@ func (s *Script) MakeServer() {
 		}
 		env["NAME"] = subname.String()
 		svc.Env = env
-		golog.Debug(subname)
+		golog.Debug("start " + subname)
 		ss.Infos[subname] = svc
 	}
 }

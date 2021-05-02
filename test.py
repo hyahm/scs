@@ -18,13 +18,12 @@ if len(sys.argv) > 1:
     # do something
 while True:
     scs.can_stop()
-    time.sleep(random.randint(5, 8))
+    time.sleep(random.randint(15, 18))
     scs.can_not_stop()
     
     log(11111)
-    time.sleep(random.randint(5, 8))
+    time.sleep(random.randint(15, 18))
     log(2333)
-    sys.exit(1)
    
     
     

@@ -270,7 +270,6 @@ func Load() error {
 	RunProbe(Cfg.Probe)
 
 	for index := range Cfg.SC {
-		golog.Info(Cfg.SC[index].Name)
 		// 将数据填充至 SS的script中
 		ss.Scripts[Cfg.SC[index].Name] = Cfg.SC[index]
 		ss.Scripts[Cfg.SC[index].Name].MakeServer()

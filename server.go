@@ -133,7 +133,6 @@ func (s *Server) cron() {
 
 // Start  启动服务 异步的
 func (svc *Server) Start() error {
-
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	if _, ok := ss.Scripts[svc.SubName.GetName()]; ok && ss.Scripts[svc.SubName.GetName()].Disable {
@@ -209,7 +208,8 @@ func (svc *Server) Start() error {
 // Restart  重动服务, 同步执行的
 func (svc *Server) Restart() {
 	if svc.IsLoop {
-		// 如果是循环的就不用管
+		svc.Cancel()
+		// 如果是循环的就直接退出
 		return
 	}
 	switch svc.Status.Status {
@@ -222,11 +222,7 @@ func (svc *Server) Restart() {
 	case RUNNING:
 		svc.Exit <- 10
 		svc.Status.Status = WAITRESTART
-		svc.Restart()
-		golog.Info(svc.SubName + " 已经停止")
-		<-svc.StopSigle
-		golog.Info(svc.SubName + " 收到停止信号")
-		svc.Start()
+		svc.stop()
 		return
 	case STOP:
 		svc.Start()
@@ -298,8 +294,6 @@ func UpdateAndRestartAllServer() {
 }
 
 func StartAllServer() {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
 	for _, svc := range ss.Infos {
 		svc.Start()
 	}
@@ -443,7 +437,7 @@ func (s *Script) RestartScript() error {
 	}
 	for i := 0; i < replicate; i++ {
 		subname := NewSubname(s.Name, i)
-		ss.Infos[subname].Restart()
+		go ss.Infos[subname].Restart()
 	}
 	return nil
 }
@@ -486,7 +480,7 @@ func (svc *Server) wait() error {
 	go svc.successAlert()
 	if err := svc.cmd.Wait(); err != nil {
 		svc.Cancel()
-		// 执行脚本后环境的错误
+		// 脚本退出后才会执行这里的代码
 		select {
 		case ec := <-svc.Exit:
 			switch ec {

@@ -40,7 +40,6 @@ func (node *Node) Reload() {
 }
 
 func (node *Node) Restart(args ...string) {
-
 	cli := node.NewSCSClient()
 	var b []byte
 	var err error
