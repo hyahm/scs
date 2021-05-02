@@ -209,6 +209,7 @@ func (svc *Server) Start() error {
 // Restart  重动服务, 同步执行的
 func (svc *Server) Restart() {
 	if svc.IsLoop {
+		// 如果是循环的就不用管
 		return
 	}
 	switch svc.Status.Status {
@@ -221,8 +222,10 @@ func (svc *Server) Restart() {
 	case RUNNING:
 		svc.Exit <- 10
 		svc.Status.Status = WAITRESTART
-		svc.stop()
+		svc.Restart()
+		golog.Info(svc.SubName + " 已经停止")
 		<-svc.StopSigle
+		golog.Info(svc.SubName + " 收到停止信号")
 		svc.Start()
 		return
 	case STOP:
