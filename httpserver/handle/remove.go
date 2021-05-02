@@ -45,7 +45,6 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 }
 
 func RemovePname(w http.ResponseWriter, r *http.Request) {
-	golog.Info("1111")
 	if reloadKey {
 		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
 		return

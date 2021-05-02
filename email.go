@@ -55,9 +55,9 @@ func (ae *AlertEmail) Send(body *Message, to ...string) error {
 	m.SetHeader("Subject", body.Title)
 	// 正文
 	m.SetBody("text/html", body.FormatBody(emailFormat))
-	d := gomail.NewPlainDialer(ae.Host, ae.Port, ae.UserName, ae.Password)
+	d := gomail.NewDialer(ae.Host, ae.Port, ae.UserName, ae.Password)
 	// d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	// 发送
-	golog.Info("sending email...")
+	golog.Debug("sending email...")
 	return d.DialAndSend(m)
 }

@@ -602,7 +602,6 @@ func DeleteScriptToConfigFile(s *Script) error {
 	}
 	for i := range tmp.SC {
 		if tmp.SC[i].Name == s.Name {
-			golog.Info(1111)
 			tmp.SC = append(tmp.SC[:i], tmp.SC[i+1:]...)
 			break
 		}

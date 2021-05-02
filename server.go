@@ -207,25 +207,20 @@ func (svc *Server) Start() error {
 }
 
 // Restart  重动服务, 同步执行的
-func (s *Server) Restart() {
-	if s.IsLoop {
-		s.Cancel()
-		s.stopStatus()
-	}
-	switch s.Status.Status {
-	case WAITSTOP:
-		// 如果之前是等待停止的状态， 更改为重启状态
-		<-s.Exit
-		s.Exit <- 10
-		s.Status.Status = WAITRESTART
+func (svc *Server) Restart() {
+	if svc.IsLoop {
 		return
-	case RUNNING:
-		s.Exit <- 10
-		s.Status.Status = WAITRESTART
-		s.stop()
+	}
+	switch svc.Status.Status {
+	case RUNNING, WAITSTOP:
+		svc.Exit <- 10
+		svc.Status.Status = WAITRESTART
+		svc.stop()
+		<-svc.StopSigle
+		svc.Start()
 		return
 	case STOP:
-		s.Start()
+		svc.Start()
 	}
 
 }
@@ -298,7 +293,6 @@ func StartAllServer() {
 	defer ss.Mu.RUnlock()
 	for _, svc := range ss.Infos {
 		svc.Start()
-		// s.StartServer()
 	}
 }
 
