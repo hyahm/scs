@@ -86,6 +86,7 @@ func (svc *Server) shell(command string) error {
 
 func (s *Server) cron() {
 	s.Status.Status = RUNNING
+
 	for {
 		select {
 		case <-s.Ctx.Done():
@@ -110,6 +111,7 @@ func (s *Server) cron() {
 			s.Cron.ComputerStartTime()
 			continue
 		case <-s.Cron.First:
+			golog.Info("first cron")
 			if err := s.start(); err != nil {
 				golog.Error(err)
 				// 设置下载启动的时间
@@ -546,6 +548,10 @@ func (svc *Server) wait() error {
 		golog.Debugf("serviceName: %s, subScript: %s, error: %v \n", svc.Script.Name, svc.SubName, err)
 		svc.stopStatus()
 		return err
+	}
+	if svc.IsLoop {
+		// 如果是个定时器， 那么不修改为停止
+		return nil
 	}
 	if svc.Script.DeleteWhenExit {
 		return Cfg.DelScript(svc.Script.Name)

@@ -17,11 +17,11 @@ if len(sys.argv) > 1:
 
     # do something
 scs.can_stop()
-time.sleep(random.randint(15, 18))
+time.sleep(random.randint(5, 8))
 scs.can_not_stop()
 
 log(11111)
-time.sleep(random.randint(15, 18))
+time.sleep(random.randint(5, 8))
 log(2333)
 
     
