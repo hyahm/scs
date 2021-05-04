@@ -64,7 +64,7 @@ scsctl kill <pname> [name]
 
 ###### 启动服务
 
-```
+```shell
 scsctl start [pname] [name]
 ```
 

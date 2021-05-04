@@ -51,7 +51,7 @@ func (s *Script) MakeEnv() {
 	}
 	for k, v := range s.Env {
 		// path 环境单独处理， 可以多个值， 其他环境变量多个值请以此写完
-
+		golog.Info()
 		if strings.EqualFold(k, pathEnvName) {
 			if runtime.GOOS == "windows" {
 				s.TempEnv[pathEnvName] = s.TempEnv[pathEnvName] + ";" + v
@@ -144,9 +144,7 @@ func (s *Script) StartServer() {
 
 // 通过script 生成 server
 func (s *Script) MakeServer() {
-
 	s.MakeEnv()
-
 	replica := s.Replicate
 	if replica == 0 {
 		replica = 1

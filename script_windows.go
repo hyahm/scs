@@ -74,7 +74,9 @@ func (svc *Server) start() error {
 		svc.cmd.Env = make([]string, 0, len(svc.Env))
 	}
 	for k, v := range svc.Env {
-		// 需要单独抽出去>>
+		if k == "" || v == "" {
+			continue
+		}
 		svc.cmd.Env = append(svc.cmd.Env, k+"="+v)
 
 	}

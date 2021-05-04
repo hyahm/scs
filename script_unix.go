@@ -77,6 +77,9 @@ func (svc *Server) start() error {
 		svc.cmd.Env = make([]string, 0, len(svc.Env))
 	}
 	for k, v := range svc.Env {
+		if k == "" || v == "" {
+			continue
+		}
 		svc.cmd.Env = append(svc.cmd.Env, k+"="+v)
 	}
 	svc.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}

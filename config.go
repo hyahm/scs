@@ -115,11 +115,6 @@ func ReLoad() error {
 	}
 	// 装载全局配置
 	global.Token = Cfg.Token
-	// global.Listen = Cfg.Listen
-	// global.IgnoreToken = Cfg.IgnoreToken
-	// global.DisableTls = Cfg.DisableTls
-	// global.Key = Cfg.Key
-	// global.Pem = Cfg.Pem
 	// 初始化日志
 	ReloadLogger(Cfg.Log)
 	// 初始化报警器信息
@@ -332,174 +327,6 @@ func (c *config) check() error {
 	return nil
 }
 
-// func (c *config) fill(index int, reload bool) {
-
-// 	// 加载环境变量
-// 	baseEnv := make(map[string]string)
-
-// 	// 填充系统环境变量到
-// 	pathEnvName := "PATH"
-// 	for _, v := range os.Environ() {
-// 		kv := strings.Split(v, "=")
-// 		if strings.ToUpper(kv[0]) == pathEnvName {
-// 			pathEnvName = kv[0]
-// 		}
-// 		baseEnv[kv[0]] = kv[1]
-// 	}
-// 	golog.Info(pathEnvName)
-// 	for k, v := range c.SC[index].Env {
-// 		// path 环境单独处理， 可以多个值， 其他环境变量多个值请以此写完
-// 		if strings.ToLower(k) == strings.ToLower(pathEnvName) {
-// 			if runtime.GOOS == "windows" {
-// 				baseEnv[pathEnvName] = baseEnv[pathEnvName] + ";" + v
-// 			} else {
-// 				golog.Info(pathEnvName)
-// 				baseEnv[pathEnvName] = baseEnv[pathEnvName] + ":" + v
-// 			}
-// 		} else {
-// 			baseEnv[k] = v
-// 		}
-// 	}
-
-// 	baseEnv["TOKEN"] = c.Token
-// 	baseEnv["PNAME"] = c.SC[index].Name
-
-// 	replica := c.SC[index].Replicate
-// 	if replica < 1 {
-// 		replica = 1
-// 	}
-// 	for i := 0; i < replica; i++ {
-// 		// 根据副本数提取子名称
-// 		subname := fmt.Sprintf("%s_%d", c.SC[index].Name, i)
-// 		if reload {
-// 			// 如果是加载配置文件， 那么删除已经有的
-// 			golog.Info("delete subname")
-// 			DelDelScript(subname)
-// 		}
-// 		baseEnv["NAME"] = subname
-// 		baseEnv["PORT"] = strconv.Itoa(c.SC[index].Port + i)
-// 		// 需要单独抽出去<<
-// 		// env := make([]string, 0, len(baseEnv))
-// 		// for k, v := range baseEnv {
-// 		// 	env = append(env, k+"="+v)
-// 		// }
-
-// 		if SS.HasSubName(c.SC[index].Name, subname) {
-// 			// 如果存在键值就修改
-
-// 			golog.Info("update")
-// 			c.update(index, subname, c.SC[index].Command, baseEnv)
-// 		} else {
-// 			golog.Info("add")
-// 			// 新增
-// 			SS.MakeSubStruct(c.SC[index].Name)
-// 			c.add(index, c.SC[index].Port+i, subname, c.SC[index].Command, baseEnv)
-// 		}
-
-// 	}
-// 	// 删除多余的副本
-// 	go func() {
-// 		pname := c.SC[index].Name
-
-// 		replicate := c.SC[index].Replicate
-// 		if replicate < 1 {
-// 			replicate = 1
-// 		}
-// 		l := SS.Len()
-// 		if l > 0 && l > replicate {
-// 			for i := l - 1; i >= replicate; i-- {
-// 				subname := fmt.Sprintf("%s_%d", pname, i)
-// 				if reload {
-// 					// 如果是加载配置文件， 那么删除已经有的
-// 					DelDelScript(subname)
-// 				}
-// 				SS.GetScriptFromPnameAndSubname(pname, subname).Remove()
-// 				// SS.Infos[pname][subname].Stop()
-// 				// delete(SS.Infos[pname], subname)
-// 			}
-// 		}
-// 	}()
-
-// }
-
-// func (c *config) update(index int, subname, command string, baseEnv map[string]string) {
-// 	// 修改
-
-// 	scriptInfo := ss.GetScriptFromPnameAndSubname(c.SC[index].Name, subname)
-
-// 	scriptInfo.Env = baseEnv
-// 	scriptInfo.LookPath = c.SC[index].LookPath
-// 	if c.SC[index].Cron != nil {
-// 		start, err := time.ParseInLocation("2006-01-02 15:04:05", c.SC[index].Cron.Start, time.Local)
-// 		if err != nil {
-// 			start = time.Time{}
-// 		}
-// 		scriptInfo.Cron = &Cron{
-// 			StartTime: start,
-// 			IsMonth:   c.SC[index].Cron.IsMonth,
-// 			Loop:      c.SC[index].Cron.Loop,
-// 		}
-// 	}
-
-// 	scriptInfo.Command = command
-// 	scriptInfo.Update = c.SC[index].Update
-// 	scriptInfo.Log = make(map[string][]string)
-// 	ss.Infos[c.SC[index].Name][subname].LogLocker = &sync.RWMutex{}
-// 	ss.Infos[c.SC[index].Name][subname].Log["log"] = make([]string, 0, global.LogCount)
-// 	ss.Infos[c.SC[index].Name][subname].Log["lookPath"] = make([]string, 0, global.LogCount)
-// 	ss.Infos[c.SC[index].Name][subname].Log["update"] = make([]string, 0, global.LogCount)
-// 	ss.Infos[c.SC[index].Name][subname].Script = c.SC[index]
-// 	ss.Infos[c.SC[index].Name][subname].ContinuityInterval = Cfg.SC[index].ContinuityInterval
-// 	ss.Infos[c.SC[index].Name][subname].Port = c.SC[index].Port + index
-// 	ss.Infos[c.SC[index].Name][subname].AT = c.SC[index].AT
-// 	ss.Infos[c.SC[index].Name][subname].Disable = c.SC[index].Disable
-// 	ss.Infos[c.SC[index].Name][subname].Status.Version = getVersion(c.SC[index].Version)
-// 	ss.Infos[c.SC[index].Name][subname].Status.Disable = c.SC[index].Disable
-// 	// 更新的时候
-
-// 	if ss.Infos[c.SC[index].Name][subname].Status.Status == STOP {
-// 		// 如果是停止的name就启动
-// 		if strings.Trim(c.SC[index].Command, " ") != "" && strings.Trim(c.SC[index].Name, " ") != "" && !c.SC[index].Disable {
-// 			ss.Infos[c.SC[index].Name][subname].Start()
-// 		}
-// 	}
-// }
-
-// // 添加script到配置文件
-// func (c *config) updateConfig(s Script, index int) {
-// 	if s.Dir != "" {
-// 		c.SC[index].Dir = s.Dir
-// 	}
-// 	if s.Command != "" {
-// 		c.SC[index].Command = s.Command
-// 	}
-// 	if s.Env != nil {
-// 		for k, v := range s.Env {
-// 			c.SC[index].Env[k] = v
-// 		}
-// 	}
-// 	if s.Replicate != 0 {
-// 		c.SC[index].Replicate = s.Replicate
-// 	}
-
-// 	c.SC[index].Always = s.Always
-// 	c.SC[index].DisableAlert = s.DisableAlert
-// 	if s.Port != 0 {
-// 		c.SC[index].Port = s.Port
-// 	}
-// 	if s.AT != nil {
-// 		c.SC[index].AT = s.AT
-// 	}
-// 	if s.Version != "" {
-// 		c.SC[index].Version = s.Version
-// 	}
-// 	c.SC[index].Cron = s.Cron
-
-// 	if len(s.LookPath) > 0 {
-// 		c.SC[index].LookPath = s.LookPath
-// 	}
-// }
-
 // 更新script到配置文件
 func UpdateScriptToConfigFile(s *Script) error {
 	// 添加
@@ -621,7 +448,6 @@ func HaveScript(pname string) bool {
 }
 
 func AddScriptToConfigFile(s *Script) error {
-
 	// 添加
 	// 默认配置
 	f, err := ioutil.ReadFile(cfgfile)
