@@ -2,7 +2,6 @@ package scs
 
 import (
 	"context"
-	"errors"
 	"os"
 	"os/exec"
 	"runtime"
@@ -527,7 +526,8 @@ func (svc *Server) wait() error {
 			}
 			// 如果是定时器的话， 直接结束
 			if svc.Cron != nil && svc.Cron.Loop > 0 {
-				return errors.New("stoped")
+				svc.cmd = nil
+				return nil
 			}
 			if svc.Script.Always {
 				golog.Info("restart +1")
