@@ -34,7 +34,7 @@ cron:
   # 每个月1号执行一起，2021年9月1号开始 **注意0不能省略**
   start: "2021-09-01 00:00:00"  
   loop: 1
-  ismonth: true
+  isMonth: true
 ```
 
 修改完配置 `scsctl config reload`  生效

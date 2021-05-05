@@ -11,7 +11,7 @@ type Cron struct {
 	Start     string        `yaml:"start,omitempty" json:"start,omitempty"`
 	StartTime time.Time     `yaml:"-" json:"-"` // 下次启动的时间
 	// 间隔的时间， 如果IsMonth 为true， loop 单位为月， 否则为秒
-	IsMonth bool `yaml:"ismonth,omitempty" json:"ismonth,omitempty"`
+	IsMonth bool `yaml:"isMonth,omitempty" json:"isMonth,omitempty"`
 	Loop    int  `yaml:"loop,omitempty" json:"loop,omitempty"`
 }
 
