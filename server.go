@@ -89,9 +89,10 @@ func (s *Server) cron() {
 	for {
 		select {
 		case <-s.Ctx.Done():
-			golog.Info("name:" + s.SubName + "end cron")
+			golog.Info("name:" + s.SubName + " end cron")
 			return
 		case <-time.After(-time.Since(s.Cron.StartTime)):
+			golog.Info("start cron")
 			if err := s.start(); err != nil {
 				golog.Error(err)
 				// 设置下载启动的时间
@@ -479,10 +480,11 @@ func (s *Server) Kill() {
 func (svc *Server) wait() error {
 	go svc.successAlert()
 	if err := svc.cmd.Wait(); err != nil {
-		svc.Cancel()
+
 		// 脚本退出后才会执行这里的代码
 		select {
 		case ec := <-svc.Exit:
+			svc.Cancel()
 			switch ec {
 			case 9:
 				// 主动退出, kill， stop
@@ -497,7 +499,7 @@ func (svc *Server) wait() error {
 			}
 		default:
 			// 意外退出
-			golog.Info("error stop")
+			golog.Error("error stop")
 			if !svc.Script.DisableAlert && HaveAlert() {
 				am := &Message{
 					Title:  "service error stop",
@@ -529,12 +531,12 @@ func (svc *Server) wait() error {
 				svc.cmd = nil
 				return nil
 			}
+			svc.Cancel()
 			if svc.Script.Always {
 				golog.Info("restart +1")
 				svc.Status.Status = STOP
 				svc.Status.Pid = 0
 				svc.Status.Start = 0
-				svc.IsLoop = false
 				// 失败了， 每秒启动一次
 				svc.Status.RestartCount++
 				return svc.Start()
@@ -553,6 +555,7 @@ func (svc *Server) wait() error {
 		svc.cmd = nil
 		return nil
 	}
+	svc.Cancel()
 	if svc.Script.DeleteWhenExit {
 		return Cfg.DelScript(svc.Script.Name)
 	}
