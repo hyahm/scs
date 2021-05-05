@@ -99,14 +99,13 @@ func (s *Server) cron() {
 				s.Cron.ComputerStartTime()
 				continue
 			}
-
+			if s.cmd != nil && s.cmd.Process != nil {
+				s.Status.Pid = s.cmd.Process.Pid
+			}
 			err := s.wait()
 			if err != nil {
 				s.Cron.ComputerStartTime()
 				continue
-			}
-			if s.cmd.Process != nil {
-				s.Status.Pid = s.cmd.Process.Pid
 			}
 			s.Cron.ComputerStartTime()
 			continue
@@ -118,15 +117,15 @@ func (s *Server) cron() {
 				s.Cron.ComputerStartTime()
 				continue
 			}
-
+			if s.cmd != nil && s.cmd.Process != nil {
+				s.Status.Pid = s.cmd.Process.Pid
+			}
 			err := s.wait()
 			if err != nil {
 				s.Cron.ComputerStartTime()
 				continue
 			}
-			if s.cmd.Process != nil {
-				s.Status.Pid = s.cmd.Process.Pid
-			}
+
 			s.Cron.ComputerStartTime()
 			continue
 		}
@@ -551,6 +550,7 @@ func (svc *Server) wait() error {
 	}
 	if svc.IsLoop {
 		// 如果是个定时器， 那么不修改为停止
+		svc.cmd = nil
 		return nil
 	}
 	if svc.Script.DeleteWhenExit {
