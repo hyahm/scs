@@ -4,11 +4,13 @@
 * [报警器](alert.md)
 * [检测器](probe.md)
 * [定时器](cron.md)
+* [停止器](stopper.md)
+* [api文档](api.md)
 * [多副本](replicate.md)
 * [脚本文件](script.md)
 * [配置文件](config.md)
 * [sdk](sdk.md)
 * [环境变量](env.md)
-* [api文档](api.md)
+
 
 * [客户端scsctl](client.md)
