@@ -19,7 +19,7 @@ while True:
     log(11111)
     time.sleep(random.randint(5, 8))
     log(2333)
-    scs.can_stop()
+    # scs.can_stop()
 
     
     

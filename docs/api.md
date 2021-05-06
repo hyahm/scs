@@ -33,8 +33,8 @@ POST /restart/{pname}
 POST /restart
 
 # 启用禁用脚本
-POST /restart/{pname}
-POST /restart/{pname}
+POST /enable/{pname}
+POST /disable/{pname}
 
 # 脚本日志的api
 POST /log/{pname}/{name}

@@ -567,6 +567,7 @@ func (svc *Server) wait() error {
 func (s *Server) stopStatus() {
 	s.Status.Status = STOP
 	s.Status.Pid = 0
+	s.Status.CanNotStop = false
 	s.Status.RestartCount = 0
 	s.Status.Start = 0
 	s.IsLoop = false
