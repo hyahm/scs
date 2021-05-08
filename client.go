@@ -11,8 +11,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/hyahm/golog"
 )
 
 var ErrPnameIsEmpty = errors.New("pname is empty")
@@ -73,7 +71,6 @@ func (sc *SCSClient) requests(url string, body io.Reader) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	golog.Info(resp.StatusCode)
 	defer resp.Body.Close()
 	switch resp.StatusCode {
 	case 203:
