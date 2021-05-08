@@ -40,16 +40,35 @@ type Server struct {
 
 func getVersion(command string) string {
 	var cmd *exec.Cmd
+	golog.Info(command)
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("powershell", "-c", command)
 	} else {
 		cmd = exec.Command("/bin/bash", "-c", command)
 	}
-	out, err := cmd.Output()
-	if err != nil {
-		return ""
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	s := new(string)
+	ch := make(chan struct{})
+	defer cancel()
+	go func(s *string) {
+		out, err := cmd.Output()
+		if err != nil {
+			return
+		}
+		*s = string(out)
+		ch <- struct{}{}
+	}(s)
+
+	for {
+		select {
+		case <-ctx.Done():
+			goto endloop
+		case <-ch:
+			goto endloop
+		}
 	}
-	output := strings.ReplaceAll(string(out), "\n", "")
+endloop:
+	output := strings.ReplaceAll(*s, "\n", "")
 	output = strings.ReplaceAll(output, "\r", "")
 	return output
 }

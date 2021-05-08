@@ -51,7 +51,6 @@ func (s *Script) MakeEnv() {
 	}
 	for k, v := range s.Env {
 		// path 环境单独处理， 可以多个值， 其他环境变量多个值请以此写完
-		golog.Info()
 		if strings.EqualFold(k, pathEnvName) {
 			if runtime.GOOS == "windows" {
 				s.TempEnv[pathEnvName] = s.TempEnv[pathEnvName] + ";" + v
@@ -73,7 +72,6 @@ func (s *Script) add(port int, subname Subname) *Server {
 	if continuityInterval == 0 {
 		continuityInterval = global.ContinuityInterval
 	}
-
 	svc := &Server{
 		// LookPath:  s.LookPath,
 		Script:    s,
@@ -101,7 +99,6 @@ func (s *Script) add(port int, subname Subname) *Server {
 			IsMonth: s.Cron.IsMonth,
 		}
 	}
-
 	return svc
 }
 
@@ -149,7 +146,6 @@ func (s *Script) MakeServer() {
 	if replica == 0 {
 		replica = 1
 	}
-
 	portIndex := 0
 	for i := 0; i < replica; i++ {
 		// 根据副本数提取子名称

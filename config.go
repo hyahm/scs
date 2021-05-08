@@ -251,6 +251,7 @@ func Load() error {
 	}
 	// 装载全局配置
 	global.Token = Cfg.Token
+	golog.Info(global.Token)
 	global.Listen = Cfg.Listen
 	global.IgnoreToken = Cfg.IgnoreToken
 	global.DisableTls = Cfg.DisableTls
@@ -263,12 +264,10 @@ func Load() error {
 	RunAlert(Cfg.Alert)
 	// 初始化硬件检测
 	RunProbe(Cfg.Probe)
-
 	for index := range Cfg.SC {
 		// 将数据填充至 SS的script中
 		ss.Scripts[Cfg.SC[index].Name] = Cfg.SC[index]
 		ss.Scripts[Cfg.SC[index].Name].MakeServer()
-
 		replicate := Cfg.SC[index].Replicate
 		if replicate == 0 {
 			replicate = 1
@@ -279,7 +278,6 @@ func Load() error {
 		}
 
 	}
-
 	return nil
 }
 

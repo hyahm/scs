@@ -24,6 +24,7 @@ func GetExecTime(handle func(http.ResponseWriter, *http.Request), w http.Respons
 
 // var dir := "key"
 func HttpServer() {
+	golog.Info("start http server")
 	router := xmux.NewRouter()
 	router.SetHeader("Access-Control-Allow-Origin", "*")
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
@@ -33,7 +34,6 @@ func HttpServer() {
 	// router.MiddleWare(GetExecTime)
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
-		return
 	})
 	router.Post("/status/{pname}/{name}", handle.Status)
 

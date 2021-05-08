@@ -45,5 +45,4 @@ group: `
 	if err != nil {
 		panic(err)
 	}
-
 }
