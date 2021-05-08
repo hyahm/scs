@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 )
 
@@ -20,8 +19,6 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 	if !needToken {
 		return false
 	}
-	golog.Info("header:", r.Header.Get("Token"))
-	golog.Info("global:", global.Token)
 	if r.Header.Get("Token") != global.Token {
 		w.Write([]byte(`{"code": 203, "msg": "token error"}`))
 		return true

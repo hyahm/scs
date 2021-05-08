@@ -251,7 +251,6 @@ func Load() error {
 	}
 	// 装载全局配置
 	global.Token = Cfg.Token
-	golog.Info(global.Token)
 	global.Listen = Cfg.Listen
 	global.IgnoreToken = Cfg.IgnoreToken
 	global.DisableTls = Cfg.DisableTls
