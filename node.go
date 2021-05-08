@@ -147,11 +147,9 @@ func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 		b, err = cli.StartName()
 	}
 	if err != nil {
-		golog.Error(err)
 		return nil, err
 	}
 	resp := &StatusList{}
-	// fmt.Println(string(b))
 	err = json.Unmarshal(b, resp)
 	if err != nil {
 		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, err)

@@ -24,6 +24,7 @@ var ErrFoundPname = errors.New("not found pname")
 var ErrFoundName = errors.New("not found name")
 var ErrFoundPnameOrName = errors.New("not found pname or name")
 var ErrWaitReload = errors.New("waiting for last reload complete")
+var ErrHttps = errors.New("Client sent an HTTP request to an HTTPS server.")
 
 type SCSClient struct {
 	Domain  string
@@ -72,8 +73,8 @@ func (sc *SCSClient) requests(url string, body io.Reader) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	golog.Info(resp.StatusCode)
 	defer resp.Body.Close()
-	golog.All.String()
 	switch resp.StatusCode {
 	case 203:
 		return nil, ErrToken
@@ -85,6 +86,8 @@ func (sc *SCSClient) requests(url string, body io.Reader) ([]byte, error) {
 		return nil, ErrFoundPnameOrName
 	case 201:
 		return nil, ErrWaitReload
+	case 400:
+		return nil, ErrHttps
 	default:
 		return ioutil.ReadAll(resp.Body)
 	}

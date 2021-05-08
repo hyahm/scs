@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs"
 
 	"github.com/spf13/cobra"
@@ -26,7 +27,7 @@ var StatusCmd = &cobra.Command{
 			fmt.Println("not found any nodes")
 			return
 		}
-
+		golog.Info(111)
 		for _, node := range getNodes() {
 			wg.Add(1)
 			go func(node *scs.Node) {
@@ -41,6 +42,7 @@ var StatusCmd = &cobra.Command{
 
 		}
 		wg.Wait()
+		golog.Info(111)
 		for _, s := range ss {
 			s.SortAndPrint()
 		}
