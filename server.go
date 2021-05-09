@@ -59,18 +59,15 @@ func getVersion(command string) string {
 		ch <- struct{}{}
 	}(s)
 
-	for {
-		select {
-		case <-ctx.Done():
-			goto endloop
-		case <-ch:
-			goto endloop
-		}
+	select {
+	case <-ctx.Done():
+		return ""
+	case <-ch:
+		output := strings.ReplaceAll(*s, "\n", "")
+		output = strings.ReplaceAll(output, "\r", "")
+		return output
 	}
-endloop:
-	output := strings.ReplaceAll(*s, "\n", "")
-	output = strings.ReplaceAll(output, "\r", "")
-	return output
+
 }
 
 func (svc *Server) shell(command string) error {
