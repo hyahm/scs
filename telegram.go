@@ -53,7 +53,6 @@ func (telegram *AlertTelegram) Send(body *Message, to ...string) error {
 			fmt.Println(string(b))
 			continue
 		}
-		fmt.Println(err)
 		fmt.Println(string(b))
 	}
 	return nil

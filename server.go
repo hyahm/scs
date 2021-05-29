@@ -34,6 +34,7 @@ type Server struct {
 	Ctx                context.Context        `json:"-"`
 	Cancel             context.CancelFunc     `json:"-"`
 	Msg                chan string            `json:"-"`
+	removed            bool                   `json"-"` // 标识是否已经被删除
 	Update             string                 `json:"update"`
 	LogLocker          *sync.RWMutex          `json:"-"`
 }
@@ -99,50 +100,55 @@ func (svc *Server) shell(command string) error {
 	return cmd.Wait()
 }
 
-func (s *Server) cron() {
-	s.Status.Status = RUNNING
+func (svc *Server) cron() {
+	svc.Status.Status = RUNNING
 
 	for {
 		select {
-		case <-s.Ctx.Done():
-			golog.Info("name:" + s.SubName + " end cron")
+		case <-svc.Ctx.Done():
+			svc.StopSigle <- true
+			golog.Info("name:" + svc.SubName + " end cron")
 			return
-		case <-time.After(-time.Since(s.Cron.StartTime)):
-			golog.Info("start cron")
-			if err := s.start(); err != nil {
+		case <-time.After(-time.Since(svc.Cron.StartTime)):
+			golog.Info("start time: ", svc.Cron.StartTime)
+			if err := svc.start(); err != nil {
 				golog.Error(err)
 				// 设置下载启动的时间
-				s.Cron.ComputerStartTime()
+				svc.Cron.ComputerStartTime()
 				continue
 			}
-			if s.cmd != nil && s.cmd.Process != nil {
-				s.Status.Pid = s.cmd.Process.Pid
+			if svc.cmd != nil && svc.cmd.Process != nil {
+				svc.Status.Pid = svc.cmd.Process.Pid
 			}
-			err := s.wait()
+			err := svc.wait()
 			if err != nil {
-				s.Cron.ComputerStartTime()
+				golog.Error(err)
+				svc.Cron.ComputerStartTime()
 				continue
 			}
-			s.Cron.ComputerStartTime()
+			svc.Cron.ComputerStartTime()
+			golog.Infof("cron task: %s have been completed", svc.SubName)
 			continue
-		case <-s.Cron.First:
-			golog.Info("first cron")
-			if err := s.start(); err != nil {
+		case <-svc.Cron.First:
+			golog.Info("start time: ", time.Now())
+			if err := svc.start(); err != nil {
 				golog.Error(err)
 				// 设置下载启动的时间
-				s.Cron.ComputerStartTime()
+				svc.Cron.ComputerStartTime()
 				continue
 			}
-			if s.cmd != nil && s.cmd.Process != nil {
-				s.Status.Pid = s.cmd.Process.Pid
+			if svc.cmd != nil && svc.cmd.Process != nil {
+				svc.Status.Pid = svc.cmd.Process.Pid
 			}
-			err := s.wait()
+			err := svc.wait()
 			if err != nil {
-				s.Cron.ComputerStartTime()
+				golog.Error(err)
+				svc.Cron.ComputerStartTime()
 				continue
 			}
 
-			s.Cron.ComputerStartTime()
+			svc.Cron.ComputerStartTime()
+			golog.Infof("cron task: %s have been completed", svc.SubName)
 			continue
 		}
 	}
@@ -203,7 +209,7 @@ func (svc *Server) Start() error {
 			}
 			// 如果有定时任务， 那么时间到了就执行
 			// 保留时间
-			golog.Info("start time: ", svc.Cron.StartTime)
+
 			go svc.cron()
 			return nil
 		}
@@ -248,47 +254,54 @@ func (svc *Server) Restart() {
 }
 
 // 异步删除
-func (s *Server) Remove() {
-	switch s.Status.Status {
+func (svc *Server) Remove() {
+	if svc.removed {
+		return
+	}
+	svc.removed = true
+	switch svc.Status.Status {
 	case WAITRESTART:
 		// 结束发送的退出错误发出的信号
-		<-s.Exit
+		<-svc.Exit
 		// 结束停止的goroutine， 转为删除处理
-		s.CancelProcess <- true
-		go s.remove()
+		svc.CancelProcess <- true
+		go svc.remove()
 	case STOP, INSTALL:
 		// 直接删除
-		DeleteServiceBySubName(s.SubName)
+		DeleteServiceBySubName(svc.SubName)
 	case RUNNING, WAITSTOP:
-		go s.remove()
+		go svc.remove()
 	default:
 		golog.Error("error status")
 	}
 }
 
-func (s *Server) remove() {
-	s.Stop()
+func (svc *Server) remove() {
+	svc.Stop()
+
 	// 等待停止信号
-	<-s.StopSigle
-	DeleteServiceBySubName(s.SubName)
+	<-svc.StopSigle
+	golog.Infof("%s stoped", svc.SubName)
+	DeleteServiceBySubName(svc.SubName)
 }
 
 // Stop  停止服务
-func (s *Server) Stop() {
-	if s.IsLoop {
+func (svc *Server) Stop() {
+	if svc.IsLoop {
 		// 如果是定时任务， 直接停止
-		s.Cancel()
-		s.stopStatus()
+		golog.Infof("stop loop %s", svc.SubName)
+		svc.Cancel()
+		svc.stopStatus()
 	}
-	switch s.Status.Status {
+	switch svc.Status.Status {
 	case RUNNING:
-		s.Exit <- 9
-		s.Status.Status = WAITSTOP
-		s.stop()
+		svc.Exit <- 9
+		svc.Status.Status = WAITSTOP
+		svc.stop()
 	case WAITRESTART:
-		<-s.Exit
-		s.Exit <- 9
-		s.Status.Status = WAITSTOP
+		<-svc.Exit
+		svc.Exit <- 9
+		svc.Status.Status = WAITSTOP
 	}
 }
 
@@ -328,6 +341,7 @@ func (s *Script) RemoveScript() error {
 	}
 	for i := 0; i < replicate; i++ {
 		subname := NewSubname(s.Name, i)
+		golog.Warn(subname)
 		ss.Infos[subname].Remove()
 	}
 	return nil
@@ -408,87 +422,87 @@ func (s *Script) StopScript() error {
 }
 
 // 同步停止
-func (s *Script) WaitStopScript() {
+func (svc *Script) WaitStopScript() {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	// 禁用 script 所在的所有server
-	replicate := s.Replicate
+	replicate := svc.Replicate
 	if replicate == 0 {
 		replicate = 1
 	}
 	for i := 0; i < replicate; i++ {
-		subname := NewSubname(s.Name, i)
+		subname := NewSubname(svc.Name, i)
 		ss.Infos[subname].Stop()
 	}
 }
 
 // 同步杀掉
-func (s *Script) WaitKillScript() {
+func (svc *Script) WaitKillScript() {
 	// ss.ServerLocker.RLock()
 	// defer ss.ServerLocker.RUnlock()
 	// 禁用 script 所在的所有server
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	// 禁用 script 所在的所有server
-	replicate := s.Replicate
+	replicate := svc.Replicate
 	if replicate == 0 {
 		replicate = 1
 	}
 	for i := 0; i < replicate; i++ {
-		subname := NewSubname(s.Name, i)
+		subname := NewSubname(svc.Name, i)
 		ss.Infos[subname].Kill()
 	}
 }
 
 // 异步重启
-func (s *Script) RestartScript() error {
+func (svc *Script) RestartScript() error {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss.Scripts[s.Name]; !ok {
+	if _, ok := ss.Scripts[svc.Name]; !ok {
 		return ErrFoundPname
 	}
-	replicate := s.Replicate
+	replicate := svc.Replicate
 	if replicate == 0 {
 		replicate = 1
 	}
 	for i := 0; i < replicate; i++ {
-		subname := NewSubname(s.Name, i)
+		subname := NewSubname(svc.Name, i)
 		go ss.Infos[subname].Restart()
 	}
 	return nil
 }
 
 // 同步更新并重启
-func (s *Server) UpdateAndRestart() {
+func (svc *Server) UpdateAndRestart() {
 	updateCommand := "git pull"
-	if s.Update != "" {
-		updateCommand = s.Update
+	if svc.Update != "" {
+		updateCommand = svc.Update
 	}
-	if err := s.shell(updateCommand); err != nil {
+	if err := svc.shell(updateCommand); err != nil {
 		golog.Error(err)
 		return
 	}
-	s.Restart()
+	svc.Restart()
 }
 
 // Stop  杀掉服务, 没有产生goroutine， 直接杀死
-func (s *Server) Kill() {
-	if s.IsLoop {
-		s.Cancel()
-		s.stopStatus()
+func (svc *Server) Kill() {
+	if svc.IsLoop {
+		svc.Cancel()
+		svc.stopStatus()
 	}
-	switch s.Status.Status {
+	switch svc.Status.Status {
 	case RUNNING:
-		s.Exit <- 9
-		if err := s.kill(); err != nil {
+		svc.Exit <- 9
+		if err := svc.kill(); err != nil {
 			golog.Error(err)
 			// s.Cancel()
 		}
 	case WAITRESTART, WAITSTOP:
-		<-s.Exit
-		s.Exit <- 9
-		s.kill()
+		<-svc.Exit
+		svc.Exit <- 9
+		svc.kill()
 	}
 
 }
@@ -580,13 +594,14 @@ func (svc *Server) wait() error {
 
 }
 
-func (s *Server) stopStatus() {
-	s.Status.Status = STOP
-	s.Status.Pid = 0
-	s.Status.CanNotStop = false
-	s.Status.RestartCount = 0
-	s.Status.Start = 0
-	s.IsLoop = false
+func (svc *Server) stopStatus() {
+	svc.Status.Status = STOP
+	svc.Status.Pid = 0
+	svc.Status.CanNotStop = false
+	svc.Status.RestartCount = 0
+	svc.Status.Start = 0
+	svc.IsLoop = false
+	svc.removed = false
 }
 
 func (svc *Server) LookCommandPath() error {

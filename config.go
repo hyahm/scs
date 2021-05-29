@@ -135,6 +135,7 @@ func ReLoad() error {
 	}
 	// 删除已删除的
 	for name := range temp {
+		golog.Warn(name)
 		ss.Scripts[name].RemoveScript()
 	}
 	return nil

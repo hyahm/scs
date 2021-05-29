@@ -40,6 +40,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
 		return
 	}
+
 	svc.Remove()
 	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 }
