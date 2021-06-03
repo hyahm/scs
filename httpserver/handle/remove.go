@@ -23,20 +23,20 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	// 读取配置文件
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	svc, err := server.GetServerByNameAndSubname(pname, subname.Subname(name))
-	if err != nil {
+	svc, ok := server.GetServerByNameAndSubname(pname, subname.Subname(name))
+	if !ok {
 		w.Write([]byte(`{"code": 500, "msg": "config file error"}`))
 		return
 	}
 
-	s, err := server.GetScriptByPname(pname)
-	if err != nil {
+	s, ok := server.GetScriptByPname(pname)
+	if !ok {
 		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
 		return
 	}
 	golog.Info(s.Replicate)
 	s.Replicate -= 1
-	err = server.UpdateScriptToConfigFile(s)
+	err := server.UpdateScriptToConfigFile(s)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
 		return
@@ -57,12 +57,12 @@ func RemovePname(w http.ResponseWriter, r *http.Request) {
 	}()
 	pname := xmux.Var(r)["pname"]
 
-	s, err := server.GetScriptByPname(pname)
-	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%v"}`, err)))
+	s, ok := server.GetScriptByPname(pname)
+	if !ok {
+		w.Write([]byte(`{"code": 404, "msg": "not found this pname"}`))
 		return
 	}
-	err = server.DeleteScriptToConfigFile(s)
+	err := server.DeleteScriptToConfigFile(s)
 	if err != nil {
 		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
 		return

@@ -14,8 +14,8 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
 
-	svc, err := server.GetServerByNameAndSubname(pname, subname.Subname(name))
-	if err != nil {
+	svc, ok := server.GetServerByNameAndSubname(pname, subname.Subname(name))
+	if !ok {
 		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
 		return
 	}
@@ -25,12 +25,12 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 
 func StopPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	s, err := server.GetScriptByPname(pname)
-	if err != nil {
+	s, ok := server.GetScriptByPname(pname)
+	if !ok {
 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
 		return
 	}
-	err = server.StopScript(s)
+	err := server.StopScript(s)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
 		return

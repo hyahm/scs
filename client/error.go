@@ -1,4 +1,4 @@
-package scserror
+package client
 
 import "errors"
 

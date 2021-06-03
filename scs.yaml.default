@@ -1,0 +1,19 @@
+listen: :11111
+disableTls: true
+log:
+  path: ""
+  size: 0
+  day: true
+  clear: 0s
+logCount: 500
+
+probe:
+  mem: 80
+  cpu: 100
+  disk: 100
+scripts:
+  - name: test
+    dir: f:\scs
+    command: python test.py
+    cron:
+      loop: 10

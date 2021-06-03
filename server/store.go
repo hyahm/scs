@@ -8,7 +8,6 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/probe"
-	"github.com/hyahm/scs/scserror"
 	"github.com/hyahm/scs/status"
 	"github.com/hyahm/scs/subname"
 	"github.com/hyahm/scs/to"
@@ -134,20 +133,18 @@ func HassubName(name subname.Subname) bool {
 	return false
 }
 
-func GetServerBySubname(subname subname.Subname) (*Server, error) {
+func GetServerBySubname(subname subname.Subname) (*Server, bool) {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
-	if _, ok := ss.Infos[subname]; ok {
-		return ss.Infos[subname], nil
-	}
-	return nil, scserror.ErrFoundName
+	v, ok := ss.Infos[subname]
+	return v, ok
 }
 
-func GetServersByName(name string) (map[subname.Subname]*Server, error) {
+func GetServersByName(name string) (map[subname.Subname]*Server, bool) {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	if _, ok := ss.Scripts[name]; !ok {
-		return nil, scserror.ErrFoundPname
+		return nil, false
 	}
 	servers := make(map[subname.Subname]*Server)
 	replicate := ss.Scripts[name].Replicate
@@ -159,20 +156,20 @@ func GetServersByName(name string) (map[subname.Subname]*Server, error) {
 		servers[subname] = ss.Infos[subname]
 	}
 
-	return servers, nil
+	return servers, true
 }
 
-func GetServerByNameAndSubname(name string, subname subname.Subname) (*Server, error) {
+func GetServerByNameAndSubname(name string, subname subname.Subname) (*Server, bool) {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	if _, ok := ss.Scripts[name]; !ok {
-		return nil, scserror.ErrFoundPname
+		return nil, false
 	}
 	if _, ok := ss.Infos[subname]; ok {
-		return ss.Infos[subname], nil
+		return ss.Infos[subname], true
 	}
 
-	return nil, scserror.ErrFoundName
+	return nil, false
 }
 
 func StopAllServer() {
@@ -220,7 +217,7 @@ func DeleteServiceBySubName(subname subname.Subname) error {
 		}
 		return nil
 	}
-	return scserror.ErrFoundName
+	return errors.New("")
 
 }
 
@@ -493,7 +490,7 @@ func RestartScript(s *Script) error {
 	defer ss.Mu.RUnlock()
 	// 禁用 script 所在的所有server
 	if _, ok := ss.Scripts[s.Name]; !ok {
-		return scserror.ErrFoundPname
+		return errors.New("")
 	}
 	replicate := s.Replicate
 	if replicate == 0 {
@@ -544,7 +541,7 @@ func StopScript(s *Script) error {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	if _, ok := ss.Scripts[s.Name]; !ok {
-		return scserror.ErrFoundPname
+		return errors.New("")
 	}
 	// 禁用 script 所在的所有server
 	replicate := s.Replicate
@@ -558,21 +555,20 @@ func StopScript(s *Script) error {
 	return nil
 }
 
-func GetScriptByPname(name string) (*Script, error) {
+func GetScriptByPname(name string) (*Script, bool) {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
-	if v, ok := ss.Scripts[name]; ok {
-		return v, nil
-	}
-	return nil, scserror.ErrFoundPname
+	v, ok := ss.Scripts[name]
+	return v, ok
 
 }
 
-func UpdateAndRestartScript(s *Script) error {
+// 返回成功还是失败
+func UpdateAndRestartScript(s *Script) bool {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
 	if _, ok := ss.Scripts[s.Name]; !ok {
-		return scserror.ErrFoundPname
+		return false
 	}
 	replicate := s.Replicate
 	if replicate == 0 {
@@ -582,15 +578,15 @@ func UpdateAndRestartScript(s *Script) error {
 		subname := subname.NewSubname(s.Name, i)
 		go ss.Infos[subname].UpdateAndRestart()
 	}
-	return nil
+	return true
 }
 
-func EnableScript(s *Script) error {
+func EnableScript(s *Script) bool {
 	ss.Mu.Lock()
 	defer ss.Mu.Unlock()
 	// 禁用 script 所在的所有server
 	if _, ok := ss.Scripts[s.Name]; !ok {
-		return scserror.ErrFoundPname
+		return false
 	}
 	ss.Scripts[s.Name].Disable = true
 	replicate := s.Replicate
@@ -601,15 +597,15 @@ func EnableScript(s *Script) error {
 		subname := subname.NewSubname(s.Name, i)
 		go ss.Infos[subname].Start()
 	}
-	return nil
+	return true
 }
 
-func DisableScript(s *Script) error {
+func DisableScript(s *Script) bool {
 	ss.Mu.Lock()
 	defer ss.Mu.Unlock()
 	// 禁用 script 所在的所有server
 	if _, ok := ss.Scripts[s.Name]; !ok {
-		return scserror.ErrFoundPname
+		return false
 	}
 	ss.Scripts[s.Name].Disable = true
 	replicate := s.Replicate
@@ -620,7 +616,7 @@ func DisableScript(s *Script) error {
 		subname := subname.NewSubname(s.Name, i)
 		go ss.Infos[subname].Stop()
 	}
-	return nil
+	return true
 }
 
 func AddInfo(name subname.Subname, svc *Server) {

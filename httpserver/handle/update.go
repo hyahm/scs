@@ -13,8 +13,8 @@ import (
 func Update(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	svc, err := server.GetServerByNameAndSubname(pname, subname.Subname(name))
-	if err != nil {
+	svc, ok := server.GetServerByNameAndSubname(pname, subname.Subname(name))
+	if !ok {
 		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
 		return
 	}
@@ -25,8 +25,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 func UpdatePname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	s, err := server.GetScriptByPname(pname)
-	if err != nil {
+	s, ok := server.GetScriptByPname(pname)
+	if !ok {
 		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
 		return
 	}

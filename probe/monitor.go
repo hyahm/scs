@@ -12,7 +12,6 @@ import (
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/alert"
 	"github.com/hyahm/scs/message"
-	"github.com/hyahm/scs/scserror"
 )
 
 var monitors Scan
@@ -92,22 +91,22 @@ func requests(domain string) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	switch resp.StatusCode {
-	case 203:
-		return nil, scserror.ErrToken
-	case 500:
-		return nil, scserror.ErrResponseData
-	case 511:
-		return nil, scserror.ErrStatusNetworkAuthenticationRequired
-	case 404:
-		return nil, scserror.ErrFoundPnameOrName
-	case 201:
-		return nil, scserror.ErrWaitReload
-	case 400:
-		return nil, scserror.ErrHttps
-	default:
-		return ioutil.ReadAll(resp.Body)
-	}
+	// switch resp.StatusCode {
+	// case 203:
+	// 	return nil, scserror.ErrToken
+	// case 500:
+	// 	return nil, scserror.ErrResponseData
+	// case 511:
+	// 	return nil, scserror.ErrStatusNetworkAuthenticationRequired
+	// case 404:
+	// 	return nil, scserror.ErrFoundPnameOrName
+	// case 201:
+	// 	return nil, scserror.ErrWaitReload
+	// case 400:
+	// 	return nil, scserror.ErrHttps
+	// default:
+	return ioutil.ReadAll(resp.Body)
+	// }
 }
 
 func client(timeout time.Duration) *http.Client {

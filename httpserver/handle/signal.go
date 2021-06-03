@@ -13,8 +13,8 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 
 	// golog.Info(string(res))
 	name := xmux.Var(r)["name"]
-	svc, err := server.GetServerBySubname(subname.Subname(name))
-	if err != nil {
+	svc, ok := server.GetServerBySubname(subname.Subname(name))
+	if !ok {
 		w.Write([]byte(`{"code": 200, "msg": "not found this name"}`))
 		return
 	}
@@ -36,8 +36,8 @@ func CanNotStop(w http.ResponseWriter, r *http.Request) {
 
 	// golog.Info(string(res))
 	name := xmux.Var(r)["name"]
-	svc, err := server.GetServerBySubname(subname.Subname(name))
-	if err != nil {
+	svc, ok := server.GetServerBySubname(subname.Subname(name))
+	if !ok {
 		w.Write([]byte(`{"code": 200, "msg": "not found this name"}`))
 		return
 	}
