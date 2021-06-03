@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/server"
+	"github.com/hyahm/scs/subname"
 	"github.com/hyahm/xmux"
 )
 
@@ -24,7 +25,7 @@ func Log(w http.ResponseWriter, r *http.Request) {
 	// 	}
 	// }
 
-	svc, err := scs.GetServerBySubname(scs.Subname(name))
+	svc, err := server.GetServerBySubname(subname.Subname(name))
 	if err != nil {
 		w.Write([]byte(`{"code": 404, "msg":"not found script"}`))
 		return

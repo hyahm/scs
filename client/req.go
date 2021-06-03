@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/hyahm/scs"
 )
 
 type ClientConfig struct {
-	Nodes       map[string]*scs.Node `yaml:"nodes"`
-	Group       map[string][]string  `yaml:"group"`
-	ReadTimeout time.Duration        `yaml:"timeout"`
+	Nodes       map[string]*Node    `yaml:"nodes"`
+	Group       map[string][]string `yaml:"group"`
+	ReadTimeout time.Duration       `yaml:"timeout"`
 	mu          *sync.RWMutex
 }
 
@@ -19,7 +17,7 @@ func NewClientConfig() *ClientConfig {
 	return &ClientConfig{mu: &sync.RWMutex{}}
 }
 
-func (cc *ClientConfig) GetNode(name string) (*scs.Node, bool) {
+func (cc *ClientConfig) GetNode(name string) (*Node, bool) {
 	if cc.mu == nil {
 		cc.mu = &sync.RWMutex{}
 	}
@@ -34,8 +32,8 @@ func (cc *ClientConfig) GetNode(name string) (*scs.Node, bool) {
 	}
 }
 
-func (cc *ClientConfig) GetNodes() []*scs.Node {
-	ns := make([]*scs.Node, 0)
+func (cc *ClientConfig) GetNodes() []*Node {
+	ns := make([]*Node, 0)
 	if cc.mu == nil {
 		cc.mu = &sync.RWMutex{}
 	}
@@ -49,8 +47,8 @@ func (cc *ClientConfig) GetNodes() []*scs.Node {
 	return ns
 }
 
-func (cc *ClientConfig) GetNodesInGroup(group string) []*scs.Node {
-	ns := make([]*scs.Node, 0)
+func (cc *ClientConfig) GetNodesInGroup(group string) []*Node {
+	ns := make([]*Node, 0)
 	if cc.mu == nil {
 		cc.mu = &sync.RWMutex{}
 	}

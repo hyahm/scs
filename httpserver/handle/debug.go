@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/server"
 )
 
 // func GetConfig(w http.ResponseWriter, r *http.Request) {
@@ -32,9 +32,9 @@ import (
 
 func GetServers(w http.ResponseWriter, r *http.Request) {
 	golog.Info("servers")
-	w.Write(scs.GetServers())
+	w.Write(server.GetServers())
 }
 
 func GetScripts(w http.ResponseWriter, r *http.Request) {
-	w.Write(scs.GetScripts())
+	w.Write(server.GetScripts())
 }

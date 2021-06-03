@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/server"
 	"github.com/hyahm/xmux"
 )
 
 func AddScript(w http.ResponseWriter, r *http.Request) {
-	s := xmux.GetData(r).Data.(*scs.Script)
+	s := xmux.GetData(r).Data.(*server.Script)
 	if s.Name == "" {
 		w.Write([]byte(`{"code": 201, "msg": "name require"}`))
 		return
@@ -18,36 +18,36 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 	if s.ContinuityInterval != 0 {
 		s.ContinuityInterval = s.ContinuityInterval * 1000000000
 	}
-	if scs.HaveScript(s.Name) {
+	if server.HaveScript(s.Name) {
 		// 修改
 		// 需要判断是否相等
 
-		err := scs.UpdateScriptToConfigFile(s)
+		err := server.UpdateScriptToConfigFile(s)
 		if err != nil {
 			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
 			return
 		}
-		if !s.NeedStop() {
+		if !server.NeedStop(s) {
 			w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
 			return
 		}
-		s.RemoveScript()
+		server.RemoveScript(s.Name)
 	} else {
 		// 添加
-		err := scs.AddScriptToConfigFile(s)
+		err := server.AddScriptToConfigFile(s)
 		if err != nil {
 			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
 			return
 		}
 
 	}
-	s.AddScript()
+	server.AddScript(s)
 	w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
 }
 
 func DelScript(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	if err := scs.Cfg.DelScript(pname); err != nil {
+	if err := server.Cfg.DelScript(pname); err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}

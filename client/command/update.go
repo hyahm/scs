@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +31,7 @@ var UpdateCmd = &cobra.Command{
 		}
 		for _, node := range nodes {
 			wg.Add(1)
-			go func(node *scs.Node) {
+			go func(node *client.Node) {
 				node.Update(args...)
 				wg.Done()
 			}(node)

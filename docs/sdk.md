@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 )
 
 func main() {
-	cli := scs.NewClient()
+	cli := client.NewClient()
 	// 获取https://127.0.0.1:11111 的 脚本状态
 	b, err := cli.Status()
 	if err != nil {

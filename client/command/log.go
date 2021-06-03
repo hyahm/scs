@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +22,7 @@ func logConfig(cmd *cobra.Command, args []string) {
 	}
 	for _, node := range nodes {
 		wg.Add(1)
-		go func(node *scs.Node) {
+		go func(node *client.Node) {
 			node.Log(args[0])
 			wg.Done()
 		}(node)

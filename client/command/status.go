@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ var StatusCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		ss := make([]*scs.ScriptStatusNode, 0)
+		ss := make([]*client.ScriptStatusNode, 0)
 
 		wg := &sync.WaitGroup{}
 		nodes := getNodes()
@@ -28,7 +28,7 @@ var StatusCmd = &cobra.Command{
 		}
 		for _, node := range getNodes() {
 			wg.Add(1)
-			go func(node *scs.Node) {
+			go func(node *client.Node) {
 				serverStatus, err := node.Status(args...)
 				if err == nil {
 					ss = append(ss, serverStatus)

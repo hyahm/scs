@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ var RestartCmd = &cobra.Command{
 		}
 		for _, node := range nodes {
 			wg.Add(1)
-			go func(node *scs.Node) {
+			go func(node *client.Node) {
 				node.Restart(args...)
 				wg.Done()
 			}(node)

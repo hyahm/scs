@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/server"
 )
 
 // 获取url和DERIVATIVE
@@ -17,8 +17,8 @@ type RespRepo struct {
 
 func GetRepo(w http.ResponseWriter, r *http.Request) {
 	resp := &RespRepo{}
-	resp.Url = scs.Cfg.Repo.Url
-	resp.Derivative = scs.Cfg.Repo.Derivative
+	resp.Url = server.Cfg.Repo.Url
+	resp.Derivative = server.Cfg.Repo.Derivative
 	send, _ := json.Marshal(resp)
 	golog.Info(string(send))
 	w.Write(send)

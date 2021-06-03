@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/client"
+	"github.com/hyahm/scs/server"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -19,7 +20,7 @@ var InstallCmd = &cobra.Command{
 	Long:  `install package`,
 	Run: func(cmd *cobra.Command, args []string) {
 		condition := 0
-		sc := make([]*scs.Script, 0)
+		sc := make([]*server.Script, 0)
 		if len(args) > 1 {
 			condition++
 		}
@@ -62,7 +63,7 @@ var InstallCmd = &cobra.Command{
 		}
 		for _, node := range nodes {
 			wg.Add(1)
-			go func(node *scs.Node) {
+			go func(node *client.Node) {
 				node.Install(sc, nil)
 				wg.Done()
 			}(node)

@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/server"
 )
-
-var reloadKey bool
 
 func Reload(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
@@ -23,7 +21,7 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 		reloadKey = false
 	}()
 	// 拷贝一份到当前运行的脚本列表
-	if err := scs.ReLoad(); err != nil {
+	if err := server.ReLoad(); err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
 		return
 	}

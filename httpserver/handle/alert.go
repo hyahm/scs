@@ -7,13 +7,13 @@ import (
 	"strings"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs"
+	"github.com/hyahm/scs/alert"
 	"github.com/hyahm/scs/global"
 )
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 
-	ra := &scs.RespAlert{}
+	ra := &alert.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
@@ -24,7 +24,7 @@ func Alert(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
-	w.Write(scs.GetDispatcher())
+	w.Write(alert.GetDispatcher())
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {

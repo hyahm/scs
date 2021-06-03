@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/hyahm/scs"
 	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/global"
 
@@ -37,8 +36,8 @@ func Execute() {
 	}
 }
 
-func getNodes() []*scs.Node {
-	nodes := make([]*scs.Node, 0)
+func getNodes() []*client.Node {
+	nodes := make([]*client.Node, 0)
 	if UseNodes != "" {
 		if nodeInfo, ok := client.CCfg.GetNode(UseNodes); ok {
 			nodes = append(nodes, nodeInfo)
