@@ -447,8 +447,8 @@ func NeedStop(s *Script) bool {
 
 // 启动方法， 异步执行
 func StartServer(s *Script) {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
+	ss.Mu.Lock()
+	ss.Mu.Unlock()
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
@@ -473,15 +473,10 @@ func KillScript(s *Script) {
 }
 
 // 通过script 生成和启动服务
-func AddScript(s *Script) error {
-	ss.Mu.RLock()
-	defer ss.Mu.RUnlock()
-	ss.Scripts[s.Name] = s
+func AddScript(s *Script) {
 	// 通过script 生成server
 	s.MakeServer()
 	StartServer(s)
-	return nil
-
 }
 
 // 异步重启
@@ -620,9 +615,7 @@ func DisableScript(s *Script) bool {
 }
 
 func AddInfo(name subname.Subname, svc *Server) {
-	ss.Mu.Lock()
-	defer ss.Mu.Unlock()
-	ss.Infos[name] = svc
+
 }
 
 // 比较新的与之前的是否相等， 调用者必须是新的

@@ -9,7 +9,6 @@
 package alert
 
 import (
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/message"
 	"gopkg.in/gomail.v2"
 )
@@ -59,6 +58,5 @@ func (ae *AlertEmail) Send(body *message.Message, to ...string) error {
 	d := gomail.NewDialer(ae.Host, ae.Port, ae.UserName, ae.Password)
 	// d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	// 发送
-	golog.Debug("sending email...")
 	return d.DialAndSend(m)
 }

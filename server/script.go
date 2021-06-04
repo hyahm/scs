@@ -152,6 +152,9 @@ func (s *Script) GetEnv() []string {
 
 // 通过script 生成 server
 func (s *Script) MakeServer() {
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
+	ss.Scripts[s.Name] = s
 	s.MakeEnv()
 	replica := s.Replicate
 	if replica == 0 {
@@ -175,10 +178,11 @@ func (s *Script) MakeServer() {
 			env["PORT"] = "0"
 			svc = s.add(0, subname)
 		}
+
 		env["NAME"] = subname.String()
 		svc.Env = env
 		golog.Debug("start " + subname)
-		AddInfo(subname, svc)
+		ss.Infos[subname] = svc
 	}
 }
 

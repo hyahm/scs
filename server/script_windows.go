@@ -65,6 +65,8 @@ func (svc *Server) start() error {
 		svc.Command = strings.ReplaceAll(svc.Command, "$"+k, v)
 		svc.Command = strings.ReplaceAll(svc.Command, "${"+k+"}", v)
 	}
+
+	svc.Cmd = exec.Command("powershell", "-c", svc.Command)
 	if svc.Script.Dir != "" {
 		if _, err := os.Stat(svc.Script.Dir); os.IsNotExist(err) {
 			golog.Error(err)
@@ -72,8 +74,6 @@ func (svc *Server) start() error {
 		}
 		svc.Cmd.Dir = svc.Script.Dir
 	}
-
-	svc.Cmd = exec.Command("powershell", "-c", svc.Command)
 	if svc.Cmd.Env == nil {
 		svc.Cmd.Env = make([]string, 0, len(svc.Env))
 	}

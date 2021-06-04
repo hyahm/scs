@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/server"
 	"github.com/hyahm/xmux"
 )
 
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetData(r).Data.(*server.Script)
+	golog.Infof("%#v", *s)
 	if s.Name == "" {
 		w.Write([]byte(`{"code": 201, "msg": "name require"}`))
 		return
@@ -21,7 +23,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 	if server.HaveScript(s.Name) {
 		// 修改
 		// 需要判断是否相等
-
+		golog.Info("aaaaa")
 		err := server.UpdateScriptToConfigFile(s)
 		if err != nil {
 			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
@@ -33,6 +35,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		}
 		server.RemoveScript(s.Name)
 	} else {
+		golog.Info("bbbb")
 		// 添加
 		err := server.AddScriptToConfigFile(s)
 		if err != nil {
@@ -41,6 +44,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
+	golog.Info("start and add server")
 	server.AddScript(s)
 	w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
 }

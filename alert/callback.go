@@ -3,11 +3,11 @@ package alert
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/message"
 )
 
@@ -24,7 +24,6 @@ func (c *Callback) Send(body *message.Message, to ...string) error {
 	}
 	data, err := json.Marshal(body)
 	if err != nil {
-		golog.Error(err)
 		return err
 	}
 	m := make(map[string]struct{})
@@ -35,25 +34,25 @@ func (c *Callback) Send(body *message.Message, to ...string) error {
 		m[url] = struct{}{}
 	}
 	for url := range m {
-		golog.Info(c.Headers)
 		req, err := http.NewRequest(c.Method, url, bytes.NewReader(data))
 		if err != nil {
-			golog.Error(err)
+			fmt.Println(err)
+
 			continue
 		}
 		req.Header = c.Headers
 		resp, err := cli.Do(req)
 		if err != nil {
-			golog.Error(err)
+			fmt.Println(err)
 			continue
 		}
 		defer resp.Body.Close()
 		b, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			golog.Error(err)
+			fmt.Println(err)
 			continue
 		}
-		golog.Info(string(b))
+		fmt.Println(string(b))
 	}
 	return nil
 }

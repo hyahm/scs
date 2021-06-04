@@ -2,14 +2,19 @@ package midware
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/hyahm/xmux"
 )
 
 func Unmarshal(w http.ResponseWriter, r *http.Request) bool {
-
-	err := json.NewDecoder(r.Body).Decode(xmux.GetData(r).Data)
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return true
+	}
+	err = json.Unmarshal(b, xmux.GetData(r).Data)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return true
