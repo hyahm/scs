@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/scserror"
 	"github.com/hyahm/scs/server"
 )
 
@@ -154,8 +153,8 @@ func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 		return nil, err
 	}
 	if resp.Code == 203 {
-		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, scserror.ErrToken)
-		return nil, scserror.ErrToken
+		fmt.Printf("node: %s, url: %s %v \n", node.Name, node.Url, ErrToken)
+		return nil, ErrToken
 	}
 
 	// if len(node.Filter) > 0 {

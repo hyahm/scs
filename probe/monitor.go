@@ -41,7 +41,7 @@ func NewMonitor() Scan {
 
 func (m Scan) Update() {
 	temp := make(map[string]struct{})
-	for k, _ := range m {
+	for k := range m {
 		temp[k] = struct{}{}
 	}
 	for _, v := range healthDetector.Config.Monitor {
@@ -59,7 +59,7 @@ func (m Scan) Update() {
 			}
 		}
 	}
-	for k, _ := range temp {
+	for k := range temp {
 		delete(m, k)
 	}
 }
@@ -91,22 +91,7 @@ func requests(domain string) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	// switch resp.StatusCode {
-	// case 203:
-	// 	return nil, scserror.ErrToken
-	// case 500:
-	// 	return nil, scserror.ErrResponseData
-	// case 511:
-	// 	return nil, scserror.ErrStatusNetworkAuthenticationRequired
-	// case 404:
-	// 	return nil, scserror.ErrFoundPnameOrName
-	// case 201:
-	// 	return nil, scserror.ErrWaitReload
-	// case 400:
-	// 	return nil, scserror.ErrHttps
-	// default:
 	return ioutil.ReadAll(resp.Body)
-	// }
 }
 
 func client(timeout time.Duration) *http.Client {
