@@ -14,7 +14,7 @@ import (
 
 	"github.com/hyahm/scs/alert"
 	"github.com/hyahm/scs/server"
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 )
 
 var CCfg *ClientConfig
