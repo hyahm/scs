@@ -67,13 +67,15 @@ func (svc *Server) start() error {
 		svc.Command = strings.ReplaceAll(svc.Command, "$"+k, v)
 		svc.Command = strings.ReplaceAll(svc.Command, "${"+k+"}", v)
 	}
-	if _, err := os.Stat(svc.Script.Dir); os.IsNotExist(err) {
-		golog.Error(err)
-		return err
+	if svc.Script.Dir != "" {
+		if _, err := os.Stat(svc.Script.Dir); os.IsNotExist(err) {
+			golog.Error(err)
+			return err
+		}
+		svc.Cmd.Dir = svc.Script.Dir
 	}
 	svc.Cmd = exec.Command("/bin/bash", "-c", svc.Command)
 
-	svc.Cmd.Dir = svc.Script.Dir
 	if svc.Cmd.Env == nil {
 		svc.Cmd.Env = make([]string, 0, len(svc.Env))
 	}
