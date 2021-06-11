@@ -4,14 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"strconv"
 
 	"github.com/hyahm/scs/alert"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/logger"
 	"github.com/hyahm/scs/probe"
 	"github.com/hyahm/scs/subname"
-	"github.com/hyahm/scs/utils"
 
 	"github.com/hyahm/golog"
 	"gopkg.in/yaml.v2"
@@ -130,15 +128,13 @@ func ReLoad() error {
 	// 这里也要判断修改
 	// 拷贝一份当前存在的所有的脚本
 	temp := make(map[string]struct{})
-	for name := range ss.Scripts {
-		temp[name] = struct{}{}
-	}
+	TempScript(temp)
 	for index := range Cfg.SC {
 		// 将数据填充至 SS, 返回是否存在此脚本
 		delete(temp, Cfg.SC[index].Name)
 		ReloadScripts(Cfg.SC[index])
 	}
-	// 删除已删除的
+	// 删除已删除的 script
 	for name := range temp {
 		golog.Warn(name)
 		RemoveScript(name)
@@ -164,6 +160,8 @@ func ReloadScripts(script *Script) {
 		if newReplicate == 0 {
 			newReplicate = 1
 		}
+		golog.Info("oldReplicate: ", oldReplicate, script.Name)
+		golog.Info("newReplicate: ", newReplicate, script.Name)
 		if !CompareScript(script, ss.Scripts[script.Name]) {
 			// 如果不一样， 那么 就需要重新启动服务
 			golog.Info("restart server")
@@ -197,33 +195,33 @@ func ReloadScripts(script *Script) {
 		}
 		if oldReplicate > newReplicate {
 			// 如果大于的话， 那么就删除多余的
+			golog.Info(ss.Scripts[script.Name].Replicate)
 			for i := newReplicate; i < oldReplicate; i++ {
 				golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
 				ss.Infos[subname.NewSubname(script.Name, i)].Remove()
 			}
 		} else {
-			script.MakeEnv()
 
-			portIndex := 0
-			for i := oldReplicate; i < newReplicate; i++ {
-				// 根据副本数提取子名称
+			script.MakeReplicateServer(oldReplicate, newReplicate)
+			// portIndex := 0
+			// for i := oldReplicate; i < newReplicate; i++ {
+			// 	// 根据副本数提取子名称
 
-				subname := subname.NewSubname(script.Name, i)
-				if script.Port > 0 {
-					portIndex += utils.ProbePort(script.Port)
-					script.TempEnv["PORT"] = strconv.Itoa(script.Port + i + portIndex)
-					ss.Infos[subname] = script.add(script.Port+i+portIndex, subname)
-				} else {
-					script.TempEnv["PORT"] = "0"
-					ss.Infos[subname] = script.add(0, subname)
-				}
-				script.TempEnv["NAME"] = subname.String()
+			// 	subname := subname.NewSubname(script.Name, i)
+			// 	// if script.Port > 0 {
+			// 	// 	portIndex += utils.ProbePort(script.Port)
+			// 	// 	script.TempEnv["PORT"] = strconv.Itoa(script.Port + i + portIndex)
+			// 	// 	ss.Infos[subname] = script.add(script.Port+i+portIndex, subname)
+			// 	// } else {
+			// 	// 	script.TempEnv["PORT"] = "0"
+			// 	// 	ss.Infos[subname] = script.add(0, subname)
+			// 	// }
+			// 	// script.TempEnv["NAME"] = subname.String()
 
-				ss.Infos[subname].Start()
+			// ss.Infos[subname].Start()
 
-			}
+			// }
 		}
-		ss.Scripts[script.Name].Replicate = script.Replicate
 
 	} else {
 		golog.Info(script.Name)

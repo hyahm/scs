@@ -42,6 +42,7 @@ type Script struct {
 	TempEnv            map[string]string    `yaml:"-" json:"-"`
 }
 
+// 生成新的env 到 tempenv
 func (s *Script) MakeEnv() {
 	// 生成 全局脚本的 env
 	if s.TempEnv == nil {
@@ -183,6 +184,44 @@ func (s *Script) MakeServer() {
 		svc.Env = env
 		golog.Debug("start " + subname)
 		ss.Infos[subname] = svc
+		ss.Infos[subname].Start()
+	}
+}
+
+// 通过script 生成 server
+func (s *Script) MakeReplicateServer(start, end int) {
+	ss.Mu.Lock()
+	defer ss.Mu.Unlock()
+	ss.Scripts[s.Name].Replicate = s.Replicate
+	s.MakeEnv()
+	// replica := s.Replicate
+	// if replica == 0 {
+	// 	replica = 1
+	// }
+	portIndex := 0
+	for i := start; i < end; i++ {
+		// 根据副本数提取子名称
+		env := make(map[string]string)
+		for k, v := range s.TempEnv {
+			env[k] = v
+		}
+		subname := subname.NewSubname(s.Name, i)
+		var svc *Server
+		if s.Port > 0 {
+			// 检测端口是否被占用， 如果占用了
+			portIndex += utils.ProbePort(s.Port)
+			env["PORT"] = strconv.Itoa(s.Port + i + portIndex)
+			svc = s.add(s.Port+i+portIndex, subname)
+		} else {
+			env["PORT"] = "0"
+			svc = s.add(0, subname)
+		}
+
+		env["NAME"] = subname.String()
+		svc.Env = env
+		golog.Debug("start " + subname)
+		ss.Infos[subname] = svc
+		ss.Infos[subname].Start()
 	}
 }
 

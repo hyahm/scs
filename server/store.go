@@ -49,6 +49,14 @@ func HaveScript(pname string) bool {
 	return ok
 }
 
+func TempScript(temp map[string]struct{}) {
+	ss.Mu.RLock()
+	defer ss.Mu.RUnlock()
+	for name := range ss.Scripts {
+		temp[name] = struct{}{}
+	}
+}
+
 func NeedStart(subname string) bool {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
@@ -94,14 +102,6 @@ func RemoveScript(pname string) error {
 func AddAndStartServer(script *Script) {
 	ss.Scripts[script.Name] = script
 	ss.Scripts[script.Name].MakeServer()
-	replicate := script.Replicate
-	if replicate == 0 {
-		replicate = 1
-	}
-	for i := 0; i < replicate; i++ {
-		subname := subname.NewSubname(script.Name, i)
-		ss.Infos[subname].Start()
-	}
 }
 
 func GetScripts() []byte {
@@ -209,8 +209,11 @@ func DeleteServiceBySubName(subname subname.Subname) error {
 		name := subname.GetName()
 		if _, ok := ss.Scripts[name]; ok {
 			ss.Scripts[name].Replicate--
+			if ss.Scripts[name].Replicate == 1 {
+				ss.Scripts[name].Replicate = 0
+			}
 			// 开发中， replicate =0 或 1 其实都是1 的意思， 所以减一后 <= 0 的其实就是都删除干净了的意思
-			if ss.Scripts[name].Replicate < 1 {
+			if ss.Scripts[name].Replicate < 0 {
 				delete(ss.Scripts, name)
 				delete(ss.Infos, subname)
 			}
