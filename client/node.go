@@ -179,6 +179,8 @@ func (node *Node) Kill(args ...string) {
 
 	switch len(args) {
 	case 2:
+		cli.Pname = args[0]
+		cli.Name = args[1]
 		b, err = cli.KillName()
 	case 1:
 		cli.Pname = args[0]
