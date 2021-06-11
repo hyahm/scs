@@ -35,7 +35,8 @@ type Service struct {
 func GetServers() []byte {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
-	send, err := json.Marshal(ss.Infos)
+	send, err := json.MarshalIndent(ss.Infos, "", "  ")
+	// send, err := json.Marshal(ss.Infos)
 	if err != nil {
 		golog.Error(err)
 	}
@@ -107,7 +108,8 @@ func AddAndStartServer(script *Script) {
 func GetScripts() []byte {
 	ss.Mu.RLock()
 	defer ss.Mu.RUnlock()
-	send, err := json.Marshal(ss.Scripts)
+	send, err := json.MarshalIndent(ss.Scripts, "", "  ")
+	// send, err := json.Marshal(ss.Scripts)
 	if err != nil {
 		golog.Error(err)
 	}
@@ -260,9 +262,7 @@ func DeleteSubname(subname subname.Subname) {
 	ss.Mu.Lock()
 	defer ss.Mu.Unlock()
 	// 以最后一个下划线来分割出pname
-	if _, ok := ss.Infos[subname]; ok {
-		delete(ss.Infos, subname)
-	}
+	delete(ss.Infos, subname)
 }
 
 type StatusList struct {
@@ -451,7 +451,7 @@ func NeedStop(s *Script) bool {
 // 启动方法， 异步执行
 func StartServer(s *Script) {
 	ss.Mu.Lock()
-	ss.Mu.Unlock()
+	defer ss.Mu.Unlock()
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
