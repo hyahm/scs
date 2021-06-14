@@ -22,15 +22,15 @@ func GetExecTime(handle func(http.ResponseWriter, *http.Request), w http.Respons
 	golog.Infof("url: %s -- addr: %s -- method: %s -- exectime: %f\n", r.URL.Path, r.RemoteAddr, r.Method, time.Since(start).Seconds())
 }
 
-func print(w http.ResponseWriter, r *http.Request) bool {
-	golog.Infof("%s", r.URL.Path)
-	return false
-}
+// func print(w http.ResponseWriter, r *http.Request) bool {
+// 	golog.Infof("%s", r.URL.Path)
+// 	return false
+// }
 
 // var dir := "key"
 func HttpServer() {
 	golog.Info("start http server")
-	router := xmux.NewRouter().AddModule(print)
+	router := xmux.NewRouter()
 	router.SetHeader("Access-Control-Allow-Origin", "*")
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")

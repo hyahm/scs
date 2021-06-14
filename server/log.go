@@ -32,11 +32,7 @@ func (svc *Server) read() {
 
 func (svc *Server) appendRead(stdout io.ReadCloser, iserr bool) {
 	readout := bufio.NewReader(stdout)
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		golog.Error(err)
-	// 	}
-	// }()
+
 	for {
 		select {
 		case <-svc.Ctx.Done():

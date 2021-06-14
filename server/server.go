@@ -36,7 +36,7 @@ type Server struct {
 	AI                 *alert.AlertInfo               `json:"ai"` // 报警规则
 	Exit               chan int                       `json:"-"`  // 判断是否是主动退出的
 	CancelProcess      chan bool                      `json:"-"`  // 取消操作，
-	StopSigle          chan bool                      `json:"-"`  // 停止后发出的信号
+	StopSigle          chan bool                      `json:"-"`  // 停止后发出的信号, 9 主动退出， 10 重启， 11 主动退出并删除
 	Ctx                context.Context                `json:"-"`
 	Cancel             context.CancelFunc             `json:"-"`
 	Msg                chan string                    `json:"-"`
@@ -80,8 +80,8 @@ func (svc *Server) cron() {
 	for {
 		select {
 		case <-svc.Ctx.Done():
-			svc.StopSigle <- true
 			golog.Info("name:" + svc.SubName + " end cron")
+			svc.StopSigle <- true
 			return
 		case <-time.After(-time.Since(svc.Cron.StartTime)):
 			golog.Info("start time: ", svc.Cron.StartTime)
@@ -130,12 +130,6 @@ func (svc *Server) cron() {
 
 // Start  启动服务 异步的
 func (svc *Server) Start() error {
-
-	// ok := service.NeedStart(svc.SubName.GetName())
-	// if !ok {
-	// 	return nil
-	// }
-
 	switch svc.Status.Status {
 	case status.WAITSTOP:
 		// 如果之前是等待停止的状态， 更改为重启状态
@@ -252,7 +246,6 @@ func (svc *Server) Remove() {
 
 func (svc *Server) remove() {
 	svc.Stop()
-
 	// 等待停止信号
 	<-svc.StopSigle
 	golog.Infof("%s stoped", svc.SubName)
@@ -316,13 +309,14 @@ func (svc *Server) Kill() {
 func (svc *Server) wait() error {
 	go svc.successAlert()
 	if err := svc.Cmd.Wait(); err != nil {
-
 		// 脚本退出后才会执行这里的代码
 		select {
 		case ec := <-svc.Exit:
 			svc.Cancel()
 			switch ec {
 			case 9:
+				golog.Info("stop -------------")
+				svc.StopSigle <- true
 				// 主动退出, kill， stop
 				svc.Status.RestartCount = 0
 				svc.stopStatus()
