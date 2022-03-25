@@ -1,0 +1,10 @@
+- name: mongo
+  env:
+    VERSION: 4.4.2
+  preStart:
+  - command: curl
+    install: yum -y install curl
+  - path: /opt/mongodb/bin/mongod
+    file: /data/scs/shell/mongo.sh
+  dir: /opt/mongodb
+  command: bin/mongod -f mongod.conf

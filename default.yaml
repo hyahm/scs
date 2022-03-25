@@ -1,0 +1,61 @@
+# 监听端口
+listen: :11111
+# 请求头认证 Token： xxxx
+log:
+    path: log/scs.log
+    day: true
+    size: 0
+    clean: 
+token: 
+# 忽略token验证的客户端ip
+ignoreToken: []
+alert:
+  email:
+    host: smtp.qq.com
+    port: 465
+    username:  165464646@qq.com
+    password: 123456
+    to:  
+      - 7270235460@qq.com
+  rocket:
+    server: https://chat.hyahm.com
+    username: "test"
+    password: "123456"
+    to: 
+      - "#general"
+  telegram:
+    server: https://chat.hyahm.com
+    to: 
+      - -575533567
+  weixin:
+    # https://open.work.weixin.qq.com/help2/pc/14931?person_id=1&is_tencent=
+    server: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  callback:
+    # 接受请求的url
+    urls:
+      - http://192.168.0.112:8080
+    headers:
+      Content-Type:
+        - application/json
+# 本地磁盘， cpu， 内存监控项， 确保elert存在才会有通知
+probe:
+  monitor: 
+  monitored: 
+  # mem使用率, 默认90, 小于0表示不启用检测
+  mem: 60 
+  # cpu使用率, 默认90, 小于0表示不启用检测
+  cpu: 90
+  # 硬盘使用率， 默认85, 小于0表示不启用检测
+  # disk: 50        
+  # 排除的挂载点， 默认已经去掉了swap， 设备, 数组
+  excludeDisk: 
+  # 检测间隔， 默认10秒
+  interval: 10s
+  # 下次报警时间间隔， 如果恢复了就重置
+  continuityInterval: 1h
+scripts:
+  - name: test
+    # 脚本执行的根目录
+    dir: /data/scs
+    # 启动脚本
+    command: "python3 test.py"

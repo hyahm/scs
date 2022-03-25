@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>KeepAlive</key>
+    <dict>
+      <key>SuccessfulExit</key>
+      <false/>
+    </dict>
+    <key>Label</key>
+    <string>scsd</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>./scsd</string>
+      <string>-f</string>
+      <string>scs.yaml</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>/Users/cander/scs</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/cander/scs/log/out.log</string>
+    <key>StandardOutPath</key>
+    <string>/Users/cander/scs/log/out.log</string>
+  </dict>
+</plist>

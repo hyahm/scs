@@ -1,0 +1,10 @@
+- name: caddy
+  env:
+    PATH: /opt/go/bin
+  preStart:
+    - command: go
+      install: wget https://studygolang.com/dl/golang/go1.16.2.linux-amd64.tar.gz && mv go1.16.2.linux-amd64.tar.gz /opt/ && tar -xf go1.16.2.linux-amd64.tar.gz
+    - path: /data/caddy
+      install: mkdir /data  && cd /data && git clone https://gitee.com/cander/caddy.git && go build cmd/caddy/main.go
+  dir: /data/caddy 
+  command: ./main
