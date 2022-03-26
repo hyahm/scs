@@ -39,3 +39,6 @@
     
     * [停止器](stopper.md)
     * [通过配置文件安装服务](installconfig.md)
+
+* [各种环境部署](deployment.md)
+    * [flask](flask.md)

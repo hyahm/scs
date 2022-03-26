@@ -13,7 +13,7 @@ var _pem string
 var _continuityInterval time.Duration
 var ProxyHeader string
 
-const VERSION = "v3.6.9"
+const VERSION = "v3.7.0"
 const FORMAT = "{{ .Ctime }} - [{{ .Level }}] - {{.Hostname}} - {{ .Msg }}"
 
 var LogDir = "" // 日志目录
