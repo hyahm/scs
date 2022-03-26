@@ -19,6 +19,7 @@ import (
 
 // 删除对应的server, 外部加了锁，内部调用不用加锁
 func removeServer(name subname.Subname) {
+	servers[name.String()].Logger.Close()
 	delete(servers, name.String())
 	golog.Info(servers)
 	// 如果scripts的副本数为0或者1就直接删除这个scripts
@@ -26,6 +27,7 @@ func removeServer(name subname.Subname) {
 	if _, ok := ss[pname]; ok {
 		ss[pname].Replicate--
 		golog.Info(ss[pname].Replicate)
+
 		if ss[pname].Replicate <= 0 {
 			config.DeleteScriptToConfigFile(ss[pname])
 			delete(ss, pname)

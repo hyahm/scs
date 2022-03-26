@@ -15,8 +15,9 @@ service control service or script
 6.  客户端控制多台服务器
 7.  通过配置文件安装服务
 8.  可以将一些执行耗时的脚本托管给scs处理， 以便快速返回结果  
+9.  远程给某些脚本做更新和查看日志的权限
 
-[文档地址](https://api.hyahm.com/docs/scs/#/)
+[文档地址](https://scs.hyahm.com/#/)
 [部分视频教程](https://www.bilibili.com/video/BV1bv411C7Qz/)
 
 具体更新的内容请查看 [update.md](update.md)文件
