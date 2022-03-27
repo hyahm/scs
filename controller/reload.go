@@ -3,8 +3,10 @@ package controller
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/config"
 	"github.com/hyahm/scs/internal/config/scripts"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
@@ -52,6 +54,7 @@ func Reload() error {
 
 			for i := 0; i < replicate; i++ {
 				subname := subname.NewSubname(name, i)
+				atomic.AddInt64(&global.CanReload, 1)
 				go Remove(servers[subname.String()])
 			}
 
@@ -165,6 +168,7 @@ func ReloadScripts(script *scripts.Script) {
 			// 如果大于的话， 那么就删除多余的
 			for i := newReplicate; i < oldReplicate; i++ {
 				delete(serverIndex[script.Name], i)
+				atomic.AddInt64(&global.CanReload, 1)
 				go Remove(servers[subname.NewSubname(script.Name, i).String()])
 			}
 		} else {

@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -16,32 +15,34 @@ import (
 func Start(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-
+	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
-		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, name)))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	svc.Start()
 
-	w.Write([]byte(`{"code": 200, "msg": "already start"}`))
+	w.Write(Waiting("start", role))
 
 }
 
 func StartPname(w http.ResponseWriter, r *http.Request) {
 	names := xmux.Var(r)["pname"]
+	role := xmux.GetInstance(r).Get("role").(string)
 	for _, pname := range strings.Split(names, ",") {
 		_, ok := controller.GetScriptByPname(pname)
 		if !ok {
-			w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s"}`, pname)))
+			w.Write(NotFoundScript(role))
 			return
 		}
 		controller.StartExsitScript(pname)
 	}
-	w.Write([]byte(`{"code": 200, "msg": "already start"}`))
+	w.Write(Waiting("start", role))
 }
 
 func StartAll(w http.ResponseWriter, r *http.Request) {
+	role := xmux.GetInstance(r).Get("role").(string)
 	controller.StartAllServer()
-	w.Write([]byte(`{"code": 200, "msg": "already start"}`))
+	w.Write(Waiting("start", role))
 }

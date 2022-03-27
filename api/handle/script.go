@@ -1,10 +1,8 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/config"
 	"github.com/hyahm/scs/internal/config/scripts"
@@ -13,7 +11,10 @@ import (
 
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetInstance(r).Data.(*scripts.Script)
-	golog.Infof("%#v", *s)
+	role := xmux.GetInstance(r).Get("role").(string)
+	res := Response{
+		Role: role,
+	}
 	if s.Name == "" {
 		w.Write([]byte(`{"code": 201, "msg": "name require"}`))
 		return
@@ -28,7 +29,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		// 需要判断是否相等
 		if !controller.NeedStop(s) {
 			// 如果没有修改，那么就返回已经add了
-			w.Write([]byte(`{"code": 200, "msg": "already have script and the same"}`))
+			w.Write(res.Sucess("already have script and the same"))
 			return
 		}
 		// 更新配置文件
@@ -37,7 +38,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 
 		err := config.UpdateScriptToConfigFile(s)
 		if err != nil {
-			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+			w.Write(res.ErrorE(err))
 			return
 		}
 		// 否则删除原来的, 需不需要删除
@@ -46,23 +47,27 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		// 添加
 		err := config.AddScriptToConfigFile(s)
 		if err != nil {
-			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+			w.Write(res.ErrorE(err))
 			return
 		}
 
 		controller.AddScript(s)
 
 	}
-
-	w.Write([]byte(`{"code": 200, "msg": "already add script"}`))
+	w.Write(res.Sucess("already add script"))
 }
 
 func DelScript(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
+	role := xmux.GetInstance(r).Get("role").(string)
+	res := Response{
+		Role: role,
+	}
+
 	if err := controller.DelScript(pname); err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+		w.Write(res.ErrorE(err))
 		return
 	}
 
-	w.Write([]byte(`{"code": 200, "msg": "already delete script"}`))
+	w.Write(res.Sucess("already add script"))
 }

@@ -2,7 +2,9 @@ package controller
 
 import (
 	"errors"
+	"sync/atomic"
 
+	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/config"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
 	"github.com/hyahm/scs/internal/server"
@@ -24,6 +26,7 @@ func RemoveScript(pname string) error {
 
 		for i := 0; i < replicate; i++ {
 			subname := subname.NewSubname(pname, i)
+			atomic.AddInt64(&global.CanReload, 1)
 			go Remove(servers[subname.String()])
 		}
 
@@ -51,6 +54,7 @@ func Remove(svc *server.Server) {
 	delete(serverIndex[svc.Name], svc.Index)
 	removeServer(svc.SubName)
 	mu.Unlock()
+	atomic.AddInt64(&global.CanReload, -1)
 }
 
 func RemoveAllScripts() {
@@ -62,6 +66,7 @@ func RemoveAllScripts() {
 	for _, svc := range servers {
 		replicate := svc.Replicate
 		for i := 0; i < replicate; i++ {
+			atomic.AddInt64(&global.CanReload, 1)
 			go Remove(svc)
 		}
 	}

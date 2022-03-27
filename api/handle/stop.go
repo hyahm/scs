@@ -14,23 +14,24 @@ import (
 func Stop(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-
+	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 
 	if !ok {
-		w.Write([]byte(`{"code": 404, "msg": "not found this script"}`))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	go svc.Stop()
-	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
+	w.Write(Waiting("stop", role))
 }
 
 func StopPname(w http.ResponseWriter, r *http.Request) {
 	names := xmux.Var(r)["pname"]
+	role := xmux.GetInstance(r).Get("role").(string)
 	for _, pname := range strings.Split(names, ",") {
 		s, ok := controller.GetScriptByPname(pname)
 		if !ok {
-			w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
+			w.Write(NotFoundScript(role))
 			return
 		}
 		err := controller.StopScript(s)
@@ -40,11 +41,11 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
+	w.Write(Waiting("stop", role))
 }
 
 func StopAll(w http.ResponseWriter, r *http.Request) {
-
+	role := xmux.GetInstance(r).Get("role").(string)
 	controller.StopAllServer()
-	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
+	w.Write(Waiting("stop", role))
 }

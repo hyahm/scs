@@ -2,6 +2,9 @@ package global
 
 import "time"
 
+// 配置文件重载
+var CanReload int64
+
 var _listen string
 var _token string
 var _logCount int

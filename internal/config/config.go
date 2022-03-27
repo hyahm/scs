@@ -87,6 +87,7 @@ func Load() (*Config, error) {
 // 读取配置文件
 func readConfig() (*Config, error) {
 	cfg := &Config{}
+	golog.Info("reload")
 	b, err := ioutil.ReadFile(cfgfile)
 	if err != nil {
 		if !os.IsNotExist(err) {

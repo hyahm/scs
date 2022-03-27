@@ -13,9 +13,10 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 
 	// golog.Info(string(res))
 	name := xmux.Var(r)["name"]
+	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerBySubname(subname.Subname(name).String())
 	if !ok {
-		w.Write([]byte(`{"code": 200, "msg": "not found this name"}`))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	svc.Status.CanNotStop = false
@@ -26,9 +27,10 @@ func CanNotStop(w http.ResponseWriter, r *http.Request) {
 
 	// golog.Info(string(res))
 	name := xmux.Var(r)["name"]
+	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerBySubname(subname.Subname(name).String())
 	if !ok {
-		w.Write([]byte(`{"code": 200, "msg": "not found this name"}`))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	svc.Status.CanNotStop = true

@@ -35,12 +35,13 @@ func NeedStop(s *scripts.Script) bool {
 	return !scripts.EqualScript(s, ss[s.Name])
 }
 
-func ScriptName(pname string, subname string) []byte {
+func ScriptName(pname, subname, role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
 	status := &StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
 		Version: global.VERSION,
+		Role:    role,
 	}
 	if _, ok := ss[pname]; !ok {
 		golog.Error("not found scripts")
@@ -54,12 +55,13 @@ func ScriptName(pname string, subname string) []byte {
 
 }
 
-func ScriptPname(pname string) []byte {
+func ScriptPname(pname, role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
 	statuss := &StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
 		Version: global.VERSION,
+		Role:    role,
 	}
 	if _, ok := ss[pname]; !ok {
 		statuss.Msg = "not found " + pname

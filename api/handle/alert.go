@@ -2,28 +2,40 @@ package handle
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/config/alert"
+	"github.com/hyahm/xmux"
 )
 
 func Alert(w http.ResponseWriter, r *http.Request) {
-
+	role := xmux.GetInstance(r).Get("role").(string)
+	if global.CanReload != 0 {
+		w.Write(WaitingConfigChanged(role))
+		return
+	}
+	res := Response{
+		Role: role,
+	}
 	ra := &alert.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+		w.Write(res.ErrorE(err))
 		return
 	}
 	ra.SendAlert()
-	w.Write([]byte(`{"code":200, "msg": "send alert message"}`))
+	w.Write(res.Sucess("send alert message"))
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
-	w.Write(alert.GetDispatcher())
+	role := xmux.GetInstance(r).Get("role").(string)
+	res := Response{
+		Role: role,
+		Data: alert.GetDispatcher(),
+	}
+	w.Write(res.Sucess(""))
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +71,7 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 		// w.WriteHeader(http.StatusOK)
 		return
 	}
-	w.Write([]byte(`{"code": 511, "msg": "StatusNetworkAuthenticationRequired"}`))
+	w.Write([]byte(`{"code": 500, "msg": "StatusNetworkAuthenticationRequired"}`))
 	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 }
 

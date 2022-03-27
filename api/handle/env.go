@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
@@ -12,14 +11,16 @@ import (
 func GetEnvName(w http.ResponseWriter, r *http.Request) {
 	// 通过pname， name 获取， 因为可能port 不一样
 	name := xmux.Var(r)["name"]
+	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerBySubname(subname.Subname(name).String())
 	if !ok {
-		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name %s"}`, name)))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	res := Response{
 		Data: svc.Env,
+		Role: role,
 	}
-	w.Write(res.Sucess())
+	w.Write(res.Sucess(""))
 
 }

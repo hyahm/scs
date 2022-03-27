@@ -2,16 +2,21 @@ package handle
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/hyahm/xmux"
 	"github.com/shirou/gopsutil/host"
 )
 
 func GetOS(w http.ResponseWriter, r *http.Request) {
+	role := xmux.GetInstance(r).Get("role").(string)
+	res := &Response{
+		Role: role,
+	}
 	hi, err := host.Info()
+
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 1, "msg": "%v"}`, err)))
+		w.Write(res.ErrorE(err))
 		return
 	}
 	type Info struct {
@@ -30,14 +35,7 @@ func GetOS(w http.ResponseWriter, r *http.Request) {
 		PlatformFamily:  hi.PlatformFamily,
 		PlatformVersion: hi.PlatformVersion,
 	}
-	type Resp struct {
-		Code int   `json:"code"`
-		Data *Info `json:"data"`
-	}
-	res := &Resp{
-		Data: info,
-	}
-
+	res.Data = info
 	b, _ := json.Marshal(res)
 	w.Write(b)
 }

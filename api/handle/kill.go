@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -13,9 +12,10 @@ import (
 func Kill(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
+	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
-		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, name)))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	go svc.Kill()
@@ -24,10 +24,11 @@ func Kill(w http.ResponseWriter, r *http.Request) {
 
 func KillPname(w http.ResponseWriter, r *http.Request) {
 	names := xmux.Var(r)["pname"]
+	role := xmux.GetInstance(r).Get("role").(string)
 	for _, pname := range strings.Split(names, ",") {
 		s, ok := controller.GetScriptByPname(pname)
 		if !ok {
-			w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this name: %s"}`, pname)))
+			w.Write(NotFoundScript(role))
 			return
 		}
 		controller.KillScript(s)

@@ -48,43 +48,38 @@ func LookHandle() *xmux.GroupRoute {
 	group.Post("/server/info/{name}", handle.ServerInfo)
 	group.Post("/get/servers", handle.GetServers)
 	group.Post("/get/alarms", handle.GetAlarms)
+	group.Get("/log/{name}/{int:line}", handle.Log)
+	group.Post("/start", handle.StartAll)
+	group.Post("/status", handle.AllStatus)
+	group.Post("/stop", handle.StopAll)
+	group.Post("/cannotstop/{name}", handle.CanNotStop)
+	group.Post("/canstop/{name}", handle.CanStop)
+	group.Post("/get/alert", handle.GetAlert)
+	group.Post("/get/scripts", handle.GetScripts)
+
+	group.Post("/get/info", handle.GetOS)
+	group.Post("/restart", handle.RestartAll)
+	group.Post("/update", handle.UpdateAll)
 	return group
 }
 
 func FileHandle() *xmux.GroupRoute {
 	// 修改文件的操作
 	group := xmux.NewGroupRoute()
-	group.Post("/status", handle.AllStatus)
-
-	group.Post("/start", handle.StartAll)
-
-	group.Post("/stop", handle.StopAll)
 
 	group.Post("/remove/{pname}/{name}", handle.Remove)
 	group.Post("/remove/{pname}", handle.RemovePname)
 	// router.Post("/remove", handle.RemoveAll)
 
-	group.Post("/restart", handle.RestartAll)
-
-	group.Post("/update", handle.UpdateAll)
-
-	group.Post("/canstop/{name}", handle.CanStop)
-	group.Post("/cannotstop/{name}", handle.CanNotStop)
-
 	group.Post("/-/reload", handle.Reload)
 
-	group.Get("/log/{name}/{int:line}", handle.Log)
-	group.Post("/get/repo", handle.GetRepo)
+	group.Post("/get/repo", handle.GetRepo) //
 
 	group.Post("/enable/{pname}", handle.Enable)
 	group.Post("/disable/{pname}", handle.Disable)
 
 	group.Post("/set/alert", handle.Alert)
-	group.Post("/get/alert", handle.GetAlert)
-	group.Post("/get/info", handle.GetOS)
 	// 监测点
-	group.Post("/probe", handle.Probe).DelModule(midware.CheckToken)
-	group.Post("/get/scripts", handle.GetScripts)
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
 	group.Post("/script", handle.AddScript).BindJson(&scripts.Script{})
@@ -99,6 +94,7 @@ func HttpServer() {
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
 	router.AddModule(midware.CheckToken)
+	router.Post("/probe", handle.Probe).DelModule(midware.CheckToken)
 	// 增加请求时间
 	router.Enter = enter
 	// router.MiddleWare(GetExecTime)

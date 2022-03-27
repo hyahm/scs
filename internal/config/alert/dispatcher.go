@@ -1,7 +1,6 @@
 package alert
 
 import (
-	"encoding/json"
 	"sync"
 	"time"
 
@@ -20,12 +19,8 @@ func init() {
 	dispatcherLock = sync.RWMutex{}
 }
 
-func GetDispatcher() []byte {
-	b, err := json.Marshal(dispatcher)
-	if err != nil {
-		return []byte(err.Error())
-	}
-	return b
+func GetDispatcher() map[string]map[string]*AlertInfo {
+	return dispatcher
 }
 
 type RespAlert struct {

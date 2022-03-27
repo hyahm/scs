@@ -21,13 +21,10 @@ import (
 func removeServer(name subname.Subname) {
 	servers[name.String()].Logger.Close()
 	delete(servers, name.String())
-	golog.Info(servers)
 	// 如果scripts的副本数为0或者1就直接删除这个scripts
 	pname := name.GetName()
 	if _, ok := ss[pname]; ok {
 		ss[pname].Replicate--
-		golog.Info(ss[pname].Replicate)
-
 		if ss[pname].Replicate <= 0 {
 			config.DeleteScriptToConfigFile(ss[pname])
 			delete(ss, pname)
@@ -109,12 +106,13 @@ func makeReplicateServerAndStart(s *scripts.Script, end int) {
 }
 
 // 获取所有服务的状态
-func All() []byte {
+func All(role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
 	statuss := &StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
 		Version: global.VERSION,
+		Role:    role,
 	}
 	serviceStatus := make([]*status.ServiceStatus, 0)
 	for name := range servers {

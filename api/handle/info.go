@@ -9,13 +9,14 @@ import (
 
 func ServerInfo(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
+	role := xmux.GetInstance(r).Get("role").(string)
 	info, ok := controller.GetServerInfo(name)
 	if !ok {
-		w.Write([]byte(`{"code": 404, "msg": "not found this server"}`))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	res := Response{
 		Data: info,
 	}
-	w.Write(res.Sucess())
+	w.Write(res.Sucess(""))
 }

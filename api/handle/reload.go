@@ -1,28 +1,27 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
+	"github.com/hyahm/scs/global"
+	"github.com/hyahm/xmux"
 )
 
 func Reload(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
-	if reloadKey {
-		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
+	role := xmux.GetInstance(r).Get("role").(string)
+	if global.CanReload != 0 {
+		w.Write(WaitingConfigChanged(role))
 		return
 	}
+	res := Response{
+		Role: role,
+	}
 
-	// script.Reloadlocker.Lock()
-	// defer script.Reloadlocker.Unlock()
-	reloadKey = true
-	defer func() {
-		reloadKey = false
-	}()
 	// 拷贝一份到当前运行的脚本列表
 	if err := controller.Reload(); err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+		w.Write(res.ErrorE(err))
 		return
 	}
 	w.Write([]byte(`{"code": 200, "msg": "config file reloaded"}`))

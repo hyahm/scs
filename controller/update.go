@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"sync/atomic"
+
+	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/config/scripts"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
 )
@@ -22,6 +25,7 @@ func DisableScript(s *scripts.Script) bool {
 	for i := 0; i < replicate; i++ {
 		subname := subname.NewSubname(s.Name, i)
 		if _, ok := servers[subname.String()]; ok {
+			atomic.AddInt64(&global.CanReload, 1)
 			go Remove(servers[subname.String()])
 		}
 

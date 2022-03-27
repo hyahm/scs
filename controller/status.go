@@ -15,6 +15,7 @@ type StatusList struct {
 	Code    int                     `json:"code"`
 	Msg     string                  `json:"msg"`
 	Version string                  `json:"version"`
+	Role    string                  `json:"role"`
 }
 
 func (sl *StatusList) Marshal() []byte {

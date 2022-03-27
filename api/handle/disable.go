@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
+	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/config"
 	"github.com/hyahm/xmux"
 )
@@ -12,19 +13,16 @@ import (
 var reloadKey bool
 
 func Disable(w http.ResponseWriter, r *http.Request) {
-	if reloadKey {
-		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
+	role := xmux.GetInstance(r).Get("role").(string)
+	if global.CanReload != 0 {
+		w.Write(WaitingConfigChanged(role))
 		return
 	}
-	reloadKey = true
-	defer func() {
-		reloadKey = false
-	}()
 	pname := xmux.Var(r)["pname"]
 
 	s, ok := controller.GetScriptByPname(pname)
 	if !ok {
-		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
@@ -40,18 +38,15 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 }
 
 func Enable(w http.ResponseWriter, r *http.Request) {
-	if reloadKey {
-		w.Write([]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
+	role := xmux.GetInstance(r).Get("role").(string)
+	if global.CanReload != 0 {
+		w.Write(WaitingConfigChanged(role))
 		return
 	}
-	reloadKey = true
-	defer func() {
-		reloadKey = false
-	}()
 	pname := xmux.Var(r)["pname"]
 	s, ok := controller.GetScriptByPname(pname)
 	if !ok {
-		w.Write([]byte(fmt.Sprintf(`{"code": 404, "msg": "not found this pname: %s}`, pname)))
+		w.Write(NotFoundScript(role))
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略

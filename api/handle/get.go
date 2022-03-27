@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
+	"github.com/hyahm/xmux"
 )
 
 // func GetConfig(w http.ResponseWriter, r *http.Request) {
@@ -30,22 +31,28 @@ import (
 // }
 
 func GetAlarms(w http.ResponseWriter, r *http.Request) {
+	role := xmux.GetInstance(r).Get("role").(string)
 	res := &Response{
 		Data: controller.GetAterts(),
+		Role: role,
 	}
-	w.Write(res.Sucess())
+	w.Write(res.Sucess(""))
 }
 
 func GetServers(w http.ResponseWriter, r *http.Request) {
+	role := xmux.GetInstance(r).Get("role").(string)
 	res := &Response{
 		Data: controller.GetServers(),
+		Role: role,
 	}
-	w.Write(res.Sucess())
+	w.Write(res.Sucess(""))
 }
 
 func GetScripts(w http.ResponseWriter, r *http.Request) {
+	role := xmux.GetInstance(r).Get("role").(string)
 	res := &Response{
 		Data: controller.GetScripts(),
+		Role: role,
 	}
-	w.Write(res.Sucess())
+	w.Write(res.Sucess(""))
 }

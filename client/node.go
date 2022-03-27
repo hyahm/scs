@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hyahm/scs/api/handle"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/config/scripts"
 )
@@ -14,6 +15,7 @@ type Node struct {
 	Name    string        `yaml:"-"`
 	Url     string        `yaml:"url"`
 	Token   string        `yaml:"token"`
+	Role    string        `json:""`
 	Timeout time.Duration `json:"timeout"`
 }
 
@@ -39,22 +41,23 @@ func (node *Node) Reload() {
 func (node *Node) Restart(args ...string) {
 	cli := node.NewSCSClient()
 	var err error
+	var res *handle.Response
 	switch len(args) {
 	case 0:
-		_, err = cli.RestartAll()
+		res, err = cli.RestartAll()
 	case 1:
 		cli.Pname = args[0]
-		_, err = cli.RestartPname()
+		res, err = cli.RestartPname()
 	default:
 		cli.Pname = args[0]
 		cli.Name = args[1]
-		_, err = cli.RestartName()
+		res, err = cli.RestartName()
 	}
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	fmt.Printf("name: %s , msg: waiting restart\n", node.Name)
+	fmt.Println(string(res.Marshal()))
 	// fmt.Println(string(node.crud("stop", args...)))
 }
 
@@ -106,23 +109,24 @@ func (node *Node) Start(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
+	var res *handle.Response
 	switch len(args) {
 	case 0:
-		_, err = cli.StartAll()
+		res, err = cli.StartAll()
 	case 1:
 		cli.Pname = args[0]
-		_, err = cli.StartPname()
+		res, err = cli.StartPname()
 	default:
 		cli.Pname = args[0]
 		cli.Name = args[1]
-		_, err = cli.StartName()
+		res, err = cli.StartName()
 	}
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
 
-	fmt.Printf("name: %s , msg: waiting start\n", node.Name)
+	fmt.Println(string(res.Marshal()))
 	// fmt.Println(string(node.crud("stop", args...)))
 }
 
@@ -163,16 +167,16 @@ func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 func (node *Node) Kill(args ...string) {
 
 	cli := node.NewSCSClient()
+	var res *handle.Response
 	var err error
-
 	switch len(args) {
 	case 2:
 		cli.Pname = args[0]
 		cli.Name = args[1]
-		_, err = cli.KillName()
+		res, err = cli.KillName()
 	case 1:
 		cli.Pname = args[0]
-		_, err = cli.KillPname()
+		res, err = cli.KillPname()
 	default:
 		return
 	}
@@ -180,7 +184,7 @@ func (node *Node) Kill(args ...string) {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	fmt.Printf("name: %s , msg: waiting kill\n", node.Name)
+	fmt.Println(string(res.Marshal()))
 	// fmt.Println(string(node.crud("stop", args...)))
 }
 
@@ -192,7 +196,7 @@ func (node *Node) Env(args string) {
 	// case 1:
 	cli := node.NewSCSClient()
 	cli.Name = args
-	b, err := cli.Env()
+	res, err := cli.Env()
 	// b, err = Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
@@ -200,7 +204,7 @@ func (node *Node) Env(args string) {
 	}
 
 	// l := make(map[string]interface{}, 0)
-	out, err := json.MarshalIndent(b, "", "  ")
+	out, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
@@ -219,14 +223,14 @@ func (node *Node) Info(args string) {
 	// case 1:
 	cli := node.NewSCSClient()
 	cli.Name = args
-	b, err := cli.Info()
+	res, err := cli.Info()
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
 
 	// l := make(map[string]string, 0)
-	out, err := json.MarshalIndent(b, "", "  ")
+	out, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 	}
@@ -241,13 +245,13 @@ func (node *Node) Install(scripts []*scripts.Script, env map[string]string) {
 
 	for _, script := range scripts {
 		cli := node.NewSCSClient()
-		_, err := cli.AddScript(script)
+		res, err := cli.AddScript(script)
 		// b, err := Requests("POST", fmt.Sprintf("%s/script", node.Url), node.Token, bytes.NewReader(body))
 		if err != nil {
 			fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 			return
 		}
-		fmt.Printf("name: %s , msg: waiting install\n", node.Name)
+		fmt.Printf(string(res.Marshal()))
 	}
 
 }
@@ -263,22 +267,23 @@ func (node *Node) Stop(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
+	var res *handle.Response
 	switch len(args) {
 	case 0:
-		_, err = cli.StopAll()
+		res, err = cli.StopAll()
 	case 1:
 		cli.Pname = args[0]
-		_, err = cli.StopPname()
+		res, err = cli.StopPname()
 	default:
 		cli.Pname = args[0]
 		cli.Name = args[1]
-		_, err = cli.StopName()
+		res, err = cli.StopName()
 	}
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	fmt.Printf("name: %s , msg: waiting stop\n", node.Name)
+	fmt.Printf(string(res.Marshal()))
 
 }
 
@@ -286,6 +291,7 @@ func (node *Node) Remove(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
+	var res *handle.Response
 	switch len(args) {
 	case 0:
 		fmt.Printf("name: %s , msg: remove all have been removed\n", node.Name)
@@ -293,17 +299,17 @@ func (node *Node) Remove(args ...string) {
 		// b, err = cli.RemoveAllScrip()
 	case 1:
 		cli.Pname = args[0]
-		_, err = cli.RemovePnameScrip()
+		res, err = cli.RemovePnameScrip()
 	default:
 		cli.Pname = args[0]
 		cli.Name = args[1]
-		_, err = cli.RemoveNameScrip()
+		res, err = cli.RemoveNameScrip()
 	}
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	fmt.Printf("name: %s , msg: waiting remove\n", node.Name)
+	fmt.Println(string(res.Marshal()))
 
 	// fmt.Println(string(node.crud("stop", args...)))
 }
@@ -312,22 +318,22 @@ func (node *Node) Enable(pname string) {
 
 	cli := node.NewSCSClient()
 	cli.Pname = pname
-	_, err := cli.Enable()
+	res, err := cli.Enable()
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	fmt.Printf("name: %s , msg: waiting enable\n", node.Name)
+	fmt.Println(string(res.Marshal()))
 }
 
 func (node *Node) GetServers() {
 	cli := node.NewSCSClient()
-	b, err := cli.GetServers()
+	res, err := cli.GetServers()
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	out, err := json.MarshalIndent(b, "", " ")
+	out, err := json.MarshalIndent(res, "", " ")
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
@@ -337,12 +343,12 @@ func (node *Node) GetServers() {
 
 func (node *Node) GetAlerts() {
 	cli := node.NewSCSClient()
-	b, err := cli.GetAlarms()
+	res, err := cli.GetAlarms()
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	out, err := json.MarshalIndent(b, "", "  ")
+	out, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
@@ -352,12 +358,12 @@ func (node *Node) GetAlerts() {
 
 func (node *Node) GetScripts() {
 	cli := node.NewSCSClient()
-	b, err := cli.GetScripts()
+	res, err := cli.GetScripts()
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	out, err := json.MarshalIndent(b, "", "  ")
+	out, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
@@ -369,12 +375,12 @@ func (node *Node) Disable(pname string) {
 
 	cli := node.NewSCSClient()
 	cli.Pname = pname
-	_, err := cli.Disable()
+	res, err := cli.Disable()
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	fmt.Printf("name: %s , msg: waiting disable\n", node.Name)
+	fmt.Println(string(res.Marshal()))
 	// fmt.Println(string(node.crud("stop", args...)))
 }
 
@@ -382,23 +388,24 @@ func (node *Node) Update(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
+	var res *handle.Response
 	switch len(args) {
 	case 0:
-		_, err = cli.UpdateAll()
+		res, err = cli.UpdateAll()
 	case 1:
 		cli.Pname = args[0]
-		_, err = cli.UpdatePname()
+		res, err = cli.UpdatePname()
 	default:
 		cli.Pname = args[0]
 		cli.Name = args[1]
-		_, err = cli.UpdateName()
+		res, err = cli.UpdateName()
 	}
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
 	// fmt.Println(string(b))
-	fmt.Printf("name: %s , msg: waiting update\n", node.Name)
+	fmt.Println(string(res.Marshal()))
 	// return string(b)
 	// return node.Update(args...)
 	// fmt.Println(string(node.crud("update", args...)))
