@@ -41,7 +41,12 @@ func RestartPname(w http.ResponseWriter, r *http.Request) {
 func RestartAll(w http.ResponseWriter, r *http.Request) {
 	// 删除所有的脚本
 	role := xmux.GetInstance(r).Get("role").(string)
-	controller.RestartAllServer()
+	token := xmux.GetInstance(r).Get("token").(string)
+	if token != "" {
+		controller.RestartPermAllServer(token)
+	} else {
+		controller.RestartAllServer()
+	}
 
 	w.Write(pkg.Waiting("restart", role))
 }

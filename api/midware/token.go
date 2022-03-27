@@ -11,7 +11,9 @@ import (
 )
 
 func CheckToken(w http.ResponseWriter, r *http.Request) bool {
+	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
+
 	var addr string
 	if global.ProxyHeader == "" {
 		addr = strings.Split(r.RemoteAddr, ":")[0]
@@ -37,19 +39,31 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	pages := xmux.GetInstance(r).Get(xmux.PAGES).(map[string]struct{})
-	golog.Info(name)
 	if _, ok := pages["look"]; ok {
 		// 如果是查看所有状态， 那么就继续
-		if xmux.GetInstance(r).Get(xmux.CURRFUNCNAME) == "AllStatus" {
+		if pname == "" && name == "" {
 			xmux.GetInstance(r).Set("token", token)
 			xmux.GetInstance(r).Set("role", "look")
 			return false
 		}
-		lookToken := controller.GetLookToken(name)
-		if lookToken != "" && token == lookToken {
-			xmux.GetInstance(r).Set("role", "look")
-			return false
+		if pname == "" && name != "" {
+			lookToken := controller.GetLookToken(name)
+			if lookToken != "" && token == lookToken {
+				xmux.GetInstance(r).Set("role", "look")
+				return false
+			}
 		}
+
+		if pname != "" {
+			lookToken := controller.GetPnameToken(pname)
+			golog.Info(lookToken)
+			if lookToken != "" && token == lookToken {
+				xmux.GetInstance(r).Set("role", "look")
+				golog.Info("token")
+				return false
+			}
+		}
+
 	}
 	w.Write([]byte(`{"code": 203, "msg": "token error"}`))
 	return true

@@ -42,18 +42,30 @@ func GetAlarms(w http.ResponseWriter, r *http.Request) {
 
 func GetServers(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
+	token := xmux.GetInstance(r).Get("token").(string)
 	res := &pkg.Response{
-		Data: controller.GetServers(),
 		Role: role,
+	}
+	if token != "" {
+		res.Data = controller.GetPremServers(token)
+	} else {
+		res.Data = controller.GetServers()
 	}
 	w.Write(res.Sucess(""))
 }
 
 func GetScripts(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
+	token := xmux.GetInstance(r).Get("token").(string)
 	res := &pkg.Response{
-		Data: controller.GetScripts(),
+
 		Role: role,
 	}
+	if token != "" {
+		res.Data = controller.GetPermScripts(token)
+	} else {
+		res.Data = controller.GetScripts()
+	}
+
 	w.Write(res.Sucess(""))
 }

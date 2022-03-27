@@ -44,6 +44,12 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 
 func StartAll(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
-	controller.StartAllServer()
+	token := xmux.GetInstance(r).Get("token").(string)
+	if token != "" {
+		controller.StartPermAllServer(token)
+	} else {
+		controller.StartAllServer()
+	}
+
 	w.Write(pkg.Waiting("start", role))
 }

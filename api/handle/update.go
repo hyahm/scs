@@ -41,6 +41,12 @@ func UpdatePname(w http.ResponseWriter, r *http.Request) {
 
 func UpdateAll(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
-	controller.UpdateAndRestartAllServer()
+	token := xmux.GetInstance(r).Get("token").(string)
+	if token != "" {
+		controller.UpdatePermAndRestartAllServer(token)
+	} else {
+		controller.UpdateAndRestartAllServer()
+	}
+
 	w.Write(pkg.Waiting("update", role))
 }

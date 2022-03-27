@@ -46,33 +46,33 @@ func LookHandle() *xmux.GroupRoute {
 	group.Post("/kill/{pname}/{name}", handle.Kill)
 	group.Post("/env/{name}", handle.GetEnvName)
 	group.Post("/server/info/{name}", handle.ServerInfo)
-	group.Post("/get/servers", handle.GetServers)
-	group.Post("/get/alarms", handle.GetAlarms)
+	group.Post("/get/servers", handle.GetServers) // complete
+
 	group.Get("/log/{name}/{int:line}", handle.Log)
-	group.Post("/start", handle.StartAll)
-	group.Post("/status", handle.AllStatus)
-	group.Post("/stop", handle.StopAll)
+
 	group.Post("/cannotstop/{name}", handle.CanNotStop)
 	group.Post("/canstop/{name}", handle.CanStop)
-	group.Post("/get/alert", handle.GetAlert)
-	group.Post("/get/scripts", handle.GetScripts)
 
-	group.Post("/get/info", handle.GetOS)
-	group.Post("/restart", handle.RestartAll)
-	group.Post("/update", handle.UpdateAll)
+	group.Post("/get/scripts", handle.GetScripts)
+	group.Post("/start", handle.StartAll)   // complete
+	group.Post("/status", handle.AllStatus) // complete
+	group.Post("/stop", handle.StopAll)     // complete
+
+	group.Post("/restart", handle.RestartAll) // complete
+	group.Post("/update", handle.UpdateAll)   // complete
 	return group
 }
 
 func FileHandle() *xmux.GroupRoute {
 	// 修改文件的操作
 	group := xmux.NewGroupRoute()
-
+	group.Post("/get/info", handle.GetOS)
 	group.Post("/remove/{pname}/{name}", handle.Remove)
 	group.Post("/remove/{pname}", handle.RemovePname)
 	// router.Post("/remove", handle.RemoveAll)
-
+	group.Post("/get/alert", handle.GetAlert)
 	group.Post("/-/reload", handle.Reload)
-
+	group.Post("/get/alarms", handle.GetAlarms)
 	group.Post("/get/repo", handle.GetRepo) //
 
 	group.Post("/enable/{pname}", handle.Enable)

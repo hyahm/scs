@@ -16,6 +16,17 @@ func GetScripts() map[string]*scripts.Script {
 	defer mu.RUnlock()
 	return ss
 }
+func GetPermScripts(token string) map[string]*scripts.Script {
+	mu.RLock()
+	defer mu.RUnlock()
+	tempScripts := make(map[string]*scripts.Script)
+	for name, script := range ss {
+		if script.Token == token {
+			tempScripts[name] = script
+		}
+	}
+	return tempScripts
+}
 
 func KillScript(s *scripts.Script) {
 	mu.RLock()

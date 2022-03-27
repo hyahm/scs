@@ -50,6 +50,17 @@ func RestartAllServer() {
 	}
 }
 
+func RestartPermAllServer(token string) {
+	mu.RLock()
+	defer mu.RUnlock()
+	for _, svc := range servers {
+		if svc.Token == token {
+			go svc.Restart()
+		}
+
+	}
+}
+
 // 返回成功还是失败
 func UpdateAndRestartScript(s *scripts.Script) bool {
 	mu.RLock()
@@ -73,5 +84,15 @@ func UpdateAndRestartAllServer() {
 	defer mu.RUnlock()
 	for _, s := range ss {
 		go UpdateAndRestartScript(s)
+	}
+}
+
+func UpdatePermAndRestartAllServer(token string) {
+	mu.RLock()
+	defer mu.RUnlock()
+	for _, s := range ss {
+		if s.Token == token {
+			go UpdateAndRestartScript(s)
+		}
 	}
 }

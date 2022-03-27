@@ -16,12 +16,12 @@ func GetLookToken(name string) string {
 	return ""
 }
 
-// func GetLookToken(name string) string {
-// 	mu.RLock()
-// 	defer mu.RUnlock()
+func GetPnameToken(pname string) string {
+	mu.RLock()
+	defer mu.RUnlock()
 
-// 	if v, ok := ss[subname.Subname(name).GetName()]; ok {
-// 		return v.Token
-// 	}
-// 	return ""
-// }
+	if v, ok := ss[pname]; ok {
+		return v.Token
+	}
+	return ""
+}

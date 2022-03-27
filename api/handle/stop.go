@@ -47,6 +47,12 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 
 func StopAll(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
-	controller.StopAllServer()
+	token := xmux.GetInstance(r).Get("token").(string)
+	if token != "" {
+		controller.StopPermAllServer(token)
+	} else {
+		controller.StopAllServer()
+	}
+
 	w.Write(pkg.Waiting("stop", role))
 }

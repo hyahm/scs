@@ -43,6 +43,17 @@ func StartAllServer() {
 	}
 }
 
+func StartPermAllServer(token string) {
+	mu.RLock()
+	defer mu.RUnlock()
+	for _, v := range servers {
+		if v.Token == token {
+			v.Start()
+		}
+
+	}
+}
+
 func HaveScript(pname string) bool {
 	mu.RLock()
 	defer mu.RUnlock()
@@ -56,8 +67,19 @@ func GetServers() map[string]*server.Server {
 	return servers
 }
 
-func GetAterts() map[string]message.SendAlerter {
+func GetPremServers(token string) map[string]*server.Server {
+	mu.RLock()
+	defer mu.RUnlock()
+	tempServers := make(map[string]*server.Server)
+	for name, v := range servers {
+		if v.Token == token {
+			tempServers[name] = v
+		}
+	}
+	return tempServers
+}
 
+func GetAterts() map[string]message.SendAlerter {
 	return alert.GetAlerts()
 }
 
@@ -159,6 +181,20 @@ func StopAllServer() {
 		if err != nil {
 			golog.Error(err)
 		}
+	}
+}
+
+func StopPermAllServer(token string) {
+	mu.RLock()
+	defer mu.RUnlock()
+	for _, s := range ss {
+		if s.Token == token {
+			err := StopScript(s)
+			if err != nil {
+				golog.Error(err)
+			}
+		}
+
 	}
 }
 

@@ -20,6 +20,7 @@
     * [检测时间和报警间隔](continuityInterval.md)
 * [定时器](cron.md)
 * [安全](safe.md)
+* [远程权限管理](perm.md)
 * [配置文件完整版](config.md)
 * [客户端基本操作](scsctl.md)
 
