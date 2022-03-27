@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/xmux"
@@ -24,17 +23,20 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 	needToken := true
 	for _, v := range global.GetIgnoreToken() {
 		if v == addr {
+			xmux.GetInstance(r).Set("token", "")
 			needToken = false
 			break
 		}
 	}
 	if !needToken {
+		xmux.GetInstance(r).Set("token", "")
 		xmux.GetInstance(r).Set("role", "admin")
 		return false
 	}
 	token := r.Header.Get("Token")
 	if token == global.GetToken() {
 		// w.Write([]byte(`{"code": 203, "msg": "token error"}`))
+		xmux.GetInstance(r).Set("token", "")
 		xmux.GetInstance(r).Set("role", "admin")
 		return false
 	}
@@ -50,16 +52,16 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 			lookToken := controller.GetLookToken(name)
 			if lookToken != "" && token == lookToken {
 				xmux.GetInstance(r).Set("role", "look")
+				xmux.GetInstance(r).Set("token", "")
 				return false
 			}
 		}
 
 		if pname != "" {
 			lookToken := controller.GetPnameToken(pname)
-			golog.Info(lookToken)
 			if lookToken != "" && token == lookToken {
 				xmux.GetInstance(r).Set("role", "look")
-				golog.Info("token")
+				xmux.GetInstance(r).Set("token", "")
 				return false
 			}
 		}

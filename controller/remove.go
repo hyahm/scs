@@ -5,7 +5,6 @@ import (
 	"sync/atomic"
 
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/config"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/status"
@@ -13,7 +12,7 @@ import (
 
 // 只有在删除的时候才会需要   svc.StopSigle 信号
 // 只有在 Server.Removed 为 true的时候才会发送  svc.StopSigle 信号
-
+// RemovePname 的时候才会用到
 func RemoveScript(pname string) error {
 	mu.RLock()
 	defer mu.RUnlock()
@@ -27,7 +26,7 @@ func RemoveScript(pname string) error {
 		for i := 0; i < replicate; i++ {
 			subname := subname.NewSubname(pname, i)
 			atomic.AddInt64(&global.CanReload, 1)
-			go Remove(servers[subname.String()])
+			go Remove(servers[subname.String()], true)
 		}
 
 	} else {
@@ -36,7 +35,8 @@ func RemoveScript(pname string) error {
 	return nil
 }
 
-func Remove(svc *server.Server) {
+// update: 是否需要重新修改配置文件
+func Remove(svc *server.Server, update bool) {
 	// 如果是always 为 true，那么直接修改为false
 	if svc == nil {
 		return
@@ -52,22 +52,22 @@ func Remove(svc *server.Server) {
 
 	mu.Lock()
 	delete(serverIndex[svc.Name], svc.Index)
-	removeServer(svc.SubName)
+	removeServer(svc.SubName, update)
 	mu.Unlock()
 	atomic.AddInt64(&global.CanReload, -1)
 }
 
-func RemoveAllScripts() {
-	// 删除所有脚本
-	config.RemoveAllScriptToConfigFile()
-	mu.RLock()
-	defer mu.RUnlock()
+// func RemoveAllScripts() {
+// 	// 删除所有脚本
+// 	config.RemoveAllScriptToConfigFile()
+// 	mu.RLock()
+// 	defer mu.RUnlock()
 
-	for _, svc := range servers {
-		replicate := svc.Replicate
-		for i := 0; i < replicate; i++ {
-			atomic.AddInt64(&global.CanReload, 1)
-			go Remove(svc)
-		}
-	}
-}
+// 	for _, svc := range servers {
+// 		replicate := svc.Replicate
+// 		for i := 0; i < replicate; i++ {
+// 			atomic.AddInt64(&global.CanReload, 1)
+// 			go Remove(svc)
+// 		}
+// 	}
+// }

@@ -26,10 +26,13 @@ func Reload() error {
 		// 第一次报错直接退出
 		return err
 	}
-
+	err = cfg.WriteConfigFile(true)
+	if err != nil {
+		// 写进配置文件
+		return err
+	}
 	temp := make(map[string]struct{})
 	getTempScript(temp)
-
 	for index := range cfg.SC {
 
 		// 	// 将数据填充至 SS, 返回是否存在此脚本
@@ -40,7 +43,7 @@ func Reload() error {
 		// 删除之前存在的name
 		delete(temp, cfg.SC[index].Name)
 		// 	// 修改配置
-		ReloadScripts(cfg.SC[index])
+		ReloadScripts(cfg.SC[index], false)
 	}
 	mu.Lock()
 	defer mu.Unlock()
@@ -55,7 +58,7 @@ func Reload() error {
 			for i := 0; i < replicate; i++ {
 				subname := subname.NewSubname(name, i)
 				atomic.AddInt64(&global.CanReload, 1)
-				go Remove(servers[subname.String()])
+				go Remove(servers[subname.String()], false)
 			}
 
 		}
@@ -78,7 +81,7 @@ func AddScript(script *scripts.Script) {
 	}
 }
 
-func UpdateScript(script *scripts.Script) {
+func UpdateScript(script *scripts.Script, update bool) {
 
 	oldReplicate := ss[script.Name].Replicate
 	if oldReplicate == 0 {
@@ -101,7 +104,7 @@ func UpdateScript(script *scripts.Script) {
 		// servers[subname.String()].Start()
 		go func(i int) {
 			golog.Info("remove ", subname.NewSubname(script.Name, i).String())
-			Remove(servers[subname.NewSubname(script.Name, i).String()])
+			Remove(servers[subname.NewSubname(script.Name, i).String()], false)
 			golog.Info("update")
 			makeReplicateServerAndStart(ss[script.Name], newReplicate)
 			golog.Info("update success")
@@ -112,12 +115,12 @@ func UpdateScript(script *scripts.Script) {
 	// 删除多余的
 	for i := newReplicate; i < oldReplicate; i++ {
 		golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-		Remove(servers[subname.NewSubname(script.Name, i).String()])
+		Remove(servers[subname.NewSubname(script.Name, i).String()], false)
 	}
 
 }
 
-func ReloadScripts(script *scripts.Script) {
+func ReloadScripts(script *scripts.Script, update bool) {
 	// script: 配置文件新读取出来的
 	// 处理存在的
 	if _, ok := ss[script.Name]; ok {
@@ -145,7 +148,7 @@ func ReloadScripts(script *scripts.Script) {
 				// subname := subname.NewSubname(script.Name, i)
 				// servers[subname.String()].Start()
 				go func(i int) {
-					Remove(servers[subname.NewSubname(script.Name, i).String()])
+					Remove(servers[subname.NewSubname(script.Name, i).String()], update)
 					makeReplicateServerAndStart(script, newReplicate)
 				}(i)
 
@@ -154,7 +157,7 @@ func ReloadScripts(script *scripts.Script) {
 			// 删除多余的
 			for i := newReplicate; i < oldReplicate; i++ {
 				golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-				Remove(servers[subname.NewSubname(script.Name, i).String()])
+				Remove(servers[subname.NewSubname(script.Name, i).String()], update)
 			}
 
 			return
@@ -169,7 +172,7 @@ func ReloadScripts(script *scripts.Script) {
 			for i := newReplicate; i < oldReplicate; i++ {
 				delete(serverIndex[script.Name], i)
 				atomic.AddInt64(&global.CanReload, 1)
-				go Remove(servers[subname.NewSubname(script.Name, i).String()])
+				go Remove(servers[subname.NewSubname(script.Name, i).String()], update)
 			}
 		} else {
 			makeReplicateServerAndStart(script, newReplicate)

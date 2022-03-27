@@ -114,7 +114,6 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		"Failed" + (space(maxColumeLen[8] - len("Failed"))).String() +
 		"CPU" + (space(maxColumeLen[9] - len("CPU"))).String() +
 		"MEM(kb)" + (space(maxColumeLen[10] - len("MEM(kb)"))).String() +
-
 		"Command")
 	for _, info := range st.Nodes {
 

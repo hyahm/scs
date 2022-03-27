@@ -50,12 +50,15 @@ func Start(filename string) (*Config, error) {
 	return ReLoad()
 }
 
-func (c *Config) WriteConfigFile() error {
+func (c *Config) WriteConfigFile(update bool) error {
+	if !update {
+		return nil
+	}
 	b, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
-
+	golog.Info(string(b))
 	return ioutil.WriteFile(cfgfile, b, 0644)
 }
 
@@ -146,7 +149,7 @@ func (c *Config) check() error {
 }
 
 // 更新单个script到配置文件
-func UpdateScriptToConfigFile(s *scripts.Script) error {
+func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
 	// 添加
 	// 默认配置
 	f, err := ioutil.ReadFile(cfgfile)
@@ -169,16 +172,12 @@ func UpdateScriptToConfigFile(s *scripts.Script) error {
 
 		}
 	}
-	b, err := yaml.Marshal(tmp)
-	if err != nil {
-		return err
-	}
-	// 跟新配置文件
-	return ioutil.WriteFile(cfgfile, b, 0644)
+	return tmp.WriteConfigFile(true)
+
 }
 
 // 删除配置文件的所有scripts
-func DeleteAllScriptToConfigFile() error {
+func DeleteAllScriptToConfigFile(update bool) error {
 	// 添加
 	// 默认配置
 	f, err := ioutil.ReadFile(cfgfile)
@@ -192,16 +191,11 @@ func DeleteAllScriptToConfigFile() error {
 		return err
 	}
 	tmp.SC = nil
-	b, err := yaml.Marshal(tmp)
-	if err != nil {
-		return err
-	}
-	// 跟新配置文件
-	return ioutil.WriteFile(cfgfile, b, 0644)
+	return tmp.WriteConfigFile(update)
 }
 
 // 更新script到配置文件
-func RemoveAllScriptToConfigFile() error {
+func RemoveAllScriptToConfigFile(update bool) error {
 	// 添加
 	// 默认配置
 	f, err := ioutil.ReadFile(cfgfile)
@@ -215,21 +209,16 @@ func RemoveAllScriptToConfigFile() error {
 		return err
 	}
 
-	b, err := yaml.Marshal(tmp)
-	if err != nil {
-		return err
-	}
-	// 跟新配置文件
-	return ioutil.WriteFile(cfgfile, b, 0644)
+	return tmp.WriteConfigFile(update)
 }
 
-func RemoveAllScripts() {
-	// 删除所有脚本
-	RemoveAllScriptToConfigFile()
-}
+// func RemoveAllScripts() {
+// 	// 删除所有脚本
+// 	RemoveAllScriptToConfigFile()
+// }
 
 // 从配置文件删除
-func DeleteScriptToConfigFile(s *scripts.Script) error {
+func DeleteScriptToConfigFile(s *scripts.Script, update bool) error {
 	// 删除默认配置
 	f, err := ioutil.ReadFile(cfgfile)
 	if err != nil {
@@ -247,15 +236,10 @@ func DeleteScriptToConfigFile(s *scripts.Script) error {
 			break
 		}
 	}
-	b, err := yaml.Marshal(tmp)
-	if err != nil {
-		return err
-	}
-	// 跟新配置文件
-	return ioutil.WriteFile(cfgfile, b, 0644)
+	return tmp.WriteConfigFile(update)
 }
 
-func AddScriptToConfigFile(s *scripts.Script) error {
+func AddScriptToConfigFile(s *scripts.Script, update bool) error {
 	// 添加
 	// 默认配置
 	if !CheckScriptNameRule(s.Name) {
@@ -272,10 +256,5 @@ func AddScriptToConfigFile(s *scripts.Script) error {
 		return err
 	}
 	tmp.SC = append(tmp.SC, s)
-	b, err := yaml.Marshal(tmp)
-	if err != nil {
-		return err
-	}
-	// 跟新配置文件
-	return ioutil.WriteFile(cfgfile, b, 0644)
+	return tmp.WriteConfigFile(update)
 }

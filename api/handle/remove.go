@@ -27,7 +27,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go controller.Remove(svc)
+	go controller.Remove(svc, true)
 	w.Write(pkg.Waiting("stop", role))
 }
 

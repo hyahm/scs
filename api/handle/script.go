@@ -37,16 +37,16 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 
 		// 更新这个script
 
-		err := config.UpdateScriptToConfigFile(s)
+		err := config.UpdateScriptToConfigFile(s, true)
 		if err != nil {
 			w.Write(res.ErrorE(err))
 			return
 		}
 		// 否则删除原来的, 需不需要删除
-		controller.UpdateScript(s)
+		controller.UpdateScript(s, false)
 	} else {
 		// 添加
-		err := config.AddScriptToConfigFile(s)
+		err := config.AddScriptToConfigFile(s, true)
 		if err != nil {
 			w.Write(res.ErrorE(err))
 			return

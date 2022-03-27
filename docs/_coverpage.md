@@ -4,7 +4,7 @@
 
 # scs <small> 3.7.0</small>
 
-> 一个监控, 报警, 进程管理运维开发工具。
+> 自带监控 ，定时器，停止控制，权限控制，分布式的高级进程管理工具。
 
 
 windows: [server](https://download.hyahm.com/scsd-3.7.0.exe)

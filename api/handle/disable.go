@@ -28,12 +28,12 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
 	s.Disable = true
-	err := config.UpdateScriptToConfigFile(s)
+	err := config.UpdateScriptToConfigFile(s, true)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s}`, err.Error())))
 		return
 	}
-	controller.DisableScript(s)
+	controller.DisableScript(s, false)
 	w.Write([]byte(`{"code": 200, "msg": "waiting stop"}`))
 
 }
@@ -52,7 +52,7 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
 	s.Disable = false
-	err := config.UpdateScriptToConfigFile(s)
+	err := config.UpdateScriptToConfigFile(s, true)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s}`, err.Error())))
 		return

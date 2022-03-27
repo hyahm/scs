@@ -58,7 +58,6 @@ func GetScripts(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 	token := xmux.GetInstance(r).Get("token").(string)
 	res := &pkg.Response{
-
 		Role: role,
 	}
 	if token != "" {

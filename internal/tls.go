@@ -117,14 +117,14 @@ func CreateCertificateFile(name string, cert *x509.Certificate, key *rsa.Private
 		Headers: map[string]string{},
 		Bytes:   ca_b}
 	ca_b64 := pem.EncodeToMemory(certificate)
-	ioutil.WriteFile(ca_f, ca_b64, 0777)
+	ioutil.WriteFile(ca_f, ca_b64, 0600)
 
 	priv_f := name + ".key"
 	priv_b := x509.MarshalPKCS1PrivateKey(priv)
-	ioutil.WriteFile(priv_f, priv_b, 0777)
+	ioutil.WriteFile(priv_f, priv_b, 0600)
 	var privateKey = &pem.Block{Type: "PRIVATE KEY",
 		Headers: map[string]string{},
 		Bytes:   priv_b}
 	priv_b64 := pem.EncodeToMemory(privateKey)
-	ioutil.WriteFile(priv_f, priv_b64, 0777)
+	ioutil.WriteFile(priv_f, priv_b64, 0600)
 }

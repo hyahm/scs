@@ -24,3 +24,41 @@ nodes:
     url: https://192.168.101.11:11111
     token: 123
 ```
+
+> 可以看到日志
+```
+[root@master scs]# scsctl log test_0
+2022-03-27 21:04:06 - [INFO] - DESKTOP-6SSBCHN - this is test token can stop
+2022-03-27 21:04:06 - [INFO] - DESKTOP-6SSBCHN - this is test token can not stop
+2022-03-27 21:04:11 - [INFO] - DESKTOP-6SSBCHN - this is test token can stop
+2022-03-27 21:04:11 - [INFO] - DESKTOP-6SSBCHN - this is test token can not stop
+2022-03-27 21:04:14 - [INFO] - DESKTOP-6SSBCHN - this is test token can stop
+```
+
+
+> 更新操作
+```shell
+[root@master scs]# scsctl update test
+{"code":200,"msg":"waiting update","role":"look"}
+
+
+[root@master scs]# scsctl log test_0
+2022-03-27 21:08:17 - [INFO] - DESKTOP-6SSBCHN - this is test token can stop-----
+2022-03-27 21:08:17 - [INFO] - DESKTOP-6SSBCHN - this is test token can not stop------
+2022-03-27 21:08:20 - [INFO] - DESKTOP-6SSBCHN - this is test token can stop-----
+```
+
+> look可以操作的命令如下
+```
+  env         show env
+  get         get info
+  help        Help about any command
+  info        show service
+  log         script log
+  restart     restart assign script
+  start       start assign script
+  status      Print assign script status
+  stop        stop script
+  update
+```
+

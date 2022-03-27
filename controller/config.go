@@ -1,5 +1,6 @@
 package controller
 
+// DelScript 删除脚本的时候才会执行
 func DelScript(pname string) error {
 	err := RemoveScript(pname)
 	if err != nil {
@@ -12,5 +13,5 @@ func DelScript(pname string) error {
 			break
 		}
 	}
-	return cfg.WriteConfigFile()
+	return cfg.WriteConfigFile(true)
 }

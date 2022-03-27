@@ -9,7 +9,7 @@ import (
 )
 
 // 更新的操作
-func DisableScript(s *scripts.Script) bool {
+func DisableScript(s *scripts.Script, update bool) bool {
 	mu.Lock()
 	defer mu.Unlock()
 	// 禁用 script 所在的所有server
@@ -26,7 +26,7 @@ func DisableScript(s *scripts.Script) bool {
 		subname := subname.NewSubname(s.Name, i)
 		if _, ok := servers[subname.String()]; ok {
 			atomic.AddInt64(&global.CanReload, 1)
-			go Remove(servers[subname.String()])
+			go Remove(servers[subname.String()], update)
 		}
 
 	}

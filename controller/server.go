@@ -18,7 +18,7 @@ import (
 )
 
 // 删除对应的server, 外部加了锁，内部调用不用加锁
-func removeServer(name subname.Subname) {
+func removeServer(name subname.Subname, update bool) {
 	servers[name.String()].Logger.Close()
 	delete(servers, name.String())
 	// 如果scripts的副本数为0或者1就直接删除这个scripts
@@ -26,12 +26,12 @@ func removeServer(name subname.Subname) {
 	if _, ok := ss[pname]; ok {
 		ss[pname].Replicate--
 		if ss[pname].Replicate <= 0 {
-			config.DeleteScriptToConfigFile(ss[pname])
+			config.DeleteScriptToConfigFile(ss[pname], update)
 			delete(ss, pname)
 			return
 		}
 		// 这里修改配置文件减一
-		config.UpdateScriptToConfigFile(ss[pname])
+		config.UpdateScriptToConfigFile(ss[pname], update)
 	}
 }
 
