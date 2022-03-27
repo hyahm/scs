@@ -6,6 +6,7 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
@@ -15,7 +16,7 @@ func Kill(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
-		w.Write(NotFoundScript(role))
+		w.Write(pkg.NotFoundScript(role))
 		return
 	}
 	go svc.Kill()
@@ -28,7 +29,7 @@ func KillPname(w http.ResponseWriter, r *http.Request) {
 	for _, pname := range strings.Split(names, ",") {
 		s, ok := controller.GetScriptByPname(pname)
 		if !ok {
-			w.Write(NotFoundScript(role))
+			w.Write(pkg.NotFoundScript(role))
 			return
 		}
 		controller.KillScript(s)

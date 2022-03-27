@@ -6,13 +6,14 @@ import (
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/config"
 	"github.com/hyahm/scs/internal/config/scripts"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetInstance(r).Data.(*scripts.Script)
 	role := xmux.GetInstance(r).Get("role").(string)
-	res := Response{
+	res := pkg.Response{
 		Role: role,
 	}
 	if s.Name == "" {
@@ -60,7 +61,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 func DelScript(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	role := xmux.GetInstance(r).Get("role").(string)
-	res := Response{
+	res := pkg.Response{
 		Role: role,
 	}
 

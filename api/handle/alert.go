@@ -7,16 +7,17 @@ import (
 
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/config/alert"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged(role))
 		return
 	}
-	res := Response{
+	res := pkg.Response{
 		Role: role,
 	}
 	ra := &alert.RespAlert{}
@@ -31,7 +32,7 @@ func Alert(w http.ResponseWriter, r *http.Request) {
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
-	res := Response{
+	res := pkg.Response{
 		Role: role,
 		Data: alert.GetDispatcher(),
 	}

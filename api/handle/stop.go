@@ -7,6 +7,7 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg"
 
 	"github.com/hyahm/xmux"
 )
@@ -18,11 +19,11 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 
 	if !ok {
-		w.Write(NotFoundScript(role))
+		w.Write(pkg.NotFoundScript(role))
 		return
 	}
 	go svc.Stop()
-	w.Write(Waiting("stop", role))
+	w.Write(pkg.Waiting("stop", role))
 }
 
 func StopPname(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +32,7 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 	for _, pname := range strings.Split(names, ",") {
 		s, ok := controller.GetScriptByPname(pname)
 		if !ok {
-			w.Write(NotFoundScript(role))
+			w.Write(pkg.NotFoundScript(role))
 			return
 		}
 		err := controller.StopScript(s)
@@ -41,11 +42,11 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write(Waiting("stop", role))
+	w.Write(pkg.Waiting("stop", role))
 }
 
 func StopAll(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 	controller.StopAllServer()
-	w.Write(Waiting("stop", role))
+	w.Write(pkg.Waiting("stop", role))
 }

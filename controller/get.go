@@ -8,13 +8,14 @@ import (
 	"github.com/hyahm/scs/internal/config/scripts"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
 	"github.com/hyahm/scs/internal/server"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/status"
 )
 
 func GetScriptName(pname string, subname string) []byte {
 	mu.RLock()
 	mu.RUnlock()
-	statuss := &StatusList{
+	statuss := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
 		Version: global.VERSION,
 	}

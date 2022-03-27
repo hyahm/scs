@@ -5,6 +5,7 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg"
 
 	"github.com/hyahm/xmux"
 )
@@ -16,7 +17,7 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerBySubname(subname.Subname(name).String())
 	if !ok {
-		w.Write(NotFoundScript(role))
+		w.Write(pkg.NotFoundScript(role))
 		return
 	}
 	svc.Status.CanNotStop = false
@@ -30,7 +31,7 @@ func CanNotStop(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 	svc, ok := controller.GetServerBySubname(subname.Subname(name).String())
 	if !ok {
-		w.Write(NotFoundScript(role))
+		w.Write(pkg.NotFoundScript(role))
 		return
 	}
 	svc.Status.CanNotStop = true

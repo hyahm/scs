@@ -5,6 +5,7 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
@@ -12,10 +13,10 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
 	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged(role))
 		return
 	}
-	res := Response{
+	res := pkg.Response{
 		Role: role,
 	}
 

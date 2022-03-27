@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 	"github.com/shirou/gopsutil/host"
 )
 
 func GetOS(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
-	res := &Response{
+	res := &pkg.Response{
 		Role: role,
 	}
 	hi, err := host.Info()

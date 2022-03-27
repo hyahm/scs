@@ -17,10 +17,9 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/api/handle"
-	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/config/alert"
 	"github.com/hyahm/scs/internal/config/scripts"
+	"github.com/hyahm/scs/pkg"
 	"github.com/sacOO7/gowebsocket"
 	"gopkg.in/yaml.v2"
 )
@@ -95,7 +94,7 @@ func client(timeout time.Duration) *http.Client {
 
 }
 
-func (sc *SCSClient) requests(url string, body io.Reader, method ...string) (*handle.Response, error) {
+func (sc *SCSClient) requests(url string, body io.Reader, method ...string) (*pkg.Response, error) {
 	httpMethod := http.MethodPost
 	if len(method) > 0 {
 		httpMethod = method[0]
@@ -121,7 +120,7 @@ func (sc *SCSClient) requests(url string, body io.Reader, method ...string) (*ha
 		fmt.Println(err)
 		return nil, err
 	}
-	res := &handle.Response{}
+	res := &pkg.Response{}
 	err = json.Unmarshal(b, res)
 	if err != nil {
 		fmt.Println(err)
@@ -134,7 +133,7 @@ func (sc *SCSClient) requests(url string, body io.Reader, method ...string) (*ha
 	return res, nil
 }
 
-func (sc *SCSClient) requestStatuss(url string, body io.Reader, method ...string) (*controller.StatusList, error) {
+func (sc *SCSClient) requestStatuss(url string, body io.Reader, method ...string) (*pkg.StatusList, error) {
 	httpMethod := http.MethodPost
 	if len(method) > 0 {
 		httpMethod = method[0]
@@ -160,7 +159,7 @@ func (sc *SCSClient) requestStatuss(url string, body io.Reader, method ...string
 		fmt.Println(err)
 		return nil, err
 	}
-	res := &controller.StatusList{}
+	res := &pkg.StatusList{}
 	err = json.Unmarshal(b, res)
 	if err != nil {
 		fmt.Println(err)
@@ -192,7 +191,7 @@ func checkCode(code int) error {
 	}
 }
 
-func (sc *SCSClient) WebSocket(url string, body io.Reader) {
+func (sc *SCSClient) webSocket(url string, body io.Reader) {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGHUP, syscall.SIGINT)
 
@@ -279,7 +278,7 @@ func (sc *SCSClient) WebSocket(url string, body io.Reader) {
 }
 
 // 标记当前副本不能停止
-func (sc *SCSClient) CanNotStop() (*handle.Response, error) {
+func (sc *SCSClient) CanNotStop() (*pkg.Response, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
@@ -287,7 +286,7 @@ func (sc *SCSClient) CanNotStop() (*handle.Response, error) {
 }
 
 // 标记当前副本可以停止
-func (sc *SCSClient) CanStop() (*handle.Response, error) {
+func (sc *SCSClient) CanStop() (*pkg.Response, error) {
 
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
@@ -301,11 +300,11 @@ func (sc *SCSClient) Log(line int) {
 		golog.Error(ErrNameIsEmpty)
 		return
 	}
-	sc.WebSocket(fmt.Sprintf("/log/%s/%d", sc.Name, line), nil)
+	sc.webSocket(fmt.Sprintf("/log/%s/%d", sc.Name, line), nil)
 }
 
 //  获取当前副本的环境变量
-func (sc *SCSClient) Env() (*handle.Response, error) {
+func (sc *SCSClient) Env() (*pkg.Response, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
@@ -313,7 +312,7 @@ func (sc *SCSClient) Env() (*handle.Response, error) {
 }
 
 //  获取当前副本的环境变量
-func (sc *SCSClient) Info() (*handle.Response, error) {
+func (sc *SCSClient) Info() (*pkg.Response, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
@@ -321,12 +320,12 @@ func (sc *SCSClient) Info() (*handle.Response, error) {
 }
 
 // 重新加载配置文件
-func (sc *SCSClient) Reload() (*handle.Response, error) {
+func (sc *SCSClient) Reload() (*pkg.Response, error) {
 	return sc.requests("/-/reload", nil)
 }
 
 // 杀掉此脚本及其对应的所有副本
-func (sc *SCSClient) KillPname() (*handle.Response, error) {
+func (sc *SCSClient) KillPname() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -334,7 +333,7 @@ func (sc *SCSClient) KillPname() (*handle.Response, error) {
 }
 
 // 杀掉此副本
-func (sc *SCSClient) KillName() (*handle.Response, error) {
+func (sc *SCSClient) KillName() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -345,12 +344,12 @@ func (sc *SCSClient) KillName() (*handle.Response, error) {
 }
 
 // 更新所有脚本
-func (sc *SCSClient) UpdateAll() (*handle.Response, error) {
+func (sc *SCSClient) UpdateAll() (*pkg.Response, error) {
 	return sc.requests("/update", nil)
 }
 
 // 更新此脚本
-func (sc *SCSClient) UpdatePname() (*handle.Response, error) {
+func (sc *SCSClient) UpdatePname() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -358,7 +357,7 @@ func (sc *SCSClient) UpdatePname() (*handle.Response, error) {
 }
 
 // 更新此副本
-func (sc *SCSClient) UpdateName() (*handle.Response, error) {
+func (sc *SCSClient) UpdateName() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -369,12 +368,12 @@ func (sc *SCSClient) UpdateName() (*handle.Response, error) {
 }
 
 // 重启所有脚本
-func (sc *SCSClient) RestartAll() (*handle.Response, error) {
+func (sc *SCSClient) RestartAll() (*pkg.Response, error) {
 	return sc.requests("/restart", nil)
 }
 
 // 重启此脚本
-func (sc *SCSClient) RestartPname() (*handle.Response, error) {
+func (sc *SCSClient) RestartPname() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -382,7 +381,7 @@ func (sc *SCSClient) RestartPname() (*handle.Response, error) {
 }
 
 // 重启当前副本
-func (sc *SCSClient) RestartName() (*handle.Response, error) {
+func (sc *SCSClient) RestartName() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -393,12 +392,12 @@ func (sc *SCSClient) RestartName() (*handle.Response, error) {
 }
 
 // 启动所有脚本
-func (sc *SCSClient) StartAll() (*handle.Response, error) {
+func (sc *SCSClient) StartAll() (*pkg.Response, error) {
 	return sc.requests("/start", nil)
 }
 
 // 启动当前脚本
-func (sc *SCSClient) StartPname() (*handle.Response, error) {
+func (sc *SCSClient) StartPname() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -406,7 +405,7 @@ func (sc *SCSClient) StartPname() (*handle.Response, error) {
 }
 
 // 启动当前副本
-func (sc *SCSClient) StartName() (*handle.Response, error) {
+func (sc *SCSClient) StartName() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -417,12 +416,12 @@ func (sc *SCSClient) StartName() (*handle.Response, error) {
 }
 
 // 停止所有脚本
-func (sc *SCSClient) StopAll() (*handle.Response, error) {
+func (sc *SCSClient) StopAll() (*pkg.Response, error) {
 	return sc.requests("/stop", nil)
 }
 
 // 停止当前脚本
-func (sc *SCSClient) StopPname() (*handle.Response, error) {
+func (sc *SCSClient) StopPname() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -430,7 +429,7 @@ func (sc *SCSClient) StopPname() (*handle.Response, error) {
 }
 
 // 停止当前副本
-func (sc *SCSClient) StopName() (*handle.Response, error) {
+func (sc *SCSClient) StopName() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -446,7 +445,7 @@ func (sc *SCSClient) StopName() (*handle.Response, error) {
 // }
 
 // 移除当前脚本
-func (sc *SCSClient) RemovePnameScrip() (*handle.Response, error) {
+func (sc *SCSClient) RemovePnameScrip() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -454,7 +453,7 @@ func (sc *SCSClient) RemovePnameScrip() (*handle.Response, error) {
 }
 
 // 移除当前副本
-func (sc *SCSClient) RemoveNameScrip() (*handle.Response, error) {
+func (sc *SCSClient) RemoveNameScrip() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -465,54 +464,54 @@ func (sc *SCSClient) RemoveNameScrip() (*handle.Response, error) {
 }
 
 // 启用脚本
-func (sc *SCSClient) Enable() (*handle.Response, error) {
+func (sc *SCSClient) Enable() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
 	return sc.requests("/enable/"+sc.Pname, nil)
 }
 
-func (sc *SCSClient) GetServers() (*handle.Response, error) {
+func (sc *SCSClient) GetServers() (*pkg.Response, error) {
 	return sc.requests("/get/servers", nil)
 }
 
-func (sc *SCSClient) GetAlarms() (*handle.Response, error) {
+func (sc *SCSClient) GetAlarms() (*pkg.Response, error) {
 	return sc.requests("/get/alarms", nil)
 }
 
-func (sc *SCSClient) GetScripts() (*handle.Response, error) {
+func (sc *SCSClient) GetScripts() (*pkg.Response, error) {
 	return sc.requests("/get/scripts", nil)
 }
 
 // 禁用脚本
-func (sc *SCSClient) Disable() (*handle.Response, error) {
+func (sc *SCSClient) Disable() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
 	return sc.requests("/disable/"+sc.Pname, nil)
 }
 
-func (sc *SCSClient) Repo() (*handle.Response, error) {
+func (sc *SCSClient) Repo() (*pkg.Response, error) {
 	return sc.requests("/get/repo", nil)
 }
 
-func (sc *SCSClient) Search(derivative, serviceName string) (*handle.Response, error) {
+func (sc *SCSClient) Search(derivative, serviceName string) (*pkg.Response, error) {
 	return sc.requests(fmt.Sprintf("/search/%s/%s", derivative, serviceName), nil)
 }
 
 // 添加或修改脚本
-func (sc *SCSClient) AddScript(s *scripts.Script) (*handle.Response, error) {
+func (sc *SCSClient) AddScript(s *scripts.Script) (*pkg.Response, error) {
 	send, _ := json.Marshal(s)
 	return sc.requests("/script", bytes.NewReader(send))
 }
 
 // 获取此所有脚本的状态
-func (sc *SCSClient) StatusAll() (*controller.StatusList, error) {
+func (sc *SCSClient) StatusAll() (*pkg.StatusList, error) {
 	return sc.requestStatuss("/status", nil)
 }
 
 // 获取此脚本的状态
-func (sc *SCSClient) StatusPname() (*controller.StatusList, error) {
+func (sc *SCSClient) StatusPname() (*pkg.StatusList, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -520,7 +519,7 @@ func (sc *SCSClient) StatusPname() (*controller.StatusList, error) {
 }
 
 // 获取此副本的状态
-func (sc *SCSClient) StatusName() (*controller.StatusList, error) {
+func (sc *SCSClient) StatusName() (*pkg.StatusList, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -531,12 +530,12 @@ func (sc *SCSClient) StatusName() (*controller.StatusList, error) {
 }
 
 // 检测远程机器的健康探针
-func (sc *SCSClient) Probe() (*handle.Response, error) {
+func (sc *SCSClient) Probe() (*pkg.Response, error) {
 	return sc.requests("/probe", nil)
 }
 
 // 发送报警
-func (sc *SCSClient) Alert(alert *alert.RespAlert) (*handle.Response, error) {
+func (sc *SCSClient) Alert(alert *alert.RespAlert) (*pkg.Response, error) {
 	send, _ := json.Marshal(alert)
 	return sc.requests("/set/alert", bytes.NewReader(send))
 }

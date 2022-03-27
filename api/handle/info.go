@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
@@ -12,10 +13,10 @@ func ServerInfo(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 	info, ok := controller.GetServerInfo(name)
 	if !ok {
-		w.Write(NotFoundScript(role))
+		w.Write(pkg.NotFoundScript(role))
 		return
 	}
-	res := Response{
+	res := pkg.Response{
 		Data: info,
 	}
 	w.Write(res.Sucess(""))

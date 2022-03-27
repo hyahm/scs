@@ -6,6 +6,7 @@ import (
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg"
 
 	"github.com/hyahm/xmux"
 )
@@ -17,34 +18,34 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged(role))
 		return
 	}
 	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
-		w.Write(NotFoundScript(role))
+		w.Write(pkg.NotFoundScript(role))
 		return
 	}
 
 	go controller.Remove(svc)
-	w.Write(Waiting("stop", role))
+	w.Write(pkg.Waiting("stop", role))
 }
 
 func RemovePname(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged(role))
 		return
 	}
 	pname := xmux.Var(r)["pname"]
 	s, ok := controller.GetScriptByPname(pname)
 	if !ok {
-		w.Write(NotFoundScript(role))
+		w.Write(pkg.NotFoundScript(role))
 		return
 	}
 
 	controller.RemoveScript(s.Name)
-	w.Write(Waiting("stop", role))
+	w.Write(pkg.Waiting("stop", role))
 }
 
 // func RemoveAll(w http.ResponseWriter, r *http.Request) {

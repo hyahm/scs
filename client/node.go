@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hyahm/scs/api/handle"
-	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/config/scripts"
+	"github.com/hyahm/scs/pkg"
 )
 
 // 已经支持多服务器操作， 每台服务器相当于一个node
@@ -41,7 +40,7 @@ func (node *Node) Reload() {
 func (node *Node) Restart(args ...string) {
 	cli := node.NewSCSClient()
 	var err error
-	var res *handle.Response
+	var res *pkg.Response
 	switch len(args) {
 	case 0:
 		res, err = cli.RestartAll()
@@ -109,7 +108,7 @@ func (node *Node) Start(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
-	var res *handle.Response
+	var res *pkg.Response
 	switch len(args) {
 	case 0:
 		res, err = cli.StartAll()
@@ -133,7 +132,7 @@ func (node *Node) Start(args ...string) {
 func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 
 	cli := node.NewSCSClient()
-	var ssn *controller.StatusList
+	var ssn *pkg.StatusList
 	var err error
 	switch len(args) {
 	case 0:
@@ -167,7 +166,7 @@ func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 func (node *Node) Kill(args ...string) {
 
 	cli := node.NewSCSClient()
-	var res *handle.Response
+	var res *pkg.Response
 	var err error
 	switch len(args) {
 	case 2:
@@ -267,7 +266,7 @@ func (node *Node) Stop(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
-	var res *handle.Response
+	var res *pkg.Response
 	switch len(args) {
 	case 0:
 		res, err = cli.StopAll()
@@ -291,7 +290,7 @@ func (node *Node) Remove(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
-	var res *handle.Response
+	var res *pkg.Response
 	switch len(args) {
 	case 0:
 		fmt.Printf("name: %s , msg: remove all have been removed\n", node.Name)
@@ -388,7 +387,7 @@ func (node *Node) Update(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
-	var res *handle.Response
+	var res *pkg.Response
 	switch len(args) {
 	case 0:
 		res, err = cli.UpdateAll()

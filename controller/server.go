@@ -109,7 +109,7 @@ func makeReplicateServerAndStart(s *scripts.Script, end int) {
 func All(role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
-	statuss := &StatusList{
+	statuss := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,

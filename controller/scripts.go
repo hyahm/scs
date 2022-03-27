@@ -7,6 +7,7 @@ import (
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/config/scripts"
 	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/status"
 )
 
@@ -38,7 +39,7 @@ func NeedStop(s *scripts.Script) bool {
 func ScriptName(pname, subname, role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
-	status := &StatusList{
+	status := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
@@ -58,7 +59,7 @@ func ScriptName(pname, subname, role string) []byte {
 func ScriptPname(pname, role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
-	statuss := &StatusList{
+	statuss := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
