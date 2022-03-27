@@ -154,6 +154,7 @@ func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 		Version: ssn.Version,
 		Name:    node.Name,
 		Url:     node.Url,
+		Role:    ssn.Role,
 	}
 
 	if len(ssn.Data) > 0 {

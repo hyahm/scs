@@ -11,6 +11,7 @@ import (
 type ScriptStatusNode struct {
 	Nodes   []*status.ServiceStatus
 	Name    string
+	Role    string
 	Version string
 	Url     string
 	Filter  []string
@@ -100,7 +101,7 @@ func (st *ScriptStatusNode) SortAndPrint() {
 	maxColumeLen[9] = 10
 	maxColumeLen[10] = 10
 
-	fmt.Printf("<node: %s, url: %s, server version: %s>\n", st.Name, st.Url, st.Version)
+	fmt.Printf("<node: %s, url: %s, server version: %s, role: %s>\n", st.Name, st.Url, st.Version, st.Role)
 	fmt.Println("--------------------------------------------------")
 	fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
 		"Name" + (space(maxColumeLen[1] - len("Name"))).String() +
