@@ -45,7 +45,7 @@ func Remove(svc *server.Server) {
 		svc.Always = false
 	}
 	svc.Removed = true
-	if svc.Status.Status != status.STOP && svc.IsLoop {
+	if svc.Status.Status != status.STOP && svc.IsCron {
 		svc.Remove()
 		<-svc.StopSigle
 	}

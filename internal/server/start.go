@@ -48,7 +48,7 @@ func (svc *Server) asyncStart() {
 	svc.CancelProcess = make(chan bool, 2)
 	svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
 	if svc.Cron != nil && svc.Cron.Loop > 0 {
-		svc.IsLoop = true
+		svc.IsCron = true
 
 		// 循环的起止时间可以只设置时分秒， 自动补齐今天的日期
 		svc.Cron.Start = strings.Trim(svc.Cron.Start, " ")

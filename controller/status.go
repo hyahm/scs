@@ -13,7 +13,7 @@ func getStatus(name, subname string) *status.ServiceStatus {
 	status := &status.ServiceStatus{
 		PName:        name,
 		Name:         subname,
-		IsCron:       servers[subname].IsLoop,
+		IsCron:       servers[subname].IsCron,
 		Command:      servers[subname].Status.Command,
 		Always:       ss[name].Always,
 		Version:      servers[subname].Status.Version,

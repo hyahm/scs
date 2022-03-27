@@ -107,7 +107,7 @@ func (st *ScriptStatusNode) SortAndPrint() {
 		"Status" + (space(maxColumeLen[2] - len("Status"))).String() +
 		"Pid" + (space(maxColumeLen[3] - len("Pid"))).String() +
 		"UpTime" + (space(maxColumeLen[4] - len("UpTime"))).String() +
-		"IsLoop" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
+		"IsCron" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
 		"Version" + (space(maxColumeLen[6] - len("Version"))).String() +
 		"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String() +
 		"Failed" + (space(maxColumeLen[8] - len("Failed"))).String() +

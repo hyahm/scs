@@ -23,12 +23,13 @@ const defaultContinuityInterval = time.Hour * 1
 
 type Server struct {
 	Index              int                            `json:"index"` // svc的索引
+	Token              string                         `json:"token"` // svc的索引
 	Name               string                         `json:"name"`
 	Dir                string                         `json:"dir,omitempty"`
 	Command            string                         `json:"command"`
 	Version            string                         `json:"version,omitempty"`
 	Cron               *cron.Cron                     `json:"cron,omitempty"`    // 这个cron是新生成的
-	IsLoop             bool                           `json:"is_loop,omitempty"` // 如果是定时任务
+	IsCron             bool                           `json:"is_loop,omitempty"` // 如果是定时任务
 	Env                map[string]string              `json:"-"`
 	Logger             *golog.Log                     `json:"-"`               // 日志
 	Times              int                            `json:"times,omitempty"` // 记录循环的次数
@@ -125,7 +126,7 @@ func (svc *Server) CheckReady(ctx context.Context) {
 
 // Restart  重动服务, 同步执行的
 func (svc *Server) Restart() {
-	if svc.IsLoop {
+	if svc.IsCron {
 		svc.Cancel()
 		// 如果是循环的就直接退出
 		return
@@ -151,7 +152,7 @@ func (svc *Server) Restart() {
 // 同步删除
 func (svc *Server) Remove() {
 	defer svc.Cancel()
-	if svc.IsLoop {
+	if svc.IsCron {
 		svc.Cancel()
 		return
 	}
@@ -178,7 +179,7 @@ func (svc *Server) Remove() {
 
 // Stop  停止服务
 func (svc *Server) Stop() {
-	if svc.IsLoop {
+	if svc.IsCron {
 		// 如果是定时任务， 直接停止
 		golog.Infof("stop loop %s", svc.SubName)
 		svc.Cancel()
@@ -212,7 +213,7 @@ func (svc *Server) UpdateAndRestart() {
 
 // Stop  杀掉服务, 没有产生goroutine， 直接杀死
 func (svc *Server) Kill() {
-	if svc.IsLoop {
+	if svc.IsCron {
 		svc.Cancel()
 		return
 	}

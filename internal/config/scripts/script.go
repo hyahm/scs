@@ -23,7 +23,7 @@ import (
 )
 
 type Script struct {
-	Token              string               `yaml:"token,omitempty" json:"token,omitempty"` // 只用来查看日志的token
+	Token              string               `yaml:"token,omitempty" json:"token,omitempty"` // 只用来查看的token
 	Name               string               `yaml:"name,omitempty" json:"name"`
 	Dir                string               `yaml:"dir,omitempty" json:"dir,omitempty"`
 	Command            string               `yaml:"command,omitempty" json:"command"`
@@ -103,6 +103,7 @@ func (s *Script) Add(port, replicate, id int, subname subname.Subname) *server.S
 		// Script:  s,
 		Name:    s.Name,
 		Index:   id,
+		Token:   s.Token,
 		Command: s.Command,
 		// Log:       make([]string, 0, global.GetLogCount()),
 		SubName: subname,

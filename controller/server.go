@@ -127,6 +127,30 @@ func All(role string) []byte {
 	return send
 }
 
+// 获取所有服务的状态
+func AllLook(role, token string) []byte {
+	mu.RLock()
+	defer mu.RUnlock()
+	statuss := &pkg.StatusList{
+		Data:    make([]*status.ServiceStatus, 0),
+		Version: global.VERSION,
+		Role:    role,
+	}
+	serviceStatus := make([]*status.ServiceStatus, 0)
+	for name, server := range servers {
+		if server.Token == token {
+			serviceStatus = append(serviceStatus, getStatus(subname.Subname(name).GetName(), name))
+		}
+	}
+	statuss.Code = 200
+	statuss.Data = serviceStatus
+	send, err := json.MarshalIndent(statuss, "", "\t")
+	if err != nil {
+		golog.Error(err)
+	}
+	return send
+}
+
 func StopAllServer() {
 	mu.RLock()
 	defer mu.RUnlock()

@@ -96,7 +96,7 @@ func (svc *Server) wait() {
 		svc.stopStatus()
 		return
 	}
-	if svc.IsLoop {
+	if svc.IsCron {
 		// 如果是个定时器， 执行结束不停止
 		return
 	}
