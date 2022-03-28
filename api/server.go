@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -131,6 +132,6 @@ func HttpServer() {
 	}
 	golog.Info("listen on " + global.GetListen() + " over http")
 	if err := svc.ListenAndServeTLS(global.GetPem(), global.GetKey()); err != nil {
-		golog.Fatal(err)
+		log.Fatal(err)
 	}
 }
