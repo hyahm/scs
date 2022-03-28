@@ -28,13 +28,13 @@ func (node *Node) NewSCSClient() *SCSClient {
 
 func (node *Node) Reload() {
 
-	_, err := node.NewSCSClient().Reload()
+	res, err := node.NewSCSClient().Reload()
 	// b, err := Requests("POST", fmt.Sprintf("%s/-/reload", node.Url), node.Token, nil)
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	fmt.Printf("name: %s , msg: waiting reload\n", node.Name)
+	fmt.Println(string(res.Marshal()))
 }
 
 func (node *Node) Restart(args ...string) {
@@ -251,7 +251,7 @@ func (node *Node) Install(scripts []*scripts.Script, env map[string]string) {
 			fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 			return
 		}
-		fmt.Printf(string(res.Marshal()))
+		fmt.Println(string(res.Marshal()))
 	}
 
 }
@@ -283,7 +283,7 @@ func (node *Node) Stop(args ...string) {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	fmt.Printf(string(res.Marshal()))
+	fmt.Println(string(res.Marshal()))
 
 }
 
@@ -404,9 +404,5 @@ func (node *Node) Update(args ...string) {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
-	// fmt.Println(string(b))
 	fmt.Println(string(res.Marshal()))
-	// return string(b)
-	// return node.Update(args...)
-	// fmt.Println(string(node.crud("update", args...)))
 }
