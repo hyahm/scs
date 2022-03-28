@@ -11,7 +11,7 @@ import (
 	"github.com/hyahm/scs/api/midware"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
-	"github.com/hyahm/scs/internal/config/scripts"
+	"github.com/hyahm/scs/pkg/config/scripts"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"

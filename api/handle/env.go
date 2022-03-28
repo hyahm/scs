@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
-	"github.com/hyahm/scs/internal/config/scripts/subname"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 	"github.com/hyahm/xmux"
 )
 

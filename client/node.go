@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hyahm/scs/internal/config/scripts"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/pkg/config/scripts"
 )
 
 // 已经支持多服务器操作， 每台服务器相当于一个node

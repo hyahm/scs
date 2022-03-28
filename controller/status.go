@@ -4,7 +4,7 @@ import (
 	"runtime"
 
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/config/probe"
+	"github.com/hyahm/scs/pkg/config/probe"
 	"github.com/hyahm/scs/status"
 )
 

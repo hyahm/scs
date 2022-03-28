@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"github.com/hyahm/scs/internal/config/scripts"
-	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
 func WaitKillAllServer() {

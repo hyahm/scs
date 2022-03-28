@@ -10,7 +10,7 @@ import (
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
-	"github.com/hyahm/scs/internal/config/alert"
+	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/scs/pkg/message"
 
 	"github.com/hyahm/golog"

@@ -8,12 +8,12 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal"
-	"github.com/hyahm/scs/internal/config/alert"
-	"github.com/hyahm/scs/internal/config/alert/to"
-	"github.com/hyahm/scs/internal/config/liveness"
-	"github.com/hyahm/scs/internal/config/scripts/cron"
-	"github.com/hyahm/scs/internal/config/scripts/prestart"
-	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/scs/pkg/config/alert/to"
+	"github.com/hyahm/scs/pkg/config/liveness"
+	"github.com/hyahm/scs/pkg/config/scripts/cron"
+	"github.com/hyahm/scs/pkg/config/scripts/prestart"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 	"github.com/hyahm/scs/pkg/message"
 	"github.com/hyahm/scs/status"
 )

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/config/alert/to"
+	"github.com/hyahm/scs/pkg/config/alert/to"
 	"github.com/hyahm/scs/pkg/message"
 )
 

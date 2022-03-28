@@ -6,8 +6,8 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/config"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/xmux"
 )
 

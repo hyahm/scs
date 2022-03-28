@@ -6,10 +6,10 @@ import (
 	"os"
 
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/config/alert"
-	"github.com/hyahm/scs/internal/config/logger"
-	"github.com/hyahm/scs/internal/config/probe"
-	"github.com/hyahm/scs/internal/config/scripts"
+	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/scs/pkg/config/logger"
+	"github.com/hyahm/scs/pkg/config/probe"
+	"github.com/hyahm/scs/pkg/config/scripts"
 
 	"github.com/hyahm/golog"
 	"gopkg.in/yaml.v2"

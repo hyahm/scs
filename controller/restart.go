@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hyahm/scs/internal/config/scripts"
-	"github.com/hyahm/scs/internal/config/scripts/subname"
 	"github.com/hyahm/scs/internal/server"
+	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
 func RestartServer(svc *server.Server) {

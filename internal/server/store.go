@@ -1,6 +1,6 @@
 package server
 
-// "github.com/hyahm/scs/internal/config/scripts"
+// "github.com/hyahm/scs/pkg/config/scripts"
 
 // 保存的所有脚本相关的配置
 // var ss *Service

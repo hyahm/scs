@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/hyahm/scs/client"
-	"github.com/hyahm/scs/internal/config/scripts"
+	"github.com/hyahm/scs/pkg/config/scripts"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )

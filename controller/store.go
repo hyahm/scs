@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/config"
-	"github.com/hyahm/scs/internal/config/scripts"
 	"github.com/hyahm/scs/internal/server"
+	"github.com/hyahm/scs/pkg/config"
+	"github.com/hyahm/scs/pkg/config/scripts"
 )
 
 var cfg *config.Config

@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/config/alert"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/xmux"
 )
 

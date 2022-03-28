@@ -17,9 +17,9 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/config/alert"
-	"github.com/hyahm/scs/internal/config/scripts"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/scs/pkg/config/scripts"
 	"github.com/sacOO7/gowebsocket"
 	"gopkg.in/yaml.v2"
 )

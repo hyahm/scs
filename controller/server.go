@@ -7,12 +7,12 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/config"
-	"github.com/hyahm/scs/internal/config/alert"
-	"github.com/hyahm/scs/internal/config/scripts"
-	"github.com/hyahm/scs/internal/config/scripts/subname"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/pkg/config"
+	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 	"github.com/hyahm/scs/pkg/message"
 	"github.com/hyahm/scs/status"
 )

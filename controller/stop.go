@@ -3,8 +3,8 @@ package controller
 import (
 	"errors"
 
-	"github.com/hyahm/scs/internal/config/scripts"
-	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
 // 异步执行停止脚本

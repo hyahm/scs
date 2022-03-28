@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/config/scripts/subname"
 	"github.com/hyahm/scs/internal/server"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 	"github.com/hyahm/scs/status"
 )
 

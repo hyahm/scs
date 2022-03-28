@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/hyahm/scs/internal/config/scripts/subname"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
 // 通过名字来获取token
