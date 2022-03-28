@@ -5,7 +5,7 @@ import time
 import random
 import sys
 
-
+sys.dont_write_bytecode = True
 
 while True:
     scs = SCS(token="123456")
