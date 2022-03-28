@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync/atomic"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg/config/scripts/subname"
@@ -45,7 +46,8 @@ func Remove(svc *server.Server, update bool) {
 		svc.Always = false
 	}
 	svc.Removed = true
-	if svc.Status.Status != status.STOP && svc.IsCron {
+	golog.Info(svc.Status.Status)
+	if svc.Status.Status != status.STOP {
 		svc.Remove()
 		<-svc.StopSigle
 	}
@@ -55,6 +57,7 @@ func Remove(svc *server.Server, update bool) {
 	removeServer(svc.SubName, update)
 	mu.Unlock()
 	atomic.AddInt64(&global.CanReload, -1)
+
 }
 
 // func RemoveAllScripts() {

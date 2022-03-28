@@ -34,7 +34,6 @@ func Reload() error {
 	temp := make(map[string]struct{})
 	getTempScript(temp)
 	for index := range cfg.SC {
-
 		// 	// 将数据填充至 SS, 返回是否存在此脚本
 		if !config.CheckScriptNameRule(cfg.SC[index].Name) {
 			golog.Error("script name must be a word, have been ignore: " + cfg.SC[index].Name)
@@ -137,17 +136,20 @@ func ReloadScripts(script *scripts.Script, update bool) {
 		if newReplicate == 0 {
 			newReplicate = 1
 		}
+
+		golog.Info("oldReplicate： ", oldReplicate)
+		golog.Info("newReplicate: ", newReplicate)
 		// 对比脚本是否修改
 		ss[script.Name].Replicate = newReplicate
 		if !scripts.EqualScript(script, ss[script.Name]) {
 			// 如果不一样， 那么 就需要重新启动服务
-
 			ss[script.Name] = script
 			ss[script.Name].EnvLocker = &sync.RWMutex{}
 			for i := 0; i < newReplicate; i++ {
 				// subname := subname.NewSubname(script.Name, i)
 				// servers[subname.String()].Start()
 				go func(i int) {
+					atomic.AddInt64(&global.CanReload, 1)
 					Remove(servers[subname.NewSubname(script.Name, i).String()], update)
 					makeReplicateServerAndStart(script, newReplicate)
 				}(i)
@@ -168,10 +170,11 @@ func ReloadScripts(script *scripts.Script, update bool) {
 			return
 		}
 		if oldReplicate > newReplicate {
+
 			// 如果大于的话， 那么就删除多余的
 			for i := newReplicate; i < oldReplicate; i++ {
-				delete(serverIndex[script.Name], i)
 				atomic.AddInt64(&global.CanReload, 1)
+				golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
 				go Remove(servers[subname.NewSubname(script.Name, i).String()], update)
 			}
 		} else {

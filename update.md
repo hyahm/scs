@@ -2,6 +2,7 @@
 - 取消内部token
 - 修复停止的服务pid不为0的问题
 - status默认显示少了failed, cpu, mem, command, 如果不要显示加上 -v
+- 修复replicate为0的时候错乱
 
 
 # v3.7.0

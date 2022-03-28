@@ -27,9 +27,7 @@ func (node *Node) NewSCSClient() *SCSClient {
 }
 
 func (node *Node) Reload() {
-
 	res, err := node.NewSCSClient().Reload()
-	// b, err := Requests("POST", fmt.Sprintf("%s/-/reload", node.Url), node.Token, nil)
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return

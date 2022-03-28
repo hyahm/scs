@@ -151,6 +151,9 @@ func (c *Config) check() error {
 // 更新单个script到配置文件
 func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
 	// 添加
+	if !update {
+		return nil
+	}
 	// 默认配置
 	f, err := ioutil.ReadFile(cfgfile)
 	if err != nil {
@@ -219,6 +222,9 @@ func RemoveAllScriptToConfigFile(update bool) error {
 
 // 从配置文件删除
 func DeleteScriptToConfigFile(s *scripts.Script, update bool) error {
+	if !update {
+		return nil
+	}
 	// 删除默认配置
 	f, err := ioutil.ReadFile(cfgfile)
 	if err != nil {

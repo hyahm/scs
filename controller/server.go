@@ -23,16 +23,19 @@ func removeServer(name subname.Subname, update bool) {
 	delete(servers, name.String())
 	// 如果scripts的副本数为0或者1就直接删除这个scripts
 	pname := name.GetName()
-	if _, ok := ss[pname]; ok {
-		ss[pname].Replicate--
-		if ss[pname].Replicate <= 0 {
-			config.DeleteScriptToConfigFile(ss[pname], update)
-			delete(ss, pname)
-			return
+	if update {
+		if _, ok := ss[pname]; ok {
+			ss[pname].Replicate--
+			if ss[pname].Replicate <= 0 {
+				config.DeleteScriptToConfigFile(ss[pname], update)
+				delete(ss, pname)
+				return
+			}
+			// 这里修改配置文件减一
+			config.UpdateScriptToConfigFile(ss[pname], update)
 		}
-		// 这里修改配置文件减一
-		config.UpdateScriptToConfigFile(ss[pname], update)
 	}
+
 }
 
 func StartAllServer() {
