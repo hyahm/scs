@@ -39,7 +39,7 @@ func boolSpace(b bool) int {
 	return 5
 }
 
-func (st *ScriptStatusNode) SortAndPrint() {
+func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 
 	if len(st.Filter) > 0 && len(st.Nodes) == 0 {
 		return
@@ -101,55 +101,82 @@ func (st *ScriptStatusNode) SortAndPrint() {
 	maxColumeLen[9] = 10
 	maxColumeLen[10] = 10
 
-	fmt.Printf("<node: %s, url: %s, server version: %s, role: %s>\n", st.Name, st.Url, st.Version, st.Role)
-	fmt.Println("--------------------------------------------------")
-	fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
-		"Name" + (space(maxColumeLen[1] - len("Name"))).String() +
-		"Status" + (space(maxColumeLen[2] - len("Status"))).String() +
-		"Pid" + (space(maxColumeLen[3] - len("Pid"))).String() +
-		"UpTime" + (space(maxColumeLen[4] - len("UpTime"))).String() +
-		"IsCron" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
-		"Version" + (space(maxColumeLen[6] - len("Version"))).String() +
-		"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String() +
-		"Failed" + (space(maxColumeLen[8] - len("Failed"))).String() +
-		"CPU" + (space(maxColumeLen[9] - len("CPU"))).String() +
-		"MEM(kb)" + (space(maxColumeLen[10] - len("MEM(kb)"))).String() +
-		"Command")
-	for _, info := range st.Nodes {
+	if verbose {
+		fmt.Printf("<node: %s, url: %s, server version: %s, role: %s>\n", st.Name, st.Url, st.Version, st.Role)
+		fmt.Println("--------------------------------------------------")
+		fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
+			"Name" + (space(maxColumeLen[1] - len("Name"))).String() +
+			"Status" + (space(maxColumeLen[2] - len("Status"))).String() +
+			"Pid" + (space(maxColumeLen[3] - len("Pid"))).String() +
+			"UpTime" + (space(maxColumeLen[4] - len("UpTime"))).String() +
+			"IsCron" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
+			"Version" + (space(maxColumeLen[6] - len("Version"))).String() +
+			"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String() +
+			"Failed" + (space(maxColumeLen[8] - len("Failed"))).String() +
+			"CPU" + (space(maxColumeLen[9] - len("CPU"))).String() +
+			"MEM(kb)" + (space(maxColumeLen[10] - len("MEM(kb)"))).String() +
+			"Command")
+		for _, info := range st.Nodes {
 
-		// var canNotStopSpace int
-		// if info.CanNotStop {
-		// 	canNotStopSpace = 4
-		// } else {
-		// 	canNotStopSpace = 5
-		// }
+			// var canNotStopSpace int
+			// if info.CanNotStop {
+			// 	canNotStopSpace = 4
+			// } else {
+			// 	canNotStopSpace = 5
+			// }
 
-		cpu := fmt.Sprintf("%.2f", info.Cpu)
-		mem := fmt.Sprintf("%d", info.Mem/1024)
-		command := info.Command
-		if info.Path != "" {
-			if info.OS == "windows" {
-				command = fmt.Sprintf("try{ cd %s ; %s } catch{$error[0];break}", info.Path, info.Command)
+			cpu := fmt.Sprintf("%.2f", info.Cpu)
+			mem := fmt.Sprintf("%d", info.Mem/1024)
+			command := info.Command
+			if info.Path != "" {
+				if info.OS == "windows" {
+					command = fmt.Sprintf("try{ cd %s ; %s } catch{$error[0];break}", info.Path, info.Command)
 
-			} else {
-				command = fmt.Sprintf("cd %s && %s", info.Path, info.Command)
+				} else {
+					command = fmt.Sprintf("cd %s && %s", info.Path, info.Command)
+				}
+
 			}
-
+			fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s%d%s%s%s%s%s%s\n",
+				info.PName, space(maxColumeLen[0]-len(info.PName)),
+				info.Name, space(maxColumeLen[1]-len(info.Name)),
+				info.Status, space(maxColumeLen[2]-len(info.Status)),
+				info.Pid, space(maxColumeLen[3]-len(strconv.Itoa(info.Pid))),
+				(time.Second * time.Duration(info.Start)).String(), space(maxColumeLen[4]-len((time.Second*time.Duration(info.Start)).String())).String(),
+				info.IsCron, space(maxColumeLen[5]-boolSpace(info.IsCron)),
+				info.Version, space(maxColumeLen[6]-len(info.Version)),
+				info.CanNotStop, space(maxColumeLen[7]-boolSpace(info.CanNotStop)),
+				info.RestartCount, space(maxColumeLen[8]-len(strconv.Itoa(info.RestartCount))),
+				cpu, space(maxColumeLen[9]-len(cpu)),
+				mem, space(maxColumeLen[10]-len(mem)),
+				command,
+			)
 		}
-		fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s%d%s%s%s%s%s%s\n",
-			info.PName, space(maxColumeLen[0]-len(info.PName)),
-			info.Name, space(maxColumeLen[1]-len(info.Name)),
-			info.Status, space(maxColumeLen[2]-len(info.Status)),
-			info.Pid, space(maxColumeLen[3]-len(strconv.Itoa(info.Pid))),
-			(time.Second * time.Duration(info.Start)).String(), space(maxColumeLen[4]-len((time.Second*time.Duration(info.Start)).String())).String(),
-			info.IsCron, space(maxColumeLen[5]-boolSpace(info.IsCron)),
-			info.Version, space(maxColumeLen[6]-len(info.Version)),
-			info.CanNotStop, space(maxColumeLen[7]-boolSpace(info.CanNotStop)),
-			info.RestartCount, space(maxColumeLen[8]-len(strconv.Itoa(info.RestartCount))),
-			cpu, space(maxColumeLen[9]-len(cpu)),
-			mem, space(maxColumeLen[10]-len(mem)),
-			command,
-		)
+		fmt.Println("--------------------------------------------------")
+	} else {
+		fmt.Printf("<node: %s, url: %s, server version: %s, role: %s>\n", st.Name, st.Url, st.Version, st.Role)
+		fmt.Println("--------------------------------------------------")
+		fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
+			"Name" + (space(maxColumeLen[1] - len("Name"))).String() +
+			"Status" + (space(maxColumeLen[2] - len("Status"))).String() +
+			"Pid" + (space(maxColumeLen[3] - len("Pid"))).String() +
+			"UpTime" + (space(maxColumeLen[4] - len("UpTime"))).String() +
+			"IsCron" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
+			"Version" + (space(maxColumeLen[6] - len("Version"))).String() +
+			"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String())
+		for _, info := range st.Nodes {
+			fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s\n",
+				info.PName, space(maxColumeLen[0]-len(info.PName)),
+				info.Name, space(maxColumeLen[1]-len(info.Name)),
+				info.Status, space(maxColumeLen[2]-len(info.Status)),
+				info.Pid, space(maxColumeLen[3]-len(strconv.Itoa(info.Pid))),
+				(time.Second * time.Duration(info.Start)).String(), space(maxColumeLen[4]-len((time.Second*time.Duration(info.Start)).String())).String(),
+				info.IsCron, space(maxColumeLen[5]-boolSpace(info.IsCron)),
+				info.Version, space(maxColumeLen[6]-len(info.Version)),
+				info.CanNotStop, space(maxColumeLen[7]-boolSpace(info.CanNotStop)),
+			)
+		}
+		fmt.Println("--------------------------------------------------")
 	}
-	fmt.Println("--------------------------------------------------")
+
 }

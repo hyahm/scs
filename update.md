@@ -1,6 +1,7 @@
 # v3.7.1
 - 取消内部token
 - 修复停止的服务pid不为0的问题
+- status默认显示少了failed, cpu, mem, command, 如果不要显示加上 -v
 
 
 # v3.7.0

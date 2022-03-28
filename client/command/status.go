@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// var filter []string
+var verbose bool
 
 var StatusCmd = &cobra.Command{
 	Use:   "status",
@@ -39,12 +39,12 @@ var StatusCmd = &cobra.Command{
 		}
 		wg.Wait()
 		for _, s := range ss {
-			s.SortAndPrint()
+			s.SortAndPrint(verbose)
 		}
 	},
 }
 
 func init() {
-	// rootCmd.Flags().StringArrayVarP(&filter, "filter", "f", []string{}, "filter name")
+	StatusCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "show verbose")
 	rootCmd.AddCommand(StatusCmd)
 }
