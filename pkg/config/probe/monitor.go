@@ -83,7 +83,7 @@ func requests(domain string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// req.Header.Set("Token", os.Getenv("TOKEN"))
+
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client(5 * time.Second).Do(req)
 	if err != nil {

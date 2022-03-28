@@ -77,7 +77,6 @@ func (s *Script) MakeEnv() {
 		}
 	}
 	tempEnv["OS"] = runtime.GOOS
-	tempEnv["TOKEN"] = global.GetToken()
 	tempEnv["PNAME"] = s.Name
 	tempEnv["PROJECT_HOME"] = s.Dir
 	for k := range tempEnv {

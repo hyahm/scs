@@ -3,6 +3,7 @@ package controller
 import (
 	"runtime"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg/config/probe"
 	"github.com/hyahm/scs/status"
@@ -10,6 +11,7 @@ import (
 
 func getStatus(name, subname string) *status.ServiceStatus {
 	// subname := svc.SubName
+	golog.Info(servers[subname].Status.Pid)
 	status := &status.ServiceStatus{
 		PName:        name,
 		Name:         subname,
@@ -22,16 +24,12 @@ func getStatus(name, subname string) *status.ServiceStatus {
 		Status:       servers[subname].Status.Status,
 		RestartCount: servers[subname].Status.RestartCount,
 		Pid:          servers[subname].Status.Pid,
-		// Up:           servers[subname].Status.Up,
-		Disable:   ss[name].Disable,
-		OS:        runtime.GOOS,
-		Start:     servers[subname].Status.Start,
-		SCSVerion: global.VERSION,
+		Disable:      ss[name].Disable,
+		OS:           runtime.GOOS,
+		Start:        servers[subname].Status.Start,
+		SCSVerion:    global.VERSION,
 	}
-	if servers[subname].Cmd != nil && servers[subname].Cmd.Process != nil {
-		status.Pid = servers[subname].Cmd.Process.Pid
-		status.Cpu, status.Mem, _ = probe.GetProcessInfo(int32(servers[subname].Cmd.Process.Pid))
 
-	}
+	status.Cpu, status.Mem, _ = probe.GetProcessInfo(int32(servers[subname].Cmd.Process.Pid))
 	return status
 }

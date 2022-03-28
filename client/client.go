@@ -66,7 +66,7 @@ type SCSClient struct {
 	Timeout time.Duration
 }
 
-func NewClient(timeout ...time.Duration) *SCSClient {
+func NewClient(token string, timeout ...time.Duration) *SCSClient {
 	var rto time.Duration
 	if len(timeout) > 0 {
 		rto = timeout[0]
@@ -74,7 +74,7 @@ func NewClient(timeout ...time.Duration) *SCSClient {
 
 	return &SCSClient{
 		Domain:  "https://127.0.0.1:11111",
-		Token:   os.Getenv("TOKEN"),
+		Token:   token,
 		Pname:   os.Getenv("PNAME"),
 		Name:    os.Getenv("NAME"),
 		Timeout: rto,
