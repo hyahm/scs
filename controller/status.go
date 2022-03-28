@@ -21,6 +21,7 @@ func getStatus(name, subname string) *status.ServiceStatus {
 		Path:         servers[subname].Status.Path,
 		Status:       servers[subname].Status.Status,
 		RestartCount: servers[subname].Status.RestartCount,
+		Pid:          servers[subname].Status.Pid,
 		// Up:           servers[subname].Status.Up,
 		Disable:   ss[name].Disable,
 		OS:        runtime.GOOS,

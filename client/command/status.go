@@ -17,9 +17,7 @@ var StatusCmd = &cobra.Command{
 	Long:  `command: scsctl status [flags] [pname] [name]`,
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-
 		ss := make([]*client.ScriptStatusNode, 0)
-
 		wg := &sync.WaitGroup{}
 		nodes := getNodes()
 		if len(nodes) == 0 {

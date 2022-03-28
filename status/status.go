@@ -18,7 +18,7 @@ const (
 type ServiceStatus struct {
 	PName        string  `json:"pname"`
 	Name         string  `json:"name"`
-	Pid          int     `json:"ppid"`
+	Pid          int     `json:"pid"`
 	Status       string  `json:"status"`
 	Command      string  `json:"command"`
 	Path         string  `json:"path"`
