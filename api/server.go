@@ -32,7 +32,7 @@ func enter(w http.ResponseWriter, r *http.Request) bool {
 
 func LookHandle() *xmux.GroupRoute {
 	// 只是查看的权限
-	group := xmux.NewGroupRoute().AddPageKeys("look")
+	group := xmux.NewGroupRoute().AddPageKeys("scripts")
 	group.Post("/status/{pname}/{name}", handle.Status)
 	group.Post("/status/{pname}", handle.StatusPname)
 	group.Post("/start/{pname}", handle.StartPname)
@@ -67,24 +67,24 @@ func LookHandle() *xmux.GroupRoute {
 func FileHandle() *xmux.GroupRoute {
 	// 修改文件的操作
 	group := xmux.NewGroupRoute()
-	group.Post("/get/info", handle.GetOS)
+	// group.Post("/get/info", handle.GetOS)
 	group.Post("/remove/{pname}/{name}", handle.Remove)
 	group.Post("/remove/{pname}", handle.RemovePname)
 	// router.Post("/remove", handle.RemoveAll)
-	group.Post("/get/alert", handle.GetAlert)
-	group.Post("/-/reload", handle.Reload)
-	group.Post("/get/alarms", handle.GetAlarms)
-	group.Post("/get/repo", handle.GetRepo) //
+	group.Post("/get/alert", handle.GetAlert)   // 只能管理员用
+	group.Post("/-/reload", handle.Reload)      // 只能管理员用
+	group.Post("/get/alarms", handle.GetAlarms) // 只能管理员用
+	group.Post("/get/repo", handle.GetRepo)     // 只能管理员用
 
-	group.Post("/enable/{pname}", handle.Enable)
-	group.Post("/disable/{pname}", handle.Disable)
+	group.Post("/enable/{pname}", handle.Enable)   // 只能管理员用
+	group.Post("/disable/{pname}", handle.Disable) // 只能管理员用
 
-	group.Post("/set/alert", handle.Alert)
+	group.Post("/set/alert", handle.Alert) // 只能管理员用
 	// 监测点
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
 	group.Post("/script", handle.AddScript).BindJson(&scripts.Script{})
-	group.Post("/delete/{pname}", handle.DelScript)
+	// group.Post("/delete/{pname}", handle.DelScript)
 	return group
 }
 

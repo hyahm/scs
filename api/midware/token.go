@@ -41,17 +41,17 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	pages := xmux.GetInstance(r).Get(xmux.PAGES).(map[string]struct{})
-	if _, ok := pages["look"]; ok {
+	if _, ok := pages["scripts"]; ok {
 		// 如果是查看所有状态， 那么就继续
 		if pname == "" && name == "" {
 			xmux.GetInstance(r).Set("token", token)
-			xmux.GetInstance(r).Set("role", "look")
+			xmux.GetInstance(r).Set("role", "scripts")
 			return false
 		}
 		if pname == "" && name != "" {
 			lookToken := controller.GetLookToken(name)
 			if lookToken != "" && token == lookToken {
-				xmux.GetInstance(r).Set("role", "look")
+				xmux.GetInstance(r).Set("role", "scripts")
 				xmux.GetInstance(r).Set("token", "")
 				return false
 			}
@@ -60,7 +60,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		if pname != "" {
 			lookToken := controller.GetPnameToken(pname)
 			if lookToken != "" && token == lookToken {
-				xmux.GetInstance(r).Set("role", "look")
+				xmux.GetInstance(r).Set("role", "scripts")
 				xmux.GetInstance(r).Set("token", "")
 				return false
 			}

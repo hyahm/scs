@@ -39,7 +39,7 @@ nodes:
 > 更新操作
 ```shell
 [root@master scs]# scsctl update test
-{"code":200,"msg":"waiting update","role":"look"}
+{"code":200,"msg":"waiting update","role":"scripts"}
 
 
 [root@master scs]# scsctl log test_0

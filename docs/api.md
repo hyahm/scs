@@ -38,7 +38,7 @@ POST /disable/{pname}
 # 脚本日志的api
 POST /log/{pname}/{name}
 
-POST /delete/{pname}
+
 POST /script
 // 部分参考， 所有配置文件的参数都可以配置
 {
