@@ -1,5 +1,6 @@
 # v3.7.1
-- 取消内部token
+- 取消内部token, 改为随机生成脚本token
+- 服务创建的脚本如果不指定的token将随机生成
 - 修复停止的服务pid不为0的问题
 - status默认显示少了failed, cpu, mem, command, 如果不要显示加上 -v
 - 修复replicate为0的时候错乱

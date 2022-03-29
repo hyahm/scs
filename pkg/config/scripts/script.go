@@ -77,6 +77,11 @@ func (s *Script) MakeEnv() {
 		}
 	}
 	tempEnv["OS"] = runtime.GOOS
+	// 增加token, 不过是随机的
+	if s.Token == "" {
+		s.Token = pkg.RandomToken()
+	}
+	tempEnv["TOKEN"] = s.Token
 	tempEnv["PNAME"] = s.Name
 	tempEnv["PROJECT_HOME"] = s.Dir
 	for k := range tempEnv {

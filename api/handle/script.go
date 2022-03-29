@@ -24,7 +24,9 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 	if s.ContinuityInterval != 0 {
 		s.ContinuityInterval = s.ContinuityInterval * 1000000000
 	}
-
+	if s.Token == "" {
+		s.Token = pkg.RandomToken()
+	}
 	if controller.HaveScript(s.Name) {
 		// 存在的话，需要对比配置文件的修改
 		// 需要判断是否相等

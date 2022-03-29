@@ -7,6 +7,7 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/scripts"
 	"github.com/hyahm/scs/pkg/config/scripts/subname"
@@ -34,6 +35,9 @@ func Reload() error {
 	temp := make(map[string]struct{})
 	getTempScript(temp)
 	for index := range cfg.SC {
+		if cfg.SC[index].Token == "" {
+			cfg.SC[index].Token = pkg.RandomToken()
+		}
 		// 	// 将数据填充至 SS, 返回是否存在此脚本
 		if !config.CheckScriptNameRule(cfg.SC[index].Name) {
 			golog.Error("script name must be a word, have been ignore: " + cfg.SC[index].Name)

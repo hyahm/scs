@@ -6,6 +6,7 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal/server"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/scripts"
 )
@@ -41,7 +42,9 @@ func Start(filename string) {
 		cfg.SC = make([]*scripts.Script, 0)
 	}
 	for index := range cfg.SC {
-
+		if cfg.SC[index].Token == "" {
+			cfg.SC[index].Token = pkg.RandomToken()
+		}
 		ss[cfg.SC[index].Name] = cfg.SC[index]
 		ss[cfg.SC[index].Name].EnvLocker = &sync.RWMutex{}
 		replicate := ss[cfg.SC[index].Name].Replicate
