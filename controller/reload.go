@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"sync"
 	"sync/atomic"
 
 	"github.com/hyahm/golog"
@@ -145,29 +144,29 @@ func ReloadScripts(script *scripts.Script, update bool) {
 		golog.Info("newReplicate: ", newReplicate)
 		// 对比脚本是否修改
 		ss[script.Name].Replicate = newReplicate
-		if !scripts.EqualScript(script, ss[script.Name]) {
-			// 如果不一样， 那么 就需要重新启动服务
-			ss[script.Name] = script
-			ss[script.Name].EnvLocker = &sync.RWMutex{}
-			for i := 0; i < newReplicate; i++ {
-				// subname := subname.NewSubname(script.Name, i)
-				// servers[subname.String()].Start()
-				go func(i int) {
-					atomic.AddInt64(&global.CanReload, 1)
-					Remove(servers[subname.NewSubname(script.Name, i).String()], update)
-					makeReplicateServerAndStart(script, newReplicate)
-				}(i)
+		// if !scripts.EqualScript(script, ss[script.Name]) {
+		// 	// 如果不一样， 那么 就需要重新启动服务
+		// 	ss[script.Name] = script
+		// 	ss[script.Name].EnvLocker = &sync.RWMutex{}
+		// 	for i := 0; i < newReplicate; i++ {
+		// 		// subname := subname.NewSubname(script.Name, i)
+		// 		// servers[subname.String()].Start()
+		// 		go func(i int) {
+		// 			atomic.AddInt64(&global.CanReload, 1)
+		// 			Remove(servers[subname.NewSubname(script.Name, i).String()], update)
+		// 			makeReplicateServerAndStart(script, newReplicate)
+		// 		}(i)
 
-			}
+		// 	}
 
-			// 删除多余的
-			for i := newReplicate; i < oldReplicate; i++ {
-				golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-				Remove(servers[subname.NewSubname(script.Name, i).String()], update)
-			}
+		// 	// 删除多余的
+		// 	for i := newReplicate; i < oldReplicate; i++ {
+		// 		golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
+		// 		Remove(servers[subname.NewSubname(script.Name, i).String()], update)
+		// 	}
 
-			return
-		}
+		// 	return
+		// }
 
 		if oldReplicate == newReplicate {
 			// 如果一样的名字， 副本数一样的就直接跳过
