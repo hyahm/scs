@@ -58,7 +58,9 @@ func LookHandle() *xmux.GroupRoute {
 	group.Post("/start", handle.StartAll)   // complete
 	group.Post("/status", handle.AllStatus) // complete
 	group.Post("/stop", handle.StopAll)     // complete
-
+	group.Post("/script", handle.AddScript).BindJson(&scripts.Script{})
+	group.Post("/remove/{pname}/{name}", handle.Remove)
+	group.Post("/remove/{pname}", handle.RemovePname)
 	group.Post("/restart", handle.RestartAll) // complete
 	group.Post("/update", handle.UpdateAll)   // complete
 	return group
@@ -68,8 +70,7 @@ func FileHandle() *xmux.GroupRoute {
 	// 修改文件的操作
 	group := xmux.NewGroupRoute()
 	// group.Post("/get/info", handle.GetOS)
-	group.Post("/remove/{pname}/{name}", handle.Remove)
-	group.Post("/remove/{pname}", handle.RemovePname)
+
 	// router.Post("/remove", handle.RemoveAll)
 	group.Post("/get/alert", handle.GetAlert)   // 只能管理员用
 	group.Post("/-/reload", handle.Reload)      // 只能管理员用
@@ -83,7 +84,7 @@ func FileHandle() *xmux.GroupRoute {
 	// 监测点
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
-	group.Post("/script", handle.AddScript).BindJson(&scripts.Script{})
+
 	// group.Post("/delete/{pname}", handle.DelScript)
 	return group
 }

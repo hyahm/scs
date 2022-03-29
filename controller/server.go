@@ -132,7 +132,7 @@ func makeReplicateServerAndStart(s *scripts.Script, end int) {
 
 // 获取所有服务的状态
 func All(role string) []byte {
-	mu.RLock()
+	mu.TryRLock()
 	defer mu.RUnlock()
 	statuss := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
@@ -154,7 +154,7 @@ func All(role string) []byte {
 
 // 获取所有服务的状态
 func AllLook(role, token string) []byte {
-	mu.RLock()
+	mu.TryRLock()
 	defer mu.RUnlock()
 	statuss := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
+	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/scripts"
@@ -13,6 +14,10 @@ import (
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetInstance(r).Data.(*scripts.Script)
 	role := xmux.GetInstance(r).Get("role").(string)
+	if global.CanReload != 0 {
+		w.Write(pkg.WaitingConfigChanged(role))
+		return
+	}
 	res := pkg.Response{
 		Role: role,
 	}
