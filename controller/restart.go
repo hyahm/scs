@@ -13,9 +13,29 @@ func RestartServer(svc *server.Server) {
 	mu.RLock()
 	defer mu.RUnlock()
 	// 禁用 script 所在的所有server
+	if _, ok := ss[svc.Name]; ok {
+		restartServer(ss[svc.Name], svc)
+	}
+
+}
+
+func restartServer(s *scripts.Script, svc *server.Server) {
+	svc.Always = s.Always
+	svc.Command = s.Command
+	svc.ContinuityInterval = s.ContinuityInterval
+	svc.Cron = s.Cron
+	svc.Dir = s.Dir
+	svc.Disable = s.Disable
+	svc.Replicate = s.Replicate
 	svc.Status.RestartCount = 0
+	svc.Port = s.Port
+	if s.Token != "" {
+		svc.Token = s.Token
+	}
+	svc.Update = s.Update
+	svc.Version = s.Version
+
 	svc.Restart()
-	// makeReplicateServerAndStart(ss[svc.Name], svc.Replicate)
 }
 
 // 异步重启
@@ -34,21 +54,7 @@ func RestartScript(s *scripts.Script) error {
 		name := s.Name + fmt.Sprintf("_%d", i)
 
 		if _, ok := servers[name]; ok {
-			servers[name].Always = s.Always
-			servers[name].Command = s.Command
-			servers[name].ContinuityInterval = s.ContinuityInterval
-			servers[name].Cron = s.Cron
-			servers[name].Dir = s.Dir
-			servers[name].Disable = s.Disable
-			servers[name].Replicate = s.Replicate
-			servers[name].Port = s.Port
-			if s.Token != "" {
-				servers[name].Token = s.Token
-			}
-			servers[name].Update = s.Update
-			servers[name].Version = s.Version
-
-			servers[name].Restart()
+			restartServer(s, servers[name])
 		}
 	}
 	return nil
@@ -58,7 +64,7 @@ func RestartAllServer() {
 	mu.RLock()
 	defer mu.RUnlock()
 	for _, svc := range servers {
-		go svc.Restart()
+		RestartServer(svc)
 	}
 }
 
@@ -67,7 +73,7 @@ func RestartPermAllServer(token string) {
 	defer mu.RUnlock()
 	for _, svc := range servers {
 		if svc.Token == token {
-			go svc.Restart()
+			RestartServer(svc)
 		}
 
 	}
