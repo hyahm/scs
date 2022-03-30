@@ -143,10 +143,12 @@ func All(role string) []byte {
 	golog.Info("222222")
 	serviceStatus := make([]*status.ServiceStatus, 0)
 	for name := range servers {
+		golog.Info("222222")
 		serviceStatus = append(serviceStatus, getStatus(subname.Subname(name).GetName(), name))
 	}
 	statuss.Code = 200
 	statuss.Data = serviceStatus
+	golog.Info("222222")
 	send, err := json.Marshal(statuss)
 	if err != nil {
 		golog.Error(err)
