@@ -48,7 +48,7 @@ func NeedStop(s *scripts.Script) bool {
 }
 
 func ScriptName(pname, subname, role string) []byte {
-	mu.TryRLock()
+	mu.RLock()
 	defer mu.RUnlock()
 	status := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
@@ -68,7 +68,7 @@ func ScriptName(pname, subname, role string) []byte {
 }
 
 func ScriptPname(pname, role string) []byte {
-	mu.TryRLock()
+	mu.RLock()
 	defer mu.RUnlock()
 	statuss := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),

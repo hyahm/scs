@@ -3,7 +3,6 @@ package controller
 import (
 	"runtime"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg/config/probe"
 	"github.com/hyahm/scs/status"
@@ -11,7 +10,6 @@ import (
 
 func getStatus(name, subname string) *status.ServiceStatus {
 	// subname := svc.SubName
-	golog.Info(servers[subname].Status.Pid)
 	status := &status.ServiceStatus{
 		PName:        name,
 		Name:         subname,
