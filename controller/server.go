@@ -136,18 +136,16 @@ func All(role string) []byte {
 	defer mu.RUnlock()
 	golog.Info("222222")
 	statuss := &pkg.StatusList{
-		Data:    make([]*status.ServiceStatus, 0),
+		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
 	}
 	golog.Info("222222")
-	serviceStatus := make([]*status.ServiceStatus, 0)
 	for name := range servers {
 		golog.Info("222222")
-		serviceStatus = append(serviceStatus, getStatus(subname.Subname(name).GetName(), name))
+		statuss.Data = append(statuss.Data, getStatus(subname.Subname(name).GetName(), name))
 	}
 	statuss.Code = 200
-	statuss.Data = serviceStatus
 	golog.Info("222222")
 	send, err := json.Marshal(statuss)
 	if err != nil {
@@ -162,11 +160,11 @@ func AllLook(role, token string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
 	statuss := &pkg.StatusList{
-		Data:    make([]*status.ServiceStatus, 0),
+		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
 	}
-	serviceStatus := make([]*status.ServiceStatus, 0)
+	serviceStatus := make([]status.ServiceStatus, 0)
 	for name, server := range servers {
 		if server.Token == token {
 			serviceStatus = append(serviceStatus, getStatus(subname.Subname(name).GetName(), name))

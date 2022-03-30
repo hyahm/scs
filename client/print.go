@@ -9,7 +9,7 @@ import (
 )
 
 type ScriptStatusNode struct {
-	Nodes   []*status.ServiceStatus
+	Nodes   []status.ServiceStatus
 	Name    string
 	Role    string
 	Version string

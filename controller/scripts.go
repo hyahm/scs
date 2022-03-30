@@ -51,7 +51,7 @@ func ScriptName(pname, subname, role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
 	status := &pkg.StatusList{
-		Data:    make([]*status.ServiceStatus, 0),
+		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
 	}
@@ -71,7 +71,7 @@ func ScriptPname(pname, role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
 	statuss := &pkg.StatusList{
-		Data:    make([]*status.ServiceStatus, 0),
+		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
 	}
@@ -88,12 +88,10 @@ func ScriptPname(pname, role string) []byte {
 	if replicate == 0 {
 		replicate = 1
 	}
-	serviceStatus := make([]*status.ServiceStatus, 0)
 	for i := 0; i < replicate; i++ {
 		subname := subname.NewSubname(pname, i).String()
-		serviceStatus = append(serviceStatus, getStatus(pname, subname))
+		statuss.Data = append(statuss.Data, getStatus(pname, subname))
 	}
-	statuss.Data = serviceStatus
 	statuss.Code = 200
 	send, err := json.MarshalIndent(statuss, "", "\n")
 

@@ -8,9 +8,9 @@ import (
 	"github.com/hyahm/scs/status"
 )
 
-func getStatus(name, subname string) *status.ServiceStatus {
+func getStatus(name, subname string) status.ServiceStatus {
 	// subname := svc.SubName
-	status := &status.ServiceStatus{
+	status := status.ServiceStatus{
 		PName:        name,
 		Name:         subname,
 		IsCron:       servers[subname].IsCron,

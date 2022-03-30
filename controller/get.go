@@ -16,7 +16,7 @@ func GetScriptName(pname string, subname string) []byte {
 	mu.RLock()
 	mu.RUnlock()
 	statuss := &pkg.StatusList{
-		Data:    make([]*status.ServiceStatus, 0),
+		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 	}
 	if _, ok := ss[pname]; !ok {

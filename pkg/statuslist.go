@@ -8,11 +8,11 @@ import (
 )
 
 type StatusList struct {
-	Data    []*status.ServiceStatus `json:"data"`
-	Code    int                     `json:"code"`
-	Msg     string                  `json:"msg"`
-	Version string                  `json:"version"`
-	Role    string                  `json:"role"`
+	Data    []status.ServiceStatus `json:"data"`
+	Code    int                    `json:"code"`
+	Msg     string                 `json:"msg"`
+	Version string                 `json:"version"`
+	Role    string                 `json:"role"`
 }
 
 func (sl *StatusList) Marshal() []byte {
