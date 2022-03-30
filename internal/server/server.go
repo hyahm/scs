@@ -124,7 +124,7 @@ func (svc *Server) CheckReady(ctx context.Context) {
 
 }
 
-// Restart  重动服务, 同步执行的
+// Restart  重动服务, 执行的
 func (svc *Server) Restart() {
 	if svc.IsCron {
 		svc.Cancel()
@@ -141,10 +141,10 @@ func (svc *Server) Restart() {
 	case status.RUNNING:
 		svc.Exit <- 10
 		svc.Status.Status = status.WAITRESTART
-		svc.stop()
+		go svc.stop()
 		return
 	case status.STOP:
-		svc.Start()
+		go svc.Start()
 	}
 
 }

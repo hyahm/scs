@@ -24,7 +24,7 @@ func RestartScript(s *scripts.Script) error {
 	defer mu.RUnlock()
 	// 禁用 script 所在的所有server
 	if _, ok := ss[s.Name]; !ok {
-		return errors.New("")
+		return errors.New("not found " + s.Name)
 	}
 	replicate := s.Replicate
 	if replicate == 0 {
@@ -32,7 +32,22 @@ func RestartScript(s *scripts.Script) error {
 	}
 	for i := 0; i < replicate; i++ {
 		name := s.Name + fmt.Sprintf("_%d", i)
+
 		if _, ok := servers[name]; ok {
+			servers[name].Always = s.Always
+			servers[name].Command = s.Command
+			servers[name].ContinuityInterval = s.ContinuityInterval
+			servers[name].Cron = s.Cron
+			servers[name].Dir = s.Dir
+			servers[name].Disable = s.Disable
+			servers[name].Replicate = s.Replicate
+			servers[name].Port = s.Port
+			if s.Token != "" {
+				servers[name].Token = s.Token
+			}
+			servers[name].Update = s.Update
+			servers[name].Version = s.Version
+
 			servers[name].Restart()
 		}
 	}
