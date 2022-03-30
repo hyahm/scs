@@ -88,10 +88,14 @@ func ScriptPname(pname, role string) []byte {
 	if replicate == 0 {
 		replicate = 1
 	}
-	for i := 0; i < replicate; i++ {
-		subname := subname.NewSubname(pname, i).String()
-		statuss.Data = append(statuss.Data, getStatus(pname, subname))
+	if !ss[pname].Disable {
+		for i := 0; i < replicate; i++ {
+			subname := subname.NewSubname(pname, i).String()
+
+			statuss.Data = append(statuss.Data, getStatus(pname, subname))
+		}
 	}
+
 	statuss.Code = 200
 	send, err := json.MarshalIndent(statuss, "", "\n")
 

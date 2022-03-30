@@ -134,16 +134,19 @@ func makeReplicateServerAndStart(s *scripts.Script, end int) {
 func All(role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
-	golog.Info("222222")
 	statuss := &pkg.StatusList{
 		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
 	}
-	golog.Info("222222")
 	for name := range servers {
-		golog.Info("222222")
-		statuss.Data = append(statuss.Data, getStatus(subname.Subname(name).GetName(), name))
+		pname := subname.Subname(name).GetName()
+		if v, ok := ss[pname]; ok {
+			if !v.Disable {
+				statuss.Data = append(statuss.Data, getStatus(pname, name))
+			}
+		}
+
 	}
 	statuss.Code = 200
 	golog.Info("222222")
@@ -164,15 +167,16 @@ func AllLook(role, token string) []byte {
 		Version: global.VERSION,
 		Role:    role,
 	}
-	serviceStatus := make([]status.ServiceStatus, 0)
 	for name, server := range servers {
-		if server.Token == token {
-			serviceStatus = append(serviceStatus, getStatus(subname.Subname(name).GetName(), name))
+		pname := subname.Subname(name).GetName()
+		if v, ok := ss[pname]; ok {
+			if server.Token == token && !v.Disable {
+				statuss.Data = append(statuss.Data, getStatus(pname, name))
+			}
 		}
 	}
 	statuss.Code = 200
-	statuss.Data = serviceStatus
-	send, err := json.MarshalIndent(statuss, "", "\t")
+	send, err := json.Marshal(statuss)
 	if err != nil {
 		golog.Error(err)
 	}
