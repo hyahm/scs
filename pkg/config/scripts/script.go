@@ -6,7 +6,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
@@ -18,30 +17,29 @@ import (
 	"github.com/hyahm/scs/pkg/config/liveness"
 	"github.com/hyahm/scs/pkg/config/scripts/cron"
 	"github.com/hyahm/scs/pkg/config/scripts/prestart"
-	"github.com/hyahm/scs/pkg/config/scripts/subname"
 	"github.com/hyahm/scs/status"
 )
 
 type Script struct {
-	Token              string               `yaml:"token,omitempty" json:"token,omitempty"` // 只用来查看的token
-	Name               string               `yaml:"name,omitempty" json:"name"`
-	Dir                string               `yaml:"dir,omitempty" json:"dir,omitempty"`
-	Command            string               `yaml:"command,omitempty" json:"command"`
-	Replicate          int                  `yaml:"replicate,omitempty" json:"replicate,omitempty"`
-	Always             bool                 `yaml:"always,omitempty" json:"always,omitempty"`
-	DisableAlert       bool                 `yaml:"disableAlert,omitempty" json:"disableAlert,omitempty"`
-	Env                map[string]string    `yaml:"env,omitempty" json:"env,omitempty"`
-	ContinuityInterval time.Duration        `yaml:"continuityInterval,omitempty" json:"continuityInterval,omitempty"`
-	Port               int                  `yaml:"port,omitempty" json:"port,omitempty"`
-	AT                 *to.AlertTo          `yaml:"alert,omitempty" json:"alert,omitempty"`
-	Version            string               `yaml:"version,omitempty" json:"version,omitempty"`
-	PreStart           []*prestart.PreStart `yaml:"preStart,omitempty" json:"preStart,omitempty"`
-	Disable            bool                 `yaml:"disable,omitempty" json:"disable,omitempty"`
-	Cron               *cron.Cron           `yaml:"cron,omitempty" json:"cron,omitempty"`
-	Update             string               `yaml:"update,omitempty" json:"update,omitempty"`
-	DeleteWhenExit     bool                 `yaml:"deleteWhenExit,omitempty" json:"deleteWhenExit,omitempty"`
-	TempEnv            map[string]string    `yaml:"-" json:"-"`
-	EnvLocker          *sync.RWMutex        `yaml:"-" json:"-"`
+	Token        string            `yaml:"token,omitempty" json:"token,omitempty"` // 只用来查看的token
+	Name         string            `yaml:"name,omitempty" json:"name"`
+	Dir          string            `yaml:"dir,omitempty" json:"dir,omitempty"`
+	Command      string            `yaml:"command,omitempty" json:"command"`
+	Replicate    int               `yaml:"replicate,omitempty" json:"replicate,omitempty"`
+	Always       bool              `yaml:"always,omitempty" json:"always,omitempty"`
+	DisableAlert bool              `yaml:"disableAlert,omitempty" json:"disableAlert,omitempty"`
+	Env          map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
+	// ContinuityInterval time.Duration        `yaml:"continuityInterval,omitempty" json:"continuityInterval,omitempty"`
+	Port           int                  `yaml:"port,omitempty" json:"port,omitempty"`
+	AT             *to.AlertTo          `yaml:"alert,omitempty" json:"alert,omitempty"`
+	Version        string               `yaml:"version,omitempty" json:"version,omitempty"`
+	PreStart       []*prestart.PreStart `yaml:"preStart,omitempty" json:"preStart,omitempty"`
+	Disable        bool                 `yaml:"disable,omitempty" json:"disable,omitempty"`
+	Cron           *cron.Cron           `yaml:"cron,omitempty" json:"cron,omitempty"`
+	Update         string               `yaml:"update,omitempty" json:"update,omitempty"`
+	DeleteWhenExit bool                 `yaml:"deleteWhenExit,omitempty" json:"deleteWhenExit,omitempty"`
+	TempEnv        map[string]string    `yaml:"-" json:"-"`
+	EnvLocker      *sync.RWMutex        `yaml:"-" json:"-"`
 	// Ready              chan bool            `yaml:"-" json:"-"`
 	// 服务ready的探测器
 	Liveness *liveness.Liveness `yaml:"liveness,omitempty" json:"liveness,omitempty"`
@@ -97,11 +95,7 @@ func (s *Script) MakeEnv() {
 }
 
 // 生成 server
-func (s *Script) Add(port, replicate, id int, subname subname.Subname) *server.Server {
-	continuityInterval := s.ContinuityInterval
-	if continuityInterval == 0 {
-		continuityInterval = global.GeContinuityInterval()
-	}
+func (s *Script) Add(port, replicate, id int, subname string) *server.Server {
 
 	svc := &server.Server{
 		// Script:  s,
@@ -113,7 +107,7 @@ func (s *Script) Add(port, replicate, id int, subname subname.Subname) *server.S
 		SubName: subname,
 		Dir:     s.Dir,
 		Status: &status.ServiceStatus{
-			Name:    subname.GetName(),
+			Name:    subname,
 			PName:   s.Name,
 			Status:  status.STOP,
 			Command: s.Command,
@@ -122,13 +116,12 @@ func (s *Script) Add(port, replicate, id int, subname subname.Subname) *server.S
 		},
 		Replicate: replicate,
 		Logger: golog.NewLog(
-			filepath.Join(global.LogDir, subname.String()+".log"), 10<<10, false, global.CleanLog),
-		Update:             s.Update,
-		ContinuityInterval: continuityInterval,
-		AI:                 &alert.AlertInfo{},
-		Port:               port,
-		AT:                 s.AT,
-		StopSigle:          make(chan bool, 1),
+			filepath.Join(global.LogDir, subname+".log"), 10<<10, false, global.CleanLog),
+		Update:    s.Update,
+		AI:        &alert.AlertInfo{},
+		Port:      port,
+		AT:        s.AT,
+		StopSigle: make(chan bool, 1),
 
 		Liveness:     s.Liveness,
 		Ready:        make(chan bool, 1),
@@ -202,7 +195,6 @@ func EqualScript(s1, s2 *Script) bool {
 		s1.Always != s2.Always ||
 		s1.Token != s2.Token ||
 		!pkg.CompareMap(s1.Env, s2.Env) ||
-		s1.ContinuityInterval != s2.ContinuityInterval ||
 		!to.CompareAT(s1.AT, s2.AT) ||
 		s1.DisableAlert != s2.DisableAlert ||
 		s1.Disable != s2.Disable ||

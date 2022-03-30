@@ -13,13 +13,13 @@ import (
 )
 
 func GetScriptName(pname string, subname string) []byte {
-	mu.RLock()
-	mu.RUnlock()
+	store.mu.RLock()
+	store.mu.RUnlock()
 	statuss := &pkg.StatusList{
 		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 	}
-	if _, ok := ss[pname]; !ok {
+	if _, ok := store.ss[pname]; !ok {
 		statuss.Msg = "not found " + pname
 		send, err := json.MarshalIndent(statuss, "", "\n")
 
@@ -33,21 +33,21 @@ func GetScriptName(pname string, subname string) []byte {
 
 // 获取脚本结构体
 func GetServerByNameAndSubname(name string, subname subname.Subname) (*server.Server, bool) {
-	mu.RLock()
-	defer mu.RUnlock()
-	if _, ok := ss[name]; !ok {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	if _, ok := store.ss[name]; !ok {
 		return nil, false
 	}
-	if _, ok := servers[subname.String()]; ok {
-		return servers[subname.String()], true
+	if _, ok := store.servers[subname.String()]; ok {
+		return store.servers[subname.String()], true
 	}
 	return nil, false
 }
 
 func GetScriptByPname(name string) (*scripts.Script, bool) {
-	mu.RLock()
-	defer mu.RUnlock()
-	v, ok := ss[name]
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	v, ok := store.ss[name]
 	return v, ok
 
 }

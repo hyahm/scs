@@ -25,10 +25,6 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"code": 201, "msg": "name require"}`))
 		return
 	}
-	// 将时间转化为秒
-	if s.ContinuityInterval != 0 {
-		s.ContinuityInterval = s.ContinuityInterval * 1000000000
-	}
 	if s.Token == "" {
 		s.Token = pkg.RandomToken()
 	}

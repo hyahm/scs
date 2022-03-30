@@ -16,13 +16,15 @@ import (
 	"github.com/hyahm/golog"
 )
 
+var configfile string
+var showversion bool
+
 func main() {
 	defer golog.Sync()
 	// 异步获取ip，防止阻塞
 	go message.GetIp()
+	// 设置limit值
 	internal.Setrlimit()
-	var configfile string
-	var showversion bool
 	flag.BoolVar(&showversion, "v", false, "get scs server version")
 	flag.StringVar(&configfile, "f", "scs.yaml", "set config file")
 	flag.Parse()

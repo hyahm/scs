@@ -10,11 +10,11 @@ import (
 )
 
 func RestartServer(svc *server.Server) {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss[svc.Name]; ok {
-		restartServer(ss[svc.Name], svc)
+	if _, ok := store.ss[svc.Name]; ok {
+		restartServer(store.ss[svc.Name], svc)
 	}
 
 }
@@ -22,7 +22,6 @@ func RestartServer(svc *server.Server) {
 func restartServer(s *scripts.Script, svc *server.Server) {
 	svc.Always = s.Always
 	svc.Command = s.Command
-	svc.ContinuityInterval = s.ContinuityInterval
 	svc.Cron = s.Cron
 	svc.Dir = s.Dir
 	svc.Disable = s.Disable
@@ -40,10 +39,10 @@ func restartServer(s *scripts.Script, svc *server.Server) {
 
 // 异步重启
 func RestartScript(s *scripts.Script) error {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss[s.Name]; !ok {
+	if _, ok := store.ss[s.Name]; !ok {
 		return errors.New("not found " + s.Name)
 	}
 	replicate := s.Replicate
@@ -53,25 +52,25 @@ func RestartScript(s *scripts.Script) error {
 	for i := 0; i < replicate; i++ {
 		name := s.Name + fmt.Sprintf("_%d", i)
 
-		if _, ok := servers[name]; ok {
-			restartServer(s, servers[name])
+		if _, ok := store.servers[name]; ok {
+			restartServer(s, store.servers[name])
 		}
 	}
 	return nil
 }
 
 func RestartAllServer() {
-	mu.RLock()
-	defer mu.RUnlock()
-	for _, svc := range servers {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for _, svc := range store.servers {
 		RestartServer(svc)
 	}
 }
 
 func RestartPermAllServer(token string) {
-	mu.RLock()
-	defer mu.RUnlock()
-	for _, svc := range servers {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for _, svc := range store.servers {
 		if svc.Token == token {
 			RestartServer(svc)
 		}
@@ -81,9 +80,9 @@ func RestartPermAllServer(token string) {
 
 // 返回成功还是失败
 func UpdateAndRestartScript(s *scripts.Script) bool {
-	mu.RLock()
-	defer mu.RUnlock()
-	if _, ok := ss[s.Name]; !ok {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	if _, ok := store.ss[s.Name]; !ok {
 		return false
 	}
 	replicate := s.Replicate
@@ -92,23 +91,23 @@ func UpdateAndRestartScript(s *scripts.Script) bool {
 	}
 	for i := 0; i < replicate; i++ {
 		subname := subname.NewSubname(s.Name, i)
-		go servers[subname.String()].UpdateAndRestart()
+		go store.servers[subname.String()].UpdateAndRestart()
 	}
 	return true
 }
 
 func UpdateAndRestartAllServer() {
-	mu.RLock()
-	defer mu.RUnlock()
-	for _, s := range ss {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for _, s := range store.ss {
 		go UpdateAndRestartScript(s)
 	}
 }
 
 func UpdatePermAndRestartAllServer(token string) {
-	mu.RLock()
-	defer mu.RUnlock()
-	for _, s := range ss {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for _, s := range store.ss {
 		if s.Token == token {
 			go UpdateAndRestartScript(s)
 		}

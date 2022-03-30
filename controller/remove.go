@@ -15,11 +15,11 @@ import (
 // 只有在 Server.Removed 为 true的时候才会发送  svc.StopSigle 信号
 // RemovePname 的时候才会用到
 func RemoveScript(pname string) error {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 
-	if _, ok := ss[pname]; ok {
-		replicate := ss[pname].Replicate
+	if _, ok := store.ss[pname]; ok {
+		replicate := store.ss[pname].Replicate
 		if replicate == 0 {
 			replicate = 1
 		}
@@ -27,7 +27,7 @@ func RemoveScript(pname string) error {
 		for i := 0; i < replicate; i++ {
 			subname := subname.NewSubname(pname, i)
 			atomic.AddInt64(&global.CanReload, 1)
-			go Remove(servers[subname.String()], true)
+			go Remove(store.servers[subname.String()], true)
 		}
 
 	} else {
@@ -52,10 +52,10 @@ func Remove(svc *server.Server, update bool) {
 		<-svc.StopSigle
 	}
 
-	mu.Lock()
-	delete(serverIndex[svc.Name], svc.Index)
-	removeServer(svc.SubName, update)
-	mu.Unlock()
+	store.mu.Lock()
+	delete(store.serverIndex[svc.Name], svc.Index)
+	removeServer(svc.Name, svc.SubName, update)
+	store.mu.Unlock()
 	atomic.AddInt64(&global.CanReload, -1)
 
 }

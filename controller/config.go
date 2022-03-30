@@ -1,5 +1,9 @@
 package controller
 
+import "github.com/hyahm/scs/pkg/config"
+
+var cfg *config.Config
+
 // DelScript 删除脚本的时候才会执行
 func DelScript(pname string) error {
 	err := RemoveScript(pname)
@@ -13,5 +17,5 @@ func DelScript(pname string) error {
 			break
 		}
 	}
-	return cfg.WriteConfigFile(true)
+	return cfg.WriteConfig(true)
 }

@@ -43,7 +43,7 @@ func (svc *Server) wait() {
 					am := &message.Message{
 						Title:  "service error stop",
 						Pname:  svc.Name,
-						Name:   svc.SubName.String(),
+						Name:   svc.SubName,
 						Reason: err.Error(),
 					}
 					if !svc.AI.Broken {

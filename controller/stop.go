@@ -9,9 +9,9 @@ import (
 
 // 异步执行停止脚本
 func StopScript(s *scripts.Script) error {
-	mu.RLock()
-	defer mu.RUnlock()
-	if _, ok := ss[s.Name]; !ok {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	if _, ok := store.ss[s.Name]; !ok {
 		return errors.New("")
 	}
 	// 禁用 script 所在的所有server
@@ -21,7 +21,7 @@ func StopScript(s *scripts.Script) error {
 	}
 	for i := 0; i < replicate; i++ {
 		subname := subname.NewSubname(s.Name, i)
-		go servers[subname.String()].Stop()
+		go store.servers[subname.String()].Stop()
 	}
 	return nil
 }

@@ -12,15 +12,15 @@ import (
 )
 
 func GetScripts() map[string]*scripts.Script {
-	mu.RLock()
-	defer mu.RUnlock()
-	return ss
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	return store.ss
 }
 func GetPermScripts(token string) map[string]*scripts.Script {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 	tempScripts := make(map[string]*scripts.Script)
-	for name, script := range ss {
+	for name, script := range store.ss {
 		if script.Token == token {
 			tempScripts[name] = script
 		}
@@ -29,37 +29,37 @@ func GetPermScripts(token string) map[string]*scripts.Script {
 }
 
 func KillScript(s *scripts.Script) {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
 	}
 	for i := 0; i < replicate; i++ {
 		subname := subname.NewSubname(s.Name, i)
-		servers[subname.String()].Kill()
+		store.servers[subname.String()].Kill()
 	}
 }
 
 func NeedStop(s *scripts.Script) bool {
 	// 更新server
 	// 判断值是否相等
-	return !scripts.EqualScript(s, ss[s.Name])
+	return !scripts.EqualScript(s, store.ss[s.Name])
 }
 
 func ScriptName(pname, subname, role string) []byte {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 	status := &pkg.StatusList{
 		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
 	}
-	if _, ok := ss[pname]; !ok {
+	if _, ok := store.ss[pname]; !ok {
 		golog.Error("not found scripts")
 		return nil
 	}
-	if _, ok := servers[subname]; !ok {
+	if _, ok := store.servers[subname]; !ok {
 		return nil
 	}
 	status.Data = append(status.Data, getStatus(pname, subname))
@@ -68,14 +68,14 @@ func ScriptName(pname, subname, role string) []byte {
 }
 
 func ScriptPname(pname, role string) []byte {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 	statuss := &pkg.StatusList{
 		Data:    make([]status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
 	}
-	if _, ok := ss[pname]; !ok {
+	if _, ok := store.ss[pname]; !ok {
 		statuss.Msg = "not found " + pname
 		send, err := json.MarshalIndent(statuss, "", "\n")
 
@@ -84,11 +84,11 @@ func ScriptPname(pname, role string) []byte {
 		}
 		return send
 	}
-	replicate := ss[pname].Replicate
+	replicate := store.ss[pname].Replicate
 	if replicate == 0 {
 		replicate = 1
 	}
-	if !ss[pname].Disable {
+	if !store.ss[pname].Disable {
 		for i := 0; i < replicate; i++ {
 			subname := subname.NewSubname(pname, i).String()
 

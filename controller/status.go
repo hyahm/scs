@@ -13,21 +13,21 @@ func getStatus(name, subname string) status.ServiceStatus {
 	status := status.ServiceStatus{
 		PName:        name,
 		Name:         subname,
-		IsCron:       servers[subname].IsCron,
-		Command:      servers[subname].Status.Command,
-		Always:       ss[name].Always,
-		Version:      servers[subname].Status.Version,
-		CanNotStop:   servers[subname].Status.CanNotStop,
-		Path:         servers[subname].Status.Path,
-		Status:       servers[subname].Status.Status,
-		RestartCount: servers[subname].Status.RestartCount,
-		Pid:          servers[subname].Status.Pid,
-		Disable:      ss[name].Disable,
+		IsCron:       store.servers[subname].IsCron,
+		Command:      store.servers[subname].Status.Command,
+		Always:       store.ss[name].Always,
+		Version:      store.servers[subname].Status.Version,
+		CanNotStop:   store.servers[subname].Status.CanNotStop,
+		Path:         store.servers[subname].Status.Path,
+		Status:       store.servers[subname].Status.Status,
+		RestartCount: store.servers[subname].Status.RestartCount,
+		Pid:          store.servers[subname].Status.Pid,
+		Disable:      store.ss[name].Disable,
 		OS:           runtime.GOOS,
-		Start:        servers[subname].Status.Start,
+		Start:        store.servers[subname].Status.Start,
 		SCSVerion:    global.VERSION,
 	}
 
-	status.Cpu, status.Mem, _ = probe.GetProcessInfo(int32(servers[subname].Cmd.Process.Pid))
+	status.Cpu, status.Mem, _ = probe.GetProcessInfo(int32(store.servers[subname].Cmd.Process.Pid))
 	return status
 }

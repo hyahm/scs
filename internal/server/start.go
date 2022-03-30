@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"runtime"
 	"strings"
 	"time"
 
@@ -23,14 +22,7 @@ func (svc *Server) Start() {
 		svc.Exit <- 10
 		svc.Status.Status = status.WAITRESTART
 	case status.STOP:
-		golog.Info("start ", svc.SubName)
 		// 开始启动的时候，需要将遍历变量值的模板渲染
-		svc.Env["OS"] = runtime.GOOS
-		for k := range svc.Env {
-			if len(k) > 8 && k[:7] == "SCS_TPL" {
-				svc.Env[k] = internal.Format(svc.Env[k], svc.Env)
-			}
-		}
 		go svc.asyncStart()
 	}
 }

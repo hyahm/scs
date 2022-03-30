@@ -56,15 +56,15 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 		if min != i {
 			st.Nodes[i], st.Nodes[min] = st.Nodes[min], st.Nodes[i]
 		}
-		// fmt.Println(st[i])
+
 	}
 	// 计算当前列最大距离
 
 	maxColumeLen := []int{5, 4, 6, 3, 6, 6, 7, 10, 6, 7, 3, 7}
-	for _, v := range st.Nodes {
+	for i, v := range st.Nodes {
 
-		if v.Start > 0 {
-			v.Start = time.Now().Unix() - v.Start
+		if st.Nodes[i].Start > 0 {
+			st.Nodes[i].Start = time.Now().Unix() - st.Nodes[i].Start
 		}
 		if len(v.PName) > maxColumeLen[0] {
 			maxColumeLen[0] = len(v.PName)

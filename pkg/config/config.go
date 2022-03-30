@@ -36,21 +36,22 @@ func defaultConfig() *Config {
 	}
 }
 
-// // 保存的配置文件路径
+// 保存的配置文件路径
 var cfgfile string
 
-//
-func Start(filename string) (*Config, error) {
+// 读文件
+func ReadConfig(filename string) (*Config, error) {
 	// 依次启动
 	if filename != "" {
 		cfgfile = filename
-		return Load()
+		return load()
 	}
 
-	return ReLoad()
+	return reLoad()
 }
 
-func (c *Config) WriteConfigFile(update bool) error {
+// 写入配置文件
+func (c *Config) WriteConfig(update bool) error {
 	if !update {
 		return nil
 	}
@@ -62,13 +63,7 @@ func (c *Config) WriteConfigFile(update bool) error {
 	return ioutil.WriteFile(cfgfile, b, 0644)
 }
 
-func ReLoad() (*Config, error) {
-	// reload: 第一次启动     还是 config reload
-	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
-	return readConfig()
-}
-
-func Load() (*Config, error) {
+func load() (*Config, error) {
 	// reload: 第一次启动     还是 config reload
 	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
 	cfg, err := readConfig()
@@ -87,19 +82,26 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
-// 读取配置文件
+func reLoad() (*Config, error) {
+	// reload: 第一次启动     还是 config reload
+	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
+	return readConfig()
+}
+
+// 读取配置文件， 找不到就创建一个空文件
 func readConfig() (*Config, error) {
 	cfg := &Config{}
-	golog.Info("reload")
 	b, err := ioutil.ReadFile(cfgfile)
 	if err != nil {
 		if !os.IsNotExist(err) {
+			f, err := os.Create(cfgfile)
+			if err != nil {
+				golog.Error(err)
+			}
+			f.Close()
 			return defaultConfig(), nil
 		}
-		f, er := os.Create(cfgfile)
-		if er == nil {
-			f.Close()
-		}
+
 	} else {
 		err = yaml.Unmarshal(b, cfg)
 		if err != nil {
@@ -126,11 +128,8 @@ func readConfig() (*Config, error) {
 	return cfg, nil
 }
 
-// 检测配置脚本是否
 func (c *Config) check() error {
-	// 检查时间
 	// 配置信息填充至状态
-
 	checkrepeat := make(map[string]bool)
 	for index := range c.SC {
 		if c.SC[index].Name == "" || c.SC[index].Command == "" {
@@ -175,7 +174,7 @@ func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
 
 		}
 	}
-	return tmp.WriteConfigFile(true)
+	return tmp.WriteConfig(true)
 
 }
 
@@ -194,7 +193,7 @@ func DeleteAllScriptToConfigFile(update bool) error {
 		return err
 	}
 	tmp.SC = nil
-	return tmp.WriteConfigFile(update)
+	return tmp.WriteConfig(update)
 }
 
 // 更新script到配置文件
@@ -212,7 +211,7 @@ func RemoveAllScriptToConfigFile(update bool) error {
 		return err
 	}
 
-	return tmp.WriteConfigFile(update)
+	return tmp.WriteConfig(update)
 }
 
 // func RemoveAllScripts() {
@@ -242,7 +241,7 @@ func DeleteScriptToConfigFile(s *scripts.Script, update bool) error {
 			break
 		}
 	}
-	return tmp.WriteConfigFile(update)
+	return tmp.WriteConfig(update)
 }
 
 func AddScriptToConfigFile(s *scripts.Script, update bool) error {
@@ -262,5 +261,5 @@ func AddScriptToConfigFile(s *scripts.Script, update bool) error {
 		return err
 	}
 	tmp.SC = append(tmp.SC, s)
-	return tmp.WriteConfigFile(update)
+	return tmp.WriteConfig(update)
 }

@@ -13,7 +13,6 @@ import (
 	"github.com/hyahm/scs/pkg/config/liveness"
 	"github.com/hyahm/scs/pkg/config/scripts/cron"
 	"github.com/hyahm/scs/pkg/config/scripts/prestart"
-	"github.com/hyahm/scs/pkg/config/scripts/subname"
 	"github.com/hyahm/scs/pkg/message"
 	"github.com/hyahm/scs/status"
 )
@@ -33,7 +32,7 @@ type Server struct {
 	Env                map[string]string              `json:"-"`
 	Logger             *golog.Log                     `json:"-"`               // 日志
 	Times              int                            `json:"times,omitempty"` // 记录循环的次数
-	SubName            subname.Subname                `json:"subname,omitempty"`
+	SubName            string                         `json:"subname,omitempty"`
 	Cmd                *exec.Cmd                      `json:"-"`
 	Replicate          int                            `json:"replicate,omitempty"`
 	Status             *status.ServiceStatus          `json:"status,omitempty"`
@@ -253,7 +252,7 @@ func (s *Server) successAlert() {
 			am := &message.Message{
 				Title:      "service recover",
 				Pname:      s.Name,
-				Name:       s.SubName.String(),
+				Name:       s.SubName,
 				BrokenTime: s.AI.Start.String(),
 				FixTime:    time.Now().String(),
 			}

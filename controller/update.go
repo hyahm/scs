@@ -10,10 +10,10 @@ import (
 
 // 更新的操作
 func DisableScript(s *scripts.Script, update bool) bool {
-	mu.Lock()
-	defer mu.Unlock()
+	store.mu.Lock()
+	defer store.mu.Unlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss[s.Name]; !ok {
+	if _, ok := store.ss[s.Name]; !ok {
 		return false
 	}
 
@@ -24,9 +24,9 @@ func DisableScript(s *scripts.Script, update bool) bool {
 
 	for i := 0; i < replicate; i++ {
 		subname := subname.NewSubname(s.Name, i)
-		if _, ok := servers[subname.String()]; ok {
+		if _, ok := store.servers[subname.String()]; ok {
 			atomic.AddInt64(&global.CanReload, 1)
-			go Remove(servers[subname.String()], update)
+			go Remove(store.servers[subname.String()], update)
 		}
 
 	}
@@ -34,10 +34,10 @@ func DisableScript(s *scripts.Script, update bool) bool {
 }
 
 func EnableScript(s *scripts.Script) bool {
-	mu.Lock()
-	defer mu.Unlock()
+	store.mu.Lock()
+	defer store.mu.Unlock()
 	// 禁用 script 所在的所有server
-	if _, ok := ss[s.Name]; !ok {
+	if _, ok := store.ss[s.Name]; !ok {
 		return false
 	}
 
@@ -47,7 +47,7 @@ func EnableScript(s *scripts.Script) bool {
 	}
 	for i := 0; i < replicate; i++ {
 		// subname := subname.NewSubname(s.Name, i)
-		makeReplicateServerAndStart(ss[s.Name], replicate)
+		makeReplicateServerAndStart(store.ss[s.Name], replicate)
 		// go servers[subname.String()].Start()
 	}
 	return true

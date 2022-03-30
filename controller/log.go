@@ -7,20 +7,20 @@ import (
 // 通过名字来获取token
 
 func GetLookToken(name string) string {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 
-	if v, ok := ss[subname.Subname(name).GetName()]; ok {
+	if v, ok := store.ss[subname.Subname(name).GetName()]; ok {
 		return v.Token
 	}
 	return ""
 }
 
 func GetPnameToken(pname string) string {
-	mu.RLock()
-	defer mu.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 
-	if v, ok := ss[pname]; ok {
+	if v, ok := store.ss[pname]; ok {
 		return v.Token
 	}
 	return ""
