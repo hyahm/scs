@@ -134,21 +134,24 @@ func makeReplicateServerAndStart(s *scripts.Script, end int) {
 func All(role string) []byte {
 	mu.RLock()
 	defer mu.RUnlock()
+	golog.Info("222222")
 	statuss := &pkg.StatusList{
 		Data:    make([]*status.ServiceStatus, 0),
 		Version: global.VERSION,
 		Role:    role,
 	}
+	golog.Info("222222")
 	serviceStatus := make([]*status.ServiceStatus, 0)
 	for name := range servers {
 		serviceStatus = append(serviceStatus, getStatus(subname.Subname(name).GetName(), name))
 	}
 	statuss.Code = 200
 	statuss.Data = serviceStatus
-	send, err := json.MarshalIndent(statuss, "", "\t")
+	send, err := json.Marshal(statuss)
 	if err != nil {
 		golog.Error(err)
 	}
+	golog.Info("222222")
 	return send
 }
 
