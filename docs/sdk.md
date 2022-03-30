@@ -31,7 +31,7 @@ func main() {
         "data": [
                 {
                         "name": "test_0",
-                        "ppid": 0,
+                        "pid": 0,
                         "status": "Stop",
                         "command": "python test.py",
                         "pname": "test",

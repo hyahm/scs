@@ -1,5 +1,7 @@
 @echo off
 
+
+$env:GOOS="windows";
 go build -o bin/scsd-3.7.1.exe  ./cmd/scsd/scsd.go;
 go build -o bin/scsctl-3.7.1.exe  ./cmd/scsctl/scsctl.go;
 $env:GOOS="linux";

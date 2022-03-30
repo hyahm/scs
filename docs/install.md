@@ -25,7 +25,7 @@ linux(需要 git tar命令， 关闭selinux),mac, windows 请按照使用二进�
 
 > 依赖
 - git  如果有没有此命令则需要安装git
-- go >= 1.16
+- go >= 1.18
 从中文网下载对应系统的包，解压后将 go/bin 添加到环境变量， 敲下 go 如果有如初则安装完go  
 
 > 下载源码

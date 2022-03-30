@@ -14,7 +14,8 @@ func RestartServer(svc *server.Server) {
 	defer mu.RUnlock()
 	// 禁用 script 所在的所有server
 	svc.Status.RestartCount = 0
-	makeReplicateServerAndStart(ss[svc.Name], svc.Replicate)
+	svc.Restart()
+	// makeReplicateServerAndStart(ss[svc.Name], svc.Replicate)
 }
 
 // 异步重启
@@ -30,14 +31,10 @@ func RestartScript(s *scripts.Script) error {
 		replicate = 1
 	}
 	for i := 0; i < replicate; i++ {
-		if _, ok := servers[s.Name+fmt.Sprintf("_%d", i)]; !ok {
-			servers[s.Name+fmt.Sprintf("_%d", i)] = &server.Server{Index: i}
-		} else {
-			servers[s.Name+fmt.Sprintf("_%d", i)].Status.RestartCount = 0
+		name := s.Name + fmt.Sprintf("_%d", i)
+		if _, ok := servers[name]; ok {
+			servers[name].Restart()
 		}
-
-		serverIndex[s.Name] = make(map[int]struct{})
-		makeReplicateServerAndStart(s, replicate)
 	}
 	return nil
 }

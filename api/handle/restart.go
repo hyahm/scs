@@ -27,7 +27,14 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 func RestartPname(w http.ResponseWriter, r *http.Request) {
 	names := xmux.Var(r)["pname"]
 	role := xmux.GetInstance(r).Get("role").(string)
+	token := xmux.GetInstance(r).Get("token").(string)
+
 	for _, pname := range strings.Split(names, ",") {
+		if token != "" {
+			controller.RestartPermAllServer(token)
+		} else {
+			controller.RestartAllServer()
+		}
 		s, ok := controller.GetScriptByPname(pname)
 		if !ok {
 			w.Write(pkg.NotFoundScript(role))
