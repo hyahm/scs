@@ -41,7 +41,7 @@ func (res *Response) ErrorE(err error) []byte {
 // }
 
 func NotFoundScript(role string) []byte {
-	return []byte(fmt.Sprintf(`{"code": 404, "msg": "not found this script", "role": "%s"}`, role))
+	return []byte(fmt.Sprintf(`{"code": 404, "msg": "not found pname or name", "role": "%s"}`, role))
 }
 
 func Waiting(step, role string) []byte {

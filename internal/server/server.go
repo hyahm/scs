@@ -169,6 +169,7 @@ func (svc *Server) MakeServer(script *scripts.Script, availablePort int) int {
 	}
 	svc.fillServer(script)
 	env["OS"] = runtime.GOOS
+	env["NAME"] = svc.SubName
 	// 格式化 SCS_TPL 开头的环境变量
 	for k := range env {
 		if len(k) > 8 && k[:7] == "SCS_TPL" {

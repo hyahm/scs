@@ -21,6 +21,7 @@ var StatusCmd = &cobra.Command{
 		wg := &sync.WaitGroup{}
 		nodes := getNodes()
 		if len(nodes) == 0 {
+			fmt.Println("-----------------")
 			fmt.Println("not found any nodes")
 			return
 		}
