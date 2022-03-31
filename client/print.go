@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hyahm/scs/status"
+	"github.com/hyahm/scs/pkg"
 )
 
 type ScriptStatusNode struct {
-	Nodes   []status.ServiceStatus
+	Nodes   []pkg.ServiceStatus
 	Name    string
 	Role    string
 	Version string
@@ -100,6 +100,7 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 	maxColumeLen[8] = 10
 	maxColumeLen[9] = 10
 	maxColumeLen[10] = 10
+	maxColumeLen[11] = 12
 
 	if verbose {
 		fmt.Printf("<node: %s, url: %s, server version: %s, role: %s>\n", st.Name, st.Url, st.Version, st.Role)
@@ -112,9 +113,10 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 			"IsCron" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
 			"Version" + (space(maxColumeLen[6] - len("Version"))).String() +
 			"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String() +
-			"Failed" + (space(maxColumeLen[8] - len("Failed"))).String() +
-			"CPU" + (space(maxColumeLen[9] - len("CPU"))).String() +
-			"MEM(kb)" + (space(maxColumeLen[10] - len("MEM(kb)"))).String() +
+			"Disable" + (space(maxColumeLen[8] - len("Disable"))).String() +
+			"Failed" + (space(maxColumeLen[9] - len("Failed"))).String() +
+			"CPU" + (space(maxColumeLen[10] - len("CPU"))).String() +
+			"MEM(kb)" + (space(maxColumeLen[11] - len("MEM(kb)"))).String() +
 			"Command")
 		for _, info := range st.Nodes {
 
@@ -137,7 +139,7 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 				}
 
 			}
-			fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s%d%s%s%s%s%s%s\n",
+			fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s%t%s%d%s%s%s%s%s%s\n",
 				info.PName, space(maxColumeLen[0]-len(info.PName)),
 				info.Name, space(maxColumeLen[1]-len(info.Name)),
 				info.Status, space(maxColumeLen[2]-len(info.Status)),
@@ -146,9 +148,10 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 				info.IsCron, space(maxColumeLen[5]-boolSpace(info.IsCron)),
 				info.Version, space(maxColumeLen[6]-len(info.Version)),
 				info.CanNotStop, space(maxColumeLen[7]-boolSpace(info.CanNotStop)),
-				info.RestartCount, space(maxColumeLen[8]-len(strconv.Itoa(info.RestartCount))),
-				cpu, space(maxColumeLen[9]-len(cpu)),
-				mem, space(maxColumeLen[10]-len(mem)),
+				info.Disable, space(maxColumeLen[8]-boolSpace(info.Disable)),
+				info.RestartCount, space(maxColumeLen[9]-len(strconv.Itoa(info.RestartCount))),
+				cpu, space(maxColumeLen[10]-len(cpu)),
+				mem, space(maxColumeLen[11]-len(mem)),
 				command,
 			)
 		}
@@ -163,9 +166,10 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 			"UpTime" + (space(maxColumeLen[4] - len("UpTime"))).String() +
 			"IsCron" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
 			"Version" + (space(maxColumeLen[6] - len("Version"))).String() +
-			"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String())
+			"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String() +
+			"Disable" + (space(maxColumeLen[8] - len("Disable"))).String())
 		for _, info := range st.Nodes {
-			fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s\n",
+			fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s%t%s\n",
 				info.PName, space(maxColumeLen[0]-len(info.PName)),
 				info.Name, space(maxColumeLen[1]-len(info.Name)),
 				info.Status, space(maxColumeLen[2]-len(info.Status)),
@@ -174,6 +178,7 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 				info.IsCron, space(maxColumeLen[5]-boolSpace(info.IsCron)),
 				info.Version, space(maxColumeLen[6]-len(info.Version)),
 				info.CanNotStop, space(maxColumeLen[7]-boolSpace(info.CanNotStop)),
+				info.Disable, space(maxColumeLen[8]-boolSpace(info.Disable)),
 			)
 		}
 		fmt.Println("--------------------------------------------------")

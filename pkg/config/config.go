@@ -59,7 +59,6 @@ func (c *Config) WriteConfig(update bool) error {
 	if err != nil {
 		return err
 	}
-	golog.Info(string(b))
 	return ioutil.WriteFile(cfgfile, b, 0644)
 }
 

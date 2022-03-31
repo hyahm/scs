@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/internal/server/status"
 	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/scs/pkg/message"
-	"github.com/hyahm/scs/status"
 )
 
 func (svc *Server) wait() {

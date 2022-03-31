@@ -41,6 +41,6 @@ var RestartCmd = &cobra.Command{
 }
 
 func init() {
-	RestartCmd.Flags().BoolVar(&restartAll, "all", false, "restart all")
+	RestartCmd.Flags().BoolVarP(&restartAll, "all", "a", false, "restart all")
 	rootCmd.AddCommand(RestartCmd)
 }

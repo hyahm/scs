@@ -4,15 +4,14 @@ import (
 	"encoding/json"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/status"
 )
 
 type StatusList struct {
-	Data    []status.ServiceStatus `json:"data"`
-	Code    int                    `json:"code"`
-	Msg     string                 `json:"msg"`
-	Version string                 `json:"version"`
-	Role    string                 `json:"role"`
+	Data    []ServiceStatus `json:"data"`
+	Code    int             `json:"code"`
+	Msg     string          `json:"msg"`
+	Version string          `json:"version"`
+	Role    string          `json:"role"`
 }
 
 func (sl *StatusList) Marshal() []byte {

@@ -17,7 +17,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
 	role := xmux.GetInstance(r).Get("role").(string)
-	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
+	svc, _, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
 		w.Write(pkg.NotFoundScript(role))
 		return

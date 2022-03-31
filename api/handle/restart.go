@@ -2,7 +2,6 @@ package handle
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
@@ -20,30 +19,30 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		w.Write(pkg.WaitingConfigChanged(role))
 		return
 	}
-	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
+	svc, script, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
 		w.Write(pkg.NotFoundScript(role))
 		return
 	}
-	go controller.RestartServer(svc)
+	go controller.RestartServer(svc, script)
 	w.Write(pkg.Waiting("restart", role))
 }
 
 func RestartPname(w http.ResponseWriter, r *http.Request) {
-	names := xmux.Var(r)["pname"]
+	pname := xmux.Var(r)["pname"]
 	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
 		w.Write(pkg.WaitingConfigChanged(role))
 		return
 	}
-	for _, pname := range strings.Split(names, ",") {
-		s, ok := controller.GetScriptByPname(pname)
-		if !ok {
-			w.Write(pkg.NotFoundScript(role))
-			return
-		}
-		controller.RestartScript(s)
+	// for _, pname := range strings.Split(names, ",") {
+	s, ok := controller.GetScriptByPname(pname)
+	if !ok {
+		w.Write(pkg.NotFoundScript(role))
+		return
 	}
+	controller.RestartScript(s)
+	// }
 	w.Write(pkg.Waiting("restart", role))
 }
 
@@ -55,11 +54,7 @@ func RestartAll(w http.ResponseWriter, r *http.Request) {
 		w.Write(pkg.WaitingConfigChanged(role))
 		return
 	}
-	if token != "" {
-		controller.RestartPermAllServer(token)
-	} else {
-		controller.RestartAllServer()
-	}
+	controller.RestartAllServer(token)
 
 	w.Write(pkg.Waiting("restart", role))
 }

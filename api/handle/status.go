@@ -26,12 +26,7 @@ func StatusPname(w http.ResponseWriter, r *http.Request) {
 func AllStatus(w http.ResponseWriter, r *http.Request) {
 	role := xmux.GetInstance(r).Get("role").(string)
 
-	if role == "scripts" {
-		token := xmux.GetInstance(r).Get("token").(string)
-		w.Write(controller.AllLook(role, token))
-		return
-
-	}
-	w.Write(controller.All(role))
+	token := xmux.GetInstance(r).Get("token").(string)
+	w.Write(controller.All(role, token))
 
 }

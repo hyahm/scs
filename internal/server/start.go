@@ -7,8 +7,8 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/internal/server/status"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/status"
 )
 
 // Start  启动服务 异步的
@@ -68,10 +68,12 @@ func (svc *Server) asyncStart() {
 		return
 	}
 	svc.Command = internal.Format(svc.Command, svc.Env)
+	golog.Info(svc.Command)
 	if svc.Disable {
 		svc.stopStatus()
 		return
 	}
+
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.start(); err != nil {
 		golog.Info(err)

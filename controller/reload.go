@@ -6,6 +6,7 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/scripts"
@@ -26,6 +27,7 @@ func Reload() error {
 		// 第一次报错直接退出
 		return err
 	}
+	// 配置文件是对的， 那么直接写进配置文件
 	cfg = c
 	err = cfg.WriteConfig(true)
 	if err != nil {
@@ -40,11 +42,7 @@ func Reload() error {
 	store.mu.Lock()
 	defer store.mu.Unlock()
 	for index := range cfg.SC {
-		//  查看是否存在此脚本
-		if !config.CheckScriptNameRule(cfg.SC[index].Name) {
-			golog.Error("script name must be a word, have been ignore: " + cfg.SC[index].Name)
-			continue
-		}
+
 		if cfg.SC[index].Token == "" {
 			cfg.SC[index].Token = pkg.RandomToken()
 		}
@@ -74,18 +72,46 @@ func Reload() error {
 	return nil
 }
 
+// 添加script并启动
 func AddScript(script *scripts.Script) {
-	if store.ss == nil {
-		store.ss = make(map[string]*scripts.Script)
+	if script.Token == "" {
+		script.Token = pkg.RandomToken()
 	}
+	// 将scripts填充到store中
 	store.ss[script.Name] = script
 	replicate := script.Replicate
 	if replicate == 0 {
 		replicate = 1
 	}
-	for i := 0; i < replicate; i++ {
-		makeReplicateServerAndStart(script, replicate)
 
+	if _, ok := store.serverIndex[script.Name]; !ok {
+		store.serverIndex[script.Name] = make(map[int]struct{})
+	}
+	// 生成环境变量, 填充到script.tempenv里面
+
+	// 假设设置的端口是可用的
+	availablePort := script.Port
+	for i := 0; i < replicate; i++ {
+		if _, ok := store.serverIndex[script.Name][i]; ok {
+			// 如果存在这个副本。直接跳过
+			continue
+		}
+		subname := fmt.Sprintf("%s_%d", script.Name, i)
+		store.servers[subname] = &server.Server{
+			Index:     i,
+			Replicate: replicate,
+			SubName:   subname,
+			Name:      script.Name,
+		}
+		store.serverIndex[script.Name][i] = struct{}{}
+		availablePort = store.servers[subname].MakeServer(script, availablePort)
+		availablePort++
+		if script.Disable {
+			// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
+			break
+		}
+
+		store.servers[subname].Start()
 	}
 }
 
@@ -114,7 +140,7 @@ func UpdateScript(script *scripts.Script, update bool) {
 			golog.Info("remove ", subname.NewSubname(script.Name, i).String())
 			Remove(store.servers[subname.NewSubname(script.Name, i).String()], false)
 			golog.Info("update")
-			makeReplicateServerAndStart(store.ss[script.Name], newReplicate)
+			// makeReplicateServerAndStart(store.ss[script.Name], newReplicate)
 			golog.Info("update success")
 		}(i)
 
@@ -133,7 +159,8 @@ func ReloadScripts(script *scripts.Script, update bool) {
 	// 处理存在的
 	// if _, ok := store.ss[script.Name]; ok {
 	// 对比启动的副本
-
+	store.mu.Lock()
+	defer store.mu.Unlock()
 	oldReplicate := store.ss[script.Name].Replicate
 	if oldReplicate == 0 {
 		oldReplicate = 1
@@ -149,31 +176,6 @@ func ReloadScripts(script *scripts.Script, update bool) {
 	// 对比脚本是否修改
 	store.ss[script.Name] = script
 	store.ss[script.Name].Replicate = newReplicate
-
-	// if !scripts.EqualScript(script, ss[script.Name]) {
-	// 	// 如果不一样， 那么 就需要重新启动服务
-	// 	ss[script.Name] = script
-	// 	ss[script.Name].EnvLocker = &sync.RWMutex{}
-	// 	for i := 0; i < newReplicate; i++ {
-	// 		// subname := subname.NewSubname(script.Name, i)
-	// 		// servers[subname.String()].Start()
-	// 		go func(i int) {
-	// 			atomic.AddInt64(&global.CanReload, 1)
-	// 			Remove(servers[subname.NewSubname(script.Name, i).String()], update)
-	// 			makeReplicateServerAndStart(script, newReplicate)
-	// 		}(i)
-
-	// 	}
-
-	// 	// 删除多余的
-	// 	for i := newReplicate; i < oldReplicate; i++ {
-	// 		golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-	// 		Remove(servers[subname.NewSubname(script.Name, i).String()], update)
-	// 	}
-
-	// 	return
-	// }
-
 	if oldReplicate == newReplicate {
 		// 如果一样的名字， 副本数一样的就直接跳过
 		return
@@ -187,10 +189,25 @@ func ReloadScripts(script *scripts.Script, update bool) {
 		}
 	} else {
 		// 小于的话，就增加
+		availablePort := script.Port
 		for i := oldReplicate; i < newReplicate; i++ {
+			subname := fmt.Sprintf("%s_%d", script.Name, i)
+			store.servers[subname] = &server.Server{
+				Index:     i,
+				Replicate: newReplicate,
+				SubName:   subname,
+				Name:      script.Name,
+			}
+			store.serverIndex[script.Name][i] = struct{}{}
+			availablePort = store.servers[subname].MakeServer(script, availablePort)
+			availablePort++
+			if script.Disable {
+				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
+				break
+			}
 
+			store.servers[subname].Start()
 		}
-		makeReplicateServerAndStart(script, newReplicate)
 	}
 
 	// } else {

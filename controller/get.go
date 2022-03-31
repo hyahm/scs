@@ -9,14 +9,13 @@ import (
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/scripts"
 	"github.com/hyahm/scs/pkg/config/scripts/subname"
-	"github.com/hyahm/scs/status"
 )
 
 func GetScriptName(pname string, subname string) []byte {
 	store.mu.RLock()
 	store.mu.RUnlock()
 	statuss := &pkg.StatusList{
-		Data:    make([]status.ServiceStatus, 0),
+		Data:    make([]pkg.ServiceStatus, 0),
 		Version: global.VERSION,
 	}
 	if _, ok := store.ss[pname]; !ok {
@@ -32,22 +31,22 @@ func GetScriptName(pname string, subname string) []byte {
 }
 
 // 获取脚本结构体
-func GetServerByNameAndSubname(name string, subname subname.Subname) (*server.Server, bool) {
+func GetServerByNameAndSubname(name string, subname subname.Subname) (*server.Server, *scripts.Script, bool) {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	if _, ok := store.ss[name]; !ok {
-		return nil, false
+		return nil, nil, false
 	}
 	if _, ok := store.servers[subname.String()]; ok {
-		return store.servers[subname.String()], true
+		return store.servers[subname.String()], store.ss[name], true
 	}
-	return nil, false
+	return nil, nil, false
 }
 
-func GetScriptByPname(name string) (*scripts.Script, bool) {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	v, ok := store.ss[name]
-	return v, ok
+// func GetScriptByPname(name string) (*scripts.Script, bool) {
+// 	store.mu.RLock()
+// 	defer store.mu.RUnlock()
+// 	v, ok := store.ss[name]
+// 	return v, ok
 
-}
+// }

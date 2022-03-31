@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/status"
+	"github.com/hyahm/scs/internal/server/status"
 )
 
 func (svc *Server) stop() {

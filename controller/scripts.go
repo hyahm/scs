@@ -1,14 +1,8 @@
 package controller
 
 import (
-	"encoding/json"
-
-	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/scripts"
 	"github.com/hyahm/scs/pkg/config/scripts/subname"
-	"github.com/hyahm/scs/status"
 )
 
 func GetScripts() map[string]*scripts.Script {
@@ -47,60 +41,9 @@ func NeedStop(s *scripts.Script) bool {
 	return !scripts.EqualScript(s, store.ss[s.Name])
 }
 
-func ScriptName(pname, subname, role string) []byte {
+func GetScriptByPname(pname string) (*scripts.Script, bool) {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
-	status := &pkg.StatusList{
-		Data:    make([]status.ServiceStatus, 0),
-		Version: global.VERSION,
-		Role:    role,
-	}
-	if _, ok := store.ss[pname]; !ok {
-		golog.Error("not found scripts")
-		return nil
-	}
-	if _, ok := store.servers[subname]; !ok {
-		return nil
-	}
-	status.Data = append(status.Data, getStatus(pname, subname))
-	return status.Marshal()
-
-}
-
-func ScriptPname(pname, role string) []byte {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	statuss := &pkg.StatusList{
-		Data:    make([]status.ServiceStatus, 0),
-		Version: global.VERSION,
-		Role:    role,
-	}
-	if _, ok := store.ss[pname]; !ok {
-		statuss.Msg = "not found " + pname
-		send, err := json.MarshalIndent(statuss, "", "\n")
-
-		if err != nil {
-			golog.Error(err)
-		}
-		return send
-	}
-	replicate := store.ss[pname].Replicate
-	if replicate == 0 {
-		replicate = 1
-	}
-	if !store.ss[pname].Disable {
-		for i := 0; i < replicate; i++ {
-			subname := subname.NewSubname(pname, i).String()
-
-			statuss.Data = append(statuss.Data, getStatus(pname, subname))
-		}
-	}
-
-	statuss.Code = 200
-	send, err := json.MarshalIndent(statuss, "", "\n")
-
-	if err != nil {
-		golog.Error(err)
-	}
-	return send
+	v, ok := store.ss[pname]
+	return v, ok
 }

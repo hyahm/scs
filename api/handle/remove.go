@@ -21,7 +21,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		w.Write(pkg.WaitingConfigChanged(role))
 		return
 	}
-	svc, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
+	svc, _, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
 		w.Write(pkg.NotFoundScript(role))
 		return

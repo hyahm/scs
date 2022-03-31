@@ -2,22 +2,17 @@ package scripts
 
 import (
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
-	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/scs/pkg/config/alert/to"
 	"github.com/hyahm/scs/pkg/config/liveness"
 	"github.com/hyahm/scs/pkg/config/scripts/cron"
 	"github.com/hyahm/scs/pkg/config/scripts/prestart"
-	"github.com/hyahm/scs/status"
 )
 
 type Script struct {
@@ -94,54 +89,6 @@ func (s *Script) MakeEnv() {
 	s.TempEnv = tempEnv
 }
 
-// 生成 server
-func (s *Script) Add(port, replicate, id int, subname string) *server.Server {
-
-	svc := &server.Server{
-		// Script:  s,
-		Name:    s.Name,
-		Index:   id,
-		Token:   s.Token,
-		Command: s.Command,
-		// Log:       make([]string, 0, global.GetLogCount()),
-		SubName: subname,
-		Dir:     s.Dir,
-		Status: &status.ServiceStatus{
-			Name:    subname,
-			PName:   s.Name,
-			Status:  status.STOP,
-			Command: s.Command,
-			Path:    s.Dir,
-			OS:      runtime.GOOS,
-		},
-		Replicate: replicate,
-		Logger: golog.NewLog(
-			filepath.Join(global.LogDir, subname+".log"), 10<<10, false, global.CleanLog),
-		Update:    s.Update,
-		AI:        &alert.AlertInfo{},
-		Port:      port,
-		AT:        s.AT,
-		StopSigle: make(chan bool, 1),
-
-		Liveness:     s.Liveness,
-		Ready:        make(chan bool, 1),
-		Always:       s.Always,
-		Disable:      s.Disable,
-		DisableAlert: s.DisableAlert,
-		PreStart:     s.PreStart,
-	}
-	svc.Logger.Format = global.FORMAT
-	if s.Cron != nil {
-		svc.Cron = &cron.Cron{
-			Start:   s.Cron.Start,
-			Loop:    s.Cron.Loop,
-			IsMonth: s.Cron.IsMonth,
-			Times:   s.Cron.Times,
-		}
-	}
-	return svc
-}
-
 func (s *Script) GetEnv() []string {
 	env := make([]string, 0, len(s.Env))
 	for k, v := range s.Env {
@@ -149,37 +96,6 @@ func (s *Script) GetEnv() []string {
 	}
 	return env
 }
-
-// 通过script 生成 server
-// func (s *Script) MakeServer(ss map[string]*server.Server) {
-// 	s.MakeEnv()
-// 	replicate := s.Replicate
-// 	if replicate == 0 {
-// 		replicate = 1
-// 	}
-// 	availablePort := s.Port
-
-// 	for i := 0; i < replicate; i++ {
-// 		// 根据副本数提取子名称
-// 		env := make(map[string]string)
-// 		for k, v := range s.TempEnv {
-// 			env[k] = v
-// 		}
-// 		svc := &server.Server{}
-// 		subname := subname.NewSubname(s.Name, i)
-// 		if availablePort > 0 {
-// 			// 检测端口是否被占用， 如果占用了
-// 			availablePort = pkg.GetAvailablePort(s.Port)
-
-// 		}
-// 		env["PORT"] = strconv.Itoa(availablePort)
-// 		svc = s.Add(availablePort, replicate, subname)
-
-// 		env["NAME"] = subname.String()
-// 		svc.Env = env
-// 		ss[subname.String()] = svc
-// 	}
-// }
 
 func EqualScript(s1, s2 *Script) bool {
 	if s1 == nil && s2 != nil || s1 != nil && s2 == nil {

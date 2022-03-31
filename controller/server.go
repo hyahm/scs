@@ -1,18 +1,11 @@
 package controller
 
 import (
-	"encoding/json"
-
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
-	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/alert"
-	"github.com/hyahm/scs/pkg/config/scripts"
-	"github.com/hyahm/scs/pkg/config/scripts/subname"
 	"github.com/hyahm/scs/pkg/message"
-	"github.com/hyahm/scs/status"
 )
 
 // 删除对应的server, 外部加了锁，内部调用不用加锁
@@ -80,100 +73,6 @@ func GetPremServers(token string) map[string]*server.Server {
 
 func GetAterts() map[string]message.SendAlerter {
 	return alert.GetAlerts()
-}
-
-// 通过script 生成 server并启动服务
-func makeReplicateServerAndStart(s *scripts.Script, end int) {
-	// 防止删除的时候也给删掉， 直接给加上
-	// ss[s.Name] = s
-	// ss[s.Name].EnvLocker = &sync.RWMutex{}
-
-	// availablePort := s.Port
-	// for i := 0; i < end; i++ {
-	// 	if _, ok := store.serverIndex[s.Name][i]; ok {
-	// 		continue
-	// 	}
-	// 	// 根据副本数提取子名称
-	// 	if store.serverIndex[s.Name] == nil {
-	// 		store.serverIndex[s.Name] = make(map[int]struct{})
-	// 	}
-	// 	store.serverIndex[s.Name][i] = struct{}{}
-	// 	env := make(map[string]string)
-	// 	for k, v := range s.TempEnv {
-	// 		env[k] = v
-	// 	}
-	// 	subname := subname.NewSubname(s.Name, i)
-	// 	var svc *server.Server
-	// 	if s.Port > 0 {
-	// 		// 顺序拿到可用端口
-	// 		availablePort = pkg.GetAvailablePort(availablePort)
-	// 		env["PORT"] = strconv.Itoa(availablePort)
-	// 		svc = s.Add(availablePort, end, i, subname)
-	// 		availablePort++
-	// 	} else {
-	// 		env["PORT"] = "0"
-	// 		svc = s.Add(0, end, i, subname)
-	// 	}
-
-	// 	env["NAME"] = subname.String()
-	// 	svc.Env = env
-	// 	servers[subname.String()] = svc
-	// 	if !svc.Disable {
-	// 		golog.Infof("start server: %s", svc.SubName)
-	// 		servers[subname.String()].Start()
-	// 	}
-
-	// }
-}
-
-// 获取所有服务的状态
-func All(role string) []byte {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	statuss := &pkg.StatusList{
-		Data:    make([]status.ServiceStatus, 0),
-		Version: global.VERSION,
-		Role:    role,
-	}
-	for name := range store.servers {
-		pname := subname.Subname(name).GetName()
-		if v, ok := store.ss[pname]; ok {
-			if !v.Disable {
-				statuss.Data = append(statuss.Data, getStatus(pname, name))
-			}
-		}
-	}
-	statuss.Code = 200
-	send, err := json.Marshal(statuss)
-	if err != nil {
-		golog.Error(err)
-	}
-	return send
-}
-
-// 获取所有服务的状态
-func AllLook(role, token string) []byte {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	statuss := &pkg.StatusList{
-		Data:    make([]status.ServiceStatus, 0),
-		Version: global.VERSION,
-		Role:    role,
-	}
-	for name, server := range store.servers {
-		pname := subname.Subname(name).GetName()
-		if v, ok := store.ss[pname]; ok {
-			if server.Token == token && !v.Disable {
-				statuss.Data = append(statuss.Data, getStatus(pname, name))
-			}
-		}
-	}
-	statuss.Code = 200
-	send, err := json.Marshal(statuss)
-	if err != nil {
-		golog.Error(err)
-	}
-	return send
 }
 
 func StopAllServer() {

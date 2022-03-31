@@ -39,7 +39,6 @@ var StatusCmd = &cobra.Command{
 		}
 		wg.Wait()
 		for _, s := range ss {
-
 			s.SortAndPrint(verbose)
 		}
 	},

@@ -3,18 +3,23 @@ package server
 import (
 	"context"
 	"os/exec"
+	"path/filepath"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/internal/server/status"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/scs/pkg/config/alert/to"
 	"github.com/hyahm/scs/pkg/config/liveness"
+	"github.com/hyahm/scs/pkg/config/scripts"
 	"github.com/hyahm/scs/pkg/config/scripts/cron"
 	"github.com/hyahm/scs/pkg/config/scripts/prestart"
 	"github.com/hyahm/scs/pkg/message"
-	"github.com/hyahm/scs/status"
 )
 
 // 默认的间隔时间
@@ -35,7 +40,7 @@ type Server struct {
 	SubName            string                         `json:"subname,omitempty"`
 	Cmd                *exec.Cmd                      `json:"-"`
 	Replicate          int                            `json:"replicate,omitempty"`
-	Status             *status.ServiceStatus          `json:"status,omitempty"`
+	Status             *status.Status                 `json:"status,omitempty"`
 	Alert              map[string]message.SendAlerter `json:"-"`
 	AT                 *to.AlertTo                    `json:"at,omitempty"`
 	Disable            bool                           `json:"disable,omitempty"`
@@ -140,12 +145,77 @@ func (svc *Server) Restart() {
 	case status.RUNNING:
 		svc.Exit <- 10
 		svc.Status.Status = status.WAITRESTART
-		go svc.stop()
+		svc.stop()
 		return
 	case status.STOP:
-		go svc.Start()
+		svc.asyncStart()
 	}
 
+}
+
+func (svc *Server) MakeServer(script *scripts.Script, availablePort int) int {
+	// 将环境变量填充到server中
+	script.MakeEnv()
+	env := make(map[string]string)
+	for k, v := range script.TempEnv {
+		env[k] = v
+	}
+	if script.Port > 0 {
+		// 顺序拿到可用端口
+		availablePort = pkg.GetAvailablePort(availablePort)
+		env["PORT"] = strconv.Itoa(availablePort)
+	} else {
+		env["PORT"] = "0"
+	}
+	svc.fillServer(script)
+	env["OS"] = runtime.GOOS
+	// 格式化 SCS_TPL 开头的环境变量
+	for k := range env {
+		if len(k) > 8 && k[:7] == "SCS_TPL" {
+			env[k] = internal.Format(env[k], env)
+		}
+	}
+	svc.Env = env
+	svc.Port = availablePort
+	return availablePort
+}
+
+func (svc *Server) fillServer(script *scripts.Script) {
+	// 填充server
+	svc.Token = script.Token
+	svc.Command = script.Command
+	svc.Disable = script.Disable
+	// Log:       make([]string, 0, global.GetLogCount()),
+	svc.Dir = script.Dir
+	if svc.Status == nil {
+		svc.Status = &status.Status{
+			Status: status.STOP,
+		}
+	}
+
+	svc.Logger = golog.NewLog(
+		filepath.Join(global.LogDir, svc.SubName+".log"), 10<<10, false, global.CleanLog)
+	svc.Update = script.Update
+	svc.AI = &alert.AlertInfo{}
+	svc.AT = script.AT
+	svc.StopSigle = make(chan bool, 1)
+
+	svc.Liveness = script.Liveness
+	svc.Ready = make(chan bool, 1)
+	svc.Always = script.Always
+
+	svc.DisableAlert = script.DisableAlert
+	svc.PreStart = script.PreStart
+
+	svc.Logger.Format = global.FORMAT
+	if script.Cron != nil {
+		svc.Cron = &cron.Cron{
+			Start:   script.Cron.Start,
+			Loop:    script.Cron.Loop,
+			IsMonth: script.Cron.IsMonth,
+			Times:   script.Cron.Times,
+		}
+	}
 }
 
 // 同步删除

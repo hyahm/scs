@@ -4,11 +4,10 @@ import (
 	"errors"
 	"sync/atomic"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
+	"github.com/hyahm/scs/internal/server/status"
 	"github.com/hyahm/scs/pkg/config/scripts/subname"
-	"github.com/hyahm/scs/status"
 )
 
 // 只有在删除的时候才会需要   svc.StopSigle 信号
@@ -39,14 +38,11 @@ func RemoveScript(pname string) error {
 // update: 是否需要重新修改配置文件
 func Remove(svc *server.Server, update bool) {
 	// 如果是always 为 true，那么直接修改为false
-	if svc == nil {
-		return
-	}
 	if svc.Always {
 		svc.Always = false
 	}
 	svc.Removed = true
-	golog.Info(svc.Status.Status)
+
 	if svc.Status.Status != status.STOP {
 		svc.Remove()
 		<-svc.StopSigle
