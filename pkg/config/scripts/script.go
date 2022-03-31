@@ -16,10 +16,10 @@ import (
 )
 
 type Script struct {
-	Token        string            `yaml:"token,omitempty" json:"token,omitempty"` // 只用来查看的token
 	Name         string            `yaml:"name,omitempty" json:"name"`
 	Dir          string            `yaml:"dir,omitempty" json:"dir,omitempty"`
 	Command      string            `yaml:"command,omitempty" json:"command"`
+	Token        string            `yaml:"token,omitempty" json:"token,omitempty"` // 只用来查看的token
 	Replicate    int               `yaml:"replicate,omitempty" json:"replicate,omitempty"`
 	Always       bool              `yaml:"always,omitempty" json:"always,omitempty"`
 	DisableAlert bool              `yaml:"disableAlert,omitempty" json:"disableAlert,omitempty"`
