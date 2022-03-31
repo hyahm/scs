@@ -2,17 +2,16 @@ package logger
 
 import (
 	"path/filepath"
-	"time"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 )
 
 type Logger struct {
-	Path  string        `yaml:"path"`
-	Size  int64         `yaml:"size"`
-	Day   bool          `yaml:"day"`
-	Clear time.Duration `json:"clear"`
+	Path  string `yaml:"path"`
+	Size  int64  `yaml:"size"`
+	Day   bool   `yaml:"day"`
+	Clear int    `json:"clear"`
 }
 
 func defaultLogger() *Logger {
@@ -20,7 +19,7 @@ func defaultLogger() *Logger {
 		Path:  "",
 		Size:  0,
 		Day:   true,
-		Clear: 30 * 24 * time.Hour,
+		Clear: 30,
 	}
 }
 

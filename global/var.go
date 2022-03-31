@@ -20,7 +20,7 @@ const VERSION = "v3.7.2"
 const FORMAT = "{{ .Ctime }} - [{{ .Level }}] - {{.Hostname}} - {{ .Msg }}"
 
 var LogDir = "" // 日志目录
-var CleanLog time.Duration
+var CleanLog int
 
 func SetToken(token string) {
 	_token = token
