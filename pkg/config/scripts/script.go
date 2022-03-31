@@ -4,7 +4,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"sync"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal"
@@ -34,7 +33,6 @@ type Script struct {
 	Update         string               `yaml:"update,omitempty" json:"update,omitempty"`
 	DeleteWhenExit bool                 `yaml:"deleteWhenExit,omitempty" json:"deleteWhenExit,omitempty"`
 	TempEnv        map[string]string    `yaml:"-" json:"-"`
-	EnvLocker      *sync.RWMutex        `yaml:"-" json:"-"`
 	// Ready              chan bool            `yaml:"-" json:"-"`
 	// 服务ready的探测器
 	Liveness *liveness.Liveness `yaml:"liveness,omitempty" json:"liveness,omitempty"`
@@ -44,9 +42,6 @@ type Script struct {
 func (s *Script) MakeEnv() {
 	// 生成 全局脚本的 env
 	tempEnv := make(map[string]string)
-	if s.EnvLocker == nil {
-		s.EnvLocker = &sync.RWMutex{}
-	}
 
 	pathEnvName := "PATH"
 	for _, v := range os.Environ() {
@@ -84,8 +79,6 @@ func (s *Script) MakeEnv() {
 	}
 
 	s.Command = internal.Format(s.Command, tempEnv)
-	s.EnvLocker.Lock()
-	defer s.EnvLocker.Unlock()
 	s.TempEnv = tempEnv
 }
 
