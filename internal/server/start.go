@@ -68,11 +68,6 @@ func (svc *Server) asyncStart() {
 		return
 	}
 	svc.Command = internal.Format(svc.Command, svc.Env)
-	golog.Info(svc.Command)
-	if svc.Disable {
-		svc.stopStatus()
-		return
-	}
 
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.start(); err != nil {

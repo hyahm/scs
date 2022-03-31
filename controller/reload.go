@@ -39,8 +39,7 @@ func Reload() error {
 	temp := make(map[string]struct{})
 
 	getTempScript(temp)
-	store.mu.Lock()
-	defer store.mu.Unlock()
+
 	for index := range cfg.SC {
 
 		if cfg.SC[index].Token == "" {
@@ -52,7 +51,8 @@ func Reload() error {
 		// 查看副本是不是对的， 不会对存在的脚本有影响
 		ReloadScripts(cfg.SC[index], false)
 	}
-
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 	// 删除已删除的 script
 	for name := range temp {
 		if _, ok := store.ss[name]; ok {
@@ -192,6 +192,7 @@ func ReloadScripts(script *scripts.Script, update bool) {
 		availablePort := script.Port
 		for i := oldReplicate; i < newReplicate; i++ {
 			subname := fmt.Sprintf("%s_%d", script.Name, i)
+			golog.Info(subname)
 			store.servers[subname] = &server.Server{
 				Index:     i,
 				Replicate: newReplicate,
