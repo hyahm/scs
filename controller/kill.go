@@ -1,7 +1,7 @@
 package controller
 
 func WaitKillAllServer() {
-	store.mu.TryLock()
+	store.mu.Lock()
 	defer store.mu.Unlock()
 	// ss.ScriptLocker.RLock()
 	// defer ss.ScriptLocker.RUnlock()
