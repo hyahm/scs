@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
@@ -76,7 +75,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	defer golog.Sync()
-	golog.InitLogger(*logpath, 0, true, 7*time.Hour*24)
+	golog.InitLogger(*logpath, 0, true, 7)
 	flag.Parse()
 	if *token == "" {
 		log.Fatal("token can not be empty")
