@@ -178,14 +178,10 @@ func checkCode(code int) error {
 		return ErrToken
 	case 500:
 		return ErrResponseData
-	case 511:
-		return ErrStatusNetworkAuthenticationRequired
 	case 404:
 		return ErrFoundPnameOrName
 	case 201:
 		return ErrWaitReload
-	case 400:
-		return ErrHttps
 	default:
 		return nil
 	}

@@ -22,12 +22,13 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		Role: role,
 	}
 	if s.Name == "" {
-		w.Write([]byte(`{"code": 201, "msg": "name require"}`))
+		w.Write([]byte(`{"code": 404, "msg": "name not found"}`))
 		return
 	}
 	if s.Token == "" {
 		s.Token = pkg.RandomToken()
 	}
+
 	if controller.HaveScript(s.Name) {
 		// 存在的话，需要对比配置文件的修改
 		// 需要判断是否相等
@@ -58,6 +59,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		controller.AddScript(s)
 
 	}
+	res.Data = s.Token
 	w.Write(res.Sucess("already add script"))
 }
 
