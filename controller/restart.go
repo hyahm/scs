@@ -13,25 +13,19 @@ import (
 
 func RestartServer(svc *server.Server, script *scripts.Script) {
 	// 禁用 script 所在的所有server
-	// restartServer(store.ss[svc.Name], svc)
-
+	if _, ok := store.ss[svc.Name]; !ok {
+		golog.Error("not found script: ", svc.Name)
+		return
+	}
 	// 先修改值
 	svc.MakeServer(script, svc.Port)
-	golog.Info(svc.Command)
 	atomic.AddInt64(&global.CanReload, 1)
 	go restartServer(svc)
 
 }
 
 func restartServer(svc *server.Server) {
-
-	// restartServer(store.ss[svc.Name], svc)
-	if _, ok := store.ss[svc.Name]; !ok {
-		golog.Error("not found script: ", svc.Name)
-		return
-	}
 	// 先修改值
-	svc.MakeServer(store.ss[svc.Name], store.servers[svc.SubName].Port)
 	svc.Restart()
 	atomic.AddInt64(&global.CanReload, -1)
 }
@@ -46,7 +40,7 @@ func RestartScript(s *scripts.Script) error {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 		if _, ok := store.servers[subname]; ok {
 			atomic.AddInt64(&global.CanReload, 1)
-			go restartServer(store.servers[subname])
+			RestartServer(store.servers[subname], s)
 		}
 	}
 	return nil

@@ -10,7 +10,7 @@ import (
 
 // 删除对应的server, 外部加了锁，内部调用不用加锁
 func removeServer(name, subname string, update bool) {
-	store.servers[subname].Logger.Close()
+
 	delete(store.servers, subname)
 	// 如果scripts的副本数为0或者1就直接删除这个scripts
 	if update {

@@ -6,7 +6,6 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/scripts"
@@ -92,26 +91,7 @@ func AddScript(script *scripts.Script) {
 	// 假设设置的端口是可用的
 	availablePort := script.Port
 	for i := 0; i < replicate; i++ {
-		if _, ok := store.serverIndex[script.Name][i]; ok {
-			// 如果存在这个副本。直接跳过
-			continue
-		}
-		subname := fmt.Sprintf("%s_%d", script.Name, i)
-		store.servers[subname] = &server.Server{
-			Index:     i,
-			Replicate: replicate,
-			SubName:   subname,
-			Name:      script.Name,
-		}
-		store.serverIndex[script.Name][i] = struct{}{}
-		availablePort = store.servers[subname].MakeServer(script, availablePort)
-		availablePort++
-		if script.Disable {
-			// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-			break
-		}
-
-		store.servers[subname].Start()
+		availablePort = makeAndStart(i, replicate, availablePort, script)
 	}
 }
 
@@ -191,23 +171,7 @@ func ReloadScripts(script *scripts.Script, update bool) {
 		// 小于的话，就增加
 		availablePort := script.Port
 		for i := oldReplicate; i < newReplicate; i++ {
-			subname := fmt.Sprintf("%s_%d", script.Name, i)
-			golog.Info(subname)
-			store.servers[subname] = &server.Server{
-				Index:     i,
-				Replicate: newReplicate,
-				SubName:   subname,
-				Name:      script.Name,
-			}
-			store.serverIndex[script.Name][i] = struct{}{}
-			availablePort = store.servers[subname].MakeServer(script, availablePort)
-			availablePort++
-			if script.Disable {
-				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-				break
-			}
-
-			store.servers[subname].Start()
+			availablePort = makeAndStart(i, newReplicate, availablePort, script)
 		}
 	}
 

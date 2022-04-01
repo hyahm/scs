@@ -50,16 +50,18 @@ type Server struct {
 	Exit               chan int                       `json:"-"` // 判断是否是主动退出的
 	CancelProcess      chan bool                      `json:"-"` // 取消操作，
 	// 停止后发出的信号, 9 主动退出， 10 重启， 11 主动退出并删除
-	StopSigle    chan bool            `json:"-"`
-	Ctx          context.Context      `json:"-"`
-	Cancel       context.CancelFunc   `json:"-"`                // 结束定时器的上下文和日志的上下文
-	Removed      bool                 `json:"-"`                // 标识是否已经被删除
-	Update       string               `json:"update,omitempty"` // 更新的命令
-	Liveness     *liveness.Liveness   `json:"-"`
-	Ready        chan bool            `json:"-"`
-	Always       bool                 `json:"always,omitempty"`
-	DisableAlert bool                 `json:"disable_alert,omitempty"`
-	PreStart     []*prestart.PreStart `json:"-"`
+	StopSigle            chan bool            `json:"-"`
+	Ctx                  context.Context      `json:"-"`
+	Cancel               context.CancelFunc   `json:"-"`                // 结束定时器的上下文和日志的上下文
+	Removed              bool                 `json:"-"`                // 标识是否已经被删除
+	Update               string               `json:"update,omitempty"` // 更新的命令
+	Liveness             *liveness.Liveness   `json:"-"`
+	Ready                chan bool            `json:"-"`
+	Always               bool                 `json:"always,omitempty"`
+	DisableAlert         bool                 `json:"disable_alert,omitempty"`
+	PreStart             []*prestart.PreStart `json:"-"`
+	DeleteWhenExit       bool                 `json:"deleteWhenExit,omitempty"`
+	DeleteWhenExitSingle chan bool            `json:"-"`
 }
 
 func newCommand(command string) *exec.Cmd {
@@ -92,8 +94,7 @@ func (svc *Server) shell(command string) error {
 }
 
 func (svc *Server) shellWithOutDir(command string) error {
-	var cmd *exec.Cmd
-	cmd = newCommand(command)
+	cmd := newCommand(command)
 	for k, v := range svc.Env {
 		cmd.Env = append(cmd.Env, k+"="+v)
 	}
@@ -206,6 +207,8 @@ func (svc *Server) fillServer(script *scripts.Script) {
 	svc.Ready = make(chan bool, 1)
 	svc.Always = script.Always
 
+	svc.DeleteWhenExit = script.DeleteWhenExit
+
 	svc.DisableAlert = script.DisableAlert
 	svc.PreStart = script.PreStart
 
@@ -309,6 +312,7 @@ func (svc *Server) stopStatus() {
 	svc.Status.CanNotStop = false
 	svc.Status.RestartCount = 0
 	svc.Status.Start = 0
+	svc.Logger.Close()
 	// svc.Removed = false
 }
 

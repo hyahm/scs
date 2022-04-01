@@ -12,11 +12,10 @@ import (
 
 func (svc *Server) wait() {
 	go svc.successAlert()
-	// 为了就绪状态做准备的代码， 暂时无用 <<<
 	ctx, cancel := context.WithCancel(context.Background())
 	go svc.CheckReady(ctx)
 	defer cancel()
-	// >>>> 为了就绪状态做准备的代码， 暂时无用
+
 	if err := svc.Cmd.Wait(); err != nil {
 		// 脚本退出后才会执行这里的代码
 		select {
@@ -70,6 +69,7 @@ func (svc *Server) wait() {
 			// 如果是定时器的话， 直接结束
 			if svc.Cron != nil && svc.Cron.Loop > 0 {
 				svc.Status.Pid = 0
+				svc.Logger.Close()
 				return
 			}
 			if svc.Always {
@@ -77,21 +77,13 @@ func (svc *Server) wait() {
 				svc.Status.Pid = 0
 				svc.Status.Start = 0
 				// 失败了， 每秒启动一次
-
+				svc.Logger.Close()
 				svc.Status.RestartCount++
 				time.Sleep(time.Second)
 				svc.Start()
 				return
 			}
 		}
-		// if svc.Script.DeleteWhenExit {
-		// TODO 删除配置文件
-		// err = config.Cfg.DelScript(svc.Script.Name)
-		// if err != nil {
-		// 	golog.Error("delete script faild: ", err.Error())
-		// 	return
-		// }
-		// }
 		golog.Errorf("serviceName: %s, subScript: %s, error: %v \n", svc.Name, svc.SubName, err)
 		svc.stopStatus()
 		return
@@ -103,8 +95,8 @@ func (svc *Server) wait() {
 	if svc.Removed {
 		svc.StopSigle <- true
 	}
-	// todo:  if svc.DeleteWhenExit {
-	// 	DelScript(svc.Script.Name)
+	// todo: if svc.DeleteWhenExit {
+	// svc.DeleteWhenExitSingle <- true
 	// }
 	svc.stopStatus()
 
