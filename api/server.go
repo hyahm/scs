@@ -62,7 +62,8 @@ func LookHandle() *xmux.GroupRoute {
 	group.Post("/remove/{pname}/{name}", handle.Remove)
 	group.Post("/remove/{pname}", handle.RemovePname)
 	group.Post("/restart", handle.RestartAll) // complete
-	group.Post("/update", handle.UpdateAll)   // complete
+	group.Post("/send/alert", handle.Alert)
+	group.Post("/update", handle.UpdateAll) // complete
 	return group
 }
 
@@ -80,7 +81,6 @@ func FileHandle() *xmux.GroupRoute {
 	group.Post("/enable/{pname}", handle.Enable)   // 只能管理员用
 	group.Post("/disable/{pname}", handle.Disable) // 只能管理员用
 
-	group.Post("/set/alert", handle.Alert) // 只能管理员用
 	// 监测点
 
 	// router.Get("/version/{pname}/{name}", handle.Version)
