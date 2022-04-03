@@ -92,21 +92,18 @@ func readConfig() (*Config, error) {
 	cfg := &Config{}
 	b, err := ioutil.ReadFile(cfgfile)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			f, err := os.Create(cfgfile)
-			if err != nil {
-				golog.Error(err)
-			}
-			f.Close()
-			return defaultConfig(), nil
-		}
-
-	} else {
-		err = yaml.Unmarshal(b, cfg)
+		f, err := os.Create(cfgfile)
 		if err != nil {
 			golog.Error(err)
-			return nil, err
 		}
+		f.Close()
+		return defaultConfig(), nil
+
+	}
+	err = yaml.Unmarshal(b, cfg)
+	if err != nil {
+		golog.Error(err)
+		return nil, err
 	}
 	// 检测配置文件的name是否重复
 	err = cfg.check()

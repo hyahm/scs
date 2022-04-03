@@ -62,6 +62,7 @@ func Reload() error {
 
 			for i := 0; i < replicate; i++ {
 				subname := subname.NewSubname(name, i)
+				golog.Info("add reload count")
 				atomic.AddInt64(&global.CanReload, 1)
 				go Remove(store.servers[subname.String()], false)
 			}
@@ -163,6 +164,7 @@ func ReloadScripts(script *scripts.Script, update bool) {
 	if oldReplicate > newReplicate {
 		// 如果大于的话， 那么就删除多余的
 		for i := newReplicate; i < oldReplicate; i++ {
+			golog.Info("add reload count")
 			atomic.AddInt64(&global.CanReload, 1)
 			golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
 			go Remove(store.servers[subname.NewSubname(script.Name, i).String()], update)

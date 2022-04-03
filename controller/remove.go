@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync/atomic"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/server/status"
@@ -25,6 +26,7 @@ func RemoveScript(pname string) error {
 
 		for i := 0; i < replicate; i++ {
 			subname := subname.NewSubname(pname, i)
+			golog.Info("add reload count")
 			atomic.AddInt64(&global.CanReload, 1)
 			go Remove(store.servers[subname.String()], true)
 		}

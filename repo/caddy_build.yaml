@@ -1,0 +1,13 @@
+- name: caddy
+  env:
+    GOPROXY: https://goproxy.cn
+  preStart:
+    - command: go
+      install: please install go>=1.16; exit 1
+    - command: git
+      install: please install git; exit 1
+    - command: caddy
+      install: git clone "https://github.com/caddyserver/caddy.git" ; cd caddy/cmd/caddy/ ; go build
+    - path: Caddyfile
+      template: Caddyfile.tpl
+  command: caddy/cmd/caddy/caddy run -config Caddyfile

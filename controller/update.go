@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg/config/scripts"
@@ -30,6 +31,7 @@ func DisableScript(s *scripts.Script, update bool) bool {
 			go store.servers[subname].Stop()
 			continue
 		}
+		golog.Info("add reload count")
 		atomic.AddInt64(&global.CanReload, 1)
 		go Remove(store.servers[subname], update)
 

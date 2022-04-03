@@ -27,13 +27,15 @@ func GetAlerts() map[string]message.SendAlerter {
 }
 
 var alerter *Alerter // 保存报警器配置文件
-func RunAlert(a *Alert) {
-	if alerter == nil {
-		alerter = &Alerter{
-			Alerts:       make(map[string]message.SendAlerter),
-			alertsLocker: &sync.RWMutex{},
-		}
+
+func init() {
+	alerter = &Alerter{
+		alertsLocker: &sync.RWMutex{},
+		Alerts:       make(map[string]message.SendAlerter),
 	}
+}
+
+func RunAlert(a *Alert) {
 	alerter.Alert = a
 	// 运行报警器
 	// 启动goroutine

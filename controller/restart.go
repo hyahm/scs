@@ -19,6 +19,7 @@ func RestartServer(svc *server.Server, script *scripts.Script) {
 	}
 	// 先修改值
 	svc.MakeServer(script, svc.Port)
+	golog.Info("delete reload count")
 	atomic.AddInt64(&global.CanReload, 1)
 	go restartServer(svc)
 
@@ -39,6 +40,7 @@ func RestartScript(s *scripts.Script) error {
 	for i := range store.serverIndex[s.Name] {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 		if _, ok := store.servers[subname]; ok {
+			golog.Info("add reload count")
 			atomic.AddInt64(&global.CanReload, 1)
 			RestartServer(store.servers[subname], s)
 		}
