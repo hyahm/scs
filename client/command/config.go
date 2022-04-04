@@ -31,6 +31,31 @@ var ShowCmd = &cobra.Command{
 	},
 }
 
+var FmtCmd = &cobra.Command{
+	Use:   "fmt",
+	Short: "Print all script status",
+	Long:  `All software has versions. This is Hugo's`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		wg := &sync.WaitGroup{}
+		nodes := getNodes()
+		if len(nodes) == 0 {
+			fmt.Println("not found any nodes")
+			return
+		}
+		for _, node := range nodes {
+			wg.Add(1)
+			go func(node *client.Node) {
+				node.Fmt()
+				wg.Done()
+			}(node)
+
+		}
+		wg.Wait()
+
+	},
+}
+
 var ReloadCmd = &cobra.Command{
 	Use:   "reload",
 	Short: "reload scs server config",
@@ -58,5 +83,7 @@ var ReloadCmd = &cobra.Command{
 func init() {
 	ConfigCmd.AddCommand(ShowCmd)
 	ConfigCmd.AddCommand(ReloadCmd)
+	ConfigCmd.AddCommand(FmtCmd)
 	rootCmd.AddCommand(ConfigCmd)
+
 }

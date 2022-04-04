@@ -20,6 +20,17 @@ func getTempScript(temp map[string]struct{}) {
 	}
 }
 
+func Fmt() error {
+	c, err := config.ReadConfig("")
+	if err != nil {
+		golog.Error(err)
+		// 第一次报错直接退出
+		return err
+	}
+	// 配置文件是对的， 那么直接写进配置文件
+	return c.WriteConfig(true)
+}
+
 func Reload() error {
 	c, err := config.ReadConfig("")
 	if err != nil {

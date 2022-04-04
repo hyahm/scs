@@ -5,3 +5,5 @@ keys
 etcd
 socks5
 bin
+repo/caddy
+repo/Caddyfile

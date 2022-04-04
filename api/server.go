@@ -75,6 +75,7 @@ func FileHandle() *xmux.GroupRoute {
 	// router.Post("/remove", handle.RemoveAll)
 	group.Post("/get/alert", handle.GetAlert)   // 只能管理员用
 	group.Post("/-/reload", handle.Reload)      // 只能管理员用
+	group.Post("/-/fmt", handle.Fmt)            // 只能管理员用
 	group.Post("/get/alarms", handle.GetAlarms) // 只能管理员用
 	group.Post("/get/repo", handle.GetRepo)     // 只能管理员用
 

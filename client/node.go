@@ -35,6 +35,15 @@ func (node *Node) Reload() {
 	fmt.Println(string(res.Marshal()))
 }
 
+func (node *Node) Fmt() {
+	res, err := node.NewSCSClient().Fmt()
+	if err != nil {
+		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
+		return
+	}
+	fmt.Println(string(res.Marshal()))
+}
+
 func (node *Node) Restart(args ...string) {
 	cli := node.NewSCSClient()
 	var err error

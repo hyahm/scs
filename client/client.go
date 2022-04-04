@@ -320,6 +320,11 @@ func (sc *SCSClient) Reload() (*pkg.Response, error) {
 	return sc.requests("/-/reload", nil)
 }
 
+// 重新加载配置文件
+func (sc *SCSClient) Fmt() (*pkg.Response, error) {
+	return sc.requests("/-/fmt", nil)
+}
+
 // 杀掉此脚本及其对应的所有副本
 func (sc *SCSClient) KillPname() (*pkg.Response, error) {
 	if sc.Pname == "" {
