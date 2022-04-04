@@ -13,14 +13,7 @@ import (
 
 // Start  启动服务 异步的
 func (svc *Server) Start() {
-
-	// svc.make(s * scripts.Script)
 	switch svc.Status.Status {
-	case status.WAITSTOP:
-		// 如果之前是等待停止的状态， 更改为重启状态
-		<-svc.Exit
-		svc.Exit <- 10
-		svc.Status.Status = status.WAITRESTART
 	case status.STOP:
 		// 开始启动的时候，需要将遍历变量值的模板渲染
 		go svc.asyncStart()

@@ -1,0 +1,8 @@
+
+nnn.admin.hyahm.com {
+	header Host {host}
+	header X-Real-IP {remote}
+	header X-Forwarded-For {remote}
+	header X-Forwarded-Proto {scheme}
+	reverse_proxy 127.0.0.1:30
+}

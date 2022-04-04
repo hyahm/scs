@@ -26,42 +26,54 @@ import (
 const defaultContinuityInterval = time.Hour * 1
 
 type Server struct {
-	Index              int                            `json:"index"` // svc的索引
-	Token              string                         `json:"token"` // svc的索引
-	Name               string                         `json:"name"`
-	Dir                string                         `json:"dir,omitempty"`
-	Command            string                         `json:"command"`
-	Version            string                         `json:"version,omitempty"`
-	Cron               *cron.Cron                     `json:"cron,omitempty"`    // 这个cron是新生成的
-	IsCron             bool                           `json:"is_loop,omitempty"` // 如果是定时任务
-	Env                map[string]string              `json:"-"`
-	Logger             *golog.Log                     `json:"-"`               // 日志
-	Times              int                            `json:"times,omitempty"` // 记录循环的次数
-	SubName            string                         `json:"subname,omitempty"`
-	Cmd                *exec.Cmd                      `json:"-"`
-	Replicate          int                            `json:"replicate,omitempty"`
-	Status             *status.Status                 `json:"status,omitempty"`
-	Alert              map[string]message.SendAlerter `json:"-"`
-	AT                 *to.AlertTo                    `json:"at,omitempty"`
-	Disable            bool                           `json:"disable,omitempty"`
-	Port               int                            `json:"port,omitempty"`
-	ContinuityInterval time.Duration                  `json:"continuity_interval,omitempty"`
-	AI                 *alert.AlertInfo               `json:"-"` // 报警规则
-	Exit               chan int                       `json:"-"` // 判断是否是主动退出的
-	CancelProcess      chan bool                      `json:"-"` // 取消操作，
-	// 停止后发出的信号, 9 主动退出， 10 重启， 11 主动退出并删除
-	StopSigle            chan bool            `json:"-"`
-	Ctx                  context.Context      `json:"-"`
-	Cancel               context.CancelFunc   `json:"-"`                // 结束定时器的上下文和日志的上下文
-	Removed              bool                 `json:"-"`                // 标识是否已经被删除
-	Update               string               `json:"update,omitempty"` // 更新的命令
-	Liveness             *liveness.Liveness   `json:"-"`
-	Ready                chan bool            `json:"-"`
-	Always               bool                 `json:"always,omitempty"`
-	DisableAlert         bool                 `json:"disable_alert,omitempty"`
-	PreStart             []*prestart.PreStart `json:"-"`
-	DeleteWhenExit       bool                 `json:"deleteWhenExit,omitempty"`
-	DeleteWhenExitSingle chan bool            `json:"-"`
+	Index   int               `json:"index"` // svc的索引
+	Token   string            `json:"token"` // svc的token
+	Name    string            `json:"name"`
+	Dir     string            `json:"dir,omitempty"`
+	Command string            `json:"command"`
+	Version string            `json:"version,omitempty"`
+	Cron    *cron.Cron        `json:"cron,omitempty"`    // 这个cron是新生成的
+	IsCron  bool              `json:"is_loop,omitempty"` // 如果是定时任务
+	Env     map[string]string `json:"-"`
+	Logger  *golog.Log        `json:"-"`               // 日志
+	Times   int               `json:"times,omitempty"` // 记录循环的次数
+	SubName string            `json:"subname,omitempty"`
+	Cmd     *exec.Cmd         `json:"-"`
+	// 总副本数
+	Replicate int            `json:"replicate,omitempty"`
+	Status    *status.Status `json:"status,omitempty"`
+	// Alert     map[string]message.SendAlerter `json:"-"`
+	//  todo: 感觉不够完善
+	AT      *to.AlertTo      `json:"at,omitempty"`
+	Disable bool             `json:"disable,omitempty"`
+	Port    int              `json:"port,omitempty"`
+	AI      *alert.AlertInfo `json:"-"` // 报警规则
+	// 主动退出的信号， kill: 9, restart: 10, stop: 11, remove: 12
+	Exit chan int `json:"-"`
+	// 取消操作， 可以取消等待重启， 等待停止， 等待remove(暂时没实现)
+	CancelProcess chan bool `json:"-"`
+	// 服务停止后的信号， 比如  restart, remove 操作， 因为停止后还有下一步操作
+	StopSigle chan bool `json:"-"`
+	// 这2个上上下文
+	Ctx    context.Context    `json:"-"`
+	Cancel context.CancelFunc `json:"-"` // 结束定时器的上下文和日志的上下文
+	// 标记 remove 操作的
+	Removed bool `json:"-"`
+	// 更新的命令
+	Update string `json:"update,omitempty"`
+	// 暂时无视
+	Liveness *liveness.Liveness `json:"-"`
+	Ready    chan bool          `json:"-"`
+	// 是否一直重启， 应该还需要一个retry次数的字段才对
+	Always bool `json:"always,omitempty"`
+	// 取消报警的感觉没用， 谁没事了会取消报警
+	DisableAlert bool `json:"disable_alert,omitempty"`
+	// 启动前的准备工作
+	PreStart []*prestart.PreStart `json:"-"`
+	// 执行完成就自动删除
+	DeleteWhenExit bool `json:"deleteWhenExit,omitempty"`
+	// 执行完成就remove的信号
+	DeleteWhenExitSingle chan bool `json:"-"`
 }
 
 func newCommand(command string) *exec.Cmd {
@@ -136,9 +148,13 @@ func (svc *Server) Restart() {
 		// 如果是循环的就直接退出
 		return
 	}
+	if svc.Always {
+		svc.Always = false
+	}
 	switch svc.Status.Status {
 	case status.WAITSTOP:
 		// 如果之前是等待停止的状态， 更改为重启状态
+		golog.Info("waiting stop")
 		<-svc.Exit
 		svc.Exit <- 10
 		svc.Status.Status = status.WAITRESTART
@@ -146,10 +162,10 @@ func (svc *Server) Restart() {
 	case status.RUNNING:
 		svc.Exit <- 10
 		svc.Status.Status = status.WAITRESTART
-		svc.stop()
+		go svc.stop()
 		return
 	case status.STOP:
-		svc.asyncStart()
+		svc.StopSigle <- true
 	}
 
 }
@@ -201,7 +217,7 @@ func (svc *Server) fillServer(script *scripts.Script) {
 	svc.Update = script.Update
 	svc.AI = &alert.AlertInfo{}
 	svc.AT = script.AT
-	svc.StopSigle = make(chan bool, 1)
+	svc.StopSigle = make(chan bool)
 
 	svc.Liveness = script.Liveness
 	svc.Ready = make(chan bool, 1)
@@ -209,7 +225,7 @@ func (svc *Server) fillServer(script *scripts.Script) {
 
 	svc.DeleteWhenExit = script.DeleteWhenExit
 
-	svc.DisableAlert = script.DisableAlert
+	// svc.DisableAlert = script.DisableAlert
 	svc.PreStart = script.PreStart
 
 	svc.Logger.Format = global.FORMAT
@@ -230,22 +246,26 @@ func (svc *Server) Remove() {
 		svc.Cancel()
 		return
 	}
+	if svc.Always {
+		svc.Always = false
+	}
 	switch svc.Status.Status {
 	case status.WAITRESTART:
 		// 结束发送的退出错误发出的信号
 		<-svc.Exit
 		// 结束停止的goroutine， 转为删除处理
-		svc.CancelProcess <- true
+		svc.Exit <- 12
 		svc.Stop()
 	case status.STOP:
-		// svc.StopSigle <- true
-	case status.INSTALL:
-		// TODO 直接删除
-		// svc.Stop()
-		// go svc.remove()
+		svc.StopSigle <- true
 		// DeleteServiceBySubName(svc.SubName)
-	case status.RUNNING, status.WAITSTOP:
+	case status.RUNNING:
+		svc.Exit <- 12
 		svc.Stop()
+	case status.WAITSTOP:
+		<-svc.Exit
+		// 结束停止的goroutine， 转为删除处理
+		svc.Exit <- 12
 	default:
 		golog.Error("error status")
 	}
@@ -258,14 +278,18 @@ func (svc *Server) Stop() {
 		golog.Infof("stop loop %s", svc.SubName)
 		svc.Cancel()
 	}
+	if svc.Always {
+		svc.Always = false
+	}
 	switch svc.Status.Status {
 	case status.RUNNING:
 		svc.Exit <- 9
 		svc.Status.Status = status.WAITSTOP
 		svc.stop()
-	case status.STOP:
-		svc.Exit <- 9
+	// case status.STOP:
+	// svc.Exit <- 9
 	case status.WAITRESTART:
+		// 将退出信号设置为waiting stop
 		<-svc.Exit
 		svc.Exit <- 9
 		svc.Status.Status = status.WAITSTOP
@@ -307,12 +331,14 @@ func (svc *Server) Kill() {
 }
 
 func (svc *Server) stopStatus() {
+	golog.UpFunc(1, "stop")
 	svc.Status.Status = status.STOP
 	svc.Status.Pid = 0
 	svc.Status.CanNotStop = false
 	svc.Status.RestartCount = 0
 	svc.Status.Start = 0
 	svc.Logger.Close()
+	svc.Cmd = nil
 	// svc.Removed = false
 }
 

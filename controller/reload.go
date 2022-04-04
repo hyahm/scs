@@ -6,6 +6,7 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/scripts"
@@ -44,7 +45,6 @@ func Reload() error {
 		// 写进配置文件
 		return err
 	}
-
 	// 取出之前的scripts
 	temp := make(map[string]struct{})
 
@@ -85,6 +85,8 @@ func Reload() error {
 
 // 添加script并启动
 func AddScript(script *scripts.Script) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
 	if script.Token == "" {
 		script.Token = pkg.RandomToken()
 	}
@@ -94,7 +96,7 @@ func AddScript(script *scripts.Script) {
 	if replicate == 0 {
 		replicate = 1
 	}
-
+	// 初始化脚本的副本数
 	if _, ok := store.serverIndex[script.Name]; !ok {
 		store.serverIndex[script.Name] = make(map[int]struct{})
 	}
@@ -103,7 +105,22 @@ func AddScript(script *scripts.Script) {
 	// 假设设置的端口是可用的
 	availablePort := script.Port
 	for i := 0; i < replicate; i++ {
-		availablePort = makeAndStart(i, replicate, availablePort, script)
+		subname := fmt.Sprintf("%s_%d", script.Name, i)
+		store.servers[subname] = &server.Server{
+			Index:     i,
+			Replicate: replicate,
+			SubName:   subname,
+			Name:      script.Name,
+		}
+		store.serverIndex[script.Name][i] = struct{}{}
+		availablePort = store.servers[subname].MakeServer(script, availablePort)
+		availablePort++
+		if script.Disable {
+			// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
+			continue
+		}
+
+		store.servers[subname].Start()
 	}
 }
 
@@ -184,7 +201,22 @@ func ReloadScripts(script *scripts.Script, update bool) {
 		// 小于的话，就增加
 		availablePort := script.Port
 		for i := oldReplicate; i < newReplicate; i++ {
-			availablePort = makeAndStart(i, newReplicate, availablePort, script)
+			subname := fmt.Sprintf("%s_%d", script.Name, i)
+			store.servers[subname] = &server.Server{
+				Index:     i,
+				Replicate: newReplicate,
+				SubName:   subname,
+				Name:      script.Name,
+			}
+			store.serverIndex[script.Name][i] = struct{}{}
+			availablePort = store.servers[subname].MakeServer(script, availablePort)
+			availablePort++
+			if script.Disable {
+				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
+				continue
+			}
+
+			store.servers[subname].Start()
 		}
 	}
 

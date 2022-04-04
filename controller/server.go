@@ -27,20 +27,12 @@ func removeServer(name, subname string, update bool) {
 	}
 }
 
-func StartAllServer() {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	for _, v := range store.servers {
-		v.Start()
-	}
-}
-
 func StartPermAllServer(token string) {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
-	for _, v := range store.servers {
-		if v.Token == token {
-			v.Start()
+	for name := range store.servers {
+		if token != "" && store.servers[name].Token == token {
+			store.servers[name].Start()
 		}
 
 	}

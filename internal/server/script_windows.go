@@ -14,6 +14,7 @@ import (
 )
 
 func (svc *Server) stop() {
+
 	for {
 		select {
 		case <-time.After(time.Millisecond * 10):
@@ -24,11 +25,11 @@ func (svc *Server) stop() {
 					return
 				}
 				// 通知外部已经停止了
-				svc.StopSigle <- true
+				// svc.StopSigle <- true
 				return
 			}
 		case <-svc.CancelProcess:
-			// 如果收到取消结束的信号，退出之前的操作
+			// 如果收到取消结束的信号，退出停止信号
 			return
 		}
 	}
@@ -43,7 +44,6 @@ func (svc *Server) kill() error {
 		// 正常来说，不会进来的，特殊问题以后再说
 		golog.Error(err)
 	}
-	svc.stopStatus()
 	return nil
 
 }

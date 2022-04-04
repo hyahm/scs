@@ -30,8 +30,6 @@ func Start(filename string) {
 // 启动脚本, 也有可能是重载
 func startScripts() {
 	// 先将配置文件填充到 store
-	store.mu.Lock()
-	defer store.mu.Unlock()
 	for _, script := range cfg.SC {
 		// 如果没设置token， 默认生成一个脚本的token
 		AddScript(script)

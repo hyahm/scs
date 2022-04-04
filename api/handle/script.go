@@ -11,6 +11,7 @@ import (
 	"github.com/hyahm/xmux"
 )
 
+// 这是一个添加script的handle
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetInstance(r).Data.(*scripts.Script)
 	role := xmux.GetInstance(r).Get("role").(string)

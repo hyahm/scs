@@ -2,6 +2,7 @@ package handle
 
 import (
 	"net/http"
+	"sync/atomic"
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
@@ -26,7 +27,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		w.Write(pkg.NotFoundScript(role))
 		return
 	}
-
+	atomic.AddInt64(&global.CanReload, 1)
 	go controller.Remove(svc, true)
 	w.Write(pkg.Waiting("stop", role))
 }

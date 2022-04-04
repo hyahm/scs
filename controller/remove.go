@@ -4,10 +4,8 @@ import (
 	"errors"
 	"sync/atomic"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
-	"github.com/hyahm/scs/internal/server/status"
 	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
@@ -26,7 +24,6 @@ func RemoveScript(pname string) error {
 
 		for i := 0; i < replicate; i++ {
 			subname := subname.NewSubname(pname, i)
-			golog.Info("add reload count")
 			atomic.AddInt64(&global.CanReload, 1)
 			go Remove(store.servers[subname.String()], true)
 		}
@@ -40,22 +37,13 @@ func RemoveScript(pname string) error {
 // update: 是否需要重新修改配置文件
 func Remove(svc *server.Server, update bool) {
 	// 如果是always 为 true，那么直接修改为false
-	if svc.Always {
-		svc.Always = false
-	}
-	svc.Removed = true
-
-	if svc.Status.Status != status.STOP {
-		svc.Remove()
-		<-svc.StopSigle
-	}
-
+	svc.Remove()
+	<-svc.StopSigle
 	store.mu.Lock()
 	delete(store.serverIndex[svc.Name], svc.Index)
 	removeServer(svc.Name, svc.SubName, update)
 	store.mu.Unlock()
 	atomic.AddInt64(&global.CanReload, -1)
-
 }
 
 // func RemoveAllScripts() {

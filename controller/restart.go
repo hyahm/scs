@@ -13,38 +13,54 @@ import (
 
 func RestartServer(svc *server.Server, script *scripts.Script) {
 	// 禁用 script 所在的所有server
-	if _, ok := store.ss[svc.Name]; !ok {
-		golog.Error("not found script: ", svc.Name)
-		return
-	}
-	// 先修改值
-	svc.MakeServer(script, svc.Port)
-	golog.Info("delete reload count")
+	// 先修改值, 因为是restart， 所以端口在svc初始化的时候就固定了
 	atomic.AddInt64(&global.CanReload, 1)
-	go restartServer(svc)
+	go restartServer(svc, script)
 
 }
 
-func restartServer(svc *server.Server) {
+func restartServer(svc *server.Server, script *scripts.Script) {
 	// 先修改值
 	svc.Restart()
+	//已经停止了。
+	<-svc.StopSigle
+	// 更新server并启动
+	svc.MakeServer(script, svc.Port)
+	svc.Start()
 	atomic.AddInt64(&global.CanReload, -1)
 }
 
-// 异步重启
+// 重启第一步
 func RestartScript(s *scripts.Script) error {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	// 禁用 script 所在的所有server
+	replicate := store.ss[s.Name].Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
 
-	for i := range store.serverIndex[s.Name] {
+	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 		if _, ok := store.servers[subname]; ok {
-			golog.Info("add reload count")
-			atomic.AddInt64(&global.CanReload, 1)
+			// 这里主要是发送restart信号
+			// 只是停止 + 发送restart信号
+			golog.Info("restart ", subname)
 			RestartServer(store.servers[subname], s)
+			// 等待停止信号，我们就要重新makeserver
+
 		}
 	}
+	// for i := range store.serverIndex[s.Name] {
+	// 	subname := fmt.Sprintf("%s_%d", s.Name, i)
+	// 	if _, ok := store.servers[subname]; ok {
+	// 		// 这里主要是发送restart信号
+	// 		// 只是停止 + 发送restart信号
+	// 		RestartServer(store.servers[subname], s)
+	// 		// 等待停止信号，我们就要重新makeserver
+
+	// 	}
+	// }
 	return nil
 }
 
