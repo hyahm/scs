@@ -14,6 +14,8 @@ import (
 )
 
 func getTempScript(temp map[string]struct{}) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
 	for name := range store.ss {
 		temp[name] = struct{}{}
 	}
@@ -52,9 +54,6 @@ func Reload() error {
 	}
 	// 取出之前的scripts
 	temp := make(map[string]struct{})
-
-	store.mu.Lock()
-	defer store.mu.Unlock()
 	// 备份旧的scripts
 	getTempScript(temp)
 	for index := range cfg.SC {
@@ -77,7 +76,7 @@ func Reload() error {
 			for i := 0; i < replicate; i++ {
 				subname := subname.NewSubname(name, i)
 				atomic.AddInt64(&global.CanReload, 1)
-				go remove(store.servers[subname.String()], false)
+				go Remove(store.servers[subname.String()], false)
 			}
 
 		}
@@ -87,7 +86,9 @@ func Reload() error {
 
 // 添加script并启动
 
-func addScript(script *scripts.Script) {
+func AddScript(script *scripts.Script) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
 	if script.Token == "" {
 		script.Token = pkg.RandomToken()
 	}
@@ -125,15 +126,9 @@ func addScript(script *scripts.Script) {
 	}
 }
 
-func AddScript(script *scripts.Script) {
-	store.mu.Lock()
-	defer store.mu.Unlock()
-	addScript(script)
-}
-
 func UpdateScript(script *scripts.Script, update bool) {
 	store.mu.Lock()
-	defer store.mu.Unlock()
+
 	oldReplicate := store.ss[script.Name].Replicate
 	if oldReplicate == 0 {
 		oldReplicate = 1
@@ -162,17 +157,18 @@ func UpdateScript(script *scripts.Script, update bool) {
 			availablePort++
 			if script.Disable {
 				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
+				store.mu.Unlock()
 				return
 			}
 			store.servers[subname].Start()
 		}
 	}
-
+	store.mu.Unlock()
 	// 删除多余的
 	for i := newReplicate; i < oldReplicate; i++ {
 		golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
 		atomic.AddInt64(&global.CanReload, 1)
-		go remove(store.servers[subname.NewSubname(script.Name, i).String()], false)
+		go Remove(store.servers[subname.NewSubname(script.Name, i).String()], false)
 	}
 
 }
@@ -185,7 +181,7 @@ func reloadScripts(script *scripts.Script, update bool) {
 	// 对比启动的副本
 	if _, ok := store.ss[script.Name]; !ok {
 		// 如果不存在，说明要新增
-		addScript(script)
+		AddScript(script)
 		return
 	}
 	oldReplicate := store.ss[script.Name].Replicate
@@ -211,7 +207,7 @@ func reloadScripts(script *scripts.Script, update bool) {
 		for i := newReplicate; i < oldReplicate; i++ {
 			atomic.AddInt64(&global.CanReload, 1)
 			golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-			go remove(store.servers[subname.NewSubname(script.Name, i).String()], update)
+			go Remove(store.servers[subname.NewSubname(script.Name, i).String()], update)
 		}
 	} else {
 		// 小于的话，就增加

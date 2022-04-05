@@ -11,7 +11,6 @@ import (
 type ScriptStatusNode struct {
 	Nodes   []pkg.ServiceStatus
 	Name    string
-	Role    string
 	Version string
 	Url     string
 	Filter  []string
@@ -103,7 +102,7 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 	maxColumeLen[11] = 12
 
 	if verbose {
-		fmt.Printf("<node: %s, url: %s, server version: %s, role: %s>\n", st.Name, st.Url, st.Version, st.Role)
+		fmt.Printf("<node: %s, url: %s, server version: %s>\n", st.Name, st.Url, st.Version)
 		fmt.Println("--------------------------------------------------")
 		fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
 			"Name" + (space(maxColumeLen[1] - len("Name"))).String() +
@@ -157,7 +156,7 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 		}
 		fmt.Println("--------------------------------------------------")
 	} else {
-		fmt.Printf("<node: %s, url: %s, server version: %s, role: %s>\n", st.Name, st.Url, st.Version, st.Role)
+		fmt.Printf("<node: %s, url: %s, server version: %s>\n", st.Name, st.Url, st.Version)
 		fmt.Println("--------------------------------------------------")
 		fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
 			"Name" + (space(maxColumeLen[1] - len("Name"))).String() +

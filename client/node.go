@@ -161,7 +161,6 @@ func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 		Version: ssn.Version,
 		Name:    node.Name,
 		Url:     node.Url,
-		Role:    ssn.Role,
 	}
 
 	if len(ssn.Data) > 0 {
@@ -192,42 +191,28 @@ func (node *Node) Kill(args ...string) {
 		return
 	}
 	fmt.Println(string(res.Marshal()))
-	// fmt.Println(string(node.crud("stop", args...)))
 }
 
 func (node *Node) Env(args string) {
 
-	// var b []byte
-	// var err error
-	// switch len(args) {
-	// case 1:
 	cli := node.NewSCSClient()
 	cli.Name = args
 	res, err := cli.Env()
-	// b, err = Requests("POST", fmt.Sprintf("%s/env/%s", node.Url, args[0]), node.Token, nil)
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
 
-	// l := make(map[string]interface{}, 0)
 	out, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 		return
 	}
 	fmt.Println(string(out))
-	// for k, v := range l {
-	// 	fmt.Println(k + ": " + v)
-	// }
 }
 
 func (node *Node) Info(args string) {
 
-	// var b []byte
-	// var err error
-	// switch len(args) {
-	// case 1:
 	cli := node.NewSCSClient()
 	cli.Name = args
 	res, err := cli.Info()
@@ -236,15 +221,11 @@ func (node *Node) Info(args string) {
 		return
 	}
 
-	// l := make(map[string]string, 0)
 	out, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 	}
 	fmt.Println(string(out))
-	// for k, v := range l {
-	// 	fmt.Println(k + ": " + v)
-	// }
 }
 
 func (node *Node) Install(scripts []*scripts.Script, env map[string]string) {
@@ -253,7 +234,6 @@ func (node *Node) Install(scripts []*scripts.Script, env map[string]string) {
 	for _, script := range scripts {
 		cli := node.NewSCSClient()
 		res, err := cli.AddScript(script)
-		// b, err := Requests("POST", fmt.Sprintf("%s/script", node.Url), node.Token, bytes.NewReader(body))
 		if err != nil {
 			fmt.Printf("name: %s , msg: %v\n", node.Name, err)
 			return
@@ -267,7 +247,6 @@ func (node *Node) Log(args string, line int) {
 	cli := node.NewSCSClient()
 	cli.Name = args
 	cli.Log(line)
-	// b, err := Requests("POST", fmt.Sprintf("%s/log/%s", node.Url, args), node.Token, nil)
 }
 
 func (node *Node) Stop(args ...string) {
@@ -318,7 +297,6 @@ func (node *Node) Remove(args ...string) {
 	}
 	fmt.Println(string(res.Marshal()))
 
-	// fmt.Println(string(node.crud("stop", args...)))
 }
 
 func (node *Node) Enable(pname string) {

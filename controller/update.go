@@ -12,8 +12,7 @@ import (
 
 // 更新的操作
 func DisableScript(s *scripts.Script, update bool) bool {
-	store.mu.Lock()
-	defer store.mu.Unlock()
+
 	// 禁用 script 所在的所有server
 	if _, ok := store.ss[s.Name]; !ok {
 		return false
@@ -21,19 +20,23 @@ func DisableScript(s *scripts.Script, update bool) bool {
 	if store.ss[s.Name].Disable {
 		return false
 	}
+	store.mu.Lock()
 	store.ss[s.Name].Disable = true
+	store.mu.Unlock()
 	for i := range store.serverIndex[s.Name] {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 
 		if i == 0 {
 			// 如果索引时0的， 那么直接停止就好了， 并且将值修改为true
+			store.mu.Lock()
 			store.servers[subname].Disable = true
+			store.mu.Unlock()
 			go store.servers[subname].Stop()
 			continue
 		}
 		golog.Info("add reload count")
 		atomic.AddInt64(&global.CanReload, 1)
-		go remove(store.servers[subname], update)
+		go Remove(store.servers[subname], update)
 
 	}
 	return true

@@ -13,8 +13,6 @@ import (
 // 只有在 Server.Removed 为 true的时候才会发送  svc.StopSignal 信号
 // RemovePname 的时候才会用到
 func RemoveScript(pname string) error {
-	store.mu.Lock()
-	defer store.mu.Unlock()
 
 	if _, ok := store.ss[pname]; ok {
 		replicate := store.ss[pname].Replicate
@@ -25,7 +23,7 @@ func RemoveScript(pname string) error {
 		for i := 0; i < replicate; i++ {
 			subname := subname.NewSubname(pname, i)
 			atomic.AddInt64(&global.CanReload, 1)
-			go remove(store.servers[subname.String()], true)
+			go Remove(store.servers[subname.String()], true)
 		}
 
 	} else {
@@ -53,16 +51,16 @@ func Remove(svc *server.Server, update bool) {
 }
 
 // remove没有锁
-func remove(svc *server.Server, update bool) {
-	// 如果是always 为 true，那么直接修改为false
-	svc.Remove()
-	<-svc.StopSignal
-	delete(store.serverIndex[svc.Name], svc.Index)
-	delete(store.servers, svc.SubName)
-	removeServer(svc.Name, svc.SubName, update)
-	// 如果全部删光了， 那么scripts的name也要删除
-	if len(store.serverIndex[svc.Name]) == 0 {
-		delete(store.ss, svc.Name)
-	}
-	atomic.AddInt64(&global.CanReload, -1)
-}
+// func remove(svc *server.Server, update bool) {
+// 	// 如果是always 为 true，那么直接修改为false
+// 	svc.Remove()
+// 	<-svc.StopSignal
+// 	delete(store.serverIndex[svc.Name], svc.Index)
+// 	delete(store.servers, svc.SubName)
+// 	removeServer(svc.Name, svc.SubName, update)
+// 	// 如果全部删光了， 那么scripts的name也要删除
+// 	if len(store.serverIndex[svc.Name]) == 0 {
+// 		delete(store.ss, svc.Name)
+// 	}
+// 	atomic.AddInt64(&global.CanReload, -1)
+// }

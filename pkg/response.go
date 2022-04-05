@@ -11,7 +11,6 @@ type Response struct {
 	Code int         `json:"code,omitempty"`
 	Msg  string      `json:"msg,omitempty"`
 	Data interface{} `json:"data,omitempty"`
-	Role string      `json:"role,omitempty"`
 }
 
 func (res *Response) Marshal() []byte {
