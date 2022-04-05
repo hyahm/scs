@@ -33,7 +33,7 @@ func DisableScript(s *scripts.Script, update bool) bool {
 		}
 		golog.Info("add reload count")
 		atomic.AddInt64(&global.CanReload, 1)
-		go Remove(store.servers[subname], update)
+		go remove(store.servers[subname], update)
 
 	}
 	return true
@@ -72,7 +72,7 @@ func EnableScript(script *scripts.Script) bool {
 		availablePort++
 		if script.Disable {
 			// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-			continue
+			return true
 		}
 
 		store.servers[subname].Start()

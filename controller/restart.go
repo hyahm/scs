@@ -11,6 +11,7 @@ import (
 	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
+// 没有锁，只是为了外部访问
 func RestartServer(svc *server.Server, script *scripts.Script) {
 	// 禁用 script 所在的所有server
 	// 先修改值, 因为是restart， 所以端口在svc初始化的时候就固定了
@@ -23,7 +24,7 @@ func restartServer(svc *server.Server, script *scripts.Script) {
 	// 先修改值
 	svc.Restart()
 	//已经停止了。
-	<-svc.StopSigle
+	<-svc.StopSignal
 	// 更新server并启动
 	svc.MakeServer(script, svc.Port)
 	svc.Start()
@@ -64,13 +65,10 @@ func RestartScript(s *scripts.Script) error {
 	return nil
 }
 
-func RestartAllServer(token string) {
+func RestartAllServer() {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	for _, svc := range store.servers {
-		if token != "" && token != svc.Token {
-			continue
-		}
 		if _, ok := store.ss[svc.Name]; !ok {
 			golog.Error("not found script: ", svc.Name)
 			return
@@ -79,10 +77,27 @@ func RestartAllServer(token string) {
 	}
 }
 
-// 返回成功还是失败
+func RestartAllServerFromScripts(names map[string]struct{}) {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for _, svc := range store.servers {
+		if _, sok := names[svc.Name]; sok {
+			if _, ok := store.ss[svc.Name]; ok {
+				RestartServer(svc, store.ss[svc.Name])
+			}
+		}
+
+	}
+}
+
 func UpdateAndRestartScript(s *scripts.Script) bool {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
+	return updateAndRestartScript(s)
+}
+
+// 返回成功还是失败
+func updateAndRestartScript(s *scripts.Script) bool {
 	if _, ok := store.ss[s.Name]; !ok {
 		return false
 	}
@@ -97,20 +112,21 @@ func UpdateAndRestartScript(s *scripts.Script) bool {
 	return true
 }
 
-func UpdateAndRestartAllServer() {
+func UpdateAllServer() {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	for _, s := range store.ss {
-		go UpdateAndRestartScript(s)
+		go updateAndRestartScript(s)
 	}
 }
 
-func UpdatePermAndRestartAllServer(token string) {
+func UpdateAllServerFromScript(names map[string]struct{}) {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	for _, s := range store.ss {
-		if s.Token == token {
-			go UpdateAndRestartScript(s)
+		if _, ok := names[s.Name]; ok {
+			go updateAndRestartScript(s)
 		}
+
 	}
 }

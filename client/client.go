@@ -475,7 +475,12 @@ func (sc *SCSClient) Enable() (*pkg.Response, error) {
 func (sc *SCSClient) GetServers() (*pkg.Response, error) {
 	return sc.requests("/get/servers", nil)
 }
-
+func (sc *SCSClient) GetIndexs() (*pkg.Response, error) {
+	if sc.Pname == "" {
+		return nil, ErrPnameIsEmpty
+	}
+	return sc.requests("/get/index/"+sc.Pname, nil)
+}
 func (sc *SCSClient) GetAlarms() (*pkg.Response, error) {
 	return sc.requests("/get/alarms", nil)
 }

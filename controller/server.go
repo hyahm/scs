@@ -8,33 +8,36 @@ import (
 	"github.com/hyahm/scs/pkg/message"
 )
 
-// 删除对应的server, 外部加了锁，内部调用不用加锁
+// 删除对应的server, 外部加了锁，内部调用不用加锁  todo:
 func removeServer(name, subname string, update bool) {
-
-	delete(store.servers, subname)
 	// 如果scripts的副本数为0或者1就直接删除这个scripts
-	if update {
-		if _, ok := store.ss[name]; ok {
-			store.ss[name].Replicate--
-			if store.ss[name].Replicate <= 0 {
-				config.DeleteScriptToConfigFile(store.ss[name], update)
-				delete(store.ss, name)
-				return
-			}
-			// 这里修改配置文件减一
-			config.UpdateScriptToConfigFile(store.ss[name], update)
+	if _, ok := store.ss[name]; ok {
+		store.ss[name].Replicate--
+		if store.ss[name].Replicate <= 0 {
+			config.DeleteScriptToConfigFile(store.ss[name], update)
+			return
 		}
+		// 这里修改配置文件减一
+		config.UpdateScriptToConfigFile(store.ss[name], update)
 	}
 }
 
-func StartPermAllServer(token string) {
+func StartAllServer() {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	for name := range store.servers {
-		if token != "" && store.servers[name].Token == token {
+		store.servers[name].Start()
+
+	}
+}
+
+func StartAllServerFromScript(names map[string]struct{}) {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for name, svc := range store.servers {
+		if _, ok := names[svc.Name]; ok {
 			store.servers[name].Start()
 		}
-
 	}
 }
 
@@ -51,6 +54,18 @@ func GetServers() map[string]*server.Server {
 	return store.servers
 }
 
+func GetServersFromScripts(names map[string]struct{}) map[string]*server.Server {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	servers := make(map[string]*server.Server)
+	for name, svc := range store.servers {
+		if _, ok := names[svc.Name]; ok {
+			servers[name] = svc
+		}
+	}
+	return servers
+}
+
 func GetPremServers(token string) map[string]*server.Server {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
@@ -65,6 +80,19 @@ func GetPremServers(token string) map[string]*server.Server {
 
 func GetAterts() map[string]message.SendAlerter {
 	return alert.GetAlerts()
+}
+
+func StopScriptFromName(names map[string]struct{}) {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for _, script := range store.ss {
+		if _, ok := names[script.Name]; ok {
+			err := StopScript(script)
+			if err != nil {
+				golog.Error(err)
+			}
+		}
+	}
 }
 
 func StopAllServer() {

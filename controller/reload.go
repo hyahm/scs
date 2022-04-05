@@ -14,8 +14,6 @@ import (
 )
 
 func getTempScript(temp map[string]struct{}) {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
 	for name := range store.ss {
 		temp[name] = struct{}{}
 	}
@@ -32,13 +30,20 @@ func Fmt() error {
 	return c.WriteConfig(true)
 }
 
+/*
+重载：  备份旧的scripts的replicate
+
+如果有多余的副本或scripts就删除, 新的scripts将会启动， 自动扩缩容
+更新所有store.ss
+
+*/
 func Reload() error {
 	c, err := config.ReadConfig("")
 	if err != nil {
 		// 第一次报错直接退出
 		return err
 	}
-	// 配置文件是对的， 那么直接写进配置文件
+	// 配置文件是对的， 那么直接写进配置文件， 后面所有的操作都取消更新配置文件
 	cfg = c
 	err = cfg.WriteConfig(true)
 	if err != nil {
@@ -48,24 +53,22 @@ func Reload() error {
 	// 取出之前的scripts
 	temp := make(map[string]struct{})
 
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	// 备份旧的scripts
 	getTempScript(temp)
-
 	for index := range cfg.SC {
-
-		if cfg.SC[index].Token == "" {
-			cfg.SC[index].Token = pkg.RandomToken()
-		}
 
 		// 删除之前存在的name
 		delete(temp, cfg.SC[index].Name)
 		// 查看副本是不是对的， 不会对存在的脚本有影响
-		ReloadScripts(cfg.SC[index], false)
+		reloadScripts(cfg.SC[index], false)
 	}
-	store.mu.RLock()
-	defer store.mu.RUnlock()
+
 	// 删除已删除的 script
 	for name := range temp {
 		if _, ok := store.ss[name]; ok {
+			golog.Info("remove ", name)
 			replicate := store.ss[name].Replicate
 			if replicate == 0 {
 				replicate = 1
@@ -73,9 +76,8 @@ func Reload() error {
 
 			for i := 0; i < replicate; i++ {
 				subname := subname.NewSubname(name, i)
-				golog.Info("add reload count")
 				atomic.AddInt64(&global.CanReload, 1)
-				go Remove(store.servers[subname.String()], false)
+				go remove(store.servers[subname.String()], false)
 			}
 
 		}
@@ -84,9 +86,8 @@ func Reload() error {
 }
 
 // 添加script并启动
-func AddScript(script *scripts.Script) {
-	store.mu.Lock()
-	defer store.mu.Unlock()
+
+func addScript(script *scripts.Script) {
 	if script.Token == "" {
 		script.Token = pkg.RandomToken()
 	}
@@ -117,57 +118,20 @@ func AddScript(script *scripts.Script) {
 		availablePort++
 		if script.Disable {
 			// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-			continue
+			return
 		}
 
 		store.servers[subname].Start()
 	}
 }
 
-func UpdateScript(script *scripts.Script, update bool) {
-
-	oldReplicate := store.ss[script.Name].Replicate
-	if oldReplicate == 0 {
-		oldReplicate = 1
-	}
-	if script.Replicate == 1 {
-		script.Replicate = 0
-	}
-	newReplicate := script.Replicate
-	if newReplicate == 0 {
-		newReplicate = 1
-	}
-
-	if store.ss == nil {
-		store.ss = make(map[string]*scripts.Script)
-	}
-	store.ss[script.Name] = script
-	for i := 0; i < newReplicate; i++ {
-		// subname := subname.NewSubname(script.Name, i)
-		// servers[subname.String()].Start()
-		go func(i int) {
-			golog.Info("remove ", subname.NewSubname(script.Name, i).String())
-			Remove(store.servers[subname.NewSubname(script.Name, i).String()], false)
-			golog.Info("update")
-			// makeReplicateServerAndStart(store.ss[script.Name], newReplicate)
-			golog.Info("update success")
-		}(i)
-
-	}
-
-	// 删除多余的
-	for i := newReplicate; i < oldReplicate; i++ {
-		golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-		Remove(store.servers[subname.NewSubname(script.Name, i).String()], false)
-	}
-
+func AddScript(script *scripts.Script) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	addScript(script)
 }
 
-func ReloadScripts(script *scripts.Script, update bool) {
-	// script: 配置文件新读取出来的
-	// 处理存在的
-	// if _, ok := store.ss[script.Name]; ok {
-	// 对比启动的副本
+func UpdateScript(script *scripts.Script, update bool) {
 	store.mu.Lock()
 	defer store.mu.Unlock()
 	oldReplicate := store.ss[script.Name].Replicate
@@ -182,9 +146,62 @@ func ReloadScripts(script *scripts.Script, update bool) {
 		newReplicate = 1
 	}
 
+	store.ss[script.Name] = script
+	availablePort := script.Port
+	for i := 0; i < newReplicate; i++ {
+		if _, ok := store.serverIndex[script.Name][i]; !ok {
+			subname := fmt.Sprintf("%s_%d", script.Name, i)
+			store.servers[subname] = &server.Server{
+				Index:     i,
+				Replicate: newReplicate,
+				SubName:   subname,
+				Name:      script.Name,
+			}
+			store.serverIndex[script.Name][i] = struct{}{}
+			availablePort = store.servers[subname].MakeServer(script, availablePort)
+			availablePort++
+			if script.Disable {
+				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
+				return
+			}
+			store.servers[subname].Start()
+		}
+	}
+
+	// 删除多余的
+	for i := newReplicate; i < oldReplicate; i++ {
+		golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
+		atomic.AddInt64(&global.CanReload, 1)
+		go remove(store.servers[subname.NewSubname(script.Name, i).String()], false)
+	}
+
+}
+
+// todo:
+func reloadScripts(script *scripts.Script, update bool) {
+	// script: 配置文件新读取出来的
+	// 处理存在的
+
+	// 对比启动的副本
+	if _, ok := store.ss[script.Name]; !ok {
+		// 如果不存在，说明要新增
+		addScript(script)
+		return
+	}
+	oldReplicate := store.ss[script.Name].Replicate
+	if oldReplicate == 0 {
+		oldReplicate = 1
+	}
+	if script.Replicate == 1 {
+		script.Replicate = 0
+	}
+	newReplicate := script.Replicate
+	if newReplicate == 0 {
+		newReplicate = 1
+	}
+
 	// 对比脚本是否修改
 	store.ss[script.Name] = script
-	store.ss[script.Name].Replicate = newReplicate
 	if oldReplicate == newReplicate {
 		// 如果一样的名字， 副本数一样的就直接跳过
 		return
@@ -192,10 +209,9 @@ func ReloadScripts(script *scripts.Script, update bool) {
 	if oldReplicate > newReplicate {
 		// 如果大于的话， 那么就删除多余的
 		for i := newReplicate; i < oldReplicate; i++ {
-			golog.Info("add reload count")
 			atomic.AddInt64(&global.CanReload, 1)
 			golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-			go Remove(store.servers[subname.NewSubname(script.Name, i).String()], update)
+			go remove(store.servers[subname.NewSubname(script.Name, i).String()], update)
 		}
 	} else {
 		// 小于的话，就增加
@@ -213,20 +229,11 @@ func ReloadScripts(script *scripts.Script, update bool) {
 			availablePort++
 			if script.Disable {
 				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-				continue
+				return
 			}
 
 			store.servers[subname].Start()
 		}
 	}
 
-	// } else {
-	// 	// 不存在的脚本直接启动即可
-	// 	store.ss[script.Name] = script
-	// 	replicate := script.Replicate
-	// 	if replicate == 0 {
-	// 		replicate = 1
-	// 	}
-	// 	makeReplicateServerAndStart(script, replicate)
-	// }
 }

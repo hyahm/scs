@@ -42,11 +42,3 @@ func GetServerByNameAndSubname(name string, subname subname.Subname) (*server.Se
 	}
 	return nil, nil, false
 }
-
-// func GetScriptByPname(name string) (*scripts.Script, bool) {
-// 	store.mu.RLock()
-// 	defer store.mu.RUnlock()
-// 	v, ok := store.ss[name]
-// 	return v, ok
-
-// }

@@ -1,4 +1,4 @@
-package midware
+package module
 
 import (
 	"encoding/json"

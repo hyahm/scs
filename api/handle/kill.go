@@ -13,10 +13,9 @@ import (
 func Kill(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	role := xmux.GetInstance(r).Get("role").(string)
 	svc, _, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
-		w.Write(pkg.NotFoundScript(role))
+		w.Write(pkg.NotFoundScript())
 		return
 	}
 	go svc.Kill()
@@ -25,11 +24,10 @@ func Kill(w http.ResponseWriter, r *http.Request) {
 
 func KillPname(w http.ResponseWriter, r *http.Request) {
 	names := xmux.Var(r)["pname"]
-	role := xmux.GetInstance(r).Get("role").(string)
 	for _, pname := range strings.Split(names, ",") {
 		s, ok := controller.GetScriptByPname(pname)
 		if !ok {
-			w.Write(pkg.NotFoundScript(role))
+			w.Write(pkg.NotFoundScript())
 			return
 		}
 		controller.KillScript(s)

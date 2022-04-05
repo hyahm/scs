@@ -348,6 +348,21 @@ func (node *Node) GetServers() {
 	fmt.Println(string(out))
 }
 
+func (node *Node) GetIndexs() {
+	cli := node.NewSCSClient()
+	res, err := cli.GetIndexs()
+	if err != nil {
+		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
+		return
+	}
+	out, err := json.MarshalIndent(res, "", " ")
+	if err != nil {
+		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
 func (node *Node) GetAlerts() {
 	cli := node.NewSCSClient()
 	res, err := cli.GetAlarms()

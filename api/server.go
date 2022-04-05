@@ -9,10 +9,8 @@ import (
 	"time"
 
 	"github.com/hyahm/scs/api/handle"
-	"github.com/hyahm/scs/api/midware"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
-	"github.com/hyahm/scs/pkg/config/scripts"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
@@ -30,82 +28,22 @@ func enter(w http.ResponseWriter, r *http.Request) bool {
 	return false
 }
 
-func LookHandle() *xmux.GroupRoute {
-	// 只是查看的权限
-	group := xmux.NewGroupRoute().AddPageKeys("scripts")
-	group.Post("/status/{pname}/{name}", handle.Status)
-	group.Post("/status/{pname}", handle.StatusPname)
-	group.Post("/start/{pname}", handle.StartPname)
-	group.Post("/start/{pname}/{name}", handle.Start)
-	group.Post("/stop/{pname}/{name}", handle.Stop)
-	group.Post("/stop/{pname}", handle.StopPname)
-	group.Post("/restart/{pname}/{name}", handle.Restart)
-	group.Post("/restart/{pname}", handle.RestartPname)
-	group.Post("/update/{pname}/{name}", handle.Update)
-	group.Post("/update/{pname}", handle.UpdatePname)
-	group.Post("/kill/{pname}", handle.KillPname)
-	group.Post("/kill/{pname}/{name}", handle.Kill)
-	group.Post("/env/{name}", handle.GetEnvName)
-	group.Post("/server/info/{name}", handle.ServerInfo)
-	group.Post("/get/servers", handle.GetServers) // complete
-
-	group.Get("/log/{name}/{int:line}", handle.Log)
-
-	group.Post("/cannotstop/{name}", handle.CanNotStop)
-	group.Post("/canstop/{name}", handle.CanStop)
-
-	group.Post("/get/scripts", handle.GetScripts)
-	group.Post("/start", handle.StartAll)   // complete
-	group.Post("/status", handle.AllStatus) // complete
-	group.Post("/stop", handle.StopAll)     // complete
-	group.Post("/script", handle.AddScript).BindJson(&scripts.Script{})
-	group.Post("/remove/{pname}/{name}", handle.Remove)
-	group.Post("/remove/{pname}", handle.RemovePname)
-	group.Post("/restart", handle.RestartAll) // complete
-	group.Post("/send/alert", handle.Alert)
-	group.Post("/update", handle.UpdateAll) // complete
-	return group
-}
-
-func FileHandle() *xmux.GroupRoute {
-	// 修改文件的操作
-	group := xmux.NewGroupRoute()
-	// group.Post("/get/info", handle.GetOS)
-
-	// router.Post("/remove", handle.RemoveAll)
-	group.Post("/get/alert", handle.GetAlert)   // 只能管理员用
-	group.Post("/-/reload", handle.Reload)      // 只能管理员用
-	group.Post("/-/fmt", handle.Fmt)            // 只能管理员用
-	group.Post("/get/alarms", handle.GetAlarms) // 只能管理员用
-	group.Post("/get/repo", handle.GetRepo)     // 只能管理员用
-
-	group.Post("/enable/{pname}", handle.Enable)   // 只能管理员用
-	group.Post("/disable/{pname}", handle.Disable) // 只能管理员用
-
-	// 监测点
-
-	// router.Get("/version/{pname}/{name}", handle.Version)
-
-	// group.Post("/delete/{pname}", handle.DelScript)
-	return group
-}
-
 // var dir := "key"
 func HttpServer() {
 	router := xmux.NewRouter()
 	router.SetHeader("Access-Control-Allow-Origin", "*")
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
-	router.AddModule(midware.CheckToken)
-	router.Post("/probe", handle.Probe).DelModule(midware.CheckToken)
+
+	router.Post("/probe", handle.Probe)
 	// 增加请求时间
 	router.Enter = enter
 	// router.MiddleWare(GetExecTime)
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
-	router.AddGroup(LookHandle())
-	router.AddGroup(FileHandle())
+	router.AddGroup(AdminHandle())
+
 	if global.GetDisableTls() {
 		golog.Info("listen on " + global.GetListen() + " over http")
 		golog.Fatal(router.Run(global.GetListen()))

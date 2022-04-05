@@ -11,22 +11,22 @@ import (
 func Status(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	role := xmux.GetInstance(r).Get("role").(string)
 
-	w.Write(controller.ScriptName(pname, name, role))
+	w.Write(controller.ScriptName(pname, name))
 }
 
 func StatusPname(w http.ResponseWriter, r *http.Request) {
-	role := xmux.GetInstance(r).Get("role").(string)
 
 	pname := xmux.Var(r)["pname"]
-	w.Write(controller.ScriptPname(pname, role))
+	w.Write(controller.ScriptPname(pname))
 }
 
 func AllStatus(w http.ResponseWriter, r *http.Request) {
-	role := xmux.GetInstance(r).Get("role").(string)
-
-	token := xmux.GetInstance(r).Get("token").(string)
-	w.Write(controller.All(role, token))
+	names := xmux.GetInstance(r).Get("scriptname")
+	if names == nil {
+		w.Write(controller.AllStatus())
+	} else {
+		w.Write(controller.AllStatusFromScript(names.(map[string]struct{})))
+	}
 
 }

@@ -13,7 +13,7 @@ func (svc *Server) cron() {
 		select {
 		case <-svc.Ctx.Done():
 			golog.Info("name:" + svc.SubName + " end cron")
-			svc.StopSigle <- true
+			svc.StopSignal <- true
 			return
 		case <-time.After(-time.Since(svc.Cron.StartTime)):
 			svc.Status.Status = status.RUNNING

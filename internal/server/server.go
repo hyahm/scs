@@ -26,19 +26,20 @@ import (
 const defaultContinuityInterval = time.Hour * 1
 
 type Server struct {
-	Index   int               `json:"index"` // svc的索引
-	Token   string            `json:"token"` // svc的token
-	Name    string            `json:"name"`
-	Dir     string            `json:"dir,omitempty"`
-	Command string            `json:"command"`
-	Version string            `json:"version,omitempty"`
-	Cron    *cron.Cron        `json:"cron,omitempty"`    // 这个cron是新生成的
-	IsCron  bool              `json:"is_loop,omitempty"` // 如果是定时任务
-	Env     map[string]string `json:"-"`
-	Logger  *golog.Log        `json:"-"`               // 日志
-	Times   int               `json:"times,omitempty"` // 记录循环的次数
-	SubName string            `json:"subname,omitempty"`
-	Cmd     *exec.Cmd         `json:"-"`
+	Index      int               `json:"index"` // svc的索引
+	Token      string            `json:"token"` // svc的token
+	Name       string            `json:"name"`
+	Dir        string            `json:"dir,omitempty"`
+	Command    string            `json:"command"`
+	Version    string            `json:"version,omitempty"`
+	Cron       *cron.Cron        `json:"cron,omitempty"`    // 这个cron是新生成的
+	IsCron     bool              `json:"is_loop,omitempty"` // 如果是定时任务
+	Env        map[string]string `json:"-"`
+	Logger     *golog.Log        `json:"-"`               // 日志
+	Times      int               `json:"times,omitempty"` // 记录循环的次数
+	SubName    string            `json:"subname,omitempty"`
+	Cmd        *exec.Cmd         `json:"-"`
+	AlwaysSign bool              `json:"always标识"` // 在停止的时候， always会变为false
 	// 总副本数
 	Replicate int            `json:"replicate,omitempty"`
 	Status    *status.Status `json:"status,omitempty"`
@@ -53,12 +54,10 @@ type Server struct {
 	// 取消操作， 可以取消等待重启， 等待停止， 等待remove(暂时没实现)
 	CancelProcess chan bool `json:"-"`
 	// 服务停止后的信号， 比如  restart, remove 操作， 因为停止后还有下一步操作
-	StopSigle chan bool `json:"-"`
+	StopSignal chan bool `json:"-"`
 	// 这2个上上下文
 	Ctx    context.Context    `json:"-"`
 	Cancel context.CancelFunc `json:"-"` // 结束定时器的上下文和日志的上下文
-	// 标记 remove 操作的
-	Removed bool `json:"-"`
 	// 更新的命令
 	Update string `json:"update,omitempty"`
 	// 暂时无视
@@ -165,7 +164,7 @@ func (svc *Server) Restart() {
 		go svc.stop()
 		return
 	case status.STOP:
-		svc.StopSigle <- true
+		svc.StopSignal <- true
 	}
 
 }
@@ -217,12 +216,12 @@ func (svc *Server) fillServer(script *scripts.Script) {
 	svc.Update = script.Update
 	svc.AI = &alert.AlertInfo{}
 	svc.AT = script.AT
-	svc.StopSigle = make(chan bool)
+	svc.StopSignal = make(chan bool)
 
 	svc.Liveness = script.Liveness
 	svc.Ready = make(chan bool, 1)
 	svc.Always = script.Always
-
+	svc.AlwaysSign = script.Always
 	svc.DeleteWhenExit = script.DeleteWhenExit
 
 	// svc.DisableAlert = script.DisableAlert
@@ -257,7 +256,7 @@ func (svc *Server) Remove() {
 		svc.Exit <- 12
 		svc.Stop()
 	case status.STOP:
-		svc.StopSigle <- true
+		svc.StopSignal <- true
 		// DeleteServiceBySubName(svc.SubName)
 	case status.RUNNING:
 		svc.Exit <- 12

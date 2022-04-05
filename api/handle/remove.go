@@ -17,36 +17,34 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	// 读取配置文件
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
 	svc, _, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
-		w.Write(pkg.NotFoundScript(role))
+		w.Write(pkg.NotFoundScript())
 		return
 	}
 	atomic.AddInt64(&global.CanReload, 1)
 	go controller.Remove(svc, true)
-	w.Write(pkg.Waiting("stop", role))
+	w.Write(pkg.Waiting("stop"))
 }
 
 func RemovePname(w http.ResponseWriter, r *http.Request) {
-	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
 	pname := xmux.Var(r)["pname"]
 	s, ok := controller.GetScriptByPname(pname)
 	if !ok {
-		w.Write(pkg.NotFoundScript(role))
+		w.Write(pkg.NotFoundScript())
 		return
 	}
 
 	controller.RemoveScript(s.Name)
-	w.Write(pkg.Waiting("stop", role))
+	w.Write(pkg.Waiting("stop"))
 }
 
 // func RemoveAll(w http.ResponseWriter, r *http.Request) {

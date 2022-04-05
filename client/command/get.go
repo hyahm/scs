@@ -32,6 +32,9 @@ var GetCmd = &cobra.Command{
 				case "servers":
 					node.GetServers()
 					wg.Done()
+				case "indexs":
+					node.GetIndexs()
+					wg.Done()
 				default:
 					node.GetAlerts()
 					wg.Done()

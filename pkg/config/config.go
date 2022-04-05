@@ -130,8 +130,6 @@ func (c *Config) check() error {
 	// 配置信息填充至状态
 	checkrepeat := make(map[string]bool)
 	for index := range c.SC {
-		golog.Info(c.SC[index].Name)
-		golog.Info(c.SC[index].Command)
 		if c.SC[index].Name == "" || c.SC[index].Command == "" {
 			golog.Fatal("name or commond is empty")
 		}

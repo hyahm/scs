@@ -22,6 +22,7 @@ func (svc *Server) Start() {
 
 // 当是停止状态的时候异步启动
 func (svc *Server) asyncStart() {
+	svc.Always = svc.AlwaysSign
 	svc.Version = pkg.GetVersion(svc.Version)
 	err := svc.Install()
 	if err != nil {

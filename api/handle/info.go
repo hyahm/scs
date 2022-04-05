@@ -10,10 +10,9 @@ import (
 
 func ServerInfo(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
-	role := xmux.GetInstance(r).Get("role").(string)
 	info, ok := controller.GetServerInfo(name)
 	if !ok {
-		w.Write(pkg.NotFoundScript(role))
+		w.Write(pkg.NotFoundScript())
 		return
 	}
 	res := pkg.Response{

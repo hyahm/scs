@@ -6,19 +6,15 @@ import (
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/xmux"
 )
 
 func Reload(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
-	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
-	res := pkg.Response{
-		Role: role,
-	}
+	res := pkg.Response{}
 
 	// 拷贝一份到当前运行的脚本列表
 	if err := controller.Reload(); err != nil {
@@ -30,14 +26,11 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 
 func Fmt(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
-	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
-	res := pkg.Response{
-		Role: role,
-	}
+	res := pkg.Response{}
 
 	// 拷贝一份到当前运行的脚本列表
 	if err := controller.Fmt(); err != nil {

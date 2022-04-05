@@ -37,7 +37,7 @@ func (svc *Server) stop() {
 					golog.Error(err)
 					return
 				}
-				// svc.StopSigle <- true
+				// svc.StopSignal <- true
 				return
 			}
 		case <-svc.CancelProcess:

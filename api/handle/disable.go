@@ -14,16 +14,15 @@ import (
 var reloadKey bool
 
 func Disable(w http.ResponseWriter, r *http.Request) {
-	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
 	pname := xmux.Var(r)["pname"]
 
 	s, ok := controller.GetScriptByPname(pname)
 	if !ok {
-		w.Write(pkg.NotFoundScript(role))
+		w.Write(pkg.NotFoundScript())
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
@@ -39,15 +38,14 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 }
 
 func Enable(w http.ResponseWriter, r *http.Request) {
-	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
 	pname := xmux.Var(r)["pname"]
 	s, ok := controller.GetScriptByPname(pname)
 	if !ok {
-		w.Write(pkg.NotFoundScript(role))
+		w.Write(pkg.NotFoundScript())
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略

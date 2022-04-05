@@ -31,37 +31,35 @@ func getStatus(svc *server.Server) pkg.ServiceStatus {
 	return status
 }
 
-func ScriptName(pname, subname, role string) []byte {
+func ScriptName(pname, subname string) []byte {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	status := &pkg.StatusList{
 		Data:    make([]pkg.ServiceStatus, 0),
 		Version: global.VERSION,
-		Role:    role,
 		Code:    200,
 	}
 	if _, ok := store.ss[pname]; !ok {
-		return pkg.NotFoundScript(role)
+		return pkg.NotFoundScript()
 	}
 	if _, ok := store.servers[subname]; !ok {
-		return pkg.NotFoundScript(role)
+		return pkg.NotFoundScript()
 	}
 	status.Data = append(status.Data, getStatus(store.servers[subname]))
 	return status.Marshal()
 
 }
 
-func ScriptPname(pname, role string) []byte {
+func ScriptPname(pname string) []byte {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	statuss := &pkg.StatusList{
 		Data:    make([]pkg.ServiceStatus, 0),
 		Version: global.VERSION,
-		Role:    role,
 		Code:    200,
 	}
 	if _, ok := store.ss[pname]; !ok {
-		return pkg.NotFoundScript(role)
+		return pkg.NotFoundScript()
 	}
 	for i := range store.serverIndex[pname] {
 		subname := fmt.Sprintf("%s_%d", pname, i)
@@ -72,23 +70,38 @@ func ScriptPname(pname, role string) []byte {
 }
 
 // 获取所有服务的状态
-func All(role, token string) []byte {
+func AllStatus() []byte {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
 	statuss := &pkg.StatusList{
 		Data:    make([]pkg.ServiceStatus, 0),
 		Version: global.VERSION,
-		Role:    role,
 		Code:    200,
 	}
 	for _, svc := range store.servers {
-		if token != "" && token != svc.Token {
-			continue
-		}
-
 		if _, ok := store.ss[svc.Name]; ok {
 			statuss.Data = append(statuss.Data, getStatus(svc))
 		}
+	}
+	return statuss.Marshal()
+}
+
+// 获取所有服务的状态
+func AllStatusFromScript(names map[string]struct{}) []byte {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	statuss := &pkg.StatusList{
+		Data:    make([]pkg.ServiceStatus, 0),
+		Version: global.VERSION,
+		Code:    200,
+	}
+	for _, svc := range store.servers {
+		if _, sok := names[svc.Name]; sok {
+			if _, ok := store.ss[svc.Name]; ok {
+				statuss.Data = append(statuss.Data, getStatus(svc))
+			}
+		}
+
 	}
 	return statuss.Marshal()
 }

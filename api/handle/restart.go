@@ -14,47 +14,48 @@ import (
 func Restart(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
 	svc, script, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
 	if !ok {
-		w.Write(pkg.NotFoundScript(role))
+		w.Write(pkg.NotFoundScript())
 		return
 	}
 	go controller.RestartServer(svc, script)
-	w.Write(pkg.Waiting("restart", role))
+	w.Write(pkg.Waiting("restart"))
 }
 
 func RestartPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	role := xmux.GetInstance(r).Get("role").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
 	// for _, pname := range strings.Split(names, ",") {
 	s, ok := controller.GetScriptByPname(pname)
 	if !ok {
-		w.Write(pkg.NotFoundScript(role))
+		w.Write(pkg.NotFoundScript())
 		return
 	}
 	controller.RestartScript(s)
 	// }
-	w.Write(pkg.Waiting("restart", role))
+	w.Write(pkg.Waiting("restart"))
 }
 
 func RestartAll(w http.ResponseWriter, r *http.Request) {
 	// 删除所有的脚本
-	role := xmux.GetInstance(r).Get("role").(string)
-	token := xmux.GetInstance(r).Get("token").(string)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged(role))
+		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
-	controller.RestartAllServer(token)
+	names := xmux.GetInstance(r).Get("scriptname")
+	if names == nil {
+		controller.RestartAllServer()
+	} else {
+		controller.RestartAllServerFromScripts(names.(map[string]struct{}))
+	}
 
-	w.Write(pkg.Waiting("restart", role))
+	w.Write(pkg.Waiting("restart"))
 }

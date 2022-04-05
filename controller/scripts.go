@@ -10,16 +10,27 @@ func GetScripts() map[string]*scripts.Script {
 	defer store.mu.RUnlock()
 	return store.ss
 }
-func GetPermScripts(token string) map[string]*scripts.Script {
+
+func GetScriptsFromScritps(names map[string]struct{}) map[string]*scripts.Script {
 	store.mu.RLock()
 	defer store.mu.RUnlock()
-	tempScripts := make(map[string]*scripts.Script)
-	for name, script := range store.ss {
-		if script.Token == token {
-			tempScripts[name] = script
+	ss := make(map[string]*scripts.Script)
+	for pname, script := range store.ss {
+		if _, ok := names[pname]; ok {
+			ss[pname] = script
 		}
 	}
-	return tempScripts
+	return ss
+}
+
+func GetIndexs(pname string) []int {
+	indexs := make([]int, 0)
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for k := range store.serverIndex[pname] {
+		indexs = append(indexs, k)
+	}
+	return indexs
 }
 
 func KillScript(s *scripts.Script) {

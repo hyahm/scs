@@ -5,15 +5,11 @@ import (
 	"net/http"
 
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/xmux"
 	"github.com/shirou/gopsutil/host"
 )
 
 func GetOS(w http.ResponseWriter, r *http.Request) {
-	role := xmux.GetInstance(r).Get("role").(string)
-	res := &pkg.Response{
-		Role: role,
-	}
+	res := &pkg.Response{}
 	hi, err := host.Info()
 
 	if err != nil {

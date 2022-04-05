@@ -40,16 +40,16 @@ func (res *Response) ErrorE(err error) []byte {
 // 	return res.Marshal()
 // }
 
-func NotFoundScript(role string) []byte {
-	return []byte(fmt.Sprintf(`{"code": 404, "msg": "not found pname or name", "role": "%s"}`, role))
+func NotFoundScript() []byte {
+	return []byte(fmt.Sprintf(`{"code": 404, "msg": "not found pname or name" }`))
 }
 
-func Waiting(step, role string) []byte {
-	return []byte(fmt.Sprintf(`{"code": 200, "msg": "waiting %s", "role": "%s"}`, step, role))
+func Waiting(step string) []byte {
+	return []byte(fmt.Sprintf(`{"code": 200, "msg": "waiting %s"}`, step))
 }
 
-func WaitingConfigChanged(role string) []byte {
-	return []byte(fmt.Sprintf(`{"code": 200, "msg": "config file is reloading, waiting completed first", "role": "%s"}`, role))
+func WaitingConfigChanged() []byte {
+	return []byte(fmt.Sprintf(`{"code": 200, "msg": "config file is reloading, waiting completed first" }`))
 }
 
 // 这是返回给前端的数据结构
