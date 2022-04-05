@@ -90,17 +90,18 @@ func RestartAllServerFromScripts(names map[string]struct{}) {
 	}
 }
 
+// 返回成功还是失败
 func UpdateAndRestartScript(s *scripts.Script) bool {
 	store.mu.RLock()
-	defer store.mu.RUnlock()
+	_, ok := store.ss[s.Name]
+	store.mu.RUnlock()
+	if !ok {
+		return false
+	}
 	return updateAndRestartScript(s)
 }
 
-// 返回成功还是失败
 func updateAndRestartScript(s *scripts.Script) bool {
-	if _, ok := store.ss[s.Name]; !ok {
-		return false
-	}
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1

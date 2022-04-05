@@ -92,6 +92,9 @@ func AddScript(script *scripts.Script) {
 	if script.Token == "" {
 		script.Token = pkg.RandomToken()
 	}
+	if script.Role == "" {
+		script.Role = scripts.ScriptRole
+	}
 	// 将scripts填充到store中
 	store.ss[script.Name] = script
 	replicate := script.Replicate
