@@ -1,5 +1,7 @@
 package controller
 
+import "github.com/hyahm/scs/internal/store"
+
 type Auth struct {
 	ScriptName string
 	Role       string
@@ -7,10 +9,8 @@ type Auth struct {
 
 func GetAuthScriptName(token string) []Auth {
 	// 获取有权限的scripts
-	store.mu.RLock()
-	defer store.mu.RUnlock()
 	auths := make([]Auth, 0)
-	for pname, script := range store.ss {
+	for pname, script := range store.Store.GetAllScriptMap() {
 		if script.Token == token {
 			auths = append(auths, Auth{
 				ScriptName: pname,
@@ -31,11 +31,10 @@ func HavePname(auths []Auth, pname string) (string, bool) {
 }
 
 func HaveName(auths []Auth, name string) (string, bool) {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	if v, ok := store.servers[name]; ok {
+	svc, ok := store.Store.GetServerByName(name)
+	if ok {
 		for _, auth := range auths {
-			if auth.ScriptName == v.Name {
+			if auth.ScriptName == svc.Name {
 				return auth.Role, true
 			}
 		}

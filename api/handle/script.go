@@ -5,6 +5,7 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/scripts"
@@ -23,7 +24,8 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"code": 404, "msg": "name not found"}`))
 		return
 	}
-	if controller.HaveScript(s.Name) {
+	_, ok := store.Store.GetServerByName(s.Name)
+	if ok {
 		// 存在的话，需要对比配置文件的修改
 		// 需要判断是否相等
 		if !controller.NeedStop(s) {

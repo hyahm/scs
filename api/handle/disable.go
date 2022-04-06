@@ -6,6 +6,7 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/xmux"
@@ -20,14 +21,14 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 	}
 	pname := xmux.Var(r)["pname"]
 
-	s, ok := controller.GetScriptByPname(pname)
+	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
 		w.Write(pkg.NotFoundScript())
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
-	if controller.DisableScript(s, false) {
-		err := config.UpdateScriptToConfigFile(s, true)
+	if controller.DisableScript(script, false) {
+		err := config.UpdateScriptToConfigFile(script, true)
 		if err != nil {
 			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s}`, err.Error())))
 			return
@@ -43,15 +44,15 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pname := xmux.Var(r)["pname"]
-	s, ok := controller.GetScriptByPname(pname)
+	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
 		w.Write(pkg.NotFoundScript())
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
 
-	if controller.EnableScript(s) {
-		err := config.UpdateScriptToConfigFile(s, true)
+	if controller.EnableScript(script) {
+		err := config.UpdateScriptToConfigFile(script, true)
 		if err != nil {
 			w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s}`, err.Error())))
 			return

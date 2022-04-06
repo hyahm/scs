@@ -6,17 +6,14 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/server"
+	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/scripts"
-	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
 func getTempScript(temp map[string]struct{}) {
-	store.mu.Lock()
-	defer store.mu.Unlock()
-	for name := range store.ss {
+	for name := range store.Store.GetAllScriptMap() {
 		temp[name] = struct{}{}
 	}
 }
@@ -66,19 +63,15 @@ func Reload() error {
 
 	// 删除已删除的 script
 	for name := range temp {
-		if _, ok := store.ss[name]; ok {
-			golog.Info("remove ", name)
-			replicate := store.ss[name].Replicate
-			if replicate == 0 {
-				replicate = 1
+		for index := range store.Store.GetScriptIndex(name) {
+			subname := fmt.Sprintf("%s_%d", name, index)
+			svc, ok := store.Store.GetServerByName(subname)
+			if !ok {
+				golog.Error(pkg.ErrBugMsg)
+				continue
 			}
-
-			for i := 0; i < replicate; i++ {
-				subname := subname.NewSubname(name, i)
-				atomic.AddInt64(&global.CanReload, 1)
-				go Remove(store.servers[subname.String()], false)
-			}
-
+			atomic.AddInt64(&global.CanReload, 1)
+			go Remove(svc, false)
 		}
 	}
 	return nil
@@ -86,121 +79,115 @@ func Reload() error {
 
 // 添加script并启动
 
-func AddScript(script *scripts.Script) {
-	store.mu.Lock()
-	defer store.mu.Unlock()
-	if script.Token == "" {
-		script.Token = pkg.RandomToken()
+func AddScript(s *scripts.Script) {
+	if s.Token == "" {
+		s.Token = pkg.RandomToken()
 	}
-	if script.Role == "" {
-		script.Role = scripts.ScriptRole
+	if s.Role == "" {
+		s.Role = scripts.ScriptRole
 	}
 	// 将scripts填充到store中
-	store.ss[script.Name] = script
-	replicate := script.Replicate
+	store.Store.SetScript(s)
+	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
 	}
 	// 初始化脚本的副本数
-	if _, ok := store.serverIndex[script.Name]; !ok {
-		store.serverIndex[script.Name] = make(map[int]struct{})
-	}
+
 	// 生成环境变量, 填充到script.tempenv里面
 
 	// 假设设置的端口是可用的
-	availablePort := script.Port
+	availablePort := s.Port
 	for i := 0; i < replicate; i++ {
-		subname := fmt.Sprintf("%s_%d", script.Name, i)
-		store.servers[subname] = &server.Server{
-			Index:     i,
-			Replicate: replicate,
-			SubName:   subname,
-			Name:      script.Name,
-		}
-		store.serverIndex[script.Name][i] = struct{}{}
-		availablePort = store.servers[subname].MakeServer(script, availablePort)
+		subname := fmt.Sprintf("%s_%d", s.Name, i)
+		store.Store.InitServer(i, replicate, s.Name, subname)
+		store.Store.SetScriptIndex(s.Name, i)
+		svc, _ := store.Store.GetServerByName(subname)
+		availablePort = svc.MakeServer(s, availablePort)
 		availablePort++
-		if script.Disable {
+		if s.Disable {
 			// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
 			return
 		}
 
-		store.servers[subname].Start()
+		svc.Start()
 	}
 }
 
-func UpdateScript(script *scripts.Script, update bool) {
-	store.mu.Lock()
-
-	oldReplicate := store.ss[script.Name].Replicate
+func UpdateScript(s *scripts.Script, update bool) {
+	script, ok := store.Store.GetScriptByName(s.Name)
+	if !ok {
+		return
+	}
+	oldReplicate := script.Replicate
 	if oldReplicate == 0 {
 		oldReplicate = 1
 	}
-	if script.Replicate == 1 {
+	if s.Replicate == 1 {
 		script.Replicate = 0
 	}
-	newReplicate := script.Replicate
+	newReplicate := s.Replicate
 	if newReplicate == 0 {
 		newReplicate = 1
 	}
 
-	store.ss[script.Name] = script
-	availablePort := script.Port
+	script = s
+	availablePort := s.Port
 	for i := 0; i < newReplicate; i++ {
-		if _, ok := store.serverIndex[script.Name][i]; !ok {
-			subname := fmt.Sprintf("%s_%d", script.Name, i)
-			store.servers[subname] = &server.Server{
-				Index:     i,
-				Replicate: newReplicate,
-				SubName:   subname,
-				Name:      script.Name,
-			}
-			store.serverIndex[script.Name][i] = struct{}{}
-			availablePort = store.servers[subname].MakeServer(script, availablePort)
+		if !store.Store.HaveServerByIndex(s.Name, i) {
+			subname := fmt.Sprintf("%s_%d", s.Name, i)
+			store.Store.InitServer(i, newReplicate, s.Name, subname)
+			store.Store.SetScriptIndex(s.Name, i)
+			svc, _ := store.Store.GetServerByName(subname)
+			availablePort = svc.MakeServer(s, availablePort)
 			availablePort++
 			if script.Disable {
 				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-				store.mu.Unlock()
 				return
 			}
-			store.servers[subname].Start()
+			svc.Start()
 		}
 	}
-	store.mu.Unlock()
 	// 删除多余的
 	for i := newReplicate; i < oldReplicate; i++ {
+		subname := fmt.Sprintf("%s_%d", s.Name, i)
+		svc, ok := store.Store.GetServerByName(subname)
+		if !ok {
+			golog.Error(pkg.ErrBugMsg)
+			continue
+		}
 		golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
 		atomic.AddInt64(&global.CanReload, 1)
-		go Remove(store.servers[subname.NewSubname(script.Name, i).String()], false)
+		go Remove(svc, false)
 	}
 
 }
 
 // todo:
-func reloadScripts(script *scripts.Script, update bool) {
+func reloadScripts(s *scripts.Script, update bool) {
 	// script: 配置文件新读取出来的
 	// 处理存在的
-
+	script, ok := store.Store.GetScriptByName(s.Name)
 	// 对比启动的副本
-	if _, ok := store.ss[script.Name]; !ok {
+	if !ok {
 		// 如果不存在，说明要新增
-		AddScript(script)
+		AddScript(s)
 		return
 	}
-	oldReplicate := store.ss[script.Name].Replicate
+	oldReplicate := script.Replicate
 	if oldReplicate == 0 {
 		oldReplicate = 1
 	}
-	if script.Replicate == 1 {
-		script.Replicate = 0
+	if s.Replicate == 1 {
+		s.Replicate = 0
 	}
-	newReplicate := script.Replicate
+	newReplicate := s.Replicate
 	if newReplicate == 0 {
 		newReplicate = 1
 	}
 
 	// 对比脚本是否修改
-	store.ss[script.Name] = script
+	script = s
 	if oldReplicate == newReplicate {
 		// 如果一样的名字， 副本数一样的就直接跳过
 		return
@@ -209,29 +196,30 @@ func reloadScripts(script *scripts.Script, update bool) {
 		// 如果大于的话， 那么就删除多余的
 		for i := newReplicate; i < oldReplicate; i++ {
 			atomic.AddInt64(&global.CanReload, 1)
-			golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-			go Remove(store.servers[subname.NewSubname(script.Name, i).String()], update)
+			subname := fmt.Sprintf("%s_%d", s.Name, i)
+			golog.Info("remove " + s.Name + fmt.Sprintf("_%d", i))
+			svc, ok := store.Store.GetServerByName(subname)
+			if !ok {
+				golog.Error(pkg.ErrBugMsg)
+				continue
+			}
+			go Remove(svc, update)
 		}
 	} else {
 		// 小于的话，就增加
-		availablePort := script.Port
+		availablePort := s.Port
 		for i := oldReplicate; i < newReplicate; i++ {
-			subname := fmt.Sprintf("%s_%d", script.Name, i)
-			store.servers[subname] = &server.Server{
-				Index:     i,
-				Replicate: newReplicate,
-				SubName:   subname,
-				Name:      script.Name,
-			}
-			store.serverIndex[script.Name][i] = struct{}{}
-			availablePort = store.servers[subname].MakeServer(script, availablePort)
+			subname := fmt.Sprintf("%s_%d", s.Name, i)
+			store.Store.InitServer(i, newReplicate, s.Name, subname)
+			store.Store.SetScriptIndex(s.Name, i)
+			svc, _ := store.Store.GetServerByName(subname)
+			availablePort = svc.MakeServer(s, availablePort)
 			availablePort++
-			if script.Disable {
+			if s.Disable {
 				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
 				return
 			}
-
-			store.servers[subname].Start()
+			svc.Start()
 		}
 	}
 

@@ -7,6 +7,8 @@ import (
 	"github.com/hyahm/golog"
 )
 
+var ErrBugMsg = "严重错误， 请提交问题到https://github.com/hyahm/scs"
+
 type Response struct {
 	Code int         `json:"code,omitempty"`
 	Msg  string      `json:"msg,omitempty"`
