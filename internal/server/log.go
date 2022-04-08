@@ -84,14 +84,6 @@ func appendErrRead(stdout io.ReadCloser, svc *Server) {
 			break
 		}
 		svc.Logger.Error(line[:len(line)-1])
-		// svc.LogLocker.Lock()
-		// if len(svc.Log) >= global.GetLogCount() {
-		// 	copy(svc.Log, svc.Log[1:])
-		// 	svc.Log[global.GetLogCount()-1] = line
-		// } else {
-		// 	svc.Log = append(svc.Log, line)
-		// }
-		// svc.LogLocker.Unlock()
 	}
 }
 
