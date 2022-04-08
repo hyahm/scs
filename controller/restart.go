@@ -3,10 +3,8 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"sync/atomic"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -17,7 +15,6 @@ import (
 func RestartServer(svc *server.Server) {
 	// 禁用 script 所在的所有server
 	// 先修改值, 因为是restart， 所以端口在svc初始化的时候就固定了
-	atomic.AddInt64(&global.CanReload, 1)
 	go restartServer(svc)
 
 }
@@ -35,7 +32,6 @@ func restartServer(svc *server.Server) {
 	}
 	svc.MakeServer(script, svc.Port)
 	svc.Start()
-	atomic.AddInt64(&global.CanReload, -1)
 }
 
 // 重启第一步
