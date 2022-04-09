@@ -79,15 +79,11 @@ func RestartAllServerFromScripts(names map[string]struct{}) {
 }
 
 // 返回成功还是失败
-func UpdateAndRestartScript(s *scripts.Script) bool {
-	_, ok := store.Store.GetScriptByName(s.Name)
-	if !ok {
-		return false
-	}
-	return updateAndRestartScript(s)
+func UpdateAndRestartScript(s *scripts.Script) {
+	updateAndRestartScript(s)
 }
 
-func updateAndRestartScript(s *scripts.Script) bool {
+func updateAndRestartScript(s *scripts.Script) {
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
@@ -99,7 +95,6 @@ func updateAndRestartScript(s *scripts.Script) bool {
 			go svc.UpdateAndRestart()
 		}
 	}
-	return true
 }
 
 func UpdateAllServer() {

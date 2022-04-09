@@ -29,8 +29,7 @@ func (svc *Server) wait() {
 				// 主动退出, kill
 			case 10:
 				// 重启 restart 感觉应该在外部重新makeserver
-				svc.stopStatus()
-				svc.StopSignal <- true
+				svc.start()
 				return
 			case 11:
 				// 停止信号 stop

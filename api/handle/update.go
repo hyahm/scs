@@ -19,7 +19,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	svc, ok := store.Store.GetServerByName(name)
-	svc.UpdateAndRestart()
+	if ok {
+		go svc.UpdateAndRestart()
+	}
 
 	w.Write(pkg.Waiting("update"))
 }

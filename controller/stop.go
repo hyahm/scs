@@ -24,10 +24,7 @@ func StopScript(s *scripts.Script) error {
 		svc, ok := store.Store.GetServerByName(subname)
 		if ok {
 			go svc.Stop()
-		} else {
-
 		}
-
 	}
 	return nil
 }
