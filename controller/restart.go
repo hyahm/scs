@@ -8,7 +8,6 @@ import (
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg/config/scripts"
-	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
 // 没有锁，只是为了外部访问
@@ -52,16 +51,6 @@ func RestartScript(s *scripts.Script) error {
 
 		}
 	}
-	// for i := range store.serverIndex[s.Name] {
-	// 	subname := fmt.Sprintf("%s_%d", s.Name, i)
-	// 	if _, ok := store.servers[subname]; ok {
-	// 		// 这里主要是发送restart信号
-	// 		// 只是停止 + 发送restart信号
-	// 		RestartServer(store.servers[subname], s)
-	// 		// 等待停止信号，我们就要重新makeserver
-
-	// 	}
-	// }
 	return nil
 }
 
@@ -85,48 +74,6 @@ func RestartAllServerFromScripts(names map[string]struct{}) {
 			if _, ok := store.ss[svc.Name]; ok {
 				RestartServer(svc, store.ss[svc.Name])
 			}
-		}
-
-	}
-}
-
-// 返回成功还是失败
-func UpdateAndRestartScript(s *scripts.Script) bool {
-	store.mu.RLock()
-	_, ok := store.ss[s.Name]
-	store.mu.RUnlock()
-	if !ok {
-		return false
-	}
-	return updateAndRestartScript(s)
-}
-
-func updateAndRestartScript(s *scripts.Script) bool {
-	replicate := s.Replicate
-	if replicate == 0 {
-		replicate = 1
-	}
-	for i := 0; i < replicate; i++ {
-		subname := subname.NewSubname(s.Name, i)
-		go store.servers[subname.String()].UpdateAndRestart()
-	}
-	return true
-}
-
-func UpdateAllServer() {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	for _, s := range store.ss {
-		go updateAndRestartScript(s)
-	}
-}
-
-func UpdateAllServerFromScript(names map[string]struct{}) {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	for _, s := range store.ss {
-		if _, ok := names[s.Name]; ok {
-			go updateAndRestartScript(s)
 		}
 
 	}

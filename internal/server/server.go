@@ -296,7 +296,7 @@ func (svc *Server) Stop() {
 }
 
 // 同步更新并重启
-func (svc *Server) UpdateAndRestart() {
+func (svc *Server) UpdateServer() {
 	updateCommand := "git pull"
 	if svc.Update != "" {
 		updateCommand = svc.Update
@@ -305,7 +305,8 @@ func (svc *Server) UpdateAndRestart() {
 		golog.Error(err)
 		return
 	}
-	svc.Restart()
+
+	// svc.Restart()
 }
 
 // Stop  杀掉服务, 没有产生goroutine， 直接杀死

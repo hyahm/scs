@@ -8,6 +8,7 @@ import (
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config/scripts/subname"
 )
 
 // 更新的操作
@@ -102,3 +103,61 @@ func EnableScript(script *scripts.Script) bool {
 // 	store.servers[subname].Start()
 // 	return availablePort
 // }
+
+func UpdateAndRestart(svc *server.Server) {
+	svc.UpdateServer()
+	store.mu.RLock()
+	store.mu.RUnlock()
+	defer store.mu.RUnlock()
+	_, ok := store.ss[svc.Name]
+	if !ok {
+		return
+	}
+	updateAndRestartScript(store.ss[svc.Name])
+}
+
+// 返回成功还是失败
+func UpdateAndRestartScript(s *scripts.Script) {
+	store.mu.RLock()
+
+	defer store.mu.RUnlock()
+	_, ok := store.ss[s.Name]
+	if !ok {
+		return
+	}
+	updateAndRestartScript(s)
+}
+
+func updateAndRestartScript(s *scripts.Script) {
+	replicate := s.Replicate
+	if replicate == 0 {
+		replicate = 1
+	}
+	go func() {
+		for i := 0; i < replicate; i++ {
+			subname := subname.NewSubname(s.Name, i)
+			store.servers[subname.String()].UpdateServer()
+		}
+		RestartScript(s)
+	}()
+
+}
+
+func UpdateAllServer() {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for _, s := range store.ss {
+		updateAndRestartScript(s)
+	}
+}
+
+func UpdateAllServerFromScript(names map[string]struct{}) {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	for _, s := range store.ss {
+		if _, ok := names[s.Name]; ok {
+			go updateAndRestartScript(s)
+		}
+
+	}
+}

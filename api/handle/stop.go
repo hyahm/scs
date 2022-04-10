@@ -44,11 +44,11 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 }
 
 func StopAll(w http.ResponseWriter, r *http.Request) {
-	scriptname := xmux.GetInstance(r).Get("scriptname").(map[string]struct{})
+	scriptname := xmux.GetInstance(r).Get("scriptname")
 	if scriptname == nil {
 		controller.StopAllServer()
 	} else {
-		controller.StopScriptFromName(scriptname)
+		controller.StopScriptFromName(scriptname.(map[string]struct{}))
 	}
 
 	w.Write(pkg.Waiting("stop"))

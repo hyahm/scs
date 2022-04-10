@@ -28,7 +28,7 @@ func simpleHandle() *xmux.GroupRoute {
 
 func scriptHandle() *xmux.GroupRoute {
 	script := xmux.NewGroupRoute().AddPageKeys(scripts.ScriptRole.ToString())
-	script.DelModule(module.CheckAdminToken).AddModule()
+	script.DelModule(module.CheckAdminToken).AddModule(module.CheckAllScriptToken)
 	script.Post("/stop/{pname}/{name}", handle.Stop)
 	script.Post("/stop/{pname}", handle.StopPname)
 	script.Post("/kill/{pname}", handle.KillPname)

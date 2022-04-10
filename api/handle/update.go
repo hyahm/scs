@@ -19,7 +19,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		w.Write(pkg.NotFoundScript())
 		return
 	}
-	svc.UpdateAndRestart()
+	go controller.UpdateAndRestart(svc)
 
 	w.Write(pkg.Waiting("update"))
 }
