@@ -6,6 +6,8 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/internal/store"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
@@ -159,8 +161,12 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 			return false
 		}
 		if pname == "" && name != "" {
-			lookToken := controller.GetLookToken(name)
-			if lookToken != "" && token == lookToken {
+			svc, ok := store.Store.GetServerByName(name)
+			if !ok {
+				w.Write(pkg.NotFoundScript())
+				return true
+			}
+			if svc.Token != "" && token == svc.Token {
 				xmux.GetInstance(r).Set("role", "scripts")
 				xmux.GetInstance(r).Set("token", "")
 				return false
@@ -168,8 +174,12 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		}
 
 		if pname != "" {
-			lookToken := controller.GetPnameToken(pname)
-			if lookToken != "" && token == lookToken {
+			script, ok := store.Store.GetScriptByName(pname)
+			if !ok {
+				w.Write(pkg.NotFoundScript())
+				return true
+			}
+			if script.Token != "" && token == script.Token {
 				xmux.GetInstance(r).Set("role", "scripts")
 				xmux.GetInstance(r).Set("token", "")
 				return false

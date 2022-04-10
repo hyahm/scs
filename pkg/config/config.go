@@ -22,6 +22,7 @@ type Config struct {
 	Key         string         `yaml:"key,omitempty"`
 	Pem         string         `yaml:"pem,omitempty"`
 	DisableTls  bool           `yaml:"disableTls,omitempty"`
+	Packet      bool           `yaml:"packet,omitempty"`
 	Log         *logger.Logger `yaml:"log,omitempty"`
 	IgnoreToken []string       `yaml:"ignoreToken,omitempty"`
 	// Repo        *Repo          `yaml:"repo,omitempty"`

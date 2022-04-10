@@ -5,8 +5,8 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/scripts/subname"
 
 	"github.com/hyahm/xmux"
 )
@@ -18,12 +18,17 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
-	svc, script, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
+	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
 		w.Write(pkg.NotFoundScript())
 		return
 	}
-	go controller.RestartServer(svc, script)
+	svc, ok := store.Store.GetServerByName(name)
+	if !ok {
+		w.Write(pkg.NotFoundScript())
+		return
+	}
+	go controller.RestartServer(svc)
 	w.Write(pkg.Waiting("restart"))
 }
 
@@ -34,12 +39,12 @@ func RestartPname(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// for _, pname := range strings.Split(names, ",") {
-	s, ok := controller.GetScriptByPname(pname)
+	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
 		w.Write(pkg.NotFoundScript())
 		return
 	}
-	controller.RestartScript(s)
+	controller.RestartScript(script)
 	// }
 	w.Write(pkg.Waiting("restart"))
 }

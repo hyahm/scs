@@ -1,9 +1,9 @@
 package controller
 
+import "github.com/hyahm/scs/internal/store"
+
 func WaitKillAllServer() {
-	store.mu.Lock()
-	defer store.mu.Unlock()
-	for _, svc := range store.servers {
+	for _, svc := range store.Store.GetAllServer() {
 		svc.Kill()
 	}
 }

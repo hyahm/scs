@@ -4,15 +4,21 @@ import (
 	"fmt"
 
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/internal/store"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 )
 
 // 启动存在的脚本
 func StartExsitScript(name string) {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-	for index := range store.serverIndex[name] {
-		store.servers[fmt.Sprintf("%s_%d", name, index)].Start()
+	for index := range store.Store.GetScriptIndex(name) {
+		subname := fmt.Sprintf("%s_%d", name, index)
+		svc, ok := store.Store.GetServerByName(subname)
+		if ok {
+			svc.Start()
+			continue
+		}
+		golog.Error(pkg.ErrBugMsg)
 	}
 }
 

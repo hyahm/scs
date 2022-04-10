@@ -20,6 +20,7 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
+	github.com/google/gopacket v1.1.19 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hyahm/lru v0.0.4 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect

@@ -52,6 +52,8 @@ var brokenMountPoint string
 var brokenStat *disk.UsageStat
 
 func (d *Disk) Check() {
+	d.AdLocker.Lock()
+	defer d.AdLocker.Unlock()
 	// 检测硬盘问题
 	for _, part := range d.Dp {
 		di, err := disk.Usage(part.Mountpoint)
@@ -63,9 +65,7 @@ func (d *Disk) Check() {
 		if currPercent >= d.Percent {
 			d.AI.AM.DiskPath = part.Mountpoint
 			brokenStat = di
-			d.AdLocker.Lock()
 			d.AlertDp[part.Mountpoint] = struct{}{}
-			d.AdLocker.Unlock()
 			d.AI.AM.Use = di.Used / 1024 / 1024 / 1024
 			d.AI.AM.Total = di.Total / 1024 / 1024 / 1024
 			d.AI.AM.UsePercent = float64(di.Used / di.Total)
@@ -76,8 +76,7 @@ func (d *Disk) Check() {
 		d.AI.AM.Use = di.Used / 1024 / 1024 / 1024
 
 	}
-	d.AdLocker.Lock()
-	defer d.AdLocker.Unlock()
+
 	if _, ok := d.AlertDp[brokenMountPoint]; ok {
 		d.AI.AM.DiskPath = brokenMountPoint
 		d.AlertDp[brokenMountPoint] = struct{}{}

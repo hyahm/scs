@@ -16,7 +16,10 @@ func (svc *Server) Start() {
 	switch svc.Status.Status {
 	case status.STOP:
 		// 开始启动的时候，需要将遍历变量值的模板渲染
-		go svc.asyncStart()
+		if !svc.Disable {
+			go svc.asyncStart()
+		}
+
 	}
 }
 

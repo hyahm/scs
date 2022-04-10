@@ -6,8 +6,8 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/scripts/subname"
 
 	"github.com/hyahm/xmux"
 )
@@ -21,7 +21,12 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		w.Write(pkg.WaitingConfigChanged())
 		return
 	}
-	svc, _, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
+	_, ok := store.Store.GetScriptByName(pname)
+	if !ok {
+		w.Write(pkg.NotFoundScript())
+		return
+	}
+	svc, ok := store.Store.GetServerByName(name)
 	if !ok {
 		w.Write(pkg.NotFoundScript())
 		return
@@ -37,13 +42,13 @@ func RemovePname(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pname := xmux.Var(r)["pname"]
-	s, ok := controller.GetScriptByPname(pname)
+	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
 		w.Write(pkg.NotFoundScript())
 		return
 	}
 
-	controller.RemoveScript(s.Name)
+	controller.RemoveScript(pname)
 	w.Write(pkg.Waiting("stop"))
 }
 

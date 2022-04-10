@@ -2,11 +2,10 @@ package handle
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/hyahm/scs/controller"
+	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/scripts/subname"
 
 	"github.com/hyahm/xmux"
 )
@@ -16,7 +15,12 @@ import (
 func Start(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	svc, _, ok := controller.GetServerByNameAndSubname(pname, subname.Subname(name))
+	_, ok := store.Store.GetScriptByName(pname)
+	if !ok {
+		w.Write(pkg.NotFoundScript())
+		return
+	}
+	svc, ok := store.Store.GetServerByName(name)
 	if !ok {
 		w.Write(pkg.NotFoundScript())
 		return
@@ -28,15 +32,13 @@ func Start(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartPname(w http.ResponseWriter, r *http.Request) {
-	names := xmux.Var(r)["pname"]
-	for _, pname := range strings.Split(names, ",") {
-		_, ok := controller.GetScriptByPname(pname)
-		if !ok {
-			w.Write(pkg.NotFoundScript())
-			return
-		}
-		controller.StartExsitScript(pname)
+	pname := xmux.Var(r)["pname"]
+	_, ok := store.Store.GetScriptByName(pname)
+	if !ok {
+		w.Write(pkg.NotFoundScript())
+		return
 	}
+	controller.StartExsitScript(pname)
 	w.Write(pkg.Waiting("start"))
 }
 
