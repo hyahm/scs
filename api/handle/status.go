@@ -11,7 +11,6 @@ import (
 func Status(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-
 	w.Write(controller.ScriptName(pname, name))
 }
 

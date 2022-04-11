@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert"
@@ -12,25 +13,26 @@ import (
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged())
+		module.Write(w, r, pkg.WaitingConfigChanged())
+
 		return
 	}
 	res := pkg.Response{}
 	ra := &alert.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
-		w.Write(res.ErrorE(err))
+		module.Write(w, r, res.ErrorE(err))
 		return
 	}
 	ra.SendAlert()
-	w.Write(res.Sucess("send alert message"))
+	module.Write(w, r, res.Sucess("send alert message"))
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
 	res := pkg.Response{
 		Data: alert.GetDispatcher(),
 	}
-	w.Write(res.Sucess(""))
+	module.Write(w, r, res.Sucess(""))
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +52,7 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !needToken {
-		w.Write([]byte(`{"code": 200, "msg": "ok"}`))
+		module.Write(w, r, []byte(`{"code": 200, "msg": "ok"}`))
 		// w.WriteHeader(http.StatusOK)
 		return
 	}
@@ -62,11 +64,11 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !needToken {
-		w.Write([]byte(`{"code": 200, "msg": "ok"}`))
+		module.Write(w, r, []byte(`{"code": 200, "msg": "ok"}`))
 		// w.WriteHeader(http.StatusOK)
 		return
 	}
-	w.Write([]byte(`{"code": 500, "msg": "StatusNetworkAuthenticationRequired"}`))
+	module.Write(w, r, []byte(`{"code": 500, "msg": "StatusNetworkAuthenticationRequired"}`))
 	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 }
 

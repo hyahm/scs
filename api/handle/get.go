@@ -3,6 +3,7 @@ package handle
 import (
 	"net/http"
 
+	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -13,7 +14,7 @@ func GetAlarms(w http.ResponseWriter, r *http.Request) {
 	res := &pkg.Response{
 		Data: controller.GetAterts(),
 	}
-	w.Write(res.Sucess(""))
+	module.Write(w, r, res.Sucess(""))
 }
 
 func GetServers(w http.ResponseWriter, r *http.Request) {
@@ -24,8 +25,7 @@ func GetServers(w http.ResponseWriter, r *http.Request) {
 	} else {
 		res.Data = controller.GetServersFromScripts(namesInterface.(map[string]struct{}))
 	}
-
-	w.Write(res.Sucess(""))
+	module.Write(w, r, res.Sucess(""))
 }
 
 func GetScripts(w http.ResponseWriter, r *http.Request) {
@@ -36,13 +36,12 @@ func GetScripts(w http.ResponseWriter, r *http.Request) {
 	} else {
 		res.Data = store.Store.GetScriptMapFilterByName(names.(map[string]struct{}))
 	}
-
-	w.Write(res.Sucess(""))
+	module.Write(w, r, res.Sucess(""))
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["name"]
 	res := &pkg.Response{}
 	res.Data = store.Store.GetScriptIndex(pname)
-	w.Write(res.Sucess(""))
+	module.Write(w, r, res.Sucess(""))
 }

@@ -33,13 +33,13 @@ func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
 	token := r.Header.Get("Token")
 
 	if token == global.GetToken() {
-		// w.Write([]byte(`{"code": 203, "msg": "token error"}`))
+		// Write(w,r,([]byte(`{"code": 203, "msg": "token error"}`))
 		xmux.GetInstance(r).Set("token", token)
 		xmux.GetInstance(r).Set("role", "admin")
 		return false
 	}
-
-	w.Write([]byte(`{"code": 203, "msg": "token error or no permission"}`))
+	xmux.GetInstance(r).Set(xmux.STATUSCODE, 203)
+	Write(w, r, []byte(`{"code": 203, "msg": "token error or no permission"}`))
 	return true
 }
 
@@ -50,7 +50,6 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	token := r.Header.Get("Token")
-
 	// 接口权限
 	roles := xmux.GetInstance(r).Get(xmux.PAGES).(map[string]struct{})
 	// 主要是2种， 一种是 script  一种是 simple
@@ -60,11 +59,9 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 		// 说明是有这些脚本权限的
 		pname := xmux.Var(r)["pname"]
 		name := xmux.Var(r)["name"]
-
 		// 如果都是空
 		if pname == "" && name == "" {
 			scriptname := make(map[string]struct{})
-
 			for _, auth := range auths {
 				if _, ok := roles[auth.Role]; ok {
 					//
@@ -81,42 +78,45 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 
 		if pname != "" && name == "" {
 			// 如果只根据pname来操作的话
-			role, ok := controller.HavePname(auths, pname)
+			ok := controller.HavePname(auths, pname, token)
 			if ok {
-				if _, ok := roles[role]; ok {
-					//
-					return false
-				}
+				return false
 			}
 
 		}
 
 		if pname != "" && name != "" {
-			if pname != name[:len(pname)] {
-				w.Write([]byte(`{"code": 404, "msg": "pname and name not match"}`))
+			_, ok := store.Store.GetScriptByName(pname)
+			_, sok := store.Store.GetServerByName(name)
+			if !ok || !sok {
+				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+				Write(w, r, ([]byte(`{"code": 404, "msg": "pname and name not match"}`)))
 				return true
 			}
 			// 如果只根据pname来操作的话, 2种都有
-			role, ok := controller.HavePname(auths, pname)
+			ok = controller.HavePname(auths, pname, token)
 			if ok {
-				if _, ok := roles[role]; ok {
-					return false
-				}
+				return false
 			}
 		}
 
 		if pname == "" && name != "" {
 			// 只有name的接口
-			role, ok := controller.HaveName(auths, pname)
+			svc, ok := store.Store.GetServerByName(name)
+			if !ok {
+				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+				Write(w, r, ([]byte(`{"code": 404, "msg": "pname and name not match"}`)))
+				return true
+			}
+			ok = controller.HavePname(auths, svc.Name, token)
 			if ok {
-				if _, ok := roles[role]; ok {
-					return false
-				}
+				return false
 			}
 		}
 
 	}
-	w.Write([]byte(`{"code": 203, "msg": "token error or no permission"}`))
+	xmux.GetInstance(r).Set(xmux.STATUSCODE, 203)
+	Write(w, r, []byte(`{"code": 203, "msg": "token error or no permission"}`))
 	return true
 }
 
@@ -145,7 +145,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 	token := r.Header.Get("Token")
 
 	if token == global.GetToken() {
-		// w.Write([]byte(`{"code": 203, "msg": "token error"}`))
+		// Write(w,r,([]byte(`{"code": 203, "msg": "token error"}`))
 		xmux.GetInstance(r).Set("token", token)
 		xmux.GetInstance(r).Set("role", "admin")
 		return false
@@ -163,7 +163,8 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		if pname == "" && name != "" {
 			svc, ok := store.Store.GetServerByName(name)
 			if !ok {
-				w.Write(pkg.NotFoundScript())
+				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+				Write(w, r, (pkg.NotFoundScript()))
 				return true
 			}
 			if svc.Token != "" && token == svc.Token {
@@ -176,7 +177,8 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		if pname != "" {
 			script, ok := store.Store.GetScriptByName(pname)
 			if !ok {
-				w.Write(pkg.NotFoundScript())
+				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+				Write(w, r, (pkg.NotFoundScript()))
 				return true
 			}
 			if script.Token != "" && token == script.Token {
@@ -187,6 +189,6 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		}
 
 	}
-	w.Write([]byte(`{"code": 203, "msg": "token error"}`))
+	Write(w, r, ([]byte(`{"code": 203, "msg": "token error"}`)))
 	return true
 }

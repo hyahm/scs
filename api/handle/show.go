@@ -3,10 +3,10 @@ package handle
 // func ShowConfig(w http.ResponseWriter, r *http.Request) {
 // 	// 关闭上次监控的goroutine
 // 	if reloadKey {
-// 		w.Write([]byte("config file is reloading, waiting completed first"))
+// 		Write(w, r,[]byte("config file is reloading, waiting completed first"))
 // 		return
 // 	} else {
-// 		w.Write([]byte("waiting config file reloaded"))
+// 		Write(w, r,[]byte("waiting config file reloaded"))
 // 	}
 // 	hardware.VarAT.Exit <- true
 
@@ -16,7 +16,7 @@ package handle
 // 	// 拷贝一份到当前的脚本
 // 	script.Copy()
 // 	if err := config.Load(); err != nil {
-// 		w.Write([]byte(err.Error()))
+// 		Write(w, r,[]byte(err.Error()))
 // 		reloadKey = false
 // 		return
 // 	}
@@ -27,7 +27,7 @@ package handle
 // 	// 拷贝一份到当前的脚本
 // 	script.Copy()
 // 	if err := config.Load(); err != nil {
-// 		w.Write([]byte(err.Error()))
+// 		Write(w, r,[]byte(err.Error()))
 // 		reloadKey = false
 // 		return
 // 	}

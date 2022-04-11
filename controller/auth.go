@@ -1,6 +1,8 @@
 package controller
 
-import "github.com/hyahm/scs/internal/store"
+import (
+	"github.com/hyahm/scs/internal/store"
+)
 
 type Auth struct {
 	ScriptName string
@@ -21,24 +23,33 @@ func GetAuthScriptName(token string) []Auth {
 	return auths
 }
 
-func HavePname(auths []Auth, pname string) (string, bool) {
-	for _, auth := range auths {
-		if auth.ScriptName == pname {
-			return auth.Role, true
+func HavePname(auths []Auth, pname, token string) bool {
+	script, ok := store.Store.GetScriptByName(pname)
+	if ok && script.Token == token {
+		for _, auth := range auths {
+			if auth.Role == script.Role.ToString() {
+				return true
+			}
+
 		}
 	}
-	return "", false
+	return false
 }
 
-func HaveName(auths []Auth, name string) (string, bool) {
+func HaveName(auths []Auth, name, token string) bool {
 	svc, ok := store.Store.GetServerByName(name)
 	if ok {
-		for _, auth := range auths {
-			if auth.ScriptName == svc.Name {
-				return auth.Role, true
+		script, ok := store.Store.GetScriptByName(svc.Name)
+		if ok && script.Token == token {
+			for _, auth := range auths {
+				if auth.Role == script.Role.ToString() {
+					return true
+				}
+
 			}
 		}
+
 	}
 
-	return "", false
+	return false
 }

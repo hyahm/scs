@@ -28,7 +28,7 @@ func simpleHandle() *xmux.GroupRoute {
 
 func scriptHandle() *xmux.GroupRoute {
 	script := xmux.NewGroupRoute().AddPageKeys(scripts.ScriptRole.ToString())
-	script.DelModule(module.CheckAdminToken).AddModule(module.CheckAllScriptToken)
+	script.AddModule(module.CheckAllScriptToken)
 	script.Post("/stop/{pname}/{name}", handle.Stop)
 	script.Post("/stop/{pname}", handle.StopPname)
 	script.Post("/kill/{pname}", handle.KillPname)
@@ -62,6 +62,5 @@ func AdminHandle() *xmux.GroupRoute {
 	admin.Post("/enable/{pname}", handle.Enable)   // 只能管理员用
 	admin.Post("/disable/{pname}", handle.Disable) // 只能管理员用
 
-	admin.AddGroup(scriptHandle())
 	return admin
 }

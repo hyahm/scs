@@ -21,7 +21,7 @@ var showversion bool
 
 func main() {
 	defer golog.Sync()
-	golog.Level = golog.DEBUG
+	// golog.Level = golog.DEBUG
 	// 异步获取ip，防止阻塞
 	go message.GetIp()
 	// 设置limit值

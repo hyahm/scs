@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -16,33 +17,33 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		w.Write(pkg.NotFoundScript())
+		module.Write(w, r, pkg.NotFoundScript())
 		return
 	}
 	svc, ok := store.Store.GetServerByName(name)
 
 	if !ok {
-		w.Write(pkg.NotFoundScript())
+		module.Write(w, r, pkg.NotFoundScript())
 		return
 	}
 	go svc.Stop()
-	w.Write(pkg.Waiting("stop"))
+	module.Write(w, r, pkg.Waiting("stop"))
 }
 
 func StopPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		w.Write(pkg.NotFoundScript())
+		module.Write(w, r, pkg.NotFoundScript())
 		return
 	}
 	err := controller.StopScript(script)
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+		module.Write(w, r, []byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
 		return
 	}
 
-	w.Write(pkg.Waiting("stop"))
+	module.Write(w, r, pkg.Waiting("stop"))
 }
 
 func StopAll(w http.ResponseWriter, r *http.Request) {
@@ -53,5 +54,5 @@ func StopAll(w http.ResponseWriter, r *http.Request) {
 		controller.StopScriptFromName(scriptname.(map[string]struct{}))
 	}
 
-	w.Write(pkg.Waiting("stop"))
+	module.Write(w, r, pkg.Waiting("stop"))
 }

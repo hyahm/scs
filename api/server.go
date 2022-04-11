@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/hyahm/scs/api/handle"
@@ -16,18 +15,6 @@ import (
 	"github.com/hyahm/xmux"
 )
 
-func enter(w http.ResponseWriter, r *http.Request) bool {
-	var addr string
-	if global.ProxyHeader == "" {
-		addr = strings.Split(r.RemoteAddr, ":")[0]
-	} else {
-		addr = r.Header.Get(global.ProxyHeader)
-	}
-
-	golog.Infof("url: %s -- addr: %s -- method: %s", r.URL.Path, addr, r.Method)
-	return false
-}
-
 // var dir := "key"
 func HttpServer() {
 	router := xmux.NewRouter()
@@ -36,14 +23,11 @@ func HttpServer() {
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
 
 	router.Post("/probe", handle.Probe)
-	// 增加请求时间
-	router.Enter = enter
-	// router.MiddleWare(GetExecTime)
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
 	router.AddGroup(AdminHandle())
-	router.DebugAssignRoute("/stop")
+	router.AddGroup(scriptHandle())
 	if global.GetDisableTls() {
 		golog.Info("listen on " + global.GetListen() + " over http")
 		golog.Fatal(router.Run(global.GetListen()))
