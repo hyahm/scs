@@ -1,10 +1,9 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/hyahm/scs/api/module"
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -31,6 +30,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 
 func StopPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
+	golog.Info("111")
 	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
@@ -38,7 +38,8 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 	}
 	err := controller.StopScript(script)
 	if err != nil {
-		module.Write(w, r, []byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
+		xmux.GetInstance(r).Response.(*pkg.Response).Msg = err.Error()
 		return
 	}
 }

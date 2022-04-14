@@ -17,10 +17,8 @@ github.com/hyahm/golog v0.0.0-20220331081316-c10def14fc7d h1:XSBxGxOyAzVrgrx7KEr
 github.com/hyahm/golog v0.0.0-20220331081316-c10def14fc7d/go.mod h1:p74BZcpYUzHMCVtTNMUz5g3iDcZj5kLKSP9vaQmcCM0=
 github.com/hyahm/lru v0.0.4 h1:v+eveZMh7T+p3N7WR32SkCyUpDOrcRRUcIjF5QzKUdE=
 github.com/hyahm/lru v0.0.4/go.mod h1:5yn4QdRKlGbtinzn6/GVLxh7SkXWCF6NlTqzMOZwvdw=
-github.com/hyahm/xmux v0.0.0-20220411020540-6f4d1ea5fc62 h1:ZgY1rCRT/lVA7yo6Ht8Gq67q8KQC6QMDgzdiDD0Hukc=
-github.com/hyahm/xmux v0.0.0-20220411020540-6f4d1ea5fc62/go.mod h1:dwYh5Q6MuzR5G0ivCvIqwnkk4h5Ojd6gdWGrA70+/lY=
-github.com/hyahm/xmux v0.0.0-20220414075657-9a90eac069ee h1:/4YtRSuzziLzAqH5TpBjQPAMmfVnXS2OD6GqKe4q/bg=
-github.com/hyahm/xmux v0.0.0-20220414075657-9a90eac069ee/go.mod h1:Mq3kH3a3RvLBOqhf9nRzCxN2tzpjcsRJNoTBXLNogdY=
+github.com/hyahm/xmux v0.0.0-20220414103542-b286e3c17d2e h1:AOtsSKJ9vswrli2iVe+Fee0xl9IZ434SFUsiqEsXVvo=
+github.com/hyahm/xmux v0.0.0-20220414103542-b286e3c17d2e/go.mod h1:Mq3kH3a3RvLBOqhf9nRzCxN2tzpjcsRJNoTBXLNogdY=
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
@@ -67,8 +65,6 @@ golang.org/x/lint v0.0.0-20200302205851-738671d3881b/go.mod h1:3xt1FjdF8hUf6vQPI
 golang.org/x/mod v0.1.1-0.20191105210325-c90efee705ee/go.mod h1:QqPTAvyqsEbceGzBzNggFXnrqF1CaUcvgkdR5Ot7KZg=
 golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
 golang.org/x/net v0.0.0-20190620200207-3b0461eec859/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
-golang.org/x/net v0.0.0-20220407224826-aac1ed45d8e3 h1:EN5+DfgmRMvRUrMGERW2gQl3Vc+Z7ZMnI/xdEpPSf0c=
-golang.org/x/net v0.0.0-20220407224826-aac1ed45d8e3/go.mod h1:CfG3xpIq0wQ8r1q4Su4UZFWDARRcnwPjda9FqA0JpMk=
 golang.org/x/net v0.0.0-20220412020605-290c469a71a5 h1:bRb386wvrE+oBNdF1d/Xh9mQrfQ4ecYhW5qJ5GvTGT4=
 golang.org/x/net v0.0.0-20220412020605-290c469a71a5/go.mod h1:CfG3xpIq0wQ8r1q4Su4UZFWDARRcnwPjda9FqA0JpMk=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=

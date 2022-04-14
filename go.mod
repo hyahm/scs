@@ -6,7 +6,7 @@ require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/google/gopacket v1.1.19
 	github.com/hyahm/golog v0.0.0-20220331081316-c10def14fc7d
-	github.com/hyahm/xmux v0.0.0-20220414075657-9a90eac069ee
+	github.com/hyahm/xmux v0.0.0-20220414103542-b286e3c17d2e
 	github.com/sacOO7/gowebsocket v0.0.0-20210515122958-9396f1a71e23
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/cobra v1.4.0
