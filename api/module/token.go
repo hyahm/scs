@@ -45,10 +45,6 @@ func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
 
 func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 	// 验证所有scripts的权限
-	if !CheckAdminToken(w, r) {
-		// 如果是管理员， 那么直接通过
-		return false
-	}
 	token := r.Header.Get("Token")
 	// 接口权限
 	roles := xmux.GetInstance(r).Get(xmux.PAGES).(map[string]struct{})
@@ -116,7 +112,7 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 
 	}
 	xmux.GetInstance(r).Set(xmux.STATUSCODE, 203)
-	Write(w, r, []byte(`{"code": 203, "msg": "token error or no permission"}`))
+	// Write(w, r, []byte(`{"code": 203, "msg": "token error or no permission"}`))
 	return true
 }
 

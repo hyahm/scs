@@ -27,7 +27,8 @@ func HttpServer() {
 		w.Write([]byte("ok"))
 	})
 	router.AddGroup(AdminHandle())
-	router.AddGroup(scriptHandle())
+
+	router.DebugAssignRoute("/status")
 	if global.GetDisableTls() {
 		golog.Info("listen on " + global.GetListen() + " over http")
 		golog.Fatal(router.Run(global.GetListen()))

@@ -61,6 +61,6 @@ func AdminHandle() *xmux.GroupRoute {
 
 	admin.Post("/enable/{pname}", handle.Enable)   // 只能管理员用
 	admin.Post("/disable/{pname}", handle.Disable) // 只能管理员用
-
+	admin.AddGroup(scriptHandle())
 	return admin
 }
