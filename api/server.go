@@ -55,7 +55,7 @@ func HttpServer() {
 		}
 	}
 	golog.Info("listen on " + global.GetListen() + " over http")
-	if err := svc.ListenAndServeTLS(global.GetPem(), global.GetKey()); err != nil {
+	if err := svc.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

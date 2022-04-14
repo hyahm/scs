@@ -2,6 +2,7 @@ package handle
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -68,7 +69,7 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 		// w.WriteHeader(http.StatusOK)
 		return
 	}
-	module.Write(w, r, []byte(`{"code": 500, "msg": "StatusNetworkAuthenticationRequired"}`))
+	module.Write(w, r, []byte(fmt.Sprintf(`{"code": 500, "msg": "StatusNetworkAuthenticationRequired"}, "ips": "%s"`, addr)))
 	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 }
 
