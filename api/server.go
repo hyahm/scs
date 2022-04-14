@@ -10,6 +10,7 @@ import (
 	"github.com/hyahm/scs/api/handle"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/pkg"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
@@ -17,7 +18,10 @@ import (
 
 // var dir := "key"
 func HttpServer() {
-	router := xmux.NewRouter()
+	response := &pkg.Response{
+		Code: 200,
+	}
+	router := xmux.NewRouter().BindResponse(response)
 	router.SetHeader("Access-Control-Allow-Origin", "*")
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")

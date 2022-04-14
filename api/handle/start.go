@@ -3,7 +3,6 @@ package handle
 import (
 	"net/http"
 
-	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -18,17 +17,15 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		module.Write(w, r, pkg.NotFoundScript())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	svc, ok := store.Store.GetServerByName(name)
 	if !ok {
-		module.Write(w, r, pkg.NotFoundScript())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	svc.Start()
-
-	module.Write(w, r, pkg.Waiting("start"))
 
 }
 
@@ -36,11 +33,10 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		module.Write(w, r, pkg.NotFoundScript())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	controller.StartExsitScript(pname)
-	module.Write(w, r, pkg.Waiting("start"))
 }
 
 func StartAll(w http.ResponseWriter, r *http.Request) {
@@ -51,5 +47,4 @@ func StartAll(w http.ResponseWriter, r *http.Request) {
 		controller.StartAllServerFromScript(names.(map[string]struct{}))
 	}
 
-	module.Write(w, r, pkg.Waiting("start"))
 }

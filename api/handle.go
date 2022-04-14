@@ -18,7 +18,7 @@ func simpleHandle() *xmux.GroupRoute {
 	simple.Post("/update/{pname}", handle.UpdatePname)
 	simple.Post("/start", handle.StartAll)   // complete
 	simple.Post("/status", handle.AllStatus) // complete
-	simple.Get("/log/{name}/{int:line}", handle.Log)
+	simple.Get("/log/{name}/{int:line}", handle.Log).BindResponse(nil)
 	simple.Post("/update", handle.UpdateAll) // complete
 	simple.Post("/restart/{pname}/{name}", handle.Restart)
 	simple.Post("/restart/{pname}", handle.RestartPname)

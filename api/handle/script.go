@@ -17,7 +17,7 @@ import (
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetInstance(r).Data.(*scripts.Script)
 	if global.CanReload != 0 {
-		module.Write(w, r, pkg.WaitingConfigChanged())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
 	res := pkg.Response{}
@@ -31,7 +31,8 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		// 需要判断是否相等
 		if !controller.NeedStop(s) {
 			// 如果没有修改，那么就返回已经add了
-			module.Write(w, r, res.Sucess("already have script and the same"))
+			xmux.GetInstance(r).Response.(*pkg.Response).Code = 202
+			xmux.GetInstance(r).Response.(*pkg.Response).Msg = "already have script and the same"
 			return
 		}
 		// 更新配置文件
@@ -55,6 +56,5 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		controller.AddScript(s)
 
 	}
-	res.Data = s.Token
-	module.Write(w, r, res.Sucess("already add script"))
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = s.Token
 }

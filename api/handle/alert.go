@@ -2,38 +2,32 @@ package handle
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/xmux"
 )
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		module.Write(w, r, pkg.WaitingConfigChanged())
-
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
-	res := pkg.Response{}
 	ra := &alert.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
-		module.Write(w, r, res.ErrorE(err))
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
+		xmux.GetInstance(r).Response.(*pkg.Response).Msg = err.Error()
 		return
 	}
 	ra.SendAlert()
-	module.Write(w, r, res.Sucess("send alert message"))
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
-	res := pkg.Response{
-		Data: alert.GetDispatcher(),
-	}
-	module.Write(w, r, res.Sucess(""))
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = alert.GetDispatcher()
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
@@ -52,25 +46,8 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	if !needToken {
-		module.Write(w, r, []byte(`{"code": 200, "msg": "ok"}`))
-		// w.WriteHeader(http.StatusOK)
+	if needToken {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 405
 		return
 	}
-	// 检查是否可以被忽略token
-	for _, v := range global.GetIgnoreToken() {
-		if v == addr {
-			needToken = false
-			break
-		}
-	}
-	if !needToken {
-		module.Write(w, r, []byte(`{"code": 200, "msg": "ok"}`))
-		// w.WriteHeader(http.StatusOK)
-		return
-	}
-	module.Write(w, r, []byte(fmt.Sprintf(`{"code": 500, "msg": "StatusNetworkAuthenticationRequired"}, "ips": "%s"`, addr)))
-	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 }
-
-// 报警相关配置

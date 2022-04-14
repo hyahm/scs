@@ -1,10 +1,8 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
@@ -17,37 +15,39 @@ var reloadKey bool
 
 func Disable(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		module.Write(w, r, pkg.WaitingConfigChanged())
+		// 报警相关配置
+
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
 	pname := xmux.Var(r)["pname"]
 
 	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		module.Write(w, r, pkg.NotFoundScript())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
 	if controller.DisableScript(script, false) {
 		err := config.UpdateScriptToConfigFile(script, true)
 		if err != nil {
-			module.Write(w, r, []byte(fmt.Sprintf(`{"code": 500, "msg": "%s}`, err.Error())))
+			xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
+			xmux.GetInstance(r).Response.(*pkg.Response).Msg = err.Error()
 			return
 		}
 	}
-	module.Write(w, r, []byte(`{"code": 200, "msg": "waiting stop"}`))
 
 }
 
 func Enable(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		module.Write(w, r, pkg.WaitingConfigChanged())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
 	pname := xmux.Var(r)["pname"]
 	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		module.Write(w, r, pkg.NotFoundScript())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
@@ -55,9 +55,9 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 	if controller.EnableScript(script) {
 		err := config.UpdateScriptToConfigFile(script, true)
 		if err != nil {
-			module.Write(w, r, []byte(fmt.Sprintf(`{"code": 500, "msg": "%s}`, err.Error())))
+			xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
+			xmux.GetInstance(r).Response.(*pkg.Response).Msg = err.Error()
 			return
 		}
 	}
-	module.Write(w, r, []byte(`{"code": 200, "msg": "waiting start"}`))
 }

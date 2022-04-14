@@ -139,7 +139,7 @@ func (node *Node) Start(args ...string) {
 func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 
 	cli := node.NewSCSClient()
-	var ssn *pkg.StatusList
+	var ssn *pkg.Response
 	var err error
 	switch len(args) {
 	case 0:
@@ -155,17 +155,20 @@ func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 	if err != nil {
 		return nil, fmt.Errorf("url: %s, name: %s, msg: %v", node.Url, node.Name, err)
 	}
-
+	send, err := json.Marshal(ssn.Data)
+	if err != nil {
+		fmt.Println(err)
+	}
 	result := &ScriptStatusNode{
-		Nodes:   ssn.Data,
 		Version: ssn.Version,
 		Name:    node.Name,
 		Url:     node.Url,
 	}
-
-	if len(ssn.Data) > 0 {
-		result.Version = ssn.Version
+	err = json.Unmarshal(send, &result.Nodes)
+	if err != nil {
+		fmt.Println(err)
 	}
+	result.Version = ssn.Version
 
 	return result, nil
 }

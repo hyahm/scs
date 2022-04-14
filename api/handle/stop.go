@@ -17,24 +17,23 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		module.Write(w, r, pkg.NotFoundScript())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	svc, ok := store.Store.GetServerByName(name)
 
 	if !ok {
-		module.Write(w, r, pkg.NotFoundScript())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	go svc.Stop()
-	module.Write(w, r, pkg.Waiting("stop"))
 }
 
 func StopPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		module.Write(w, r, pkg.NotFoundScript())
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	err := controller.StopScript(script)
@@ -42,8 +41,6 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 		module.Write(w, r, []byte(fmt.Sprintf(`{"code": 500, "msg": "%s"}`, err.Error())))
 		return
 	}
-
-	module.Write(w, r, pkg.Waiting("stop"))
 }
 
 func StopAll(w http.ResponseWriter, r *http.Request) {
@@ -54,5 +51,4 @@ func StopAll(w http.ResponseWriter, r *http.Request) {
 		controller.StopScriptFromName(scriptname.(map[string]struct{}))
 	}
 
-	module.Write(w, r, pkg.Waiting("stop"))
 }

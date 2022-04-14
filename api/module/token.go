@@ -4,14 +4,15 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
 func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
+	golog.Info("-----------------------------")
 	var addr string
 	if global.ProxyHeader == "" {
 		addr = strings.Split(r.RemoteAddr, ":")[0]
@@ -19,31 +20,31 @@ func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
 		addr = r.Header.Get(global.ProxyHeader)
 	}
 
-	// 先拿到这个地址需要的权限
-	// 以最低的权限为当前的权限
-
 	for _, v := range global.GetIgnoreToken() {
 		// 免token的admin权限
 		if v == addr {
 			xmux.GetInstance(r).Set("token", "")
 			xmux.GetInstance(r).Set("role", "admin")
-			break
+			return false
 		}
 	}
 	token := r.Header.Get("Token")
-
+	golog.Info(token)
 	if token == global.GetToken() {
-		// Write(w,r,([]byte(`{"code": 203, "msg": "token error"}`))
 		xmux.GetInstance(r).Set("token", token)
 		xmux.GetInstance(r).Set("role", "admin")
 		return false
 	}
+	golog.Info(token)
 	xmux.GetInstance(r).Set(xmux.STATUSCODE, 203)
 	Write(w, r, []byte(`{"code": 203, "msg": "token error or no permission"}`))
 	return true
 }
 
 func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
+	if xmux.GetInstance(r).Get("role") != nil && xmux.GetInstance(r).Get("role").(string) == "admin" {
+		return false
+	}
 	// 验证所有scripts的权限
 	token := r.Header.Get("Token")
 	// 接口权限
@@ -116,75 +117,75 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 	return true
 }
 
-func CheckToken(w http.ResponseWriter, r *http.Request) bool {
-	pname := xmux.Var(r)["pname"]
-	name := xmux.Var(r)["name"]
+// func CheckToken(w http.ResponseWriter, r *http.Request) bool {
+// 	pname := xmux.Var(r)["pname"]
+// 	name := xmux.Var(r)["name"]
 
-	var addr string
-	if global.ProxyHeader == "" {
-		addr = strings.Split(r.RemoteAddr, ":")[0]
-	} else {
-		addr = r.Header.Get(global.ProxyHeader)
-	}
+// 	var addr string
+// 	if global.ProxyHeader == "" {
+// 		addr = strings.Split(r.RemoteAddr, ":")[0]
+// 	} else {
+// 		addr = r.Header.Get(global.ProxyHeader)
+// 	}
 
-	// 先拿到这个地址需要的权限
-	// 以最低的权限为当前的权限
+// 	// 先拿到这个地址需要的权限
+// 	// 以最低的权限为当前的权限
 
-	for _, v := range global.GetIgnoreToken() {
-		// 免token的admin权限
-		if v == addr {
-			xmux.GetInstance(r).Set("token", "")
-			xmux.GetInstance(r).Set("role", "admin")
-			break
-		}
-	}
-	token := r.Header.Get("Token")
+// 	for _, v := range global.GetIgnoreToken() {
+// 		// 免token的admin权限
+// 		if v == addr {
+// 			xmux.GetInstance(r).Set("token", "")
+// 			xmux.GetInstance(r).Set("role", "admin")
+// 			break
+// 		}
+// 	}
+// 	token := r.Header.Get("Token")
 
-	if token == global.GetToken() {
-		// Write(w,r,([]byte(`{"code": 203, "msg": "token error"}`))
-		xmux.GetInstance(r).Set("token", token)
-		xmux.GetInstance(r).Set("role", "admin")
-		return false
-	}
+// 	if token == global.GetToken() {
+// 		// Write(w,r,([]byte(`{"code": 203, "msg": "token error"}`))
+// 		xmux.GetInstance(r).Set("token", token)
+// 		xmux.GetInstance(r).Set("role", "admin")
+// 		return false
+// 	}
 
-	// 验证 scripts的权限
-	pages := xmux.GetInstance(r).Get(xmux.PAGES).(map[string]struct{})
-	if _, ok := pages["scripts"]; ok {
-		// 如果是查看所有状态， 那么就继续
-		if pname == "" && name == "" {
-			xmux.GetInstance(r).Set("token", token)
-			xmux.GetInstance(r).Set("role", "scripts")
-			return false
-		}
-		if pname == "" && name != "" {
-			svc, ok := store.Store.GetServerByName(name)
-			if !ok {
-				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
-				Write(w, r, (pkg.NotFoundScript()))
-				return true
-			}
-			if svc.Token != "" && token == svc.Token {
-				xmux.GetInstance(r).Set("role", "scripts")
-				xmux.GetInstance(r).Set("token", "")
-				return false
-			}
-		}
+// 	// 验证 scripts的权限
+// 	pages := xmux.GetInstance(r).Get(xmux.PAGES).(map[string]struct{})
+// 	if _, ok := pages["scripts"]; ok {
+// 		// 如果是查看所有状态， 那么就继续
+// 		if pname == "" && name == "" {
+// 			xmux.GetInstance(r).Set("token", token)
+// 			xmux.GetInstance(r).Set("role", "scripts")
+// 			return false
+// 		}
+// 		if pname == "" && name != "" {
+// 			svc, ok := store.Store.GetServerByName(name)
+// 			if !ok {
+// 				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+// 				Write(w, r, (pkg.NotFoundScript()))
+// 				return true
+// 			}
+// 			if svc.Token != "" && token == svc.Token {
+// 				xmux.GetInstance(r).Set("role", "scripts")
+// 				xmux.GetInstance(r).Set("token", "")
+// 				return false
+// 			}
+// 		}
 
-		if pname != "" {
-			script, ok := store.Store.GetScriptByName(pname)
-			if !ok {
-				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
-				Write(w, r, (pkg.NotFoundScript()))
-				return true
-			}
-			if script.Token != "" && token == script.Token {
-				xmux.GetInstance(r).Set("role", "scripts")
-				xmux.GetInstance(r).Set("token", "")
-				return false
-			}
-		}
+// 		if pname != "" {
+// 			script, ok := store.Store.GetScriptByName(pname)
+// 			if !ok {
+// 				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+// 				Write(w, r, (pkg.NotFoundScript()))
+// 				return true
+// 			}
+// 			if script.Token != "" && token == script.Token {
+// 				xmux.GetInstance(r).Set("role", "scripts")
+// 				xmux.GetInstance(r).Set("token", "")
+// 				return false
+// 			}
+// 		}
 
-	}
-	Write(w, r, ([]byte(`{"code": 203, "msg": "token error"}`)))
-	return true
-}
+// 	}
+// 	Write(w, r, ([]byte(`{"code": 203, "msg": "token error"}`)))
+// 	return true
+// }

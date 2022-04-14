@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 
 	"github.com/hyahm/golog"
 )
@@ -10,9 +10,10 @@ import (
 var ErrBugMsg = "严重错误， 请提交问题到https://github.com/hyahm/scs"
 
 type Response struct {
-	Code int         `json:"code,omitempty"`
-	Msg  string      `json:"msg,omitempty"`
-	Data interface{} `json:"data,omitempty"`
+	Code    int         `json:"code,omitempty"`
+	Msg     string      `json:"msg,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
+	Version string      `json:"version,omitempty"`
 }
 
 func (res *Response) Marshal() []byte {
@@ -35,22 +36,15 @@ func (res *Response) ErrorE(err error) []byte {
 	return res.Marshal()
 }
 
-// func (res *Response) NotFound(role string) []byte {
-// 	res.Code = 404
-// 	res.Role = role
-// 	return res.Marshal()
-// }
+var ErrNotFound = errors.New("not found pname or name")
+var ResponseMsg map[int]string
 
-func NotFoundScript() []byte {
-	return []byte(fmt.Sprintf(`{"code": 404, "msg": "not found pname or name" }`))
-}
-
-func Waiting(step string) []byte {
-	return []byte(fmt.Sprintf(`{"code": 200, "msg": "waiting %s"}`, step))
-}
-
-func WaitingConfigChanged() []byte {
-	return []byte(fmt.Sprintf(`{"code": 200, "msg": "config file is reloading, waiting completed first" }`))
+func init() {
+	ResponseMsg = make(map[int]string)
+	ResponseMsg[200] = "ok"
+	ResponseMsg[201] = "config file is reloading, waiting completed first"
+	ResponseMsg[404] = "not found pname or name"
+	ResponseMsg[405] = "auth failed"
 }
 
 // 这是返回给前端的数据结构

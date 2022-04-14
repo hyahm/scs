@@ -133,7 +133,7 @@ func (sc *SCSClient) requests(url string, body io.Reader, method ...string) (*pk
 	return res, nil
 }
 
-func (sc *SCSClient) requestStatuss(url string, body io.Reader, method ...string) (*pkg.StatusList, error) {
+func (sc *SCSClient) requestStatuss(url string, body io.Reader, method ...string) (*pkg.Response, error) {
 	httpMethod := http.MethodPost
 	if len(method) > 0 {
 		httpMethod = method[0]
@@ -159,7 +159,7 @@ func (sc *SCSClient) requestStatuss(url string, body io.Reader, method ...string
 		fmt.Println(err)
 		return nil, err
 	}
-	res := &pkg.StatusList{}
+	res := &pkg.Response{}
 	err = json.Unmarshal(b, res)
 	if err != nil {
 		fmt.Println(err)
@@ -512,12 +512,12 @@ func (sc *SCSClient) AddScript(s *scripts.Script) (*pkg.Response, error) {
 }
 
 // 获取此所有脚本的状态
-func (sc *SCSClient) StatusAll() (*pkg.StatusList, error) {
+func (sc *SCSClient) StatusAll() (*pkg.Response, error) {
 	return sc.requestStatuss("/status", nil)
 }
 
 // 获取此脚本的状态
-func (sc *SCSClient) StatusPname() (*pkg.StatusList, error) {
+func (sc *SCSClient) StatusPname() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
@@ -525,7 +525,7 @@ func (sc *SCSClient) StatusPname() (*pkg.StatusList, error) {
 }
 
 // 获取此副本的状态
-func (sc *SCSClient) StatusName() (*pkg.StatusList, error) {
+func (sc *SCSClient) StatusName() (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
