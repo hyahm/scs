@@ -20,6 +20,7 @@ import (
 func HttpServer() {
 	response := &pkg.Response{
 		Code: 200,
+		Msg:  "ok",
 	}
 	router := xmux.NewRouter().BindResponse(response)
 	router.SetHeader("Access-Control-Allow-Origin", "*")

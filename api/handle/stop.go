@@ -3,7 +3,6 @@ package handle
 import (
 	"net/http"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -30,7 +29,6 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 
 func StopPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	golog.Info("111")
 	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
