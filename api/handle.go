@@ -1,8 +1,14 @@
 package api
 
 import (
+	"encoding/json"
+	"net/http"
+	"time"
+
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/api/handle"
 	"github.com/hyahm/scs/api/module"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/scripts"
 	"github.com/hyahm/xmux"
 )
@@ -26,7 +32,7 @@ func simpleHandle() *xmux.GroupRoute {
 	return simple
 }
 
-func scriptHandle() *xmux.GroupRoute {
+func ScriptHandle() *xmux.GroupRoute {
 	script := xmux.NewGroupRoute().AddPageKeys(scripts.ScriptRole.ToString())
 	script.AddModule(module.CheckAllScriptToken)
 	script.Post("/stop/{pname}/{name}", handle.Stop)
@@ -61,6 +67,37 @@ func AdminHandle() *xmux.GroupRoute {
 
 	admin.Post("/enable/{pname}", handle.Enable)   // 只能管理员用
 	admin.Post("/disable/{pname}", handle.Disable) // 只能管理员用
-	admin.AddGroup(scriptHandle())
+
 	return admin
+}
+
+var statusMsg map[int]string
+
+func init() {
+	statusMsg = make(map[int]string)
+	statusMsg[200] = "ok"
+	statusMsg[201] = "config is reloading, please wait"
+	statusMsg[203] = "token error"
+	statusMsg[404] = "pname or name not found"
+	statusMsg[500] = "system error"
+}
+
+func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
+	var send []byte
+	var err error
+	response := xmux.GetInstance(r).Response.(*pkg.Response)
+	if response != nil {
+		response.Code = xmux.GetInstance(r).Get(xmux.STATUSCODE).(int)
+		response.Msg = statusMsg[response.Code]
+		send, err = json.Marshal(response)
+		if err != nil {
+			golog.Error(err)
+		}
+		w.Write(send)
+	}
+	golog.Infof("connect_id: %d,method: %s\turl: %s\ttime: %f\t status_code: %v, body: %v\n",
+		xmux.GetInstance(r).Get(xmux.CONNECTID),
+		r.Method,
+		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).Get(xmux.STATUSCODE),
+		string(send))
 }

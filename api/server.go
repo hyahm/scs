@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -19,20 +18,22 @@ import (
 // var dir := "key"
 func HttpServer() {
 	response := &pkg.Response{
-		Code: 200,
-		Msg:  "ok",
+		Code:    200,
+		Msg:     "ok",
+		Version: global.VERSION,
 	}
 	router := xmux.NewRouter().BindResponse(response)
 	router.SetHeader("Access-Control-Allow-Origin", "*")
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
-
+	router.Exit = exit
 	router.Post("/probe", handle.Probe)
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
 	router.AddGroup(AdminHandle())
-
+	router.AddGroup(ScriptHandle())
+	router.DebugAssignRoute("/status")
 	if global.GetDisableTls() {
 		golog.Info("listen on " + global.GetListen() + " over http")
 		golog.Fatal(router.Run(global.GetListen()))
@@ -50,17 +51,11 @@ func HttpServer() {
 	_, err1 := os.Stat(keyfile)
 	_, err2 := os.Stat(pemfile)
 	if global.GetKey() == "" || global.GetPem() == "" && os.IsNotExist(err1) || os.IsNotExist(err2) {
-
 		internal.CreateTLS()
-		golog.Info(global.GetListen())
-		on := "listen on " + global.GetListen() + " over https"
-		golog.Info(on)
-		if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
-			golog.Fatal(err)
-		}
 	}
-	golog.Info("listen on " + global.GetListen() + " over http")
-	if err := svc.ListenAndServe(); err != nil {
-		log.Fatal(err)
+	on := "listen on " + global.GetListen() + " over https"
+	golog.Info(on)
+	if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
+		golog.Fatal(err)
 	}
 }

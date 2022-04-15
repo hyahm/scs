@@ -10,10 +10,10 @@ scs = SCS()
 
 while True:
     print("can stop------", flush=True)
-    # msg, code = scs.can_not_stop()
+    msg, code = scs.can_not_stop()
     print(" can not stop------", flush=True)
     time.sleep(random.randint(5, 10))
     print(" can not stop------", flush=True)
-    # msg, code =scs.can_stop()
+    msg, code =scs.can_stop()
     time.sleep(random.randint(1, 3))
     print("can stop-----", flush=True)
