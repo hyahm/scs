@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
@@ -15,8 +14,7 @@ func Status(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	status, err := controller.ScriptName(pname, name)
 	if err != nil {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-		xmux.GetInstance(r).Response.(*pkg.Response).Msg = err.Error()
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return
 	}
 	xmux.GetInstance(r).Response.(*pkg.Response).Data = status
@@ -27,15 +25,13 @@ func StatusPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	status, err := controller.ScriptPname(pname)
 	if err != nil {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-		xmux.GetInstance(r).Response.(*pkg.Response).Msg = err.Error()
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return
 	}
 	xmux.GetInstance(r).Response.(*pkg.Response).Data = status
 }
 
 func AllStatus(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("names")
 	names := xmux.GetInstance(r).Get("scriptname")
 	if names == nil {
 		xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.AllStatus()

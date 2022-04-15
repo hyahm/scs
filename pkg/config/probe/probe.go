@@ -94,7 +94,6 @@ func RunProbe(p *Probe) {
 			!pkg.CompareSlice(p.ExcludeDisk, healthDetector.Probe.ExcludeDisk) {
 			// 那么需要停掉之前的goroutine 然后重新启动
 			healthDetector.Cancel()
-			golog.Info("change")
 			healthDetector.Probe = p
 		}
 	}

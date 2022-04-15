@@ -13,14 +13,13 @@ import (
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 201)
 		return
 	}
 	ra := &alert.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
-		xmux.GetInstance(r).Response.(*pkg.Response).Msg = err.Error()
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
 		return
 	}
 	ra.SendAlert()
@@ -47,7 +46,8 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if needToken {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 405
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 203)
 		return
 	}
+
 }

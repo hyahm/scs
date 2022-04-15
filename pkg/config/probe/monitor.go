@@ -2,13 +2,10 @@ package probe
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/scs/pkg/message"
 )
@@ -34,7 +31,6 @@ func NewMonitor() Scan {
 			Interval: healthDetector.Config.Interval,
 		}
 	}
-	golog.Info(monitors)
 	return monitors
 }
 
@@ -63,34 +59,20 @@ func (m Scan) Update() {
 	}
 }
 
-// func NewClient(timeout ...time.Duration) *SCSClient {
-// 	var rto time.Duration
-// 	if len(timeout) > 0 {
-// 		rto = timeout[0]
-// 	}
-
-// 	return &SCSClient{
-// 		Domain:  "https://127.0.0.1:11111",
-// 		Token:   os.Getenv("TOKEN"),
-// 		Pname:   os.Getenv("PNAME"),
-// 		Name:    os.Getenv("NAME"),
-// 		Timeout: rto,
-// 	}
-// }
-
-func requests(domain string) ([]byte, error) {
+func requests(domain string) bool {
 	req, err := http.NewRequest(http.MethodPost, domain+"/probe", nil)
 	if err != nil {
-		return nil, err
+		return false
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client(5 * time.Second).Do(req)
 	if err != nil {
-		return nil, err
+		return false
 	}
 	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+
+	return resp.StatusCode == 200
 }
 
 func client(timeout time.Duration) *http.Client {
@@ -108,29 +90,8 @@ func client(timeout time.Duration) *http.Client {
 
 func (m Scan) Check() {
 	for server, mm := range m {
-		var failed bool
 		//http cookie接口
-		resp, err := requests(server)
-		if err != nil {
-			golog.Error(err)
-			failed = true
-		} else {
-			rest := &struct {
-				Code int    `json:"code"`
-				Msg  string `json:"msg"`
-			}{}
-			golog.Info(string(resp))
-			err := json.Unmarshal(resp, rest)
-			if err != nil {
-				golog.Error(err)
-				break
-			}
-			if rest.Code != 200 {
-				golog.Error(rest.Msg)
-				failed = true
-			}
-		}
-
+		failed := requests(server)
 		if failed {
 			mm.AI.AM.HostName = server
 			mm.AI.BreakDown(fmt.Sprintf("服务器或scs服务出现问题: %s", server))

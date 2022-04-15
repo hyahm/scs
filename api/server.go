@@ -28,9 +28,7 @@ func HttpServer() {
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
 	router.Exit = exit
 	router.Post("/probe", handle.Probe)
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok"))
-	})
+
 	router.AddGroup(AdminHandle())
 	router.AddGroup(ScriptHandle())
 	router.DebugAssignRoute("/status")

@@ -133,6 +133,45 @@ func (sc *SCSClient) requests(url string, body io.Reader, method ...string) (*pk
 	return res, nil
 }
 
+func (sc *SCSClient) requestStatuss(url string, body io.Reader, method ...string) (*pkg.Response, error) {
+	httpMethod := http.MethodPost
+	if len(method) > 0 {
+		httpMethod = method[0]
+	}
+	req, err := http.NewRequest(httpMethod, sc.Domain+url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Token", sc.Token)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client(sc.Timeout).Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	err = checkCode(resp.StatusCode)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	res := &pkg.Response{}
+	err = json.Unmarshal(b, res)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	err = checkCode(res.Code)
+	if err != nil {
+		return nil, errors.New(res.Msg)
+	}
+	return res, nil
+}
+
 func checkCode(code int) error {
 	switch code {
 	case 203:
@@ -494,11 +533,6 @@ func (sc *SCSClient) StatusName() (*pkg.Response, error) {
 		return nil, ErrNameIsEmpty
 	}
 	return sc.requests(fmt.Sprintf("/status/%s/%s", sc.Pname, sc.Name), nil)
-}
-
-// 检测远程机器的健康探针
-func (sc *SCSClient) Probe() (*pkg.Response, error) {
-	return sc.requests("/probe", nil)
 }
 
 // 发送报警

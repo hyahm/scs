@@ -6,6 +6,7 @@ import (
 
 	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/xmux"
 	"github.com/shirou/gopsutil/host"
 )
 
@@ -14,7 +15,7 @@ func GetOS(w http.ResponseWriter, r *http.Request) {
 	hi, err := host.Info()
 
 	if err != nil {
-		module.Write(w, r, res.ErrorE(err))
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
 		return
 	}
 	type Info struct {

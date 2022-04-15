@@ -5,7 +5,6 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg"
 
 	"github.com/hyahm/xmux"
 )
@@ -17,12 +16,12 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return
 	}
 	svc, ok := store.Store.GetServerByName(name)
 	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return
 	}
 	svc.Start()
@@ -33,7 +32,7 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return
 	}
 	controller.StartExsitScript(pname)

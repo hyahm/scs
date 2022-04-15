@@ -3,7 +3,6 @@ package handle
 import (
 	"net/http"
 
-	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -11,10 +10,7 @@ import (
 )
 
 func GetAlarms(w http.ResponseWriter, r *http.Request) {
-	res := &pkg.Response{
-		Data: controller.GetAterts(),
-	}
-	module.Write(w, r, res.Sucess(""))
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.GetAterts()
 }
 
 func GetServers(w http.ResponseWriter, r *http.Request) {
