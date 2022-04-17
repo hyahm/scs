@@ -543,5 +543,5 @@ func (sc *SCSClient) Probe() (*pkg.Response, error) {
 // 发送报警
 func (sc *SCSClient) Alert(alert *alert.RespAlert) (*pkg.Response, error) {
 	send, _ := json.Marshal(alert)
-	return sc.requests("/set/alert", bytes.NewReader(send))
+	return sc.requests("/send/alert", bytes.NewReader(send))
 }

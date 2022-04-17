@@ -82,26 +82,6 @@ func EnableScript(script *scripts.Script) bool {
 	return true
 }
 
-// func makeAndStart(i, replicate, availablePort int, script *scripts.Script) int {
-// 	subname := fmt.Sprintf("%s_%d", script.Name, i)
-// 	store.servers[subname] = &server.Server{
-// 		Index:     i,
-// 		Replicate: replicate,
-// 		SubName:   subname,
-// 		Name:      script.Name,
-// 	}
-// 	store.serverIndex[script.Name][i] = struct{}{}
-// 	availablePort = store.servers[subname].MakeServer(script, availablePort)
-// 	availablePort++
-// 	if script.Disable {
-// 		// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-// 		return availablePort
-// 	}
-
-// 	store.servers[subname].Start()
-// 	return availablePort
-// }
-
 func UpdateAndRestart(svc *server.Server) {
 	svc.UpdateServer()
 	restartServer(svc)
@@ -117,16 +97,17 @@ func updateAndRestartScript(s *scripts.Script) {
 	if replicate == 0 {
 		replicate = 1
 	}
-	go func() {
-		for i := 0; i < replicate; i++ {
-			subname := fmt.Sprintf("%s_%d", s.Name, i)
-			svc, ok := store.Store.GetServerByName(subname)
-			if ok {
+
+	for i := 0; i < replicate; i++ {
+		subname := fmt.Sprintf("%s_%d", s.Name, i)
+		svc, ok := store.Store.GetServerByName(subname)
+		if ok {
+			go func() {
 				svc.UpdateServer()
-			}
+				restartServer(svc)
+			}()
 		}
-		RestartScript(s)
-	}()
+	}
 
 }
 
