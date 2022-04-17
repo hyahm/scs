@@ -47,6 +47,7 @@ func main() {
 	// 自动清除全局报警器的值
 	go alert.CleanAlert()
 	golog.Info("config file path: ", configfile)
+	golog.Format = "{{ .Ctime }} - [{{ .Level }}]- {{.Msg}}"
 	controller.Start(configfile)
 	api.HttpServer()
 
