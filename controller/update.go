@@ -60,25 +60,6 @@ func EnableScript(script *scripts.Script) bool {
 	script.Disable = false
 
 	AddScript(script)
-	replicate := script.Replicate
-	if replicate == 0 {
-		replicate = 1
-	}
-	availablePort := script.Port
-	for i := 0; i < replicate; i++ {
-		subname := fmt.Sprintf("%s_%d", script.Name, i)
-		store.Store.InitServer(i, replicate, script.Name, subname)
-		store.Store.SetScriptIndex(script.Name, i)
-		svc, _ := store.Store.GetServerByName(subname)
-		availablePort = svc.MakeServer(script, availablePort)
-		availablePort++
-		if script.Disable {
-			// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-			return true
-		}
-
-		svc.Start()
-	}
 	return true
 }
 

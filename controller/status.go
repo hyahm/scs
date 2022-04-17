@@ -5,7 +5,6 @@ import (
 	"runtime"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -33,34 +32,26 @@ func getStatus(svc *server.Server) pkg.ServiceStatus {
 	return status
 }
 
-func ScriptName(pname, subname string) []byte {
-	status := &pkg.StatusList{
-		Data:    make([]pkg.ServiceStatus, 0),
-		Version: global.VERSION,
-		Code:    200,
-	}
+func ScriptName(pname, subname string) ([]pkg.ServiceStatus, error) {
+	statuss := make([]pkg.ServiceStatus, 0)
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		return pkg.NotFoundScript()
+		return nil, pkg.ErrNotFound
 	}
 	svc, ok := store.Store.GetServerByName(subname)
 	if !ok {
-		return pkg.NotFoundScript()
+		return nil, pkg.ErrNotFound
 	}
-	status.Data = append(status.Data, getStatus(svc))
-	return status.Marshal()
+	statuss = append(statuss, getStatus(svc))
+	return statuss, nil
 
 }
 
-func ScriptPname(pname string) []byte {
-	statuss := &pkg.StatusList{
-		Data:    make([]pkg.ServiceStatus, 0),
-		Version: global.VERSION,
-		Code:    200,
-	}
+func ScriptPname(pname string) ([]pkg.ServiceStatus, error) {
+	statuss := make([]pkg.ServiceStatus, 0)
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		return pkg.NotFoundScript()
+		return nil, pkg.ErrNotFound
 	}
 	for i := range store.Store.GetScriptIndex(pname) {
 		subname := fmt.Sprintf("%s_%d", pname, i)
@@ -68,38 +59,28 @@ func ScriptPname(pname string) []byte {
 		if !ok {
 			golog.Error(pkg.ErrBugMsg)
 		}
-		statuss.Data = append(statuss.Data, getStatus(svc))
+		statuss = append(statuss, getStatus(svc))
 	}
 
-	return statuss.Marshal()
+	return statuss, nil
 }
 
 // 获取所有服务的状态
-func AllStatus() []byte {
-	statuss := &pkg.StatusList{
-		Data:    make([]pkg.ServiceStatus, 0),
-		Version: global.VERSION,
-		Code:    200,
-	}
-
+func AllStatus() []pkg.ServiceStatus {
+	statuss := make([]pkg.ServiceStatus, 0)
 	for _, svc := range store.Store.GetAllServer() {
-		statuss.Data = append(statuss.Data, getStatus(svc))
+		statuss = append(statuss, getStatus(svc))
 	}
-	return statuss.Marshal()
+	return statuss
 }
 
 // 获取所有服务的状态
-func AllStatusFromScript(names map[string]struct{}) []byte {
-	statuss := &pkg.StatusList{
-		Data:    make([]pkg.ServiceStatus, 0),
-		Version: global.VERSION,
-		Code:    200,
-	}
+func AllStatusFromScript(names map[string]struct{}) []pkg.ServiceStatus {
+	statuss := make([]pkg.ServiceStatus, 0)
 	for _, svc := range store.Store.GetAllServer() {
 		if _, sok := names[svc.Name]; sok {
-			statuss.Data = append(statuss.Data, getStatus(svc))
+			statuss = append(statuss, getStatus(svc))
 		}
-
 	}
-	return statuss.Marshal()
+	return statuss
 }

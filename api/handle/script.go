@@ -16,12 +16,12 @@ import (
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetInstance(r).Data.(*scripts.Script)
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged())
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 201)
 		return
 	}
-	res := pkg.Response{}
+
 	if s.Name == "" {
-		w.Write([]byte(`{"code": 404, "msg": "name not found"}`))
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return
 	}
 	_, ok := store.Store.GetServerByName(s.Name)
@@ -30,7 +30,6 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		// 需要判断是否相等
 		if !controller.NeedStop(s) {
 			// 如果没有修改，那么就返回已经add了
-			w.Write(res.Sucess("already have script and the same"))
 			return
 		}
 		// 更新配置文件
@@ -38,7 +37,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		// 更新这个script
 		err := config.UpdateScriptToConfigFile(s, true)
 		if err != nil {
-			w.Write(res.ErrorE(err))
+			xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
 			return
 		}
 		// 否则删除原来的, 需不需要删除
@@ -47,13 +46,12 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		// 添加
 		err := config.AddScriptToConfigFile(s, true)
 		if err != nil {
-			w.Write(res.ErrorE(err))
+			xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
 			return
 		}
 
 		controller.AddScript(s)
 
 	}
-	res.Data = s.Token
-	w.Write(res.Sucess("already add script"))
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = s.Token
 }

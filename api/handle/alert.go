@@ -8,29 +8,25 @@ import (
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/xmux"
 )
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		w.Write(pkg.WaitingConfigChanged())
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 201)
 		return
 	}
-	res := pkg.Response{}
 	ra := &alert.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
-		w.Write(res.ErrorE(err))
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
 		return
 	}
 	ra.SendAlert()
-	w.Write(res.Sucess("send alert message"))
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
-	res := pkg.Response{
-		Data: alert.GetDispatcher(),
-	}
-	w.Write(res.Sucess(""))
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = alert.GetDispatcher()
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
@@ -49,25 +45,9 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	if !needToken {
-		w.Write([]byte(`{"code": 200, "msg": "ok"}`))
-		// w.WriteHeader(http.StatusOK)
+	if needToken {
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 203)
 		return
 	}
-	// 检查是否可以被忽略token
-	for _, v := range global.GetIgnoreToken() {
-		if v == addr {
-			needToken = false
-			break
-		}
-	}
-	if !needToken {
-		w.Write([]byte(`{"code": 200, "msg": "ok"}`))
-		// w.WriteHeader(http.StatusOK)
-		return
-	}
-	w.Write([]byte(`{"code": 500, "msg": "StatusNetworkAuthenticationRequired"}`))
-	// w.WriteHeader(http.StatusNetworkAuthenticationRequired)
-}
 
-// 报警相关配置
+}

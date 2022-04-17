@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
+	"github.com/hyahm/scs/pkg"
 
 	"github.com/hyahm/xmux"
 )
@@ -11,22 +12,30 @@ import (
 func Status(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-
-	w.Write(controller.ScriptName(pname, name))
+	status, err := controller.ScriptName(pname, name)
+	if err != nil {
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+		return
+	}
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = status
 }
 
 func StatusPname(w http.ResponseWriter, r *http.Request) {
 
 	pname := xmux.Var(r)["pname"]
-	w.Write(controller.ScriptPname(pname))
+	status, err := controller.ScriptPname(pname)
+	if err != nil {
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+		return
+	}
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = status
 }
 
 func AllStatus(w http.ResponseWriter, r *http.Request) {
 	names := xmux.GetInstance(r).Get("scriptname")
 	if names == nil {
-		w.Write(controller.AllStatus())
+		xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.AllStatus()
 	} else {
-		w.Write(controller.AllStatusFromScript(names.(map[string]struct{})))
+		xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.AllStatusFromScript(names.(map[string]struct{}))
 	}
-
 }

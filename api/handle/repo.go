@@ -16,5 +16,5 @@ func GetRepo(w http.ResponseWriter, r *http.Request) {
 	// resp.Url = server.Cfg.Repo.Url
 	// resp.Derivative = server.Cfg.Repo.Derivative
 	// send, _ := json.Marshal(resp)
-	// w.Write(send)
+	// Write(w, r,send)
 }

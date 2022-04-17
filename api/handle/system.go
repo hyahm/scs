@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/xmux"
 	"github.com/shirou/gopsutil/host"
 )
 
@@ -13,7 +15,7 @@ func GetOS(w http.ResponseWriter, r *http.Request) {
 	hi, err := host.Info()
 
 	if err != nil {
-		w.Write(res.ErrorE(err))
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
 		return
 	}
 	type Info struct {
@@ -34,5 +36,5 @@ func GetOS(w http.ResponseWriter, r *http.Request) {
 	}
 	res.Data = info
 	b, _ := json.Marshal(res)
-	w.Write(b)
+	module.Write(w, r, b)
 }

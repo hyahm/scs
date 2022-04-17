@@ -12,11 +12,8 @@ func ServerInfo(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	svc, ok := store.Store.GetServerByName(name)
 	if !ok {
-		w.Write(pkg.NotFoundScript())
+		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return
 	}
-	res := pkg.Response{
-		Data: svc,
-	}
-	w.Write(res.Sucess(""))
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = svc
 }
