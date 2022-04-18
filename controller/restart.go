@@ -13,6 +13,9 @@ import (
 
 // 没有锁，只是为了外部访问
 func RestartServer(svc *server.Server) {
+	if svc.Disable {
+		return
+	}
 	// 禁用 script 所在的所有server
 	// 先修改值, 因为是restart， 所以端口在svc初始化的时候就固定了
 	go restartServer(svc)
@@ -37,6 +40,9 @@ func restartServer(svc *server.Server) {
 // 重启第一步
 func RestartScript(s *scripts.Script) error {
 	// 禁用 script 所在的所有server
+	if s.Disable {
+		return nil
+	}
 	script, ok := store.Store.GetScriptByName(s.Name)
 	if !ok {
 		return errors.New("not found script: " + s.Name)

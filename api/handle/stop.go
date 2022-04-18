@@ -18,7 +18,6 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	svc, ok := store.Store.GetServerByName(name)
-
 	if !ok {
 		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return

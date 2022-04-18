@@ -78,7 +78,10 @@ func StopScriptFromName(names map[string]struct{}) {
 }
 
 func StopAllServer() {
-	for _, svc := range store.Store.GetAllServer() {
-		svc.Stop()
+	for _, script := range store.Store.GetAllScriptMap() {
+		err := StopScript(script)
+		if err != nil {
+			golog.Error(err)
+		}
 	}
 }

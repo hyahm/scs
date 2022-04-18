@@ -10,6 +10,9 @@ import (
 
 // 异步执行停止脚本
 func StopScript(s *scripts.Script) error {
+	if s.Disable {
+		return nil
+	}
 	_, ok := store.Store.GetScriptByName(s.Name)
 	if !ok {
 		return errors.New("not found script: " + s.Name)

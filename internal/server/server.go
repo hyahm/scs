@@ -142,6 +142,9 @@ func (svc *Server) CheckReady(ctx context.Context) {
 
 // Restart  重动服务, 执行的
 func (svc *Server) Restart() {
+	if svc.Disable {
+		return
+	}
 	if svc.IsCron {
 		svc.Cancel()
 		// 如果是循环的就直接退出
@@ -272,6 +275,9 @@ func (svc *Server) Remove() {
 
 // Stop  停止服务
 func (svc *Server) Stop() {
+	if svc.Disable {
+		return
+	}
 	if svc.IsCron {
 		// 如果是定时任务， 直接停止
 		golog.Infof("stop loop %s", svc.SubName)
