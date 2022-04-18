@@ -79,7 +79,6 @@ func requests(domain string) bool {
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		golog.Error(err)
-		return false
 	}
 	golog.Info(string(b))
 	return resp.StatusCode == 200
