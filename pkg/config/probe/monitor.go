@@ -3,9 +3,11 @@ package probe
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/scs/pkg/message"
 )
@@ -62,16 +64,24 @@ func (m Scan) Update() {
 func requests(domain string) bool {
 	req, err := http.NewRequest(http.MethodPost, domain+"/probe", nil)
 	if err != nil {
+		golog.Error(err)
 		return false
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client(5 * time.Second).Do(req)
 	if err != nil {
+		golog.Error(err)
 		return false
 	}
 	defer resp.Body.Close()
-
+	golog.Info(resp.StatusCode)
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		golog.Error(err)
+		return false
+	}
+	golog.Info(string(b))
 	return resp.StatusCode == 200
 }
 
