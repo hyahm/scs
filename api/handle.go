@@ -96,7 +96,7 @@ func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(send)
 	}
-	golog.Infof("connect_id: %d,method: %s\turl: %s\ttime: %f\t status_code: %v, body: %v\n",
+	golog.Infof("connect_id: %d,method: %s\turl: %s\ttime: %f\t status_code: %v, body: %v",
 		xmux.GetInstance(r).Get(xmux.CONNECTID),
 		r.Method,
 		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).Get(xmux.STATUSCODE),
