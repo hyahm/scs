@@ -100,8 +100,8 @@ func client(timeout time.Duration) *http.Client {
 func (m Scan) Check() {
 	for server, mm := range m {
 		//http cookie接口
-		failed := requests(server)
-		if failed {
+		ok := requests(server)
+		if !ok {
 			mm.AI.AM.HostName = server
 			mm.AI.BreakDown(fmt.Sprintf("服务器或scs服务出现问题: %s", server))
 			continue
