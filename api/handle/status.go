@@ -14,7 +14,7 @@ func Status(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	status, err := controller.ScriptName(pname, name)
 	if err != nil {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	xmux.GetInstance(r).Response.(*pkg.Response).Data = status
@@ -25,7 +25,7 @@ func StatusPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	status, err := controller.ScriptPname(pname)
 	if err != nil {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	xmux.GetInstance(r).Response.(*pkg.Response).Data = status

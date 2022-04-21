@@ -5,19 +5,20 @@ import (
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
 func Reload(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
 	if global.CanReload != 0 {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 201)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
 
 	// 拷贝一份到当前运行的脚本列表
 	if err := controller.Reload(); err != nil {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
 		return
 	}
 }
@@ -25,13 +26,13 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 func Fmt(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
 	if global.CanReload != 0 {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 201)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
 
 	// 拷贝一份到当前运行的脚本列表
 	if err := controller.Fmt(); err != nil {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
 		return
 	}
 }
