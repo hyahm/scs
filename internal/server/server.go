@@ -39,7 +39,7 @@ type Server struct {
 	Times      int               `json:"times,omitempty"` // 记录循环的次数
 	SubName    string            `json:"subname,omitempty"`
 	Cmd        *exec.Cmd         `json:"-"`
-	AlwaysSign bool              `json:"always标识"` // 在停止的时候， always会变为false
+	AlwaysSign bool              `json:"always"` // 在停止的时候， always会变为false
 	// 总副本数
 	Replicate int            `json:"replicate,omitempty"`
 	Status    *status.Status `json:"status,omitempty"`
