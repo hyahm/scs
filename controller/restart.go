@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/hyahm/golog"
@@ -24,7 +23,9 @@ func RestartServer(svc *server.Server) {
 
 func restartServer(svc *server.Server) {
 	// 先修改值
+	golog.Info("restart")
 	svc.Restart()
+	golog.Debug("receive stop single")
 	//已经停止了。
 	<-svc.StopSignal
 	// 更新server并启动
@@ -40,19 +41,16 @@ func restartServer(svc *server.Server) {
 // 重启第一步
 func RestartScript(s *scripts.Script) error {
 	// 禁用 script 所在的所有server
+	golog.Debug("restart ", s.Name)
 	if s.Disable {
 		return nil
 	}
-	script, ok := store.Store.GetScriptByName(s.Name)
-	if !ok {
-		return errors.New("not found script: " + s.Name)
-	}
-	replicate := script.Replicate
-	if replicate == 0 {
-		replicate = 1
-	}
+
+	golog.Debug("restart ", s.Name)
 	for index := range store.Store.GetScriptIndex(s.Name) {
+
 		subname := fmt.Sprintf("%s_%d", s.Name, index)
+		golog.Info("restart ", subname)
 		svc, ok := store.Store.GetServerByName(subname)
 		if !ok {
 			golog.Error(pkg.ErrBugMsg)
@@ -65,7 +63,9 @@ func RestartScript(s *scripts.Script) error {
 
 func RestartAllServer() {
 	for _, svc := range store.Store.GetAllServer() {
-		svc.Restart()
+		if svc.Disable {
+			continue
+		}
 		RestartServer(svc)
 	}
 }

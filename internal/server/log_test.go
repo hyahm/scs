@@ -58,7 +58,6 @@ func TestLog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	golog.Info("command")
 	svc.Cancel()
 	// out, err := cmd.Output()
 	// if err != nil {

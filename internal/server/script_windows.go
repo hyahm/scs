@@ -25,7 +25,6 @@ func (svc *Server) stop() {
 					return
 				}
 				// 通知外部已经停止了
-				// svc.StopSignal <- true
 				return
 			}
 		case <-svc.CancelProcess:
