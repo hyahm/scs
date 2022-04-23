@@ -69,11 +69,8 @@ func UpdateAndRestart(svc *server.Server) {
 }
 
 // 返回成功还是失败
-func UpdateAndRestartScript(s *scripts.Script) {
-	updateAndRestartScript(s)
-}
 
-func updateAndRestartScript(s *scripts.Script) {
+func UpdateAndRestartScript(s *scripts.Script) {
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
@@ -83,10 +80,8 @@ func updateAndRestartScript(s *scripts.Script) {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 		svc, ok := store.Store.GetServerByName(subname)
 		if ok {
-			go func() {
-				svc.UpdateServer()
-				restartServer(svc)
-			}()
+			svc.UpdateServer()
+			restartServer(svc)
 		}
 	}
 
@@ -94,14 +89,14 @@ func updateAndRestartScript(s *scripts.Script) {
 
 func UpdateAllServer() {
 	for _, s := range store.Store.GetAllScriptMap() {
-		updateAndRestartScript(s)
+		go UpdateAndRestartScript(s)
 	}
 }
 
 func UpdateAllServerFromScript(names map[string]struct{}) {
 	for _, s := range store.Store.GetAllScriptMap() {
 		if _, ok := names[s.Name]; ok {
-			go updateAndRestartScript(s)
+			go UpdateAndRestartScript(s)
 		}
 
 	}

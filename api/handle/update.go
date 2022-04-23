@@ -33,7 +33,7 @@ func UpdatePname(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
 		return
 	}
-	controller.UpdateAndRestartScript(script)
+	go controller.UpdateAndRestartScript(script)
 }
 
 func UpdateAll(w http.ResponseWriter, r *http.Request) {
