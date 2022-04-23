@@ -22,6 +22,7 @@ var showversion bool
 func main() {
 	defer golog.Sync()
 	// golog.Level = golog.DEBUG
+	golog.Format = "{{ .Ctime }} - [{{ .Level }}]- {{.Msg}}"
 	// 异步获取ip，防止阻塞
 	go message.GetIp()
 	// 设置limit值
@@ -47,7 +48,7 @@ func main() {
 	// 自动清除全局报警器的值
 	go alert.CleanAlert()
 	golog.Info("config file path: ", configfile)
-	golog.Format = "{{ .Ctime }} - [{{ .Level }}]- {{.Msg}}"
+
 	controller.Start(configfile)
 	api.HttpServer()
 

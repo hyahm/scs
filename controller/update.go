@@ -65,7 +65,7 @@ func EnableScript(script *scripts.Script) bool {
 
 func UpdateAndRestart(svc *server.Server) {
 	svc.UpdateServer()
-	restartServer(svc)
+	RestartServer(svc)
 }
 
 // 返回成功还是失败
@@ -79,7 +79,7 @@ func UpdateAndRestartScript(s *scripts.Script) {
 	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 		svc, ok := store.Store.GetServerByName(subname)
-		if ok {
+		if ok && !svc.Disable {
 			svc.UpdateServer()
 			restartServer(svc)
 		}

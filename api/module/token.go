@@ -7,6 +7,7 @@ import (
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
+	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
@@ -32,7 +33,7 @@ func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
 		xmux.GetInstance(r).Set("role", "admin")
 		return false
 	}
-	xmux.GetInstance(r).Set(xmux.STATUSCODE, 203)
+	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
 	Write(w, r, []byte(`{"code": 203, "msg": "token error or no permission"}`))
 	return true
 }
@@ -100,7 +101,7 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 			_, ok := store.Store.GetScriptByName(pname)
 			_, sok := store.Store.GetServerByName(name)
 			if !ok || !sok {
-				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+				xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 				Write(w, r, ([]byte(`{"code": 404, "msg": "pname and name not match"}`)))
 				return true
 			}
@@ -115,7 +116,7 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 			// 只有name的接口
 			svc, ok := store.Store.GetServerByName(name)
 			if !ok {
-				xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+				xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 				Write(w, r, ([]byte(`{"code": 404, "msg": "pname and name not match"}`)))
 				return true
 			}
@@ -126,6 +127,6 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 		}
 
 	}
-	xmux.GetInstance(r).Set(xmux.STATUSCODE, 203)
+	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
 	return true
 }

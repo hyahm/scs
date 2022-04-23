@@ -7,6 +7,7 @@ import (
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
+	"github.com/hyahm/scs/pkg"
 
 	"github.com/hyahm/xmux"
 )
@@ -17,17 +18,17 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
 	if global.CanReload != 0 {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 201)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	svc, ok := store.Store.GetServerByName(name)
 	if !ok {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
 	atomic.AddInt64(&global.CanReload, 1)
@@ -36,13 +37,14 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 
 func RemovePname(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 201)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
 	pname := xmux.Var(r)["pname"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 404)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+
 		return
 	}
 

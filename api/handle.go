@@ -86,9 +86,9 @@ func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 	var send []byte
 	var err error
 
-	if xmux.GetInstance(r).Response != nil {
+	if xmux.GetInstance(r).Response != nil && xmux.GetInstance(r).Get(xmux.STATUSCODE).(int) == 200 {
 		response := xmux.GetInstance(r).Response.(*pkg.Response)
-		response.Code = xmux.GetInstance(r).Get(xmux.STATUSCODE).(int)
+		// response.Code = xmux.GetInstance(r).Get(xmux.STATUSCODE).(int)
 		response.Msg = statusMsg[response.Code]
 		send, err = json.Marshal(response)
 		if err != nil {

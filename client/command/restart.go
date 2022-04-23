@@ -15,7 +15,7 @@ var RestartCmd = &cobra.Command{
 	Long:  `command: scsctl restart ([flags]) || ([pname] [name])`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 && !restartAll {
-			fmt.Println("Specify at least one parameter, or -- all")
+			fmt.Println("Specify at least one parameter, or --all")
 			return
 		}
 		if restartAll {

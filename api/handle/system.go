@@ -15,7 +15,7 @@ func GetOS(w http.ResponseWriter, r *http.Request) {
 	hi, err := host.Info()
 
 	if err != nil {
-		xmux.GetInstance(r).Set(xmux.STATUSCODE, 500)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
 		return
 	}
 	type Info struct {

@@ -1,0 +1,15 @@
+2022-04-22 10:46:38 - [ERROR] - cander-vmwarevirtualplatform - Traceback (most recent call last):
+2022-04-22 10:46:38 - [ERROR] - cander-vmwarevirtualplatform - File "/home/cander/work/scs/test.py", line 3, in <module>
+2022-04-22 10:46:38 - [ERROR] - cander-vmwarevirtualplatform - from pyscs.scs import SCS
+2022-04-22 10:46:38 - [ERROR] - cander-vmwarevirtualplatform - ModuleNotFoundError: No module named 'pyscs'
+2022-04-22 10:53:26 - [INFO] - cander-vmwarevirtualplatform - can stop------
+2022-04-22 10:53:26 - [INFO] - cander-vmwarevirtualplatform - can not stop------
+2022-04-22 10:53:33 - [INFO] - cander-vmwarevirtualplatform - can not stop------
+2022-04-22 10:53:34 - [INFO] - cander-vmwarevirtualplatform - can stop-----
+2022-04-22 10:53:34 - [INFO] - cander-vmwarevirtualplatform - can stop------
+2022-04-22 10:53:34 - [INFO] - cander-vmwarevirtualplatform - can not stop------
+2022-04-22 10:53:42 - [INFO] - cander-vmwarevirtualplatform - can not stop------
+2022-04-22 10:53:43 - [INFO] - cander-vmwarevirtualplatform - can stop-----
+2022-04-22 10:53:43 - [INFO] - cander-vmwarevirtualplatform - can stop------
+2022-04-22 10:53:43 - [INFO] - cander-vmwarevirtualplatform - can not stop------
+2022-04-22 10:53:53 - [INFO] - cander-vmwarevirtualplatform - can not stop------

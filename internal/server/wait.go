@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -14,9 +13,9 @@ import (
 func (svc *Server) wait() {
 	go svc.successAlert()
 	// 这三行无视，
-	ctx, cancel := context.WithCancel(context.Background())
-	go svc.CheckReady(ctx)
-	defer cancel()
+	// ctx, cancel := context.WithCancel(context.Background())
+	// go svc.CheckReady(ctx)
+	// defer cancel()
 	// 只要是结束的。 都要修改状态， 关闭日志
 	if err := svc.Cmd.Wait(); err != nil {
 		// 脚本退出后才会执行这里的代码
@@ -29,13 +28,16 @@ func (svc *Server) wait() {
 				// 主动退出, kill
 			case 10:
 				// 重启 restart 感觉应该在外部重新makeserver
-				svc.start()
+				svc.stopStatus()
+				golog.Debug("ready send stop single")
+				svc.StopSignal <- true
 				return
 			case 11:
 				// 停止信号 stop
 			case 12:
 				// remove的信号
 				svc.stopStatus()
+				golog.Debug("ready send stop single")
 				svc.StopSignal <- true
 				return
 			}

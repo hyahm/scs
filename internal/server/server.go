@@ -39,7 +39,7 @@ type Server struct {
 	Times      int               `json:"times,omitempty"` // 记录循环的次数
 	SubName    string            `json:"subname,omitempty"`
 	Cmd        *exec.Cmd         `json:"-"`
-	AlwaysSign bool              `json:"always标识"` // 在停止的时候， always会变为false
+	AlwaysSign bool              `json:"always"` // 在停止的时候， always会变为false
 	// 总副本数
 	Replicate int            `json:"replicate,omitempty"`
 	Status    *status.Status `json:"status,omitempty"`
@@ -140,11 +140,9 @@ func (svc *Server) CheckReady(ctx context.Context) {
 
 }
 
-// Restart  重动服务, 执行的
+// Restart send stop single
 func (svc *Server) Restart() {
-	if svc.Disable {
-		return
-	}
+
 	if svc.IsCron {
 		svc.Cancel()
 		// 如果是循环的就直接退出
@@ -153,6 +151,7 @@ func (svc *Server) Restart() {
 	if svc.Always {
 		svc.Always = false
 	}
+	golog.Info(svc.Status.Status)
 	switch svc.Status.Status {
 	case status.WAITSTOP:
 		// 如果之前是等待停止的状态， 更改为重启状态
@@ -167,7 +166,9 @@ func (svc *Server) Restart() {
 		go svc.stop()
 		return
 	case status.STOP:
+		golog.Debug("ready send stop single")
 		svc.StopSignal <- true
+		golog.Debug("send stop single")
 	}
 
 }
@@ -219,7 +220,7 @@ func (svc *Server) fillServer(script *scripts.Script) {
 	svc.Update = script.Update
 	svc.AI = &alert.AlertInfo{}
 	svc.AT = script.AT
-	svc.StopSignal = make(chan bool)
+	svc.StopSignal = make(chan bool, 1)
 
 	svc.Liveness = script.Liveness
 	svc.Ready = make(chan bool, 1)
@@ -259,6 +260,7 @@ func (svc *Server) Remove() {
 		svc.Exit <- 12
 		svc.Stop()
 	case status.STOP:
+		golog.Debug("ready send stop single")
 		svc.StopSignal <- true
 		// DeleteServiceBySubName(svc.SubName)
 	case status.RUNNING:
@@ -312,7 +314,6 @@ func (svc *Server) UpdateServer() {
 		return
 	}
 
-	// svc.Restart()
 }
 
 // Stop  杀掉服务, 没有产生goroutine， 直接杀死

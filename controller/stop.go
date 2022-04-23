@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg/config/scripts"
 )
@@ -26,8 +27,10 @@ func StopScript(s *scripts.Script) error {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 		svc, ok := store.Store.GetServerByName(subname)
 		if ok {
+			golog.Debug("send all stop")
 			go svc.Stop()
 		}
 	}
+	golog.Debug("stop", s.Name)
 	return nil
 }

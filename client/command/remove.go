@@ -16,7 +16,7 @@ var RemoveCmd = &cobra.Command{
 	Long:  `command: scsctl remove ([flags]) || ([pname] [name])`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 && !removeAll {
-			fmt.Println("Specify at least one parameter, or -- all")
+			fmt.Println("Specify at least one parameter, or --all")
 			return
 		}
 		if removeAll {
