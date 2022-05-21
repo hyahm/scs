@@ -54,7 +54,6 @@ func Reload() error {
 	// 备份旧的scripts
 	getTempScript(temp)
 	for index := range cfg.SC {
-
 		// 删除之前存在的name
 		delete(temp, cfg.SC[index].Name)
 		// 查看副本是不是对的， 不会对存在的脚本有影响
@@ -187,8 +186,16 @@ func reloadScripts(s *scripts.Script, update bool) {
 	}
 
 	// 对比脚本是否修改
-	script = s
+	golog.Error(oldReplicate)
+	golog.Error(newReplicate)
+	golog.Error(script.Command)
+	golog.Error(s.Command)
 	if oldReplicate == newReplicate {
+		if !scripts.EqualScript(s, script) {
+			golog.Info(s.Name)
+			store.Store.SetScript(s)
+		}
+
 		// 如果一样的名字， 副本数一样的就直接跳过
 		return
 	}
