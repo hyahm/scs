@@ -38,7 +38,7 @@ func (svc *Server) asyncStart() {
 	svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
 	if svc.Cron != nil && svc.Cron.Loop > 0 {
 		svc.IsCron = true
-
+		svc.Status.Status = status.RUNNING
 		// 循环的起止时间可以只设置时分秒， 自动补齐今天的日期
 		svc.Cron.Start = strings.Trim(svc.Cron.Start, " ")
 		if svc.Cron.Start != "" {
