@@ -27,8 +27,8 @@ func Exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 		w.Write(send)
 	}
 	log.Printf("connect_id: %d,method: %s\turl: %s\ttime: %f\t status_code: %v, body: %v\n",
-		xmux.GetInstance(r).Get(xmux.CONNECTID),
+		xmux.GetInstance(r).GetConnectId(),
 		r.Method,
-		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).Get(xmux.STATUSCODE),
+		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
 		string(send))
 }

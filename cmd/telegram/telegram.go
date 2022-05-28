@@ -60,7 +60,6 @@ type Text struct {
 
 func proxy(w http.ResponseWriter, r *http.Request) {
 	text := xmux.GetInstance(r).Data.(*Text)
-	golog.Infof("%#v", *text)
 	if text.ChatID == "" {
 		golog.Info("chat_id is empty")
 		w.Write([]byte("chat_id is empty"))

@@ -13,9 +13,9 @@ import (
 	"github.com/hyahm/xmux"
 )
 
-func simpleHandle() *xmux.GroupRoute {
+func simpleHandle() *xmux.RouteGroup {
 	// 只是查看的权限
-	simple := xmux.NewGroupRoute().AddPageKeys(scripts.Simple.ToString())
+	simple := xmux.NewRouteGroup().AddPageKeys(scripts.Simple.ToString())
 	simple.Post("/status/{pname}/{name}", handle.Status)
 	simple.Post("/status/{pname}", handle.StatusPname)
 	simple.Post("/start/{pname}", handle.StartPname)
@@ -32,8 +32,8 @@ func simpleHandle() *xmux.GroupRoute {
 	return simple
 }
 
-func ScriptHandle() *xmux.GroupRoute {
-	script := xmux.NewGroupRoute().AddPageKeys(scripts.ScriptRole.ToString())
+func ScriptHandle() *xmux.RouteGroup {
+	script := xmux.NewRouteGroup().AddPageKeys(scripts.ScriptRole.ToString())
 	script.AddModule(module.CheckAllScriptToken)
 	script.Post("/stop/{pname}/{name}", handle.Stop)
 	script.Post("/stop/{pname}", handle.StopPname)
@@ -55,9 +55,9 @@ func ScriptHandle() *xmux.GroupRoute {
 	return script
 }
 
-func AdminHandle() *xmux.GroupRoute {
+func AdminHandle() *xmux.RouteGroup {
 	// 只能管理员操作 修改文件的操作
-	admin := xmux.NewGroupRoute().AddPageKeys(scripts.AdminRole.ToString()).AddModule(module.CheckAdminToken)
+	admin := xmux.NewRouteGroup().AddPageKeys(scripts.AdminRole.ToString()).AddModule(module.CheckAdminToken)
 
 	admin.Post("/get/alert", handle.GetAlert)   // 只能管理员用
 	admin.Post("/-/reload", handle.Reload)      // 只能管理员用
@@ -86,7 +86,7 @@ func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 	var send []byte
 	var err error
 
-	if xmux.GetInstance(r).Response != nil && xmux.GetInstance(r).Get(xmux.STATUSCODE).(int) == 200 {
+	if xmux.GetInstance(r).Response != nil && xmux.GetInstance(r).StatusCode == 200 {
 		response := xmux.GetInstance(r).Response.(*pkg.Response)
 		// response.Code = xmux.GetInstance(r).Get(xmux.STATUSCODE).(int)
 		response.Msg = statusMsg[response.Code]
@@ -96,9 +96,9 @@ func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(send)
 	}
-	golog.Infof("connect_id: %d,method: %s\turl: %s\ttime: %f\t status_code: %v, body: %v",
-		xmux.GetInstance(r).Get(xmux.CONNECTID),
+	golog.Infof("connect_id: %d,method: %s\turl: %s\ttime: %f\t status_code: %v, body: %v\n",
+		xmux.GetInstance(r).GetConnectId(),
 		r.Method,
-		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).Get(xmux.STATUSCODE),
+		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
 		string(send))
 }

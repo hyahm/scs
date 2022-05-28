@@ -282,7 +282,7 @@ func (svc *Server) Stop() {
 	}
 	if svc.IsCron {
 		// 如果是定时任务， 直接停止
-		golog.Infof("stop loop %s", svc.SubName)
+		golog.Infof("stop loop %s\n", svc.SubName)
 		svc.Cancel()
 	}
 	if svc.Always {
