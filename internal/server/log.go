@@ -14,12 +14,10 @@ func (svc *Server) read() {
 	if err != nil {
 		golog.Error(err)
 	}
-	golog.Info(stdout)
 	stderr, err := svc.Cmd.StderrPipe()
 	if err != nil {
 		golog.Error(err)
 	}
-	golog.Info(stderr)
 	// svc.Msg = make(chan string, 1000)
 	// 数据同步到log命令
 	// go svc.appendLog()
@@ -30,7 +28,6 @@ func (svc *Server) read() {
 }
 
 func (svc *Server) appendRead(stdout io.ReadCloser, iserr bool) {
-	golog.Info(stdout)
 	readout := bufio.NewReader(stdout)
 	for {
 		select {
@@ -38,7 +35,6 @@ func (svc *Server) appendRead(stdout io.ReadCloser, iserr bool) {
 			// close(svc.Msg)
 			return
 		default:
-			golog.Info(readout)
 			line, _, err := readout.ReadLine()
 			if err != nil {
 				stdout.Close()

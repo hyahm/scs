@@ -19,6 +19,8 @@ github.com/hyahm/golog v0.0.0-20220331081316-c10def14fc7d h1:XSBxGxOyAzVrgrx7KEr
 github.com/hyahm/golog v0.0.0-20220331081316-c10def14fc7d/go.mod h1:p74BZcpYUzHMCVtTNMUz5g3iDcZj5kLKSP9vaQmcCM0=
 github.com/hyahm/golog v0.0.0-20220504012620-eb402ee1ab9d h1:1JONmLsiBKJK+jUwbRlBd2s400k8tXGfLPMNduR7tnE=
 github.com/hyahm/golog v0.0.0-20220504012620-eb402ee1ab9d/go.mod h1:p74BZcpYUzHMCVtTNMUz5g3iDcZj5kLKSP9vaQmcCM0=
+github.com/hyahm/golog v0.0.0-20220530023613-47d2a9f33e27 h1:gKTTewrarO/dlGGILNDpM0iNG4sJSUF6oFsVKSldqpU=
+github.com/hyahm/golog v0.0.0-20220530023613-47d2a9f33e27/go.mod h1:p74BZcpYUzHMCVtTNMUz5g3iDcZj5kLKSP9vaQmcCM0=
 github.com/hyahm/lru v0.0.4 h1:v+eveZMh7T+p3N7WR32SkCyUpDOrcRRUcIjF5QzKUdE=
 github.com/hyahm/lru v0.0.4/go.mod h1:5yn4QdRKlGbtinzn6/GVLxh7SkXWCF6NlTqzMOZwvdw=
 github.com/hyahm/xmux v0.0.0-20220417040808-876e1403d387 h1:ziU7LadD3LsP71j/QUBP0u6oIsMYoAjKrtGLNDX52sQ=
