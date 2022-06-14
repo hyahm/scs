@@ -3,6 +3,7 @@ package handle
 import (
 	"net/http"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
@@ -12,6 +13,7 @@ import (
 func Reload(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
 	if global.CanReload != 0 {
+		golog.Info("global.CanReload: ", global.CanReload)
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
@@ -26,6 +28,7 @@ func Reload(w http.ResponseWriter, r *http.Request) {
 func Fmt(w http.ResponseWriter, r *http.Request) {
 	// 关闭上次监控的goroutine
 	if global.CanReload != 0 {
+		golog.Info("global.CanReload: ", global.CanReload)
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}

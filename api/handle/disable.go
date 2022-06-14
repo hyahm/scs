@@ -15,6 +15,7 @@ import (
 func Disable(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
 		// 报警相关配置
+		golog.Info("global.CanReload: ", global.CanReload)
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
@@ -38,6 +39,7 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 
 func Enable(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
+		golog.Info("global.CanReload: ", global.CanReload)
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
