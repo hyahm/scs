@@ -37,7 +37,9 @@ func RemoveScript(pname string) error {
 // update: 是否需要重新修改配置文件， 有锁
 func Remove(svc *server.Server, update bool) {
 	// 如果是always 为 true，那么直接修改为false
+	golog.Info("svc start removed")
 	svc.Remove()
+	golog.Info("svc removed")
 	<-svc.StopSignal
 	store.Store.DeleteScriptIndex(svc.Name, svc.Index)
 	store.Store.DeleteServerByName(svc.SubName)

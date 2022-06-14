@@ -246,7 +246,6 @@ func (svc *Server) fillServer(script *scripts.Script) {
 func (svc *Server) Remove() {
 	defer svc.Cancel()
 	if svc.IsCron {
-		svc.Cancel()
 		return
 	}
 	if svc.Always {
