@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"sync/atomic"
 
 	"github.com/hyahm/golog"
@@ -20,17 +21,19 @@ func RemoveScript(pname string) error {
 	if !sok {
 		return errors.New("not found this pname:" + pname)
 	}
-
+	wg := &sync.WaitGroup{}
 	for index := range store.Store.GetScriptIndex(pname) {
+		wg.Add(1)
 		subname := fmt.Sprintf("%s_%d", pname, index)
 		svc, ok := store.Store.GetServerByName(subname)
 		if !ok {
 			golog.Error(pkg.ErrBugMsg)
 			continue
 		}
-		go Remove(svc, true)
+		go remove(svc, true, wg)
 	}
-
+	wg.Done()
+	atomic.AddInt64(&global.CanReload, -1)
 	return nil
 }
 
@@ -51,4 +54,22 @@ func Remove(svc *server.Server, update bool) {
 		store.Store.DeleteScriptByName(svc.Name)
 	}
 	atomic.AddInt64(&global.CanReload, -1)
+}
+
+func remove(svc *server.Server, update bool, wg *sync.WaitGroup) {
+	// 如果是always 为 true，那么直接修改为false
+	golog.Info("svc start removed")
+	svc.Remove()
+	golog.Info("svc removed")
+	<-svc.StopSignal
+	store.Store.DeleteScriptIndex(svc.Name, svc.Index)
+	store.Store.DeleteServerByName(svc.SubName)
+	removeServer(svc.Name, svc.SubName, update)
+
+	// 如果全部删光了， 那么scripts的name也要删除
+
+	if store.Store.GetScriptLength(svc.Name) == 0 {
+		store.Store.DeleteScriptByName(svc.Name)
+	}
+	wg.Done()
 }
