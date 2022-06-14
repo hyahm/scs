@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert"
@@ -14,7 +13,6 @@ import (
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		golog.Info("global.CanReload: ", global.CanReload)
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}

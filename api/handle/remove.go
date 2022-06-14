@@ -39,7 +39,6 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 
 func RemovePname(w http.ResponseWriter, r *http.Request) {
 	if global.CanReload != 0 {
-		golog.Info("global.CanReload: ", global.CanReload)
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}

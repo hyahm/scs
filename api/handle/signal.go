@@ -21,7 +21,6 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 
 func CanNotStop(w http.ResponseWriter, r *http.Request) {
 
-	// golog.Info(string(res))
 	name := xmux.Var(r)["name"]
 	svc, ok := store.Store.GetServerByName(name)
 	if !ok {

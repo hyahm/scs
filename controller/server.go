@@ -15,14 +15,11 @@ func removeServer(name, subname string, update bool) {
 
 	script, ok := store.Store.GetScriptByName(name)
 	if !ok {
-		golog.Info(script.Replicate)
 		return
 	}
 
 	script.Replicate--
-	golog.Info(script.Replicate)
 	if script.Replicate <= 0 {
-
 		config.DeleteScriptToConfigFile(script, update)
 		return
 	}

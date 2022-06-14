@@ -3,7 +3,6 @@ package handle
 import (
 	"net/http"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
@@ -17,7 +16,6 @@ import (
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetInstance(r).Data.(*scripts.Script)
 	if global.CanReload != 0 {
-		golog.Info("global.CanReload: ", global.CanReload)
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}
