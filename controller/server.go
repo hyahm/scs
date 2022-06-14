@@ -12,16 +12,22 @@ import (
 // 删除对应的server, 外部加了锁，内部调用不用加锁  todo:
 func removeServer(name, subname string, update bool) {
 	// 如果scripts的副本数为0或者1就直接删除这个scripts
+
 	script, ok := store.Store.GetScriptByName(name)
 	if !ok {
+		golog.Info(script.Replicate)
 		return
 	}
+
 	_, ok = store.Store.GetServerByName(subname)
 	if !ok {
+		golog.Info(script.Replicate)
 		return
 	}
 	script.Replicate--
+	golog.Info(script.Replicate)
 	if script.Replicate <= 0 {
+
 		config.DeleteScriptToConfigFile(script, update)
 		return
 	}
