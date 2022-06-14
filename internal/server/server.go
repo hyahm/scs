@@ -244,9 +244,10 @@ func (svc *Server) fillServer(script *scripts.Script) {
 
 // 同步删除
 func (svc *Server) Remove() {
-	defer svc.Cancel()
 	if svc.IsCron {
-		return
+		// 如果是定时任务， 直接停止
+		golog.Infof("stop loop %s\n", svc.SubName)
+		svc.Cancel()
 	}
 	if svc.Always {
 		svc.Always = false
@@ -257,14 +258,14 @@ func (svc *Server) Remove() {
 		<-svc.Exit
 		// 结束停止的goroutine， 转为删除处理
 		svc.Exit <- 12
-		svc.Stop()
+		svc.stop()
 	case status.STOP:
 		golog.Debug("ready send stop single")
 		svc.StopSignal <- true
 		// DeleteServiceBySubName(svc.SubName)
 	case status.RUNNING:
 		svc.Exit <- 12
-		svc.Stop()
+		svc.stop()
 	case status.WAITSTOP:
 		<-svc.Exit
 		// 结束停止的goroutine， 转为删除处理
