@@ -32,7 +32,7 @@ func RemoveScript(pname string) error {
 		}
 		go remove(svc, true, wg)
 	}
-	wg.Done()
+	wg.Wait()
 	atomic.AddInt64(&global.CanReload, -1)
 	return nil
 }
