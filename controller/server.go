@@ -19,11 +19,6 @@ func removeServer(name, subname string, update bool) {
 		return
 	}
 
-	_, ok = store.Store.GetServerByName(subname)
-	if !ok {
-		golog.Info(script.Replicate)
-		return
-	}
 	script.Replicate--
 	golog.Info(script.Replicate)
 	if script.Replicate <= 0 {
