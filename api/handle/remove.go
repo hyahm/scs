@@ -50,7 +50,7 @@ func RemovePname(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
+	atomic.AddInt64(&global.CanReload, 1)
 	controller.RemoveScript(pname)
 }
 
