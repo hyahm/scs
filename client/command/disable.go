@@ -46,10 +46,10 @@ var DisableCmd = &cobra.Command{
 		}
 		for _, node := range getNodes() {
 			wg.Add(1)
-			go func() {
+			go func(node *client.Node) {
 				node.Disable(args[0])
 				wg.Done()
-			}()
+			}(node)
 
 		}
 		wg.Wait()

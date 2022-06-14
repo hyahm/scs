@@ -31,10 +31,10 @@ func DisableScript(s *scripts.Script, update bool) bool {
 		}
 		if i == 0 {
 			// 如果索引时0的， 那么直接停止就好了， 并且将值修改为true
-
-			svc.Disable = true
-
-			go svc.Stop()
+			go func() {
+				svc.Stop()
+				svc.Disable = true
+			}()
 			continue
 		}
 		golog.Info("add reload count")
