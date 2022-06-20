@@ -34,6 +34,7 @@ func UpdatePname(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
+
 	go controller.UpdateAndRestartScript(script)
 }
 

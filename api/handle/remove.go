@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
@@ -19,7 +18,6 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
 	if global.CanReload != 0 {
-		golog.Info("global.CanReload: ", global.CanReload)
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
 		return
 	}

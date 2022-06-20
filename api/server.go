@@ -51,7 +51,6 @@ func HttpServer() {
 		internal.CreateTLS()
 	}
 
-	router.DebugIncludeTpl("/cannotstop/")
 	on := "listen on " + global.GetListen() + " over https"
 	golog.Info(on)
 	if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {

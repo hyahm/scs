@@ -79,9 +79,11 @@ func UpdateAndRestartScript(s *scripts.Script) {
 	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 		svc, ok := store.Store.GetServerByName(subname)
-		if ok && !svc.Disable {
+		if ok && !svc.Disable && i == 0 {
 			svc.UpdateServer()
-			restartServer(svc)
+		}
+		if ok && !svc.Disable {
+			go restartServer(svc)
 		}
 	}
 

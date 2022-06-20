@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
@@ -64,7 +63,6 @@ func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
 	}
 	// 验证所有scripts的权限
 	// 接口权限
-	golog.Info(r.URL.Path)
 	roles := xmux.GetInstance(r).GetPageKeys()
 	// 主要是2种， 一种是 script  一种是 simple
 
