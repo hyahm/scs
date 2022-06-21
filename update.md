@@ -1,3 +1,15 @@
+# 3.8.0
+- 增加 原子性操作的超时时间设置， 结构体如下
+```
+type SignalRequest struct {
+	Timeout            int64 `json:"timeout"`            // 超时时间， 单位:s
+	Restart            bool  `json:"restart"`            // 如果超时了是否重启
+	Notice             bool  `json:"notice"`             // 如果超时了是否报警通知
+	ContinuityInterval int   `json:"continuityInterval"` // 下次报警时间
+}
+```
+
+
 # 3.7.7
 - 修复权限问题
 - 日志优化

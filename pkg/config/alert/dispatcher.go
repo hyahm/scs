@@ -1,6 +1,9 @@
 package alert
 
 import (
+	"crypto/md5"
+	"fmt"
+	"io"
 	"sync"
 	"time"
 
@@ -8,18 +11,24 @@ import (
 	"github.com/hyahm/scs/pkg/message"
 )
 
+func Md5(src string) string {
+	m := md5.New()
+	io.WriteString(m, src)
+	return fmt.Sprintf("%x", m.Sum(nil))
+}
+
 // 分发器, 每个报警器间隔多久发一次
 var dispatcherLock sync.RWMutex
 
 // 分发器  2个map的key 分别是  name key,  副本名和一个自定义的key
-var dispatcher map[string]map[string]*AlertInfo
+var dispatcher map[string]*AlertInfo
 
 func init() {
-	dispatcher = make(map[string]map[string]*AlertInfo)
+	dispatcher = make(map[string]*AlertInfo)
 	dispatcherLock = sync.RWMutex{}
 }
 
-func GetDispatcher() map[string]map[string]*AlertInfo {
+func GetDispatcher() map[string]*AlertInfo {
 	return dispatcher
 }
 
@@ -36,16 +45,13 @@ func (ra *RespAlert) SendAlert() {
 	dispatcherLock.Lock()
 	defer dispatcherLock.Unlock()
 	// 异常的通知
-	if _, ok := dispatcher[ra.Pname]; !ok {
-		dispatcher[ra.Pname] = make(map[string]*AlertInfo)
-	}
 	// 如果收到了报警
-	if _, ok := dispatcher[ra.Pname][ra.Name]; !ok {
+	if _, ok := dispatcher[ra.Name]; !ok {
 		// 如果是第一次， 那么初始化值并直接发送报警
 		if ra.ContinuityInterval == 0 {
 			ra.ContinuityInterval = 60 * 60
 		}
-		dispatcher[ra.Pname][ra.Name] = &AlertInfo{
+		dispatcher[ra.Name] = &AlertInfo{
 			AlertTime:  time.Now(),
 			Start:      time.Now(),
 			BrokenTime: time.Now(),
@@ -60,13 +66,13 @@ func (ra *RespAlert) SendAlert() {
 			To:                 ra.To,
 			ContinuityInterval: time.Duration(ra.ContinuityInterval) * time.Second,
 		}
-		AlertMessage(dispatcher[ra.Pname][ra.Name].AM, dispatcher[ra.Pname][ra.Name].To)
+		AlertMessage(dispatcher[ra.Name].AM, dispatcher[ra.Name].To)
 
 	} else {
 		// 否则的话， 检查上次报警的时间是否大于间隔时间
-		if time.Since(dispatcher[ra.Pname][ra.Name].AlertTime) > dispatcher[ra.Pname][ra.Name].ContinuityInterval {
-			AlertMessage(dispatcher[ra.Pname][ra.Name].AM, dispatcher[ra.Pname][ra.Name].To)
-			dispatcher[ra.Pname][ra.Name].AlertTime = time.Now()
+		if time.Since(dispatcher[ra.Name].AlertTime) > dispatcher[ra.Name].ContinuityInterval {
+			AlertMessage(dispatcher[ra.Name].AM, dispatcher[ra.Name].To)
+			dispatcher[ra.Name].AlertTime = time.Now()
 		}
 	}
 }
@@ -75,13 +81,11 @@ func CleanAlert() {
 	// 删除超过10小时没发送信息的值， 每10分钟执行一次
 	for {
 		dispatcherLock.Lock()
-		for pname := range dispatcher {
-			for name, di := range dispatcher[pname] {
-				if time.Since(di.AlertTime) > time.Hour*10 {
-					delete(dispatcher[pname], name)
-				}
-
+		for name, di := range dispatcher {
+			if time.Since(di.AlertTime) > time.Hour*10 {
+				delete(dispatcher, name)
 			}
+
 		}
 		dispatcherLock.Unlock()
 		time.Sleep(time.Minute * 10)

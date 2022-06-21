@@ -15,6 +15,11 @@ import (
 	"github.com/hyahm/xmux"
 )
 
+// 为了兼容之前版本，无视解析失败的问题
+func unmarshalError(err error, w http.ResponseWriter, r *http.Request) bool {
+	return false
+}
+
 // var dir := "key"
 func HttpServer() {
 	response := &pkg.Response{
@@ -27,6 +32,7 @@ func HttpServer() {
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
 	router.Exit = exit
+	router.UnmarshalError = unmarshalError
 	router.Post("/probe", handle.Probe)
 
 	router.AddGroup(AdminHandle())

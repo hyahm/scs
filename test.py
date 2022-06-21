@@ -12,7 +12,7 @@ while True:
     print("can stop------", flush=True)
     msg, code = scs.can_not_stop()
     print(" can not stop------", flush=True)
-    time.sleep(random.randint(5, 10))
+    time.sleep(random.randint(12, 20))
     print(" can not stop------", flush=True)
     msg, code =scs.can_stop()
     time.sleep(random.randint(1, 3))

@@ -43,7 +43,7 @@ func ScriptHandle() *xmux.RouteGroup {
 	script.Post("/server/info/{name}", handle.ServerInfo)
 	script.Post("/get/servers", handle.GetServers)    // complete
 	script.Post("/get/index/{name}", handle.GetIndex) // complete
-	script.Post("/cannotstop/{name}", handle.CanNotStop)
+	script.Post("/cannotstop/{name}", handle.CanNotStop).BindJson(pkg.SignalRequest{})
 	script.Post("/canstop/{name}", handle.CanStop)
 	script.Post("/get/scripts", handle.GetScripts)
 	script.Post("/stop", handle.StopAll) // complete
@@ -96,9 +96,10 @@ func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(send)
 	}
-	// golog.Infof("connect_id: %d,method: %s\turl: %s\ttime: %f\t status_code: %v, body: %v\n",
-	// 	xmux.GetInstance(r).GetConnectId(),
-	// 	r.Method,
-	// 	r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
-	// 	string(send))
+	golog.Info(string(xmux.GetInstance(r).Body))
+	golog.Infof("connect_id: %d,method: %s\turl: %s\ttime: %f\t status_code: %v, body: %v\n",
+		xmux.GetInstance(r).GetConnectId(),
+		r.Method,
+		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
+		string(send))
 }
