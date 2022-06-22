@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var stopAll bool
-
 var StopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "stop script",

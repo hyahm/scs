@@ -12,19 +12,30 @@ import (
 )
 
 // Start  启动服务 异步的
-func (svc *Server) Start() {
+func (svc *Server) Start(param ...string) {
+	parameter := ""
+	if len(param) > 0 {
+		parameter = param[0]
+	}
 	switch svc.Status.Status {
 	case status.STOP:
 		// 开始启动的时候，需要将遍历变量值的模板渲染
 		if !svc.Disable {
-			go svc.asyncStart()
+			go svc.asyncStart(parameter)
 		}
 
 	}
 }
 
 // 当是停止状态的时候异步启动
-func (svc *Server) asyncStart() {
+func (svc *Server) asyncStart(param string) {
+	svc.Env["PARAMETER"] = param
+	// 格式化 SCS_TPL 开头的环境变量
+	for k := range svc.Env {
+		if len(k) > 8 && k[:7] == "SCS_TPL" {
+			svc.Env[k] = internal.Format(svc.Env[k], svc.Env)
+		}
+	}
 	svc.Always = svc.AlwaysSign
 	svc.Version = pkg.GetVersion(svc.Version)
 	err := svc.Install()
@@ -35,6 +46,8 @@ func (svc *Server) asyncStart() {
 	}
 	svc.Exit = make(chan int, 2)
 	svc.CancelProcess = make(chan bool, 2)
+
+	svc.Status.Command = internal.Format(svc.Command, svc.Env)
 	svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
 	if svc.Cron != nil && svc.Cron.Loop > 0 {
 		svc.IsCron = true
@@ -64,7 +77,6 @@ func (svc *Server) asyncStart() {
 		go svc.cron()
 		return
 	}
-	svc.Command = internal.Format(svc.Command, svc.Env)
 
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.start(); err != nil {

@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var removeAll bool
-
 var RemoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "remove script",

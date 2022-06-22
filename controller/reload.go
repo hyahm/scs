@@ -57,7 +57,7 @@ func Reload() error {
 		// 删除之前存在的name
 		delete(temp, cfg.SC[index].Name)
 		// 查看副本是不是对的， 不会对存在的脚本有影响
-		reloadScripts(cfg.SC[index], false)
+		reloadScripts(cfg.SC[index])
 	}
 
 	// 删除已删除的 script
@@ -76,8 +76,7 @@ func Reload() error {
 	return nil
 }
 
-// 添加script并启动
-
+// 新增script并启动
 func AddScript(s *scripts.Script) {
 	if s.Token == "" {
 		s.Token = pkg.RandomToken()
@@ -87,25 +86,24 @@ func AddScript(s *scripts.Script) {
 	}
 	// 将scripts填充到store中
 	store.Store.SetScript(s)
+	// 初始化脚本的副本数
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
 	}
-	// 初始化脚本的副本数
-
-	// 生成环境变量, 填充到script.tempenv里面
-
+	s.MakeTempEnv()
 	// 假设设置的端口是可用的
+	// 对于每个script 都生成对应的
 	availablePort := s.Port
 	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		store.Store.InitServer(i, replicate, s.Name, subname)
+		svc := store.Store.InitServer(i, s.Name, subname)
 		store.Store.SetScriptIndex(s.Name, i)
-		svc, _ := store.Store.GetServerByName(subname)
-		availablePort = svc.MakeServer(s, availablePort)
-		availablePort++
+		svc.Port = availablePort
+		svc.MakeServer(s)
+		availablePort = svc.Port + 1
 		if s.Disable {
-			// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
+			// 如果是禁用的 ，那么不用生成多个副本
 			return
 		}
 
@@ -113,66 +111,11 @@ func AddScript(s *scripts.Script) {
 	}
 }
 
-func UpdateScript(s *scripts.Script, update bool) {
-	script, ok := store.Store.GetScriptByName(s.Name)
-	if !ok {
-		return
-	}
-	oldReplicate := script.Replicate
-	if oldReplicate == 0 {
-		oldReplicate = 1
-	}
-	if s.Replicate == 1 {
-		script.Replicate = 0
-	}
-	newReplicate := s.Replicate
-	if newReplicate == 0 {
-		newReplicate = 1
-	}
+// 脚本更新操作
+func UpdateScriptApi(s *scripts.Script) {
+	// 既然是更新操作，那么这个必定存在
+	script, _ := store.Store.GetScriptByName(s.Name)
 
-	script = s
-	availablePort := s.Port
-	for i := 0; i < newReplicate; i++ {
-		if !store.Store.HaveServerByIndex(s.Name, i) {
-			subname := fmt.Sprintf("%s_%d", s.Name, i)
-			store.Store.InitServer(i, newReplicate, s.Name, subname)
-			store.Store.SetScriptIndex(s.Name, i)
-			svc, _ := store.Store.GetServerByName(subname)
-			availablePort = svc.MakeServer(s, availablePort)
-			availablePort++
-			if script.Disable {
-				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-				return
-			}
-			svc.Start()
-		}
-	}
-	// 删除多余的
-	for i := newReplicate; i < oldReplicate; i++ {
-		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		svc, ok := store.Store.GetServerByName(subname)
-		if !ok {
-			golog.Error(pkg.ErrBugMsg)
-			continue
-		}
-		golog.Info("remove " + script.Name + fmt.Sprintf("_%d", i))
-		atomic.AddInt64(&global.CanReload, 1)
-		go Remove(svc, false)
-	}
-
-}
-
-// todo:
-func reloadScripts(s *scripts.Script, update bool) {
-	// script: 配置文件新读取出来的
-	// 处理存在的
-	script, ok := store.Store.GetScriptByName(s.Name)
-	// 对比启动的副本
-	if !ok {
-		// 如果不存在，说明要新增
-		AddScript(s)
-		return
-	}
 	oldReplicate := script.Replicate
 	if oldReplicate == 0 {
 		oldReplicate = 1
@@ -186,10 +129,6 @@ func reloadScripts(s *scripts.Script, update bool) {
 	}
 
 	// 对比脚本是否修改
-	golog.Error(oldReplicate)
-	golog.Error(newReplicate)
-	golog.Error(script.Command)
-	golog.Error(s.Command)
 	if oldReplicate == newReplicate {
 		if !scripts.EqualScript(s, script) {
 			golog.Info(s.Name)
@@ -210,18 +149,19 @@ func reloadScripts(s *scripts.Script, update bool) {
 				golog.Error(pkg.ErrBugMsg)
 				continue
 			}
-			go Remove(svc, update)
+			atomic.AddInt64(&global.CanReload, 1)
+			go Remove(svc, false)
 		}
 	} else {
 		// 小于的话，就增加
 		availablePort := s.Port
 		for i := oldReplicate; i < newReplicate; i++ {
 			subname := fmt.Sprintf("%s_%d", s.Name, i)
-			store.Store.InitServer(i, newReplicate, s.Name, subname)
+			svc := store.Store.InitServer(i, s.Name, subname)
 			store.Store.SetScriptIndex(s.Name, i)
-			svc, _ := store.Store.GetServerByName(subname)
-			availablePort = svc.MakeServer(s, availablePort)
-			availablePort++
+			svc.Port = availablePort
+			svc.MakeServer(s)
+			availablePort = svc.Port + 1
 			if s.Disable {
 				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
 				return
@@ -230,4 +170,18 @@ func reloadScripts(s *scripts.Script, update bool) {
 		}
 	}
 
+}
+
+// 配置文件直接reload
+func reloadScripts(s *scripts.Script) {
+	// script: 配置文件新读取出来的
+	// 处理存在的
+	script, ok := store.Store.GetScriptByName(s.Name)
+	// 对比启动的副本
+	if !ok {
+		// 如果不存在，说明要新增
+		AddScript(s)
+		return
+	}
+	UpdateScriptApi(script)
 }

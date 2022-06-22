@@ -9,8 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var verbose bool
-
 var StatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Print assign script status",

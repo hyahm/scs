@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert"
@@ -13,6 +14,7 @@ import (
 func UnStop(ctx context.Context, name string, sr *pkg.SignalRequest) {
 	select {
 	case <-time.After(time.Second * time.Duration(sr.Timeout)):
+		pkg.DeleteAtomSignal(name)
 		// 报警
 		if sr.Notice {
 			ra := &alert.RespAlert{
@@ -24,11 +26,11 @@ func UnStop(ctx context.Context, name string, sr *pkg.SignalRequest) {
 				ra.ContinuityInterval = sr.ContinuityInterval
 			}
 			ra.SendAlert()
-			pkg.DeleteAtomSignal(name)
 		}
 		if sr.Restart {
 			if server, ok := store.Store.GetServerByName(name); ok {
-				server.Restart()
+				golog.Info("restart atom")
+				KillAndStartServer(sr.Parameter, server)
 			}
 		}
 	case <-ctx.Done():

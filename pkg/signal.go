@@ -11,10 +11,11 @@ type atomSignal struct {
 }
 
 type SignalRequest struct {
-	Timeout            int64 `json:"timeout"`            // 超时时间， 默认s
-	Restart            bool  `json:"restart"`            // 如果超时了是否重启
-	Notice             bool  `json:"notice"`             // 如果超时了是否报警通知
-	ContinuityInterval int   `json:"continuityInterval"` // 下次报警时间
+	Timeout            int64  `json:"timeout"`            // 超时时间， 默认s
+	Restart            bool   `json:"restart"`            // 如果超时了是否重启
+	Notice             bool   `json:"notice"`             // 如果超时了是否报警通知
+	ContinuityInterval int    `json:"continuityInterval"` // 下次报警时间
+	Parameter          string `json:"parameter"`          // 重启后的传参
 }
 
 var atom *atomSignal

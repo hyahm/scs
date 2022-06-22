@@ -25,6 +25,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
+	// rp := xmux.GetInstance(r).Data.(*pkg.ReStartParameter)
 	svc.Start()
 
 }

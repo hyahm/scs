@@ -369,51 +369,51 @@ func (sc *SCSClient) UpdateName() (*pkg.Response, error) {
 }
 
 // 重启所有脚本
-func (sc *SCSClient) RestartAll() (*pkg.Response, error) {
-	return sc.requests("/restart", nil)
+func (sc *SCSClient) RestartAll(param string) (*pkg.Response, error) {
+	return sc.requests("/restart", strings.NewReader(fmt.Sprintf(`{"parameter": "%s"}`, param)))
 }
 
 // 重启此脚本
-func (sc *SCSClient) RestartPname() (*pkg.Response, error) {
+func (sc *SCSClient) RestartPname(param string) (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.requests("/restart/"+sc.Pname, nil)
+	return sc.requests("/restart/"+sc.Pname, strings.NewReader(fmt.Sprintf(`{"parameter": "%s"}`, param)))
 }
 
 // 重启当前副本
-func (sc *SCSClient) RestartName() (*pkg.Response, error) {
+func (sc *SCSClient) RestartName(param string) (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.requests(fmt.Sprintf("/restart/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/restart/%s/%s", sc.Pname, sc.Name), strings.NewReader(fmt.Sprintf(`{"parameter": "%s"}`, param)))
 }
 
 // 启动所有脚本
-func (sc *SCSClient) StartAll() (*pkg.Response, error) {
-	return sc.requests("/start", nil)
+func (sc *SCSClient) StartAll(param string) (*pkg.Response, error) {
+	return sc.requests("/start", strings.NewReader(fmt.Sprintf(`{"parameter": "%s"}`, param)))
 }
 
 // 启动当前脚本
-func (sc *SCSClient) StartPname() (*pkg.Response, error) {
+func (sc *SCSClient) StartPname(param string) (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
-	return sc.requests("/start/"+sc.Pname, nil)
+	return sc.requests("/start/"+sc.Pname, strings.NewReader(fmt.Sprintf(`{"parameter": "%s"}`, param)))
 }
 
 // 启动当前副本
-func (sc *SCSClient) StartName() (*pkg.Response, error) {
+func (sc *SCSClient) StartName(param string) (*pkg.Response, error) {
 	if sc.Pname == "" {
 		return nil, ErrPnameIsEmpty
 	}
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.requests(fmt.Sprintf("/start/%s/%s", sc.Pname, sc.Name), nil)
+	return sc.requests(fmt.Sprintf("/start/%s/%s", sc.Pname, sc.Name), strings.NewReader(fmt.Sprintf(`{"parameter": "%s"}`, param)))
 }
 
 // 停止所有脚本

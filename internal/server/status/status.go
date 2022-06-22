@@ -17,4 +17,5 @@ type Status struct {
 	Version      string `json:"version"`
 	IsCron       bool   `json:"isCron"`
 	RestartCount int    `json:"restartCount"` // 记录失败重启的次数
+	Command      string `json:"command"`
 }

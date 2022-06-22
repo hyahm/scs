@@ -15,10 +15,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var env map[string]string
-var file string
-var url string
-
 // install <-f yaml> || <-u url> || <name>
 var InstallCmd = &cobra.Command{
 	Use:   "install",

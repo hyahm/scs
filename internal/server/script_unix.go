@@ -58,32 +58,32 @@ func (svc *Server) kill() error {
 	return nil
 }
 
-func (svc *Server) start() error {
-	svc.Cmd = exec.Command("/bin/bash", "-c", svc.Command)
-	if svc.Dir != "" {
-		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
-			golog.Error(err)
-			return err
-		}
-		svc.Cmd.Dir = svc.Dir
-	}
-	if svc.Cmd.Env == nil {
-		svc.Cmd.Env = make([]string, 0, len(svc.Env))
-	}
-	for k, v := range svc.Env {
-		if k == "" || v == "" {
-			continue
-		}
-		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
-	}
-	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	svc.read()
-	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
-	if err := svc.Cmd.Start(); err != nil {
-		// 执行脚本前的错误, 改变状态
-		golog.Error(err)
-		return err
-	}
-	svc.Status.Status = status.RUNNING
-	return nil
-}
+// func (svc *Server) start() error {
+// 	svc.Cmd = exec.Command("/bin/bash", "-c", svc.Command)
+// 	if svc.Dir != "" {
+// 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
+// 			golog.Error(err)
+// 			return err
+// 		}
+// 		svc.Cmd.Dir = svc.Dir
+// 	}
+// 	if svc.Cmd.Env == nil {
+// 		svc.Cmd.Env = make([]string, 0, len(svc.Env))
+// 	}
+// 	for k, v := range svc.Env {
+// 		if k == "" || v == "" {
+// 			continue
+// 		}
+// 		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
+// 	}
+// 	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+// 	svc.read()
+// 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
+// 	if err := svc.Cmd.Start(); err != nil {
+// 		// 执行脚本前的错误, 改变状态
+// 		golog.Error(err)
+// 		return err
+// 	}
+// 	svc.Status.Status = status.RUNNING
+// 	return nil
+// }

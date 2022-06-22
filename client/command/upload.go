@@ -14,13 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var overwrite bool
-
-var osDir []string
-var repoUrl string
-var username string
-var password string
-
 func upload(filename string) error {
 	bodyBuf := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(bodyBuf)

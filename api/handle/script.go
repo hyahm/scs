@@ -24,7 +24,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	_, ok := store.Store.GetServerByName(s.Name)
+	_, ok := store.Store.GetScriptByName(s.Name)
 	if ok {
 		// 存在的话，需要对比配置文件的修改
 		// 需要判断是否相等
@@ -33,18 +33,16 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// 更新配置文件
-
-		// 更新这个script
 		err := config.UpdateScriptToConfigFile(s, true)
 		if err != nil {
 			xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
 			return
 		}
 		// 否则删除原来的, 需不需要删除
-		controller.UpdateScript(s, false)
+		controller.UpdateScriptApi(s)
 	} else {
 		// 添加
-		err := config.AddScriptToConfigFile(s, true)
+		err := config.AddScriptToConfigFile(s)
 		if err != nil {
 			xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
 			return

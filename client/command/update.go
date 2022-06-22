@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var updateAll bool
-
 var UpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "update server",

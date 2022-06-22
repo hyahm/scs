@@ -127,7 +127,6 @@ func readConfig() (*Config, error) {
 }
 
 func (c *Config) check() error {
-	golog.UpFunc(1, "check")
 	// 配置信息填充至状态
 	checkrepeat := make(map[string]bool)
 	for index := range c.SC {
@@ -243,8 +242,7 @@ func DeleteScriptToConfigFile(s *scripts.Script, update bool) error {
 	return tmp.WriteConfig(update)
 }
 
-func AddScriptToConfigFile(s *scripts.Script, update bool) error {
-	// 添加
+func AddScriptToConfigFile(s *scripts.Script) error {
 	// 默认配置
 	if !CheckScriptNameRule(s.Name) {
 		return errors.New("script name must be a word, " + s.Name)
@@ -260,5 +258,5 @@ func AddScriptToConfigFile(s *scripts.Script, update bool) error {
 		return err
 	}
 	tmp.SC = append(tmp.SC, s)
-	return tmp.WriteConfig(update)
+	return tmp.WriteConfig(true)
 }

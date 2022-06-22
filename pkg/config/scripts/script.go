@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert/to"
 	"github.com/hyahm/scs/pkg/config/liveness"
@@ -53,7 +52,7 @@ type Script struct {
 }
 
 // 生成新的env 到 tempenv
-func (s *Script) MakeEnv() {
+func (s *Script) MakeTempEnv() {
 	// 生成 全局脚本的 env
 	tempEnv := make(map[string]string)
 
@@ -83,13 +82,7 @@ func (s *Script) MakeEnv() {
 	tempEnv["TOKEN"] = s.Token
 	tempEnv["PNAME"] = s.Name
 	tempEnv["PROJECT_HOME"] = s.Dir
-	for k := range tempEnv {
-		if len(k) > 8 && k[:7] == "SCS_TPL" {
-			tempEnv[k] = internal.Format(tempEnv[k], tempEnv)
-		}
-	}
 
-	s.Command = internal.Format(s.Command, tempEnv)
 	s.TempEnv = tempEnv
 }
 

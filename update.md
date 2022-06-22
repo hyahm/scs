@@ -1,13 +1,18 @@
 # 3.8.0
-- 增加 原子性操作的超时时间设置， 结构体如下
+- 增加 原子性操作的超时时间设置，`/cannotstop/{name}`， 类似数据库事务操作 结构体如下
 ```
 type SignalRequest struct {
 	Timeout            int64 `json:"timeout"`            // 超时时间， 单位:s
 	Restart            bool  `json:"restart"`            // 如果超时了是否重启
 	Notice             bool  `json:"notice"`             // 如果超时了是否报警通知
 	ContinuityInterval int   `json:"continuityInterval"` // 下次报警时间
+  // 原子操作后，如果设置了此参数，并且设置了restart=true， 那么将在重启后注入到环境变量 PARAMETER 中
+  Parameter string   `json:"parameter"`                 
 }
 ```
+- 代码优化
+- 修复windows下kill脚本失效的问题
+- enable 后自动启动
 
 
 # 3.7.7

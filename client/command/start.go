@@ -23,7 +23,7 @@ var StartCmd = &cobra.Command{
 		for _, node := range nodes {
 			wg.Add(1)
 			go func(node *client.Node) {
-				node.Start(args...)
+				node.Start(parameter, args...)
 				wg.Done()
 			}(node)
 
@@ -33,7 +33,7 @@ var StartCmd = &cobra.Command{
 }
 
 func init() {
-
+	StartCmd.Flags().StringVarP(&parameter, "parameter", "p", "", "restart all")
 	rootCmd.AddCommand(StartCmd)
 
 }

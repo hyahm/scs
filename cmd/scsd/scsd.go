@@ -49,7 +49,7 @@ func main() {
 	go alert.CleanAlert()
 	golog.Info("config file path: ", configfile)
 
-	controller.Start(configfile)
+	controller.FirstStartAllScript(configfile)
 	api.HttpServer()
 
 }

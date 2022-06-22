@@ -8,12 +8,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var restartAll bool
 var RestartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "restart assign script",
 	Long:  `command: scsctl restart ([flags]) || ([pname] [name])`,
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(parameter)
 		if len(args) == 0 && !restartAll {
 			fmt.Println("Specify at least one parameter, or --all")
 			return
@@ -30,7 +30,7 @@ var RestartCmd = &cobra.Command{
 		for _, node := range nodes {
 			wg.Add(1)
 			go func(node *client.Node) {
-				node.Restart(args...)
+				node.Restart(parameter, args...)
 				wg.Done()
 			}(node)
 
@@ -42,5 +42,6 @@ var RestartCmd = &cobra.Command{
 
 func init() {
 	RestartCmd.Flags().BoolVarP(&restartAll, "all", "a", false, "restart all")
+	RestartCmd.Flags().StringVarP(&parameter, "parameter", "p", "", "restart all")
 	rootCmd.AddCommand(RestartCmd)
 }

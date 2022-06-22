@@ -19,11 +19,7 @@ func (svc *Server) stop() {
 		select {
 		case <-time.After(time.Millisecond * 10):
 			if !svc.Status.CanNotStop {
-				err := svc.kill()
-				if err != nil {
-					golog.Error(err)
-					return
-				}
+				svc.kill()
 				// 通知外部已经停止了
 				return
 			}
@@ -34,22 +30,21 @@ func (svc *Server) stop() {
 	}
 }
 
-func (svc *Server) kill() error {
+func (svc *Server) kill() {
 	if svc.Cmd == nil {
-		return nil
+		golog.Info(svc.Cmd)
+		return
 	}
-	err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(svc.Cmd.Process.Pid)).Run()
+	err := exec.Command("powershell", "/C", "taskkill", "/F", "/T", "/PID", fmt.Sprint(svc.Cmd.Process.Pid)).Run()
 	if err != nil {
 		// 正常来说，不会进来的，特殊问题以后再说
 		golog.Error(err)
 	}
-	return nil
-
 }
 
 func (svc *Server) start() error {
-
-	svc.Cmd = exec.Command("powershell", "-c", svc.Command)
+	golog.Info("server command: ", svc.Status.Command)
+	svc.Cmd = exec.Command("powershell", "-c", svc.Status.Command)
 	if svc.Dir != "" {
 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
 			return err
@@ -66,10 +61,8 @@ func (svc *Server) start() error {
 		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
 
 	}
-
 	// 等待初始化完成完成后向后执行
 	svc.read()
-
 	if err := svc.Cmd.Start(); err != nil {
 		// 执行脚本前的错误, 改变状态
 		golog.Error(err)
