@@ -274,11 +274,12 @@ func (sc *SCSClient) webSocket(url string, body io.Reader) {
 }
 
 // 标记当前副本不能停止
-func (sc *SCSClient) CanNotStop() (*pkg.Response, error) {
+func (sc *SCSClient) CanNotStop(sr *pkg.SignalRequest) (*pkg.Response, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
 	}
-	return sc.requests("/cannotstop/"+sc.Name, nil)
+	b, _ := json.Marshal(sr)
+	return sc.requests("/cannotstop/"+sc.Name, bytes.NewReader(b))
 }
 
 // 标记当前副本可以停止
