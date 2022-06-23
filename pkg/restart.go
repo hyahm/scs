@@ -1,5 +1,5 @@
 package pkg
 
-type ReStartParameter struct {
+type RequestParameter struct {
 	Parameter string `json:"parameter"`
 }

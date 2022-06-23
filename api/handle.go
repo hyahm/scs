@@ -14,18 +14,19 @@ import (
 )
 
 func simpleHandle() *xmux.RouteGroup {
-	// 只是查看的权限
-	simple := xmux.NewRouteGroup().AddPageKeys(scripts.Simple.ToString())
+	// 只是调试的权限
+	simple := xmux.NewRouteGroup().AddPageKeys(scripts.Server.ToString())
 	simple.Post("/status/{pname}/{name}", handle.Status)
 	simple.Post("/status/{pname}", handle.StatusPname)
 	simple.Post("/start/{pname}", handle.StartPname)
 	simple.Post("/start/{pname}/{name}", handle.Start)
 	simple.Post("/update/{pname}/{name}", handle.Update)
 	simple.Post("/update/{pname}", handle.UpdatePname)
+	simple.Post("/update", handle.UpdateAll) // complete
 	simple.Post("/start", handle.StartAll)   // complete
 	simple.Post("/status", handle.AllStatus) // complete
 	simple.Get("/log/{name}/{int:line}", handle.Log).BindResponse(nil)
-	simple.Post("/update", handle.UpdateAll) // complete
+
 	simple.Post("/restart/{pname}/{name}", handle.Restart)
 	simple.Post("/restart/{pname}", handle.RestartPname)
 	simple.Post("/restart", handle.RestartAll) // complete
@@ -40,10 +41,11 @@ func ScriptHandle() *xmux.RouteGroup {
 	script.Post("/kill/{pname}", handle.KillPname)
 	script.Post("/kill/{pname}/{name}", handle.Kill)
 	script.Post("/env/{name}", handle.GetEnvName)
-	script.Post("/server/info/{name}", handle.ServerInfo)
-	script.Post("/get/servers", handle.GetServers)    // complete
-	script.Post("/get/index/{name}", handle.GetIndex) // complete
+	script.Post("/server/info/{name}", handle.ServerInfo) // 获取某个server信息
+	script.Post("/get/servers", handle.GetServers)        // 获取所有server信息
+	script.Post("/get/index/{pname}", handle.GetIndex)    // 获取某script 对应副本的index
 	script.Post("/cannotstop/{name}", handle.CanNotStop).BindJson(pkg.SignalRequest{})
+	script.Post("/parameter/{name}", handle.SetParameter).BindJson(pkg.SignalRequest{})
 	script.Post("/canstop/{name}", handle.CanStop)
 	script.Post("/get/scripts", handle.GetScripts)
 	script.Post("/stop", handle.StopAll) // complete

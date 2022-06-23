@@ -32,6 +32,6 @@ func GetScripts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
-	pname := xmux.Var(r)["name"]
+	pname := xmux.Var(r)["pname"]
 	xmux.GetInstance(r).Response.(*pkg.Response).Data = store.Store.GetScriptIndex(pname)
 }

@@ -23,7 +23,7 @@ func (role Role) ToString() string {
 const (
 	AdminRole  Role = "admin"
 	ScriptRole Role = "script"
-	Simple     Role = "simple"
+	Server     Role = "server"
 )
 
 type Script struct {

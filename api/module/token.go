@@ -11,7 +11,7 @@ import (
 	"github.com/hyahm/xmux"
 )
 
-func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
+func isadmin(r *http.Request) bool {
 	var addr string
 	if global.ProxyHeader == "" {
 		addr = strings.Split(r.RemoteAddr, ":")[0]
@@ -24,13 +24,20 @@ func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
 		if v == addr {
 			xmux.GetInstance(r).Set("token", "")
 			xmux.GetInstance(r).Set("role", "admin")
-			return false
+			return true
 		}
 	}
 	token := r.Header.Get("Token")
 	if token == global.GetToken() {
 		xmux.GetInstance(r).Set("token", token)
 		xmux.GetInstance(r).Set("role", "admin")
+		return true
+	}
+	return false
+}
+
+func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
+	if isadmin(r) {
 		return false
 	}
 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
@@ -39,30 +46,12 @@ func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
 }
 
 func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
-
-	var addr string
-	if global.ProxyHeader == "" {
-		addr = strings.Split(r.RemoteAddr, ":")[0]
-	} else {
-		addr = r.Header.Get(global.ProxyHeader)
-	}
-
-	for _, v := range global.GetIgnoreToken() {
-		// 免token的admin权限
-		if v == addr {
-			xmux.GetInstance(r).Set("token", "")
-			xmux.GetInstance(r).Set("role", "admin")
-			return false
-		}
-	}
-	token := r.Header.Get("Token")
-	if token == global.GetToken() {
-		xmux.GetInstance(r).Set("token", token)
-		xmux.GetInstance(r).Set("role", "admin")
+	if isadmin(r) {
 		return false
 	}
 	// 验证所有scripts的权限
 	// 接口权限
+	token := r.Header.Get("Token")
 	roles := xmux.GetInstance(r).GetPageKeys()
 	// 主要是2种， 一种是 script  一种是 simple
 
