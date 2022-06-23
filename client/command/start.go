@@ -23,7 +23,7 @@ var StartCmd = &cobra.Command{
 		for _, node := range nodes {
 			wg.Add(1)
 			go func(node *client.Node) {
-				node.Start(parameter, args...)
+				node.Start(args...)
 				wg.Done()
 			}(node)
 

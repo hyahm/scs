@@ -30,7 +30,7 @@ var RestartCmd = &cobra.Command{
 		for _, node := range nodes {
 			wg.Add(1)
 			go func(node *client.Node) {
-				node.Restart(parameter, args...)
+				node.Restart(args...)
 				wg.Done()
 			}(node)
 

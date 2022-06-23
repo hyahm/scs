@@ -44,20 +44,20 @@ func (node *Node) Fmt() {
 	fmt.Println(string(res.Marshal()))
 }
 
-func (node *Node) Restart(param string, args ...string) {
+func (node *Node) Restart(args ...string) {
 	cli := node.NewSCSClient()
 	var err error
 	var res *pkg.Response
 	switch len(args) {
 	case 0:
-		res, err = cli.RestartAll(param)
+		res, err = cli.RestartAll()
 	case 1:
 		cli.Pname = args[0]
-		res, err = cli.RestartPname(param)
+		res, err = cli.RestartPname()
 	default:
 		cli.Pname = args[0]
 		cli.Name = args[1]
-		res, err = cli.RestartName(param)
+		res, err = cli.RestartName()
 	}
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
@@ -111,21 +111,21 @@ func (node *Node) Search(args string) {
 
 }
 
-func (node *Node) Start(param string, args ...string) {
+func (node *Node) Start(args ...string) {
 
 	cli := node.NewSCSClient()
 	var err error
 	var res *pkg.Response
 	switch len(args) {
 	case 0:
-		res, err = cli.StartAll(param)
+		res, err = cli.StartAll()
 	case 1:
 		cli.Pname = args[0]
-		res, err = cli.StartPname(param)
+		res, err = cli.StartPname()
 	default:
 		cli.Pname = args[0]
 		cli.Name = args[1]
-		res, err = cli.StartName(param)
+		res, err = cli.StartName()
 	}
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)

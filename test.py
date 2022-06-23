@@ -15,8 +15,8 @@ print(sys.argv, flush=True)
 
 while True:
     print("can stop------", flush=True)
-    atom = AtomSignal(timeout=10, notice=True, restart=True, parameter="aaaaa")
-    msg, code = scs.can_not_stop(atom=atom)
+    # atom = AtomSignal(timeout=10, notice=True, restart=True, parameter="aaaaa")
+    msg, code = scs.can_not_stop()
     print(" can not stop------", flush=True)
     time.sleep(random.randint(120, 200))
     print(" can not stop------", flush=True)
