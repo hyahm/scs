@@ -32,10 +32,10 @@ func StatusPname(w http.ResponseWriter, r *http.Request) {
 }
 
 func AllStatus(w http.ResponseWriter, r *http.Request) {
-	names := xmux.GetInstance(r).Get("scriptname")
-	if names == nil {
-		xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.AllStatus()
-	} else {
-		xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.AllStatusFromScript(names.(map[string]struct{}))
+	validAuths := xmux.GetInstance(r).Get("validAuths").([]controller.Auth)
+	validName := make(map[string]struct{})
+	for _, auth := range validAuths {
+		validName[auth.ScriptName] = struct{}{}
 	}
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.AllStatusFromScript(validName)
 }

@@ -23,15 +23,15 @@ func (role Role) ToString() string {
 const (
 	AdminRole  Role = "admin"
 	ScriptRole Role = "script"
-	Server     Role = "server"
+	SimpleRole Role = "simple"
 )
 
 type Script struct {
 	Name         string            `yaml:"name,omitempty" json:"name"`
 	Dir          string            `yaml:"dir,omitempty" json:"dir,omitempty"`
 	Command      string            `yaml:"command,omitempty" json:"command"`
-	Token        string            `yaml:"token,omitempty" json:"token,omitempty"` // 只用来查看的token
-	Role         Role              `yaml:"role,omitempty" json:"role,omitempty"`   // 角色权限
+	ScriptToken  string            `yaml:"scriptToken,omitempty" json:"scriptToken,omitempty"` // 只用来查看的token
+	SimpleToken  string            `yaml:"simpleToken,omitempty" json:"simpleToken,omitempty"` // 角色权限
 	Replicate    int               `yaml:"replicate,omitempty" json:"replicate,omitempty"`
 	Always       bool              `yaml:"always,omitempty" json:"always,omitempty"`
 	DisableAlert bool              `yaml:"disableAlert,omitempty" json:"disableAlert,omitempty"`
@@ -79,7 +79,7 @@ func (s *Script) MakeTempEnv() {
 	}
 	tempEnv["OS"] = runtime.GOOS
 	// 增加token, 不过是随机的
-	tempEnv["TOKEN"] = s.Token
+	tempEnv["TOKEN"] = s.ScriptToken
 	tempEnv["PNAME"] = s.Name
 	tempEnv["PROJECT_HOME"] = s.Dir
 
@@ -106,7 +106,7 @@ func EqualScript(s1, s2 *Script) bool {
 		s1.Dir != s2.Dir ||
 		s1.Command != s2.Command ||
 		s1.Always != s2.Always ||
-		s1.Token != s2.Token ||
+		s1.ScriptToken != s2.ScriptToken ||
 		!pkg.CompareMap(s1.Env, s2.Env) ||
 		!to.CompareAT(s1.AT, s2.AT) ||
 		s1.DisableAlert != s2.DisableAlert ||

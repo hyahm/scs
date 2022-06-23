@@ -78,11 +78,8 @@ func Reload() error {
 
 // 新增script并启动
 func AddScript(s *scripts.Script) {
-	if s.Token == "" {
-		s.Token = pkg.RandomToken()
-	}
-	if s.Role == "" {
-		s.Role = scripts.ScriptRole
+	if s.ScriptToken == "" {
+		s.ScriptToken = pkg.RandomToken()
 	}
 	// 将scripts填充到store中
 	store.Store.SetScript(s)

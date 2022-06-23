@@ -37,6 +37,7 @@ func (res *Response) ErrorE(err error) []byte {
 }
 
 var ErrNotFound = errors.New("not found pname or name")
+
 var ResponseMsg map[int]string
 
 func init() {
@@ -45,6 +46,7 @@ func init() {
 	ResponseMsg[201] = "config file is reloading, waiting completed first"
 	ResponseMsg[404] = "not found pname or name"
 	ResponseMsg[405] = "auth failed"
+	ResponseMsg[406] = "没有找到对应运行的信号参数"
 }
 
 // 这是返回给前端的数据结构

@@ -41,11 +41,11 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartAll(w http.ResponseWriter, r *http.Request) {
-	names := xmux.GetInstance(r).Get("scriptname")
-	if names == nil {
-		controller.StartAllServer()
-	} else {
-		controller.StartAllServerFromScript(names.(map[string]struct{}))
+	validAuths := xmux.GetInstance(r).Get("validAuths").([]controller.Auth)
+	validName := make(map[string]struct{})
+	for _, auth := range validAuths {
+		validName[auth.ScriptName] = struct{}{}
 	}
+	controller.StartAllServerFromScript(validName)
 
 }

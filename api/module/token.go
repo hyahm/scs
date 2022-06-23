@@ -2,120 +2,89 @@ package module
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
-func isadmin(r *http.Request) bool {
-	var addr string
-	if global.ProxyHeader == "" {
-		addr = strings.Split(r.RemoteAddr, ":")[0]
-	} else {
-		addr = r.Header.Get(global.ProxyHeader)
-	}
-
-	for _, v := range global.GetIgnoreToken() {
-		// 免token的admin权限
-		if v == addr {
-			xmux.GetInstance(r).Set("token", "")
-			xmux.GetInstance(r).Set("role", "admin")
-			return true
-		}
-	}
+// 验证script权限及一下
+func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 	token := r.Header.Get("Token")
+	// if token == "" {
+	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
+	// 	return true
+	// }
 	if token == global.GetToken() {
-		xmux.GetInstance(r).Set("token", token)
+		auths := controller.GetAllAuth()
+		xmux.GetInstance(r).Set("validAuths", auths)
 		xmux.GetInstance(r).Set("role", "admin")
-		return true
-	}
-	return false
-}
-
-func CheckAdminToken(w http.ResponseWriter, r *http.Request) bool {
-	if isadmin(r) {
 		return false
 	}
-	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
-	Write(w, r, []byte(`{"code": 203, "msg": "token error or no permission"}`))
-	return true
-}
 
-func CheckAllScriptToken(w http.ResponseWriter, r *http.Request) bool {
-	if isadmin(r) {
-		return false
-	}
+	roles := xmux.GetInstance(r).GetPageKeys()
+	// if _, roles[scripts.SimpleRole.ToString()]
 	// 验证所有scripts的权限
 	// 接口权限
-	token := r.Header.Get("Token")
-	roles := xmux.GetInstance(r).GetPageKeys()
-	// 主要是2种， 一种是 script  一种是 simple
 
-	auths := controller.GetAuthScriptName(token)
-	if len(auths) > 0 {
-		// 说明是有这些脚本权限的
+	// 主要是2种， 一种是 script  一种是 simple
+	auths := controller.GetAuthByToken(token)
+	validAuths := make([]controller.Auth, 0, len(auths))
+	// 根据权限过滤出有用的
+	for _, auth := range auths {
+		if _, ok := roles[auth.Role]; ok {
+			validAuths = append(validAuths, auth)
+		}
+	}
+	if len(validAuths) > 0 {
+		// 	// 说明是有这些脚本权限的
 		pname := xmux.Var(r)["pname"]
 		name := xmux.Var(r)["name"]
-		// 如果都是空
+		// 	// 如果都是空
 		if pname == "" && name == "" {
-			scriptname := make(map[string]struct{})
-			for _, auth := range auths {
-				if _, ok := roles[auth.Role]; ok {
-					//
-					scriptname[auth.ScriptName] = struct{}{}
-				}
-			}
-			if len(scriptname) > 0 {
-				// 全操作， 获取 接口权限
-				xmux.GetInstance(r).Set("scriptname", scriptname)
-				return false
-			}
-
+			// 如果都是空的，那么后面接口基本需要这个来操作
+			xmux.GetInstance(r).Set("validAuths", validAuths)
+			return false
 		}
 
 		if pname != "" && name == "" {
 			// 如果只根据pname来操作的话
-			ok := controller.HavePname(auths, pname, token)
-			if ok {
-				return false
+			for _, auth := range validAuths {
+				if pname == auth.ScriptName {
+					xmux.GetInstance(r).Set("role", auth.Role)
+					return false
+				}
 			}
+		}
 
+		if name != "" && pname == "" {
+			for _, auth := range validAuths {
+				if name == auth.ServerName {
+					xmux.GetInstance(r).Set("role", auth.Role)
+					return false
+				}
+			}
 		}
 
 		if pname != "" && name != "" {
-			_, ok := store.Store.GetScriptByName(pname)
-			_, sok := store.Store.GetServerByName(name)
-			if !ok || !sok {
-				xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-				Write(w, r, ([]byte(`{"code": 404, "msg": "pname and name not match"}`)))
-				return true
-			}
-			// 如果只根据pname来操作的话, 2种都有
-			ok = controller.HavePname(auths, pname, token)
-			if ok {
-				return false
-			}
-		}
-
-		if pname == "" && name != "" {
 			// 只有name的接口
-			svc, ok := store.Store.GetServerByName(name)
-			if !ok {
-				xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-				Write(w, r, ([]byte(`{"code": 404, "msg": "pname and name not match"}`)))
-				return true
-			}
-			ok = controller.HavePname(auths, svc.Name, token)
-			if ok {
-				return false
+			for _, auth := range validAuths {
+				if name == auth.ServerName && pname == auth.ScriptName {
+					xmux.GetInstance(r).Set("role", auth.Role)
+					return false
+				}
 			}
 		}
 
 	}
+	// todo: 后期为了防止密码报错，增开ip黑名单功能
+	// var addr string
+	// if global.ProxyHeader == "" {
+	// 	addr = strings.Split(r.RemoteAddr, ":")[0]
+	// } else {
+	// 	addr = r.Header.Get(global.ProxyHeader)
+	// }
 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
 	return true
 }

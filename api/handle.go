@@ -15,7 +15,7 @@ import (
 
 func simpleHandle() *xmux.RouteGroup {
 	// 只是调试的权限
-	simple := xmux.NewRouteGroup().AddPageKeys(scripts.Server.ToString())
+	simple := xmux.NewRouteGroup().AddPageKeys(scripts.SimpleRole.ToString())
 	simple.Post("/status/{pname}/{name}", handle.Status)
 	simple.Post("/status/{pname}", handle.StatusPname)
 	simple.Post("/start/{pname}", handle.StartPname)
@@ -35,21 +35,19 @@ func simpleHandle() *xmux.RouteGroup {
 
 func ScriptHandle() *xmux.RouteGroup {
 	script := xmux.NewRouteGroup().AddPageKeys(scripts.ScriptRole.ToString())
-	script.AddModule(module.CheckAllScriptToken)
 	script.Post("/stop/{pname}/{name}", handle.Stop)
 	script.Post("/stop/{pname}", handle.StopPname)
 	script.Post("/kill/{pname}", handle.KillPname)
 	script.Post("/kill/{pname}/{name}", handle.Kill)
 	script.Post("/env/{name}", handle.GetEnvName)
 	script.Post("/server/info/{name}", handle.ServerInfo) // 获取某个server信息
-	script.Post("/get/servers", handle.GetServers)        // 获取所有server信息
+	script.Post("/get/servers", handle.GetServers)        // 获取所有server信息 complete
 	script.Post("/get/index/{pname}", handle.GetIndex)    // 获取某script 对应副本的index
 	script.Post("/cannotstop/{name}", handle.CanNotStop).BindJson(pkg.SignalRequest{})
 	script.Post("/parameter/{name}", handle.SetParameter).BindJson(pkg.SignalRequest{})
 	script.Post("/canstop/{name}", handle.CanStop)
-	script.Post("/get/scripts", handle.GetScripts)
-	script.Post("/stop", handle.StopAll) // complete
-	script.Post("/script", handle.AddScript).BindJson(&scripts.Script{})
+	script.Post("/get/scripts", handle.GetScripts) // complete
+	script.Post("/stop", handle.StopAll)           // complete
 	script.Post("/remove/{pname}/{name}", handle.Remove)
 	script.Post("/remove/{pname}", handle.RemovePname)
 	script.Post("/send/alert", handle.Alert)
@@ -59,17 +57,17 @@ func ScriptHandle() *xmux.RouteGroup {
 
 func AdminHandle() *xmux.RouteGroup {
 	// 只能管理员操作 修改文件的操作
-	admin := xmux.NewRouteGroup().AddPageKeys(scripts.AdminRole.ToString()).AddModule(module.CheckAdminToken)
+	admin := xmux.NewRouteGroup().AddPageKeys(scripts.AdminRole.ToString()).AddModule(module.CheckToken)
 
 	admin.Post("/get/alert", handle.GetAlert)   // 只能管理员用
 	admin.Post("/-/reload", handle.Reload)      // 只能管理员用
 	admin.Post("/-/fmt", handle.Fmt)            // 只能管理员用
 	admin.Post("/get/alarms", handle.GetAlarms) // 只能管理员用
 	admin.Post("/get/repo", handle.GetRepo)     // 只能管理员用
-
+	admin.Post("/script", handle.AddScript).BindJson(&scripts.Script{})
 	admin.Post("/enable/{pname}", handle.Enable)   // 只能管理员用
 	admin.Post("/disable/{pname}", handle.Disable) // 只能管理员用
-
+	admin.AddGroup(ScriptHandle())
 	return admin
 }
 
@@ -81,6 +79,7 @@ func init() {
 	statusMsg[201] = "config is reloading, please wait"
 	statusMsg[203] = "token error"
 	statusMsg[404] = "pname or name not found"
+	statusMsg[406] = "没有找到对应运行的信号"
 	statusMsg[500] = "system error"
 }
 

@@ -21,17 +21,25 @@ func init() {
 }
 
 // 添加信号请求，如果添加成功返回true， 修改就是false
-func AddSignalRequest(name string, sr *pkg.SignalRequest) bool {
+func AddSignalRequest(name string, sr *pkg.SignalRequest) {
+	mu.Lock()
+	defer mu.Unlock()
+	if _, ok := signalHandle[name]; !ok {
+		signalHandle[name] = sr
+	}
+}
+
+// 添加信号请求，如果添加成功返回true， 修改就是false
+func UpdateSignalRequest(name string, sr *pkg.SignalRequest) bool {
 	mu.Lock()
 	defer mu.Unlock()
 	if _, ok := signalHandle[name]; ok {
 		signalHandle[name].Parameter = sr.Parameter
 		signalHandle[name].Notice = sr.Notice
 		signalHandle[name].Restart = sr.Restart
-		return false
+		return true
 	}
-	signalHandle[name] = sr
-	return true
+	return false
 }
 
 func GetSignalRequest(name string) *pkg.SignalRequest {

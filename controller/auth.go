@@ -2,54 +2,79 @@ package controller
 
 import (
 	"github.com/hyahm/scs/internal/store"
+	"github.com/hyahm/scs/pkg/config/scripts"
 )
 
 type Auth struct {
+	ServerName string
 	ScriptName string
 	Role       string
 }
 
-func GetAuthScriptName(token string) []Auth {
-	// 获取有权限的scripts
+// 获取有权限的server
+func GetAuthByToken(token string) []Auth {
+
 	auths := make([]Auth, 0)
-	for pname, script := range store.Store.GetAllScriptMap() {
-		if script.Token == token {
+	for name, server := range store.Store.GetAllServerMap() {
+		if server.ScriptToken == token {
 			auths = append(auths, Auth{
-				ScriptName: pname,
-				Role:       script.Role.ToString(),
+				ServerName: name,
+				ScriptName: server.Name,
+				Role:       string(scripts.ScriptRole),
+			})
+		}
+		if server.SimpleToken == token {
+			auths = append(auths, Auth{
+				ServerName: name,
+				ScriptName: server.Name,
+				Role:       string(scripts.SimpleRole),
 			})
 		}
 	}
 	return auths
 }
 
-func HavePname(auths []Auth, pname, token string) bool {
-	script, ok := store.Store.GetScriptByName(pname)
-	if ok && script.Token == token {
-		for _, auth := range auths {
-			if auth.Role == script.Role.ToString() {
-				return true
-			}
-
-		}
+func GetAllAuth() []Auth {
+	auths := make([]Auth, 0)
+	for name, server := range store.Store.GetAllServerMap() {
+		auths = append(auths, Auth{
+			ServerName: name,
+			ScriptName: server.Name,
+			Role:       string(scripts.ScriptRole),
+		})
 	}
-	return false
+	return auths
 }
 
-func HaveName(auths []Auth, name, token string) bool {
-	svc, ok := store.Store.GetServerByName(name)
-	if ok {
-		script, ok := store.Store.GetScriptByName(svc.Name)
-		if ok && script.Token == token {
-			for _, auth := range auths {
-				if auth.Role == script.Role.ToString() {
-					return true
-				}
+// func HavePname1(auths []Auth, pname, token string) bool {
+// 	script, ok := store.Store.GetScriptByName(pname)
+// 	if ok {
+// 		if script.ScriptToken == token {
+// 			for _, auth := range auths {
+// 				if auth.Role == script.Role.ToString() {
+// 					return true
+// 				}
 
-			}
-		}
+// 			}
+// 		}
+// 	}
+// 	return false
+// }
 
-	}
+// func HaveName1(auths []Auth, name, token string) bool {
+// 	svc, ok := store.Store.GetServerByName(name)
+// 	if ok {
+// 		script, ok := store.Store.GetScriptByName(svc.Name)
+// 		if ok && script.Token == token {
+// 			for _, auth := range auths {
+// 				if auth.Role == script.Role.ToString() {
+// 					return true
+// 				}
 
-	return false
-}
+// 			}
+// 		}
+
+// 	}
+
+// 	return false
+// }

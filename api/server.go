@@ -36,7 +36,6 @@ func HttpServer() {
 	router.Post("/probe", handle.Probe)
 
 	router.AddGroup(AdminHandle())
-	router.AddGroup(ScriptHandle())
 	if global.GetDisableTls() {
 		golog.Info("listen on " + global.GetListen() + " over http")
 		golog.Fatal(router.Run(global.GetListen()))

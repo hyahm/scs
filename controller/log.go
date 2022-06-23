@@ -12,5 +12,5 @@ func GetPnameToken(pname string) string {
 	if !ok {
 		return ""
 	}
-	return script.Token
+	return script.ScriptToken
 }

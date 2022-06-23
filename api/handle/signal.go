@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -45,7 +44,7 @@ func CanNotStop(w http.ResponseWriter, r *http.Request) {
 func SetParameter(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	sr := xmux.GetInstance(r).Data.(*pkg.SignalRequest)
-	if controller.AddSignalRequest(name, sr) {
-		golog.Info("没有找到对应运行的信号参数")
+	if !controller.UpdateSignalRequest(name, sr) {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 406
 	}
 }

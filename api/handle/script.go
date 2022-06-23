@@ -51,5 +51,5 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		controller.AddScript(s)
 
 	}
-	xmux.GetInstance(r).Response.(*pkg.Response).Data = s.Token
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = s.ScriptToken
 }
