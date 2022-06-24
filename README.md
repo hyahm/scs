@@ -12,7 +12,6 @@ service control service or script
 ```
 只要安装启动就已经监控的， 如需报警，需要添加报警器
 下面是完整配置的参考 `/etc/scs.yaml` 详细用法参考文档
-```
 alert:
   email:
     host: smtp.qq.com
@@ -44,7 +43,6 @@ alert:
     headers:
       Content-Type:
         - application/json
-```
 ```
 
 
