@@ -61,22 +61,7 @@ func (svc *Server) kill() error {
 }
 
 func (svc *Server) start() error {
-	users, err := user.Lookup(svc.User)
-	if err != nil {
-		return err
-	}
-	uid, err := strconv.ParseUint(users.Uid, 10, 32)
-	if err != nil {
-		return err
-	}
-	groups, err := user.LookupGroup(svc.Group)
-	if err != nil {
-		return err
-	}
-	gid, err := strconv.ParseUint(groups.Gid, 10, 32)
-	if err != nil {
-		return err
-	}
+
 	svc.Cmd = exec.Command("/bin/bash", "-c", svc.Command)
 	if svc.Dir != "" {
 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
@@ -95,10 +80,30 @@ func (svc *Server) start() error {
 		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
 	}
 	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true,
-		Credential: &syscall.Credential{
-			Uid: uint32(uid),
-			Gid: uint32(gid),
-		}}
+		Credential: &syscall.Credential{}}
+
+	if svc.User != "" {
+		users, err := user.Lookup(svc.User)
+		if err != nil {
+			return err
+		}
+		uid, err := strconv.ParseUint(users.Uid, 10, 32)
+		if err != nil {
+			return err
+		}
+		svc.Cmd.SysProcAttr.Credential.Uid = uint32(uid)
+	}
+	if svc.Group != "" {
+		groups, err := user.LookupGroup(svc.Group)
+		if err != nil {
+			return err
+		}
+		gid, err := strconv.ParseUint(groups.Gid, 10, 32)
+		if err != nil {
+			return err
+		}
+		svc.Cmd.SysProcAttr.Credential.Gid = uint32(gid)
+	}
 	svc.read()
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.Cmd.Start(); err != nil {
