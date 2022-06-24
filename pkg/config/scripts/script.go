@@ -46,6 +46,8 @@ type Script struct {
 	Update         string               `yaml:"update,omitempty" json:"update,omitempty"`
 	DeleteWhenExit bool                 `yaml:"deleteWhenExit,omitempty" json:"deleteWhenExit,omitempty"`
 	TempEnv        map[string]string    `yaml:"-" json:"-"`
+	User           string               `yaml:"user" json:"user"`
+	Group          string               `yaml:"group" json:"group"`
 	// Ready              chan bool            `yaml:"-" json:"-"`
 	// 服务ready的探测器
 	Liveness *liveness.Liveness `yaml:"liveness,omitempty" json:"liveness,omitempty"`
@@ -112,6 +114,8 @@ func EqualScript(s1, s2 *Script) bool {
 		s1.DisableAlert != s2.DisableAlert ||
 		s1.Disable != s2.Disable ||
 		s1.Update != s2.Update ||
+		s1.User != s2.User ||
+		s1.Group != s2.Group ||
 		!prestart.EqualPreStart(s1.PreStart, s2.PreStart) ||
 		s1.Version != s2.Version ||
 		!cron.CompareCron(s1.Cron, s2.Cron))

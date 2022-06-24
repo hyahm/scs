@@ -29,6 +29,8 @@ type Server struct {
 	Index       int               `json:"index"`       // svc的索引
 	ScriptToken string            `json:"scriptToken"` // svc的token
 	SimpleToken string            `json:"simpleToken"` // svc的token
+	User        string            `json:"user"`
+	Group       string            `json:"group"`
 	Name        string            `json:"name"`
 	Dir         string            `json:"dir,omitempty"`
 	Command     string            `json:"command"`
@@ -40,7 +42,7 @@ type Server struct {
 	Times       int               `json:"times,omitempty"` // 记录循环的次数
 	SubName     string            `json:"subname,omitempty"`
 	Cmd         *exec.Cmd         `json:"-"`
-	AlwaysSign  bool              `json:"always"` // 在停止的时候， always会变为false
+	AlwaysSign  bool              `json:"-"` // 在停止的时候， always会变为false
 	// 总副本数
 	// Replicate int            `json:"replicate,omitempty"`
 	Status *status.Status `json:"status,omitempty"`
@@ -204,6 +206,8 @@ func (svc *Server) fillServer(script *scripts.Script) {
 		svc.SimpleToken = pkg.RandomToken()
 	}
 	svc.Command = script.Command
+	svc.User = script.User
+	svc.Group = script.Group
 	svc.Disable = script.Disable
 	// Log:       make([]string, 0, global.GetLogCount()),
 	svc.Dir = script.Dir

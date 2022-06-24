@@ -15,6 +15,8 @@ package server
 import (
 	"os"
 	"os/exec"
+	"os/user"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -59,6 +61,22 @@ func (svc *Server) kill() error {
 }
 
 func (svc *Server) start() error {
+	users, err := user.Lookup(svc.User)
+	if err != nil {
+		return err
+	}
+	uid, err := strconv.ParseUint(users.Uid, 10, 32)
+	if err != nil {
+		return err
+	}
+	groups, err := user.LookupGroup(svc.Group)
+	if err != nil {
+		return err
+	}
+	gid, err := strconv.ParseUint(groups.Gid, 10, 32)
+	if err != nil {
+		return err
+	}
 	svc.Cmd = exec.Command("/bin/bash", "-c", svc.Command)
 	if svc.Dir != "" {
 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
