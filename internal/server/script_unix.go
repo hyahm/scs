@@ -76,7 +76,11 @@ func (svc *Server) start() error {
 		}
 		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
 	}
-	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true,
+		Credential: &syscall.Credential{
+			Uid: uint32(uid),
+			Gid: uint32(gid),
+		}}
 	svc.read()
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.Cmd.Start(); err != nil {
