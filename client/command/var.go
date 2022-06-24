@@ -3,7 +3,6 @@ package command
 import "time"
 
 var restartAll bool
-var parameter string
 var UseNodes string
 var GroupName string
 var ReadTimeout time.Duration

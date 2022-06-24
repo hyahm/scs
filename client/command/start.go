@@ -33,7 +33,6 @@ var StartCmd = &cobra.Command{
 }
 
 func init() {
-	StartCmd.Flags().StringVarP(&parameter, "parameter", "p", "", "restart all")
 	rootCmd.AddCommand(StartCmd)
 
 }
