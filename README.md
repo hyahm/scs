@@ -6,48 +6,91 @@ service control service or script
 服务控制脚本能否停止 最大程度防止脚本数据丢失   
 码云地址: https://gitee.com/cander/scs
 
-# 主要功能
-1.  为了保护数据不会在执行中被人工手动中断丢失， 可以让服务在某段时间内才能停止（数据保证）
-2.  监控硬件信息， 主要是磁盘， cpu， 内存,  scs服务  
-3.  服务之间可以相互控制添加删除启动停止  
-4.  报警功能api(适合代码内部问题的报警) 
-5.  支持定时器功能执行命令或脚本
-6.  客户端控制多台服务器 
-7.  通过配置文件安装服务（简化安装）
-8.  远程给某些脚本做更新和查看日志的权限（运维开发权限的桥梁）
+# 适用适用的
 
-# 操作说明（重启服务指 scsctl restart 操作， 并不是重启scsd服务）
+场景一:  服务器需要监控报警cpu，内存, 磁盘，但是主要是要给我实时报警，以便提前避免不必要的事故
+```
+只要安装启动就已经监控的， 如需报警，需要添加报警器
+下面是完整配置的参考 `/etc/scs.yaml` 详细用法参考文档
+```
+alert:
+  email:
+    host: smtp.qq.com
+    port: 465
+    username:  165464646@qq.com
+    password: 123456
+    to:
+      - 727023460@qq.com
+  rocket:
+    server: https://chat.hyahm.com
+    username:  test
+    password: 123456
+    to:
+      - "#general"
+  telegram:
+    server: https://telegram.hyahm.com:8989
+    to:
+      - "-789789435"
+  # https://work.weixin.qq.com/help?person_id=1&doc_id=13376#markdown%E7%B1%BB%E5%9E%8B 固定mark格式
+  weixin:
+    server: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=dd065367-b753-48fb-a974-bbfff0284c1c
+  # 这个回调决定支持所有类型报警， 需要自己写
+  callback:
+    # 接受请求的url
+    urls:
+      - http://192.168.0.112:8080
+    # 请求方式
+    method:  POST
+    headers:
+      Content-Type:
+        - application/json
+```
+```
 
-- start:  
-    - 如果服务是停止的状态，那么直接启动。 
-    - 如果是等待停止状态则修改为启动状态 
-    - 等待重启状态保持不变
-    - 如果配置文件修改并reload， 都不会使用新的command，如果想要生效请重启服务
-    
-- reload:  
-    - 配置文件错误，无任何变化。 
-    - 配置文件没有变化， 无任何变化
-    - 副本数增加， 添加并启动新的副本， 原副本数无变化
-    - 运行，停止，等待停止状态无任何变化（配置文件的修改不会使之生效， 如果想要生效请重启服务）
-    - 副本数减少， 减少索引值大的
-    - 所有停止，减少副本数的停止都会遵循 停止信号
-    - 等待内存状态没有完全更新完成前， restart, stop, remove, reload, start操作将会暂停
 
-- restart:
-    - 重启后使用最新的配置启动
-    - 等待内存状态没有完全更新完成前， remove, reload操作将会暂停
+场景二:  一个二进制文件想要执行，需要工具管理起来，而不用手动进入目录启动和找pid停止
 
-- stop:
-    - 所有停止，减少副本数的停止都会遵循 停止信号
-    - 定时器任务只会停止下次的计时启动，不会停止当前运行的定时任务， 如果定时器是一个服务， 就不应该加入定时器
-    - 等待内存状态没有完全更新完成前， remove, reload操作将会暂停
+```
+# 最少配置， 其实只需要name和command， 相对于supervisor， 配置更简单, 执行`scsctl config reload`即可加载而不影响其他的配置
+scripts:
+- name: test
+  dir: D:\scs
+  command: python test.py
+```
 
-- remove:
-    - 所有删除，停止时都会遵循 停止信号
-    - 等待内存状态没有完全更新完成前， restart, stop, remove, reload, start操作将会暂停
+场景三:  想要一个定时器，但是系统自带的太麻烦，而且精确度不高(更多详细的配置请参考文档)
 
-- status:
-    - 查看当前状态， 无要求  -v 可以查看很多信息
+```
+# 每3秒执行一次
+scripts:
+- name: test
+  dir: D:\scs
+  command: python test.py
+  cron:
+    loop: 3
+```
+
+
+场景四:  执行一段队列处理代码，但是需要保证数据处理完成后停止，也就是我在执行`stop` 信号后等处理完成后才会停止，防止队列中的这条数据丢失，并支持超时机制， 如果处理队列的一个请求因为位置原因导致卡住，如果不处理会降低分布式集群的效率，这时候需要自动重启服务，并通过参数传递来做响应的回滚操作
+
+```
+# 停止器
+本身是通过代码http接口请求实现的，目前执行python和go的sdk 详细的请参考文档
+
+```
+
+
+场景五:  批量升级更新服务， 但是觉得ansible管理太麻烦, 可以在某一台控制机器直接执行 `update <panme> <name>`升级服务，
+```
+需要在客户端配置所有scsd的信息， 可以通过 -n 和 -g 来自定义管理的节点或组， 详细请参考文档
+```
+
+场景六:  降低运维开发的沟通成本， 运维给与开发的权限，方便开发远程调试，又保证服务器权限
+```
+请参考权限的文档
+```
+
+
 
 
 [文档地址](https://www.itjingtu.com/document/13)
