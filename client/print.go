@@ -95,39 +95,23 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 		maxColumeLen[4] = 10
 	}
 	maxColumeLen[6] = 12
-	maxColumeLen[7] = 13
-	maxColumeLen[8] = 10
-	maxColumeLen[9] = 10
+	maxColumeLen[7] = 12
+	maxColumeLen[8] = 9
+	maxColumeLen[9] = 8
 	maxColumeLen[10] = 10
-	maxColumeLen[11] = 12
-
+	maxColumeLen[11] = 10
+	maxlength := make([]any, len(maxColumeLen))
+	for k, v := range maxColumeLen {
+		maxlength[k] = v
+	}
+	headerName := []any{"PName", "Name", "Status", "Pid", "UpTime", "IsCron", "Version", "CanNotStop", "Disable", "Failed", "CPU", "MEM(kb)", "Command"}
 	if verbose {
 		fmt.Printf("<node: %s, url: %s, server version: %s>\n", st.Name, st.Url, st.Version)
 		fmt.Println("--------------------------------------------------")
-		fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
-			"Name" + (space(maxColumeLen[1] - len("Name"))).String() +
-			"Status" + (space(maxColumeLen[2] - len("Status"))).String() +
-			"Pid" + (space(maxColumeLen[3] - len("Pid"))).String() +
-			"UpTime" + (space(maxColumeLen[4] - len("UpTime"))).String() +
-			"IsCron" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
-			"Version" + (space(maxColumeLen[6] - len("Version"))).String() +
-			"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String() +
-			"Disable" + (space(maxColumeLen[8] - len("Disable"))).String() +
-			"Failed" + (space(maxColumeLen[9] - len("Failed"))).String() +
-			"CPU" + (space(maxColumeLen[10] - len("CPU"))).String() +
-			"MEM(kb)" + (space(maxColumeLen[11] - len("MEM(kb)"))).String() +
-			"Command")
+		header := fmt.Sprintf("%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%s\n", maxlength...)
+		fmt.Printf(header, headerName...)
+		row := fmt.Sprintf("%%-%ds%%-%ds%%-%ds%%-%dd%%-%ds%%-%dt%%-%ds%%-%dt%%-%dt%%-%dd%%-%ds%%-%ds%%s\n", maxlength...)
 		for _, info := range st.Nodes {
-
-			// var canNotStopSpace int
-			// if info.CanNotStop {
-			// 	canNotStopSpace = 4
-			// } else {
-			// 	canNotStopSpace = 5
-			// }
-
-			cpu := fmt.Sprintf("%.2f", info.Cpu)
-			mem := fmt.Sprintf("%d", info.Mem/1024)
 			command := info.Command
 			if info.Path != "" {
 				if info.OS == "windows" {
@@ -138,47 +122,24 @@ func (st *ScriptStatusNode) SortAndPrint(verbose bool) {
 				}
 
 			}
-			fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s%t%s%d%s%s%s%s%s%s\n",
-				info.PName, space(maxColumeLen[0]-len(info.PName)),
-				info.Name, space(maxColumeLen[1]-len(info.Name)),
-				info.Status, space(maxColumeLen[2]-len(info.Status)),
-				info.Pid, space(maxColumeLen[3]-len(strconv.Itoa(info.Pid))),
-				(time.Second * time.Duration(info.Start)).String(), space(maxColumeLen[4]-len((time.Second*time.Duration(info.Start)).String())).String(),
-				info.IsCron, space(maxColumeLen[5]-boolSpace(info.IsCron)),
-				info.Version, space(maxColumeLen[6]-len(info.Version)),
-				info.CanNotStop, space(maxColumeLen[7]-boolSpace(info.CanNotStop)),
-				info.Disable, space(maxColumeLen[8]-boolSpace(info.Disable)),
-				info.RestartCount, space(maxColumeLen[9]-len(strconv.Itoa(info.RestartCount))),
-				cpu, space(maxColumeLen[10]-len(cpu)),
-				mem, space(maxColumeLen[11]-len(mem)),
-				command,
+			fmt.Printf(row, info.PName, info.Name, info.Status, info.Pid,
+				(time.Second * time.Duration(info.Start)).String(), info.IsCron,
+				info.Version, info.CanNotStop, info.Disable, info.RestartCount,
+				fmt.Sprintf("%.2f", info.Cpu), fmt.Sprintf("%d", info.Mem/1024), command,
 			)
+
 		}
 		fmt.Println("--------------------------------------------------")
 	} else {
 		fmt.Printf("<node: %s, url: %s, server version: %s>\n", st.Name, st.Url, st.Version)
 		fmt.Println("--------------------------------------------------")
-		fmt.Println("PName" + (space(maxColumeLen[0]) - space(len("PName"))).String() +
-			"Name" + (space(maxColumeLen[1] - len("Name"))).String() +
-			"Status" + (space(maxColumeLen[2] - len("Status"))).String() +
-			"Pid" + (space(maxColumeLen[3] - len("Pid"))).String() +
-			"UpTime" + (space(maxColumeLen[4] - len("UpTime"))).String() +
-			"IsCron" + (space(maxColumeLen[5] - len("MEM(kb)"))).String() +
-			"Version" + (space(maxColumeLen[6] - len("Version"))).String() +
-			"CanNotStop" + (space(maxColumeLen[7] - len("CanNotStop"))).String() +
-			"Disable" + (space(maxColumeLen[8] - len("Disable"))).String())
+
+		header := fmt.Sprintf("%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds%%-%ds\n", maxlength[0:9]...)
+		fmt.Printf(header, headerName[0:9]...)
+		row := fmt.Sprintf("%%-%ds%%-%ds%%-%ds%%-%dd%%-%ds%%-%dt%%-%ds%%-%dt%%-%dt\n", maxlength[0:9]...)
 		for _, info := range st.Nodes {
-			fmt.Printf("%s%s%s%s%s%s%d%s%s%s%t%s%s%s%t%s%t%s\n",
-				info.PName, space(maxColumeLen[0]-len(info.PName)),
-				info.Name, space(maxColumeLen[1]-len(info.Name)),
-				info.Status, space(maxColumeLen[2]-len(info.Status)),
-				info.Pid, space(maxColumeLen[3]-len(strconv.Itoa(info.Pid))),
-				(time.Second * time.Duration(info.Start)).String(), space(maxColumeLen[4]-len((time.Second*time.Duration(info.Start)).String())).String(),
-				info.IsCron, space(maxColumeLen[5]-boolSpace(info.IsCron)),
-				info.Version, space(maxColumeLen[6]-len(info.Version)),
-				info.CanNotStop, space(maxColumeLen[7]-boolSpace(info.CanNotStop)),
-				info.Disable, space(maxColumeLen[8]-boolSpace(info.Disable)),
-			)
+			fmt.Printf(row, info.PName, info.Name, info.Status, info.Pid,
+				(time.Second * time.Duration(info.Start)).String(), info.IsCron, info.Version, info.CanNotStop, info.Disable)
 		}
 		fmt.Println("--------------------------------------------------")
 	}
