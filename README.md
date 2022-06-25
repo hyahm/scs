@@ -6,7 +6,7 @@ service control service or script
 服务控制脚本能否停止 最大程度防止脚本数据丢失   
 码云地址: https://gitee.com/cander/scs
 
-# 适用适用的
+# 适用场景
 
 场景一:  服务器需要监控报警cpu，内存, 磁盘，但是主要是要给我实时报警，以便提前避免不必要的事故
 ```
