@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert"
@@ -81,7 +80,6 @@ func UnStop(ctx context.Context, name string, timeout time.Duration) {
 		}
 		if sr.Restart {
 			if server, ok := store.Store.GetServerByName(name); ok {
-				golog.Info("restart atom")
 				KillAndStartServer(sr.Parameter, server)
 			}
 		}

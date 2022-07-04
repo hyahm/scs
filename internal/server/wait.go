@@ -23,7 +23,9 @@ func (svc *Server) wait() {
 		case ec := <-svc.Exit:
 			switch ec {
 			case 9:
+				golog.Info("stop")
 				// stop操作
+				svc.stopStatus()
 				// 返回一个停止的信号
 				// 主动退出, kill
 			case 10:

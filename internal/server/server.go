@@ -328,12 +328,14 @@ func (svc *Server) Kill() {
 	}
 	switch svc.Status.Status {
 	case status.RUNNING:
-		svc.Exit <- 9
+		svc.Exit <- 10
 		svc.kill()
+		<-svc.StopSignal
 	case status.WAITRESTART, status.WAITSTOP:
 		<-svc.Exit
-		svc.Exit <- 9
+		svc.Exit <- 10
 		svc.kill()
+		<-svc.StopSignal
 	}
 
 }
