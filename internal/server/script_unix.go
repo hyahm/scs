@@ -24,30 +24,30 @@ import (
 	"github.com/hyahm/scs/internal/server/status"
 )
 
-func (svc *Server) stop() {
-	defer func() {
-		if err := recover(); err != nil {
-			golog.Error(err)
-		}
-	}()
-	for {
-		select {
-		case <-time.After(time.Millisecond * 10):
-			if !svc.Status.CanNotStop {
-				err := svc.kill()
-				if err != nil {
-					golog.Error(err)
-					return
-				}
-				return
-			}
-		case <-svc.CancelProcess:
-			// 如果收到取消结束的信号，退出之前的操作
-			return
-		}
-	}
+// func (svc *Server) stop() {
+// 	defer func() {
+// 		if err := recover(); err != nil {
+// 			golog.Error(err)
+// 		}
+// 	}()
+// 	for {
+// 		select {
+// 		case <-time.After(time.Millisecond * 10):
+// 			if !svc.Status.CanNotStop {
+// 				err := svc.kill()
+// 				if err != nil {
+// 					golog.Error(err)
+// 					return
+// 				}
+// 				return
+// 			}
+// 		case <-svc.CancelProcess:
+// 			// 如果收到取消结束的信号，退出之前的操作
+// 			return
+// 		}
+// 	}
 
-}
+// }
 
 func (svc *Server) kill() error {
 	var err error
