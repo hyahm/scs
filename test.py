@@ -18,7 +18,7 @@ while True:
     # atom = AtomSignal(timeout=10, notice=True, restart=True, parameter="aaaaa")
     msg, code = scs.can_not_stop()
     print(" can not stop------", flush=True)
-    time.sleep(random.randint(120, 200))
+    time.sleep(random.randint(20, 30))
     print(" can not stop------", flush=True)
     msg, code =scs.can_stop()
     time.sleep(random.randint(1, 3))

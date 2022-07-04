@@ -253,20 +253,23 @@ func (svc *Server) Remove() {
 	if svc.Always {
 		svc.Always = false
 	}
+	golog.Info("remove")
+	golog.Info(svc.Status.Status)
 	switch svc.Status.Status {
 	case status.WAITRESTART:
 		// 结束发送的退出错误发出的信号
 		<-svc.Exit
 		// 结束停止的goroutine， 转为删除处理
 		svc.Exit <- 12
-		svc.stop()
+		svc.remove()
 	case status.STOP:
 		golog.Debug("ready send stop single")
 		svc.StopSignal <- true
 		// DeleteServiceBySubName(svc.SubName)
 	case status.RUNNING:
+		golog.Info("remove")
 		svc.Exit <- 12
-		svc.stop()
+		svc.remove()
 	case status.WAITSTOP:
 		<-svc.Exit
 		// 结束停止的goroutine， 转为删除处理

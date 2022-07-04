@@ -56,6 +56,7 @@ func Reload() error {
 	for index := range cfg.SC {
 		// 删除之前存在的name
 		delete(temp, cfg.SC[index].Name)
+		golog.Info(cfg.SC[index])
 		// 查看副本是不是对的， 不会对存在的脚本有影响
 		reloadScripts(cfg.SC[index])
 	}
@@ -114,6 +115,7 @@ func UpdateScriptApi(s *scripts.Script) {
 	script, _ := store.Store.GetScriptByName(s.Name)
 
 	oldReplicate := script.Replicate
+
 	if oldReplicate == 0 {
 		oldReplicate = 1
 	}
@@ -124,7 +126,8 @@ func UpdateScriptApi(s *scripts.Script) {
 	if newReplicate == 0 {
 		newReplicate = 1
 	}
-
+	golog.Info(oldReplicate)
+	golog.Info(newReplicate)
 	// 对比脚本是否修改
 	if oldReplicate == newReplicate {
 		if !scripts.EqualScript(s, script) {
@@ -173,12 +176,12 @@ func UpdateScriptApi(s *scripts.Script) {
 func reloadScripts(s *scripts.Script) {
 	// script: 配置文件新读取出来的
 	// 处理存在的
-	script, ok := store.Store.GetScriptByName(s.Name)
+	_, ok := store.Store.GetScriptByName(s.Name)
 	// 对比启动的副本
 	if !ok {
 		// 如果不存在，说明要新增
 		AddScript(s)
 		return
 	}
-	UpdateScriptApi(script)
+	UpdateScriptApi(s)
 }

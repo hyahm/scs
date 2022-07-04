@@ -7,6 +7,7 @@ const (
 	WAITRESTART string = "Waiting Restart" // 等待重启
 	INSTALL     string = "Installing"      // 正在安装
 	STARTING    string = "Starting"        // 正在启动中
+	REMOVING    string = "Removing"        // 删除中
 )
 
 type Status struct {
