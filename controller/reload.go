@@ -56,7 +56,6 @@ func Reload() error {
 	for index := range cfg.SC {
 		// 删除之前存在的name
 		delete(temp, cfg.SC[index].Name)
-		golog.Info(cfg.SC[index])
 		// 查看副本是不是对的， 不会对存在的脚本有影响
 		reloadScripts(cfg.SC[index])
 	}
@@ -160,7 +159,7 @@ func UpdateScriptApi(s *scripts.Script) {
 			svc := store.Store.InitServer(i, s.Name, subname)
 			store.Store.SetScriptIndex(s.Name, i)
 			svc.Port = availablePort
-			svc.MakeServer(s)
+			svc.MakeServer(script)
 			availablePort = svc.Port + 1
 			if s.Disable {
 				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
