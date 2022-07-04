@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/hyahm/golog"
@@ -61,18 +62,22 @@ func (m Scan) Update() {
 	}
 }
 
-func requests(domain string) bool {
+func requests(domain string, retry int) bool {
+	if retry == 0 {
+		return false
+	}
 	req, err := http.NewRequest(http.MethodPost, domain+"/probe", nil)
 	if err != nil {
 		golog.Error(err)
-		return false
+
+		return requests(domain, retry-1)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client(5 * time.Second).Do(req)
 	if err != nil {
 		golog.Error(err)
-		return false
+		return requests(domain, retry-1)
 	}
 	defer resp.Body.Close()
 	golog.Info(resp.StatusCode)
@@ -81,7 +86,13 @@ func requests(domain string) bool {
 		golog.Error(err)
 	}
 	golog.Info(string(b))
-	return resp.StatusCode == 200
+	if resp.StatusCode == 203 {
+		return false
+	}
+	if resp.StatusCode != 200 {
+		return requests(domain, retry-1)
+	}
+	return true
 }
 
 func client(timeout time.Duration) *http.Client {
@@ -98,16 +109,21 @@ func client(timeout time.Duration) *http.Client {
 }
 
 func (m Scan) Check() {
+	wg := &sync.WaitGroup{}
 	for server, mm := range m {
 		//http cookie接口
-		ok := requests(server)
-		if !ok {
-			mm.AI.AM.HostName = server
-			mm.AI.BreakDown(fmt.Sprintf("服务器或scs服务出现问题: %s", server))
-			continue
-		}
-		mm.AI.Recover(fmt.Sprintf("服务器或scs服务恢复: %s", server))
+		wg.Add(1)
+		go func(server string, mm *Monitor, wg *sync.WaitGroup) {
+			ok := requests(server, 3)
+			wg.Done()
+			if !ok {
+				mm.AI.AM.HostName = server
+				mm.AI.BreakDown(fmt.Sprintf("服务器或scs服务出现问题: %s", server))
+				return
+			}
+			mm.AI.Recover(fmt.Sprintf("服务器或scs服务恢复: %s", server))
+		}(server, mm, wg)
 
 	}
-
+	wg.Wait()
 }
