@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 
@@ -62,7 +64,25 @@ func (m Scan) Update() {
 	}
 }
 
+func telnet(domain string) {
+	uri, err := url.ParseRequestURI(domain)
+	if err != nil {
+		golog.Error(err)
+		return
+	}
+	// 检测端口是否是通的
+	conn, err := net.DialTimeout("tcp", uri.Host, 3*time.Second)
+	if err != nil {
+		golog.Error("failed")
+		// todo log handler
+	}
+	defer conn.Close()
+}
+
 func requests(domain string, retry int) bool {
+	if retry != 3 {
+		go telnet(domain)
+	}
 	if retry == 0 {
 		return false
 	}
