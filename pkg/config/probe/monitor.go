@@ -74,6 +74,7 @@ func telnet(domain string) {
 	conn, err := net.DialTimeout("tcp", uri.Host, 3*time.Second)
 	if err != nil {
 		golog.Error("failed")
+		return
 		// todo log handler
 	}
 	defer conn.Close()
