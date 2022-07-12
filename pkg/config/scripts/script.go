@@ -48,6 +48,8 @@ type Script struct {
 	TempEnv        map[string]string    `yaml:"-" json:"-"`
 	User           string               `yaml:"user,omitempty" json:"user,omitempty"`
 	Group          string               `yaml:"group,omitempty" json:"group,omitempty"`
+	StartTime      string               `yaml:"startTime,omitempty" json:"startTime,omitempty"` // 启动时间
+	StopTime       string               `yaml:"stopTime,omitempty" json:"stopTime,omitempty"`   // 停止时间
 	// Ready              chan bool            `yaml:"-" json:"-"`
 	// 服务ready的探测器
 	Liveness *liveness.Liveness `yaml:"liveness,omitempty" json:"liveness,omitempty"`

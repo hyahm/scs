@@ -125,6 +125,7 @@ func UpdateScriptApi(s *scripts.Script) {
 	if newReplicate == 0 {
 		newReplicate = 1
 	}
+	s.MakeTempEnv()
 	golog.Info(oldReplicate)
 	golog.Info(newReplicate)
 	// 对比脚本是否修改
