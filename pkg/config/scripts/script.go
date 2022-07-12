@@ -46,8 +46,8 @@ type Script struct {
 	Update         string               `yaml:"update,omitempty" json:"update,omitempty"`
 	DeleteWhenExit bool                 `yaml:"deleteWhenExit,omitempty" json:"deleteWhenExit,omitempty"`
 	TempEnv        map[string]string    `yaml:"-" json:"-"`
-	User           string               `yaml:"user" json:"user"`
-	Group          string               `yaml:"group" json:"group"`
+	User           string               `yaml:"user,omitempty" json:"user,omitempty"`
+	Group          string               `yaml:"group,omitempty" json:"group,omitempty"`
 	// Ready              chan bool            `yaml:"-" json:"-"`
 	// 服务ready的探测器
 	Liveness *liveness.Liveness `yaml:"liveness,omitempty" json:"liveness,omitempty"`
