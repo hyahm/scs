@@ -43,6 +43,8 @@ type Server struct {
 	SubName     string            `json:"subname,omitempty"`
 	Cmd         *exec.Cmd         `json:"-"`
 	AlwaysSign  bool              `json:"-"` // 在停止的时候， always会变为false
+	StartTime   string            `json:"-"`
+	StopTime    string            `json:"-"`
 	// 总副本数
 	// Replicate int            `json:"replicate,omitempty"`
 	Status *status.Status `json:"status,omitempty"`
@@ -216,6 +218,8 @@ func (svc *Server) fillServer(script *scripts.Script) {
 			Status: status.STOP,
 		}
 	}
+	svc.StartTime = script.StartTime
+	svc.StopTime = script.StopTime
 	svc.Logger = golog.NewLog(
 		filepath.Join(global.LogDir, svc.SubName+".log"), 10<<10, false, global.CleanLog)
 	svc.Update = script.Update

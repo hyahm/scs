@@ -50,6 +50,21 @@ func (svc *Server) asyncStart(param string) {
 
 	svc.Status.Command = internal.Format(svc.Command, svc.Env)
 	svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
+	go func() {
+		stopTime, err := time.ParseInLocation("2006-01-02 15:04:05", svc.StopTime, time.Local)
+		if err == nil && time.Since(stopTime).Seconds() < 0 {
+			for {
+				select {
+				case <-time.After(time.Since(stopTime) * -1):
+					svc.Stop()
+					svc.Cancel()
+					return
+				case <-svc.Ctx.Done():
+					return
+				}
+			}
+		}
+	}()
 	if svc.Cron != nil && svc.Cron.Loop > 0 {
 		svc.IsCron = true
 		svc.Status.Status = status.RUNNING
@@ -78,7 +93,21 @@ func (svc *Server) asyncStart(param string) {
 		go svc.cron()
 		return
 	}
-
+	if svc.StartTime != "" {
+		startTime, err := time.ParseInLocation("2006-01-02 15:04:05", svc.StartTime, time.Local)
+		if err == nil && time.Since(startTime).Seconds() < 0 {
+			for {
+				select {
+				case <-time.After(-1 * time.Since(startTime)):
+					svc.Stop()
+					svc.Cancel()
+					return
+				case <-svc.Ctx.Done():
+					return
+				}
+			}
+		}
+	}
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.start(); err != nil {
 		golog.Info(err)
