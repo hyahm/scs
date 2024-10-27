@@ -16,7 +16,7 @@ PName    Name    Status    Pid    UpTime    Version    CanNotStop  Failed    Dis
 
 
 ## 自动安装
-linux(需要 git tar命令， 关闭selinux),mac, windows 请按照使用二进制安装或自行编译安装
+linux(需要 git tar命令， 关闭selinux,mac, windows 请按照使用二进制安装或自行编译安装
 ```
 /bin/bash -c "$(curl -fsSL http://download.hyahm.com/scs.sh)"
 ```
@@ -40,7 +40,7 @@ git clone https://github.com/hyahm/scs.git
 cd scs
 export GOPROXY=https://goproxy.cn  # 国内需要加个代理
 go build -o scsd cmd/scsd/scsd.go  # 服务器端
-go build -o /usr/local/bin/scsctl cmd/scsctl/scsctl.go  # 服务器端
+go build -o /usr/local/bin/scsctl cmd/scsctl/scsctl.go  # 客户端
 
 # 拷贝配置文件模板
 cp default.yaml /etc/scs.yaml  # 拷贝配置文件
