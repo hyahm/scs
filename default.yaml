@@ -1,11 +1,12 @@
 # 监听端口
 listen: :11111
-# 请求头认证 Token： xxxx
+
 log:
     path: log/scs.log
     day: true
     size: 0
     clean: 
+# 请求头认证 Token： xxxx
 token: 
 # 忽略token验证的客户端ip
 ignoreToken: []

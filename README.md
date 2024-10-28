@@ -91,7 +91,7 @@ scripts:
 
 
 
-[文档地址](https://www.itjingtu.com/document/13)
+[文档地址](https://scs.doc.hyahm.com/#/)
 [部分视频教程](https://www.bilibili.com/video/BV1bv411C7Qz/)
 
 具体更新的内容请查看 [update.md](update.md)文件
