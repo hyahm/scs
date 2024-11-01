@@ -18,7 +18,7 @@ func (svc *Server) cron() {
 			return
 		case <-time.After(-time.Since(svc.Cron.StartTime)):
 			svc.Status.Status = status.RUNNING
-			golog.Infof("cron start: %s time: %v", svc.SubName, svc.Cron.StartTime)
+			golog.Infof("cron start: %s time: %v\n", svc.SubName, svc.Cron.StartTime)
 			if err := svc.start(); err != nil {
 				golog.Error(err)
 				// 设置下载启动的时间, 失败的就直接退出
@@ -32,7 +32,7 @@ func (svc *Server) cron() {
 
 			svc.Times--
 			if svc.Cron.Times > 0 && svc.Times <= 0 {
-				golog.Infof("循环器%s执行次数结束", svc.SubName)
+				golog.Infof("循环器%s执行次数结束\n", svc.SubName)
 				svc.stopStatus()
 				return
 			}

@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var restartAll bool
 var RestartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "restart assign script",
@@ -27,6 +26,7 @@ var RestartCmd = &cobra.Command{
 			fmt.Println("not found any nodes")
 			return
 		}
+
 		for _, node := range nodes {
 			wg.Add(1)
 			go func(node *client.Node) {

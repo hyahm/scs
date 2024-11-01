@@ -31,10 +31,10 @@ func DisableScript(s *scripts.Script, update bool) bool {
 		}
 		if i == 0 {
 			// 如果索引时0的， 那么直接停止就好了， 并且将值修改为true
-
-			svc.Disable = true
-
-			go svc.Stop()
+			go func() {
+				svc.Stop()
+				svc.Disable = true
+			}()
 			continue
 		}
 		golog.Info("add reload count")
@@ -79,9 +79,11 @@ func UpdateAndRestartScript(s *scripts.Script) {
 	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
 		svc, ok := store.Store.GetServerByName(subname)
-		if ok && !svc.Disable {
+		if ok && !svc.Disable && i == 0 {
 			svc.UpdateServer()
-			restartServer(svc)
+		}
+		if ok && !svc.Disable {
+			go restartServer(svc)
 		}
 	}
 

@@ -15,6 +15,11 @@ import (
 	"github.com/hyahm/xmux"
 )
 
+// 为了兼容之前版本，无视解析失败的问题
+func unmarshalError(err error, w http.ResponseWriter, r *http.Request) bool {
+	return false
+}
+
 // var dir := "key"
 func HttpServer() {
 	response := &pkg.Response{
@@ -27,10 +32,10 @@ func HttpServer() {
 	router.SetHeader("Content-Type", "application/x-www-form-urlencoded,application/json; charset=UTF-8")
 	router.SetHeader("Access-Control-Allow-Headers", "Content-Type")
 	router.Exit = exit
+	router.UnmarshalError = unmarshalError
 	router.Post("/probe", handle.Probe)
 
 	router.AddGroup(AdminHandle())
-	router.AddGroup(ScriptHandle())
 	if global.GetDisableTls() {
 		golog.Info("listen on " + global.GetListen() + " over http")
 		golog.Fatal(router.Run(global.GetListen()))
@@ -50,6 +55,7 @@ func HttpServer() {
 	if global.GetKey() == "" || global.GetPem() == "" && os.IsNotExist(err1) || os.IsNotExist(err2) {
 		internal.CreateTLS()
 	}
+
 	on := "listen on " + global.GetListen() + " over https"
 	golog.Info(on)
 	if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {

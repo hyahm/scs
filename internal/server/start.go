@@ -12,19 +12,31 @@ import (
 )
 
 // Start  启动服务 异步的
-func (svc *Server) Start() {
+func (svc *Server) Start(param ...string) {
+	parameter := ""
+
+	if len(param) > 0 {
+		parameter = param[0]
+	}
 	switch svc.Status.Status {
 	case status.STOP:
 		// 开始启动的时候，需要将遍历变量值的模板渲染
 		if !svc.Disable {
-			go svc.asyncStart()
+			go svc.asyncStart(parameter)
 		}
 
 	}
 }
 
 // 当是停止状态的时候异步启动
-func (svc *Server) asyncStart() {
+func (svc *Server) asyncStart(param string) {
+	svc.Env["PARAMETER"] = param
+	// 格式化 SCS_TPL 开头的环境变量
+	for k := range svc.Env {
+		if len(k) > 8 && k[:7] == "SCS_TPL" {
+			svc.Env[k] = internal.Format(svc.Env[k], svc.Env)
+		}
+	}
 	svc.Always = svc.AlwaysSign
 	svc.Version = pkg.GetVersion(svc.Version)
 	err := svc.Install()
@@ -35,10 +47,27 @@ func (svc *Server) asyncStart() {
 	}
 	svc.Exit = make(chan int, 2)
 	svc.CancelProcess = make(chan bool, 2)
+
+	svc.Status.Command = internal.Format(svc.Command, svc.Env)
 	svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
+	go func() {
+		stopTime, err := time.ParseInLocation("2006-01-02 15:04:05", svc.StopTime, time.Local)
+		if err == nil && time.Since(stopTime).Seconds() < 0 {
+			for {
+				select {
+				case <-time.After(time.Since(stopTime) * -1):
+					svc.Stop()
+					svc.Cancel()
+					return
+				case <-svc.Ctx.Done():
+					return
+				}
+			}
+		}
+	}()
 	if svc.Cron != nil && svc.Cron.Loop > 0 {
 		svc.IsCron = true
-
+		svc.Status.Status = status.RUNNING
 		// 循环的起止时间可以只设置时分秒， 自动补齐今天的日期
 		svc.Cron.Start = strings.Trim(svc.Cron.Start, " ")
 		if svc.Cron.Start != "" {
@@ -64,8 +93,21 @@ func (svc *Server) asyncStart() {
 		go svc.cron()
 		return
 	}
-	svc.Command = internal.Format(svc.Command, svc.Env)
-
+	if svc.StartTime != "" {
+		startTime, err := time.ParseInLocation("2006-01-02 15:04:05", svc.StartTime, time.Local)
+		if err == nil && time.Since(startTime).Seconds() < 0 {
+			for {
+				select {
+				case <-time.After(-1 * time.Since(startTime)):
+					svc.Stop()
+					svc.Cancel()
+					return
+				case <-svc.Ctx.Done():
+					return
+				}
+			}
+		}
+	}
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.start(); err != nil {
 		golog.Info(err)

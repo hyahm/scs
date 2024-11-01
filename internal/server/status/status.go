@@ -7,6 +7,7 @@ const (
 	WAITRESTART string = "Waiting Restart" // 等待重启
 	INSTALL     string = "Installing"      // 正在安装
 	STARTING    string = "Starting"        // 正在启动中
+	REMOVING    string = "Removing"        // 删除中
 )
 
 type Status struct {
@@ -17,4 +18,5 @@ type Status struct {
 	Version      string `json:"version"`
 	IsCron       bool   `json:"isCron"`
 	RestartCount int    `json:"restartCount"` // 记录失败重启的次数
+	Command      string `json:"command"`
 }

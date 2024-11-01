@@ -9,15 +9,15 @@ import (
 )
 
 // 判断是否存在这个script
-func (s *store) InitServer(index, replicate int, pname, name string) {
+func (s *store) InitServer(index int, pname, name string) *server.Server {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.servers[name] = &server.Server{
-		Index:     index,
-		Replicate: replicate,
-		Name:      pname,
-		SubName:   name,
+		Index:   index,
+		Name:    pname,
+		SubName: name,
 	}
+	return s.servers[name]
 }
 
 func (s *store) GetServerByName(name string) (*server.Server, bool) {

@@ -33,7 +33,6 @@ var StartCmd = &cobra.Command{
 }
 
 func init() {
-
 	rootCmd.AddCommand(StartCmd)
 
 }

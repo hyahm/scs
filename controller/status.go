@@ -16,7 +16,7 @@ func getStatus(svc *server.Server) pkg.ServiceStatus {
 		PName:        svc.Name,
 		Name:         svc.SubName,
 		IsCron:       svc.IsCron,
-		Command:      svc.Command,
+		Command:      svc.Status.Command,
 		Version:      svc.Status.Version,
 		CanNotStop:   svc.Status.CanNotStop,
 		Path:         svc.Dir,

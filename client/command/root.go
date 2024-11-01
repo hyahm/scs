@@ -3,17 +3,12 @@ package command
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/hyahm/scs/client"
 	"github.com/hyahm/scs/global"
 
 	"github.com/spf13/cobra"
 )
-
-var UseNodes string
-var GroupName string
-var ReadTimeout time.Duration
 
 var rootCmd = &cobra.Command{
 	Use:     "scsctl",

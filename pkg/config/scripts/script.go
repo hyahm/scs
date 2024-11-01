@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config/alert/to"
 	"github.com/hyahm/scs/pkg/config/liveness"
@@ -24,15 +23,15 @@ func (role Role) ToString() string {
 const (
 	AdminRole  Role = "admin"
 	ScriptRole Role = "script"
-	Simple     Role = "simple"
+	SimpleRole Role = "simple"
 )
 
 type Script struct {
 	Name         string            `yaml:"name,omitempty" json:"name"`
 	Dir          string            `yaml:"dir,omitempty" json:"dir,omitempty"`
 	Command      string            `yaml:"command,omitempty" json:"command"`
-	Token        string            `yaml:"token,omitempty" json:"token,omitempty"` // 只用来查看的token
-	Role         Role              `yaml:"role,omitempty" json:"role,omitempty"`   // 角色权限
+	ScriptToken  string            `yaml:"scriptToken,omitempty" json:"scriptToken,omitempty"` // 只用来查看的token
+	SimpleToken  string            `yaml:"simpleToken,omitempty" json:"simpleToken,omitempty"` // 角色权限
 	Replicate    int               `yaml:"replicate,omitempty" json:"replicate,omitempty"`
 	Always       bool              `yaml:"always,omitempty" json:"always,omitempty"`
 	DisableAlert bool              `yaml:"disableAlert,omitempty" json:"disableAlert,omitempty"`
@@ -47,13 +46,17 @@ type Script struct {
 	Update         string               `yaml:"update,omitempty" json:"update,omitempty"`
 	DeleteWhenExit bool                 `yaml:"deleteWhenExit,omitempty" json:"deleteWhenExit,omitempty"`
 	TempEnv        map[string]string    `yaml:"-" json:"-"`
+	User           string               `yaml:"user,omitempty" json:"user,omitempty"`
+	Group          string               `yaml:"group,omitempty" json:"group,omitempty"`
+	StartTime      string               `yaml:"startTime,omitempty" json:"startTime,omitempty"` // 启动时间
+	StopTime       string               `yaml:"stopTime,omitempty" json:"stopTime,omitempty"`   // 停止时间
 	// Ready              chan bool            `yaml:"-" json:"-"`
 	// 服务ready的探测器
 	Liveness *liveness.Liveness `yaml:"liveness,omitempty" json:"liveness,omitempty"`
 }
 
 // 生成新的env 到 tempenv
-func (s *Script) MakeEnv() {
+func (s *Script) MakeTempEnv() {
 	// 生成 全局脚本的 env
 	tempEnv := make(map[string]string)
 
@@ -80,16 +83,10 @@ func (s *Script) MakeEnv() {
 	}
 	tempEnv["OS"] = runtime.GOOS
 	// 增加token, 不过是随机的
-	tempEnv["TOKEN"] = s.Token
+	tempEnv["TOKEN"] = s.ScriptToken
 	tempEnv["PNAME"] = s.Name
 	tempEnv["PROJECT_HOME"] = s.Dir
-	for k := range tempEnv {
-		if len(k) > 8 && k[:7] == "SCS_TPL" {
-			tempEnv[k] = internal.Format(tempEnv[k], tempEnv)
-		}
-	}
 
-	s.Command = internal.Format(s.Command, tempEnv)
 	s.TempEnv = tempEnv
 }
 
@@ -113,12 +110,14 @@ func EqualScript(s1, s2 *Script) bool {
 		s1.Dir != s2.Dir ||
 		s1.Command != s2.Command ||
 		s1.Always != s2.Always ||
-		s1.Token != s2.Token ||
+		s1.ScriptToken != s2.ScriptToken ||
 		!pkg.CompareMap(s1.Env, s2.Env) ||
 		!to.CompareAT(s1.AT, s2.AT) ||
 		s1.DisableAlert != s2.DisableAlert ||
 		s1.Disable != s2.Disable ||
 		s1.Update != s2.Update ||
+		s1.User != s2.User ||
+		s1.Group != s2.Group ||
 		!prestart.EqualPreStart(s1.PreStart, s2.PreStart) ||
 		s1.Version != s2.Version ||
 		!cron.CompareCron(s1.Cron, s2.Cron))

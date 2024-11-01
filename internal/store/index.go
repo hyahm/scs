@@ -1,5 +1,6 @@
 package store
 
+// 设置一个script里面有多少个副本index
 func (s *store) SetScriptIndex(pname string, i int) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

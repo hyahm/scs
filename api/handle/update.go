@@ -34,15 +34,16 @@ func UpdatePname(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
+
 	go controller.UpdateAndRestartScript(script)
 }
 
 func UpdateAll(w http.ResponseWriter, r *http.Request) {
-	names := xmux.GetInstance(r).Get("scriptname")
-	if names == nil {
-		controller.UpdateAllServer()
-	} else {
-		controller.UpdateAllServerFromScript(names.(map[string]struct{}))
+	validAuths := xmux.GetInstance(r).Get("validAuths").([]controller.Auth)
+	validName := make(map[string]struct{})
+	for _, auth := range validAuths {
+		validName[auth.ScriptName] = struct{}{}
 	}
+	controller.UpdateAllServerFromScript(validName)
 
 }

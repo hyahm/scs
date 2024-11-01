@@ -20,7 +20,6 @@ func RemoveScript(pname string) error {
 	if !sok {
 		return errors.New("not found this pname:" + pname)
 	}
-
 	for index := range store.Store.GetScriptIndex(pname) {
 		subname := fmt.Sprintf("%s_%d", pname, index)
 		svc, ok := store.Store.GetServerByName(subname)
@@ -28,16 +27,18 @@ func RemoveScript(pname string) error {
 			golog.Error(pkg.ErrBugMsg)
 			continue
 		}
+		atomic.AddInt64(&global.CanReload, 1)
 		go Remove(svc, true)
 	}
-
 	return nil
 }
 
 // update: 是否需要重新修改配置文件， 有锁
 func Remove(svc *server.Server, update bool) {
 	// 如果是always 为 true，那么直接修改为false
+	golog.Infof("%s start removed \n", svc.SubName)
 	svc.Remove()
+	golog.Infof("%s removed \n", svc.SubName)
 	<-svc.StopSignal
 	store.Store.DeleteScriptIndex(svc.Name, svc.Index)
 	store.Store.DeleteServerByName(svc.SubName)
@@ -50,3 +51,21 @@ func Remove(svc *server.Server, update bool) {
 	}
 	atomic.AddInt64(&global.CanReload, -1)
 }
+
+// func remove(svc *server.Server, update bool, wg *sync.WaitGroup) {
+// 	// 如果是always 为 true，那么直接修改为false
+// 	golog.Info("svc start removed")
+// 	svc.Remove()
+// 	golog.Info("svc removed")
+// 	<-svc.StopSignal
+// 	store.Store.DeleteScriptIndex(svc.Name, svc.Index)
+// 	store.Store.DeleteServerByName(svc.SubName)
+// 	removeServer(svc.Name, svc.SubName, update)
+
+// 	// 如果全部删光了， 那么scripts的name也要删除
+
+// 	if store.Store.GetScriptLength(svc.Name) == 0 {
+// 		store.Store.DeleteScriptByName(svc.Name)
+// 	}
+// 	wg.Done()
+// }

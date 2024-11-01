@@ -14,7 +14,6 @@ func (svc *Server) read() {
 	if err != nil {
 		golog.Error(err)
 	}
-
 	stderr, err := svc.Cmd.StderrPipe()
 	if err != nil {
 		golog.Error(err)

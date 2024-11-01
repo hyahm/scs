@@ -22,7 +22,7 @@ func Kill(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	go svc.Kill()
+	svc.Kill()
 }
 
 func KillPname(w http.ResponseWriter, r *http.Request) {

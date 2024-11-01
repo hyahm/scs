@@ -15,6 +15,8 @@ package server
 import (
 	"os"
 	"os/exec"
+	"os/user"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -22,30 +24,30 @@ import (
 	"github.com/hyahm/scs/internal/server/status"
 )
 
-func (svc *Server) stop() {
-	defer func() {
-		if err := recover(); err != nil {
-			golog.Error(err)
-		}
-	}()
-	for {
-		select {
-		case <-time.After(time.Millisecond * 10):
-			if !svc.Status.CanNotStop {
-				err := svc.kill()
-				if err != nil {
-					golog.Error(err)
-					return
-				}
-				return
-			}
-		case <-svc.CancelProcess:
-			// 如果收到取消结束的信号，退出之前的操作
-			return
-		}
-	}
+// func (svc *Server) stop() {
+// 	defer func() {
+// 		if err := recover(); err != nil {
+// 			golog.Error(err)
+// 		}
+// 	}()
+// 	for {
+// 		select {
+// 		case <-time.After(time.Millisecond * 10):
+// 			if !svc.Status.CanNotStop {
+// 				err := svc.kill()
+// 				if err != nil {
+// 					golog.Error(err)
+// 					return
+// 				}
+// 				return
+// 			}
+// 		case <-svc.CancelProcess:
+// 			// 如果收到取消结束的信号，退出之前的操作
+// 			return
+// 		}
+// 	}
 
-}
+// }
 
 func (svc *Server) kill() error {
 	var err error
@@ -59,6 +61,7 @@ func (svc *Server) kill() error {
 }
 
 func (svc *Server) start() error {
+
 	svc.Cmd = exec.Command("/bin/bash", "-c", svc.Command)
 	if svc.Dir != "" {
 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
@@ -76,7 +79,31 @@ func (svc *Server) start() error {
 		}
 		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
 	}
-	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true,
+		Credential: &syscall.Credential{}}
+
+	if svc.User != "" {
+		users, err := user.Lookup(svc.User)
+		if err != nil {
+			return err
+		}
+		uid, err := strconv.ParseUint(users.Uid, 10, 32)
+		if err != nil {
+			return err
+		}
+		svc.Cmd.SysProcAttr.Credential.Uid = uint32(uid)
+	}
+	if svc.Group != "" {
+		groups, err := user.LookupGroup(svc.Group)
+		if err != nil {
+			return err
+		}
+		gid, err := strconv.ParseUint(groups.Gid, 10, 32)
+		if err != nil {
+			return err
+		}
+		svc.Cmd.SysProcAttr.Credential.Gid = uint32(gid)
+	}
 	svc.read()
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.Cmd.Start(); err != nil {

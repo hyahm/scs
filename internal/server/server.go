@@ -26,23 +26,28 @@ import (
 const defaultContinuityInterval = time.Hour * 1
 
 type Server struct {
-	Index      int               `json:"index"` // svc的索引
-	Token      string            `json:"token"` // svc的token
-	Name       string            `json:"name"`
-	Dir        string            `json:"dir,omitempty"`
-	Command    string            `json:"command"`
-	Version    string            `json:"version,omitempty"`
-	Cron       *cron.Cron        `json:"cron,omitempty"`    // 这个cron是新生成的
-	IsCron     bool              `json:"is_loop,omitempty"` // 如果是定时任务
-	Env        map[string]string `json:"-"`
-	Logger     *golog.Log        `json:"-"`               // 日志
-	Times      int               `json:"times,omitempty"` // 记录循环的次数
-	SubName    string            `json:"subname,omitempty"`
-	Cmd        *exec.Cmd         `json:"-"`
-	AlwaysSign bool              `json:"always"` // 在停止的时候， always会变为false
+	Index       int               `json:"index"`       // svc的索引
+	ScriptToken string            `json:"scriptToken"` // svc的token
+	SimpleToken string            `json:"simpleToken"` // svc的token
+	User        string            `json:"user"`
+	Group       string            `json:"group"`
+	Name        string            `json:"name"`
+	Dir         string            `json:"dir,omitempty"`
+	Command     string            `json:"command"`
+	Version     string            `json:"version,omitempty"`
+	Cron        *cron.Cron        `json:"cron,omitempty"`    // 这个cron是新生成的
+	IsCron      bool              `json:"is_loop,omitempty"` // 如果是定时任务
+	Env         map[string]string `json:"-"`
+	Logger      *golog.Log        `json:"-"`               // 日志
+	Times       int               `json:"times,omitempty"` // 记录循环的次数
+	SubName     string            `json:"subname,omitempty"`
+	Cmd         *exec.Cmd         `json:"-"`
+	AlwaysSign  bool              `json:"-"` // 在停止的时候， always会变为false
+	StartTime   string            `json:"-"`
+	StopTime    string            `json:"-"`
 	// 总副本数
-	Replicate int            `json:"replicate,omitempty"`
-	Status    *status.Status `json:"status,omitempty"`
+	// Replicate int            `json:"replicate,omitempty"`
+	Status *status.Status `json:"status,omitempty"`
 	// Alert     map[string]message.SendAlerter `json:"-"`
 	//  todo: 感觉不够完善
 	AT      *to.AlertTo      `json:"at,omitempty"`
@@ -173,39 +178,38 @@ func (svc *Server) Restart() {
 
 }
 
-func (svc *Server) MakeServer(script *scripts.Script, availablePort int) int {
-	// 将环境变量填充到server中
-	script.MakeEnv()
+// 填充到server中
+func (svc *Server) MakeServer(script *scripts.Script) {
+
 	env := make(map[string]string)
 	for k, v := range script.TempEnv {
 		env[k] = v
 	}
-	if script.Port > 0 {
+	if svc.Port > 0 {
 		// 顺序拿到可用端口
-		availablePort = pkg.GetAvailablePort(availablePort)
-		env["PORT"] = strconv.Itoa(availablePort)
+		svc.Port = pkg.GetAvailablePort(svc.Port)
+		env["PORT"] = strconv.Itoa(svc.Port)
 	} else {
 		env["PORT"] = "0"
 	}
+	// 填充server
 	svc.fillServer(script)
-	env["OS"] = runtime.GOOS
 	env["NAME"] = svc.SubName
-	env["PROJECT_HOME"] = svc.Dir
-	// 格式化 SCS_TPL 开头的环境变量
-	for k := range env {
-		if len(k) > 8 && k[:7] == "SCS_TPL" {
-			env[k] = internal.Format(env[k], env)
-		}
-	}
+
 	svc.Env = env
-	svc.Port = availablePort
-	return availablePort
 }
 
+// 填充server
 func (svc *Server) fillServer(script *scripts.Script) {
-	// 填充server
-	svc.Token = script.Token
+
+	svc.ScriptToken = script.ScriptToken
+	svc.SimpleToken = script.SimpleToken
+	if svc.SimpleToken == "" {
+		svc.SimpleToken = pkg.RandomToken()
+	}
 	svc.Command = script.Command
+	svc.User = script.User
+	svc.Group = script.Group
 	svc.Disable = script.Disable
 	// Log:       make([]string, 0, global.GetLogCount()),
 	svc.Dir = script.Dir
@@ -214,7 +218,8 @@ func (svc *Server) fillServer(script *scripts.Script) {
 			Status: status.STOP,
 		}
 	}
-
+	svc.StartTime = script.StartTime
+	svc.StopTime = script.StopTime
 	svc.Logger = golog.NewLog(
 		filepath.Join(global.LogDir, svc.SubName+".log"), 10<<10, false, global.CleanLog)
 	svc.Update = script.Update
@@ -244,28 +249,31 @@ func (svc *Server) fillServer(script *scripts.Script) {
 
 // 同步删除
 func (svc *Server) Remove() {
-	defer svc.Cancel()
 	if svc.IsCron {
+		// 如果是定时任务， 直接停止
+		golog.Infof("stop loop %s\n", svc.SubName)
 		svc.Cancel()
-		return
 	}
 	if svc.Always {
 		svc.Always = false
 	}
+	golog.Info("remove")
+	golog.Info(svc.Status.Status)
 	switch svc.Status.Status {
 	case status.WAITRESTART:
 		// 结束发送的退出错误发出的信号
 		<-svc.Exit
 		// 结束停止的goroutine， 转为删除处理
 		svc.Exit <- 12
-		svc.Stop()
+		svc.remove()
 	case status.STOP:
 		golog.Debug("ready send stop single")
 		svc.StopSignal <- true
 		// DeleteServiceBySubName(svc.SubName)
 	case status.RUNNING:
+		golog.Info("remove")
 		svc.Exit <- 12
-		svc.Stop()
+		svc.remove()
 	case status.WAITSTOP:
 		<-svc.Exit
 		// 结束停止的goroutine， 转为删除处理
@@ -282,7 +290,7 @@ func (svc *Server) Stop() {
 	}
 	if svc.IsCron {
 		// 如果是定时任务， 直接停止
-		golog.Infof("stop loop %s", svc.SubName)
+		golog.Infof("stop loop %s\n", svc.SubName)
 		svc.Cancel()
 	}
 	if svc.Always {
@@ -324,21 +332,19 @@ func (svc *Server) Kill() {
 	}
 	switch svc.Status.Status {
 	case status.RUNNING:
-		svc.Exit <- 9
-		if err := svc.kill(); err != nil {
-			golog.Error(err)
-			// s.Cancel()
-		}
+		svc.Exit <- 10
+		svc.kill()
+		<-svc.StopSignal
 	case status.WAITRESTART, status.WAITSTOP:
 		<-svc.Exit
-		svc.Exit <- 9
+		svc.Exit <- 10
 		svc.kill()
+		<-svc.StopSignal
 	}
 
 }
 
 func (svc *Server) stopStatus() {
-	golog.UpFunc(1, "stop")
 	svc.Status.Status = status.STOP
 	svc.Status.Pid = 0
 	svc.Status.CanNotStop = false

@@ -56,5 +56,6 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 			xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
 			return
 		}
+		controller.AddScript(script)
 	}
 }

@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"net"
+	"os"
 	"testing"
 )
 
@@ -16,4 +17,13 @@ func TestSshd(t *testing.T) {
 		Port: 22,
 	}
 	sshd.Dump()
+}
+
+func TestLog(t *testing.T) {
+	b, err := os.ReadFile("/var/log/btmp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(len(b))
+	t.Log(b)
 }

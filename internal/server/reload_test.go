@@ -1,8 +1,16 @@
 package server
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
-func TestReload(t *testing.T) {
-	a := make(map[string]int)
-	delete(a, "1")
+func TestTime(t *testing.T) {
+	for {
+		select {
+		case <-time.After(10 * time.Second):
+			t.Log(111)
+			break
+		}
+	}
 }

@@ -142,14 +142,12 @@ func (svc *Server) Install() (err error) {
 
 	svc.Status.Status = status.INSTALL
 	for _, v := range svc.PreStart {
-		golog.Infof("%#v", *v)
 		if strings.Trim(v.Path, " ") == "" &&
 			strings.Trim(v.Command, " ") == "" &&
 			strings.Trim(v.ExecCommand, " ") == "" {
 			continue
 		}
 		if strings.Trim(v.Path, " ") != "" {
-			golog.Info(v.Path)
 			v.Path = internal.Format(v.Path, svc.Env)
 			golog.Info("check path: ", v.Path)
 			_, err := os.Stat(filepath.Join(svc.Dir, v.Path))
