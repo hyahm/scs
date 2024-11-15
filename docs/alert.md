@@ -83,7 +83,7 @@ go build cmd/telegram/telegram.go
 ```
 5. 配置还少了一个`to` 这里需要添加chat_id, 我们在群组里面@机器人 发送任何信息， 然后再国外服务器执行下面请求
 ```
-curl https://api.telegram.org/bot<token>/sendMessage
+curl https://api.telegram.org/bot<token>/getUpdates
 {
     "ok": true,
     "result": [
