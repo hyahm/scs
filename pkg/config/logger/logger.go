@@ -27,6 +27,7 @@ func ReloadLogger(log *Logger) {
 	if log == nil {
 		log = defaultLogger()
 	}
+
 	global.LogDir = filepath.Dir(log.Path)
 
 	if global.LogDir == "." {

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -66,7 +66,7 @@ func (rocket *AlertRocket) getToken() (*Token, error) {
 	}
 
 	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (rocket *AlertRocket) sendMsg(token, uid, body, to string) (err error) {
 		golog.Error(err)
 		return
 	}
-	respmsg, err := ioutil.ReadAll(r.Body)
+	respmsg, err := io.ReadAll(r.Body)
 	if err != nil {
 		golog.Error(err)
 		return

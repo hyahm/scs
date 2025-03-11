@@ -3,7 +3,7 @@ package alert
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -29,7 +29,7 @@ func (weixin *AlertWeiXin) Send(body *message.Message, to ...string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		golog.Error(err)
 		return err

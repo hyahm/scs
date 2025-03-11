@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -35,7 +34,7 @@ func ReadClientConfig(configfile string) {
 			panic(err)
 		}
 	}
-	b, err := ioutil.ReadFile(configfile)
+	b, err := os.ReadFile(configfile)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +45,7 @@ func ReadClientConfig(configfile string) {
     token:  
 group: `
 		b = []byte(x)
-		err := ioutil.WriteFile(configfile, b, 0644)
+		err := os.WriteFile(configfile, b, 0644)
 		if err != nil {
 			panic(err)
 		}
@@ -115,7 +114,7 @@ func (sc *SCSClient) requests(url string, body io.Reader, method ...string) (*pk
 	// 	return nil, err
 	// }
 
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -154,7 +153,7 @@ func (sc *SCSClient) requestStatuss(url string, body io.Reader, method ...string
 		return nil, err
 	}
 
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -300,7 +299,7 @@ func (sc *SCSClient) Log(line int) {
 	sc.webSocket(fmt.Sprintf("/log/%s/%d", sc.Name, line), nil)
 }
 
-//  获取当前副本的环境变量
+// 获取当前副本的环境变量
 func (sc *SCSClient) Env() (*pkg.Response, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty
@@ -308,7 +307,7 @@ func (sc *SCSClient) Env() (*pkg.Response, error) {
 	return sc.requests("/env/"+sc.Name, nil)
 }
 
-//  获取当前副本的环境变量
+// 获取当前副本的环境变量
 func (sc *SCSClient) Info() (*pkg.Response, error) {
 	if sc.Name == "" {
 		return nil, ErrNameIsEmpty

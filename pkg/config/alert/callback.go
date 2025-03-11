@@ -3,7 +3,7 @@ package alert
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -45,7 +45,7 @@ func (c *Callback) Send(body *message.Message, to ...string) error {
 			continue
 		}
 		defer resp.Body.Close()
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			golog.Error(err)
 			continue

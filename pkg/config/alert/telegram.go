@@ -2,7 +2,7 @@ package alert
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -43,8 +43,7 @@ func (telegram *AlertTelegram) Send(body *message.Message, to ...string) error {
 			continue
 		}
 		defer resp.Body.Close()
-
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			golog.Error(err)
 			continue

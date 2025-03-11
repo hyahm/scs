@@ -3,9 +3,9 @@ package command
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 
@@ -45,7 +45,7 @@ var InstallCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			f, err := ioutil.ReadFile(path)
+			f, err := os.ReadFile(path)
 			if err != nil {
 				fmt.Println(err)
 				return

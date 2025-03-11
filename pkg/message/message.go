@@ -4,7 +4,7 @@ package message
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"text/template"
 
@@ -19,7 +19,7 @@ func GetIp() {
 		return
 	}
 	defer r.Body.Close()
-	b, _ := ioutil.ReadAll(r.Body)
+	b, _ := io.ReadAll(r.Body)
 	addr = string(b)
 }
 

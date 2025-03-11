@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -57,14 +56,14 @@ func upload(filename string) error {
 	//这里的Content-Type值就是上面contentType的值
 	req.Header.Set("Content-Type", contentType)
 	//转换类型
-	req.Body = ioutil.NopCloser(bodyBuf)
+	req.Body = io.NopCloser(bodyBuf)
 	//发送数据
 	data, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	//读取请求返回的数据
-	bytes, _ := ioutil.ReadAll(data.Body)
+	bytes, _ := io.ReadAll(data.Body)
 	defer data.Body.Close()
 	//打印数据
 	fmt.Println(string(bytes))

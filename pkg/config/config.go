@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 
 	"github.com/hyahm/scs/global"
@@ -60,7 +59,7 @@ func (c *Config) WriteConfig(update bool) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(cfgfile, b, 0644)
+	return os.WriteFile(cfgfile, b, 0644)
 }
 
 func load() (*Config, error) {
@@ -91,7 +90,7 @@ func reLoad() (*Config, error) {
 // 读取配置文件， 找不到就创建一个空文件
 func readConfig() (*Config, error) {
 	cfg := &Config{}
-	b, err := ioutil.ReadFile(cfgfile)
+	b, err := os.ReadFile(cfgfile)
 	if err != nil {
 		f, err := os.Create(cfgfile)
 		if err != nil {
@@ -152,7 +151,7 @@ func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
 		return nil
 	}
 	// 默认配置
-	f, err := ioutil.ReadFile(cfgfile)
+	f, err := os.ReadFile(cfgfile)
 	if err != nil {
 		return err
 	}
@@ -180,7 +179,7 @@ func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
 func DeleteAllScriptToConfigFile(update bool) error {
 	// 添加
 	// 默认配置
-	f, err := ioutil.ReadFile(cfgfile)
+	f, err := os.ReadFile(cfgfile)
 	if err != nil {
 		return err
 	}
@@ -198,7 +197,7 @@ func DeleteAllScriptToConfigFile(update bool) error {
 func RemoveAllScriptToConfigFile(update bool) error {
 	// 添加
 	// 默认配置
-	f, err := ioutil.ReadFile(cfgfile)
+	f, err := os.ReadFile(cfgfile)
 	if err != nil {
 		return err
 	}
@@ -223,7 +222,7 @@ func DeleteScriptToConfigFile(s *scripts.Script, update bool) error {
 		return nil
 	}
 	// 删除默认配置
-	f, err := ioutil.ReadFile(cfgfile)
+	f, err := os.ReadFile(cfgfile)
 	if err != nil {
 		return err
 	}
@@ -247,7 +246,7 @@ func AddScriptToConfigFile(s *scripts.Script) error {
 	if !CheckScriptNameRule(s.Name) {
 		return errors.New("script name must be a word, " + s.Name)
 	}
-	f, err := ioutil.ReadFile(cfgfile)
+	f, err := os.ReadFile(cfgfile)
 	if err != nil {
 		return err
 	}

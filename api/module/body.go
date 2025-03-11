@@ -2,14 +2,14 @@ package module
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/hyahm/xmux"
 )
 
 func Unmarshal(w http.ResponseWriter, r *http.Request) bool {
-	b, err := ioutil.ReadAll(r.Body)
+	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return true
