@@ -5,6 +5,8 @@ service control service or script
 自带监控及通知     
 服务控制脚本能否停止 最大程度防止脚本数据丢失   
 码云地址: https://gitee.com/cander/scs
+文档请参考 docs目录下的内容，
+如果本地有docsify服务可以直接在本地启动打开美观的文档
 
 # 适用场景
 
@@ -78,7 +80,7 @@ scripts:
 ```
 
 
-场景五:  批量升级更新服务， 但是觉得ansible管理太麻烦, 可以在某一台控制机器直接执行 `update <panme> <name>`升级服务，
+场景五:  使用了http的接口，可以自己写一个前端对接服务生成有界面的管理工具
 ```
 需要在客户端配置所有scsd的信息， 可以通过 -n 和 -g 来自定义管理的节点或组， 详细请参考文档
 ```
@@ -91,7 +93,7 @@ scripts:
 
 
 
-[文档地址](https://scs.doc.hyahm.com/#/)
+
 [部分视频教程](https://www.bilibili.com/video/BV1bv411C7Qz/)
 
 具体更新的内容请查看 [update.md](update.md)文件
