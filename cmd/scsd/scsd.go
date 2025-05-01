@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/hyahm/scs/api"
 	"github.com/hyahm/scs/controller"
@@ -35,7 +36,9 @@ func main() {
 		return
 	}
 	single := make(chan os.Signal, 1)
-	signal.Notify(single, os.Interrupt, os.Kill)
+	signal.Notify(single, os.Interrupt, syscall.SIGTERM)
+	pipe := make(chan os.Signal, 1)
+	signal.Notify(pipe, syscall.SIGPIPE)
 	go func() {
 		select {
 		case <-single:
@@ -43,6 +46,8 @@ func main() {
 			fmt.Println("waiting stop all")
 			controller.WaitKillAllServer()
 			os.Exit(1)
+		case <-pipe:
+			fmt.Println("pipe exit")
 		}
 	}()
 	// 自动清除全局报警器的值
