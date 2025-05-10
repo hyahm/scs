@@ -14,7 +14,7 @@ import (
 var addr string
 
 func GetIp() {
-	r, err := http.Get("http://ip.hyahm.com")
+	r, err := http.Get("https://ifconfig.me")
 	if err != nil {
 		return
 	}

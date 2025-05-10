@@ -24,12 +24,12 @@ func StartExsitScript(name string) {
 
 // 第一次启动
 func FirstStartAllScript(filename string) {
-	config, err := config.ReadConfig(filename)
+	var err error
+	cfg, err := config.ReadConfig(filename)
 	if err != nil && cfg == nil {
 		// 第一次报错直接退出
 		golog.Fatal(err)
 	}
-	cfg = config
 	for _, script := range cfg.SC {
 		// 如果没设置token， 默认生成一个脚本的token
 		AddScript(script)

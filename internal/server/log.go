@@ -35,6 +35,9 @@ func (svc *Server) appendRead(stdout io.ReadCloser, iserr bool) {
 			// close(svc.Msg)
 			return
 		default:
+			if readout == nil {
+				return
+			}
 			line, _, err := readout.ReadLine()
 			if err != nil {
 				stdout.Close()

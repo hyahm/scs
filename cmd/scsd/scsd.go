@@ -40,15 +40,18 @@ func main() {
 	pipe := make(chan os.Signal, 1)
 	signal.Notify(pipe, syscall.SIGPIPE)
 	go func() {
-		select {
-		case <-single:
-			// 确保删除了server
-			fmt.Println("waiting stop all")
-			controller.WaitKillAllServer()
-			os.Exit(1)
-		case <-pipe:
-			fmt.Println("pipe exit")
+		for {
+			select {
+			case <-single:
+				// 确保删除了server
+				fmt.Println("waiting stop all")
+				controller.WaitKillAllServer()
+				os.Exit(1)
+			case <-pipe:
+				fmt.Println("pipe exit")
+			}
 		}
+
 	}()
 	// 自动清除全局报警器的值
 	go alert.CleanAlert()

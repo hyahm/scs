@@ -34,7 +34,6 @@ func Fmt() error {
 
 如果有多余的副本或scripts就删除, 新的scripts将会启动， 自动扩缩容
 更新所有store.ss
-
 */
 func Reload() error {
 	c, err := config.ReadConfig("")
@@ -126,8 +125,6 @@ func UpdateScriptApi(s *scripts.Script) {
 		newReplicate = 1
 	}
 	s.MakeTempEnv()
-	golog.Info(oldReplicate)
-	golog.Info(newReplicate)
 	// 对比脚本是否修改
 	if oldReplicate == newReplicate {
 		if !scripts.EqualScript(s, script) {
