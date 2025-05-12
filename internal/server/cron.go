@@ -20,6 +20,7 @@ func (svc *Server) cron() {
 			svc.Status.Status = status.RUNNING
 			golog.Infof("cron start: %s time: %v\n", svc.SubName, svc.Cron.StartTime)
 			if err := svc.start(); err != nil {
+				golog.Error("cron start error: ", err)
 				golog.Error(err)
 				// 设置下载启动的时间, 失败的就直接退出
 				svc.stopStatus()
@@ -29,7 +30,6 @@ func (svc *Server) cron() {
 				svc.Status.Pid = svc.Cmd.Process.Pid
 			}
 			svc.wait()
-
 			svc.Times--
 			if svc.Cron.Times > 0 && svc.Times <= 0 {
 				golog.Infof("循环器%s执行次数结束\n", svc.SubName)

@@ -65,18 +65,31 @@ func (svc *Server) asyncStart(param string) {
 			}
 		}
 	}()
+
 	if svc.Cron != nil && svc.Cron.Loop > 0 {
+		golog.Info("name:" + svc.SubName + " start cron")
 		svc.IsCron = true
 		svc.Status.Status = status.RUNNING
 		// 循环的起止时间可以只设置时分秒， 自动补齐今天的日期
 		svc.Cron.Start = strings.Trim(svc.Cron.Start, " ")
 		if svc.Cron.Start != "" {
 			// 计算下次启动的时间, 不等于空就按照上面的时间来计算
-			index := strings.Index(svc.Cron.Start, " ")
-			if index < 0 {
-				// 如果只有时间， 自动获取今天的年月日
-				svc.Cron.Start = strings.Split(time.Now().Format("2006-01-02 15:04:05"), " ")[0] + " " + svc.Cron.Start
+			// 如果只有日期呢，怎么判断是时间还是日期
+			// 这里的时间格式是 2023-10-01 12:00:00
+			// 这里的时间格式是 12:00:00
+			if !strings.Contains(svc.Cron.Start, " ") {
+				// 不是时间就是日期
+				if strings.Contains(svc.Cron.Start, ":") {
+					// 时间格式 := "15:04:05"
+					// 如果只有时间， 自动获取今天的年月日
+					svc.Cron.Start = time.Now().Format("2006-01-02") + " " + svc.Cron.Start
+				} else {
+					// 日期格式 := "2006-01-02"
+					// 如果只有日期， 自动获取今天的时分秒
+					svc.Cron.Start = svc.Cron.Start + " " + time.Now().Format("15:04:05")
+				}
 			}
+
 			svc.Cron.StartTime, err = time.ParseInLocation("2006-01-02 15:04:05", svc.Cron.Start, time.Local)
 			if err != nil {
 				golog.Error(err)
@@ -89,7 +102,9 @@ func (svc *Server) asyncStart(param string) {
 			svc.Cron.StartTime = time.Now()
 			// 如果没设置， 设置下此启动的时间为当前时间
 		}
+
 		svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
+		golog.Info("cron start: ", svc.Cron.StartTime)
 		go svc.cron()
 		return
 	}

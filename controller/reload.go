@@ -100,6 +100,7 @@ func AddScript(s *scripts.Script) {
 		availablePort = svc.Port + 1
 		if s.Disable {
 			// 如果是禁用的 ，那么不用生成多个副本
+			// 不在上面就是因为， 是为了看到状态
 			return
 		}
 

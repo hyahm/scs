@@ -78,6 +78,13 @@ func (svc *Server) wait() {
 			// 	svc.Logger.Close()
 			// 	return
 			// }
+			if svc.IsCron {
+				// 如果是个定时器， 执行结束不停止
+				svc.Status.RestartCount++
+				svc.Status.Status = status.STOP
+				svc.Status.Pid = 0
+				return
+			}
 			if svc.Always {
 				golog.Info("is always restart")
 				// 如果总是启动的话， 再次拉起服务
@@ -95,10 +102,12 @@ func (svc *Server) wait() {
 		}
 
 	}
-	// if svc.IsCron {
-	// 	// 如果是个定时器， 执行结束不停止
-	// 	return
-	// }
+	if svc.IsCron {
+		// 如果是个定时器， 执行结束不停止
+		svc.Status.Pid = 0
+		svc.Status.Status = status.STOP
+		return
+	}
 	// if svc.Removed {
 
 	// }
