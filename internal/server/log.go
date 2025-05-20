@@ -28,6 +28,9 @@ func (svc *Server) read() {
 }
 
 func (svc *Server) appendRead(stdout io.ReadCloser, iserr bool) {
+	if stdout == nil {
+		return
+	}
 	readout := bufio.NewReader(stdout)
 	for {
 		select {
