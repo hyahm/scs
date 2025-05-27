@@ -10,6 +10,9 @@ import (
 )
 
 func (svc *Server) read() {
+    if svc.Cmd == nil {
+        return
+    }
 	stdout, err := svc.Cmd.StdoutPipe()
 	if err != nil {
 		golog.Error(err)
