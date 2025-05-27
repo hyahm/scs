@@ -3,6 +3,7 @@ scs.yaml
 main
 keys
 etcd
+scsd
 socks5
 bin
 repo/caddy
