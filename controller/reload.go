@@ -139,7 +139,6 @@ func UpdateScriptApi(s *scripts.Script) {
 	if oldReplicate > newReplicate {
 		// 如果大于的话， 那么就删除多余的
 		for i := newReplicate; i < oldReplicate; i++ {
-			atomic.AddInt64(&global.CanReload, 1)
 			subname := fmt.Sprintf("%s_%d", s.Name, i)
 			golog.Info("remove " + s.Name + fmt.Sprintf("_%d", i))
 			svc, ok := store.Store.GetServerByName(subname)
