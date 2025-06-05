@@ -8,6 +8,7 @@ type AlertTo struct {
 	Telegram []string `yaml:"telegram"`
 	WeiXin   []string `yaml:"weixin"`
 	Callback []string `yaml:"callback"`
+	DingDing []string `yaml:"dingding"`
 }
 
 func CompareAT(a1, a2 *AlertTo) bool {

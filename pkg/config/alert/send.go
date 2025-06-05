@@ -60,7 +60,6 @@ func AlertMessage(msg *message.Message, at *to.AlertTo) {
 		if at == nil {
 			alertErr := alert.Send(msg)
 			if alertErr != nil {
-				golog.Error(alertErr)
 				continue
 			}
 			continue
@@ -78,35 +77,30 @@ func AlertMessage(msg *message.Message, at *to.AlertTo) {
 			}()
 		case *AlertRocket:
 			go func() {
-				alertErr := alert.Send(msg, at.Rocket...)
-				if alertErr != nil {
-					golog.Error(alertErr)
-				}
+				alert.Send(msg, at.Rocket...)
 
 			}()
 		case *AlertTelegram:
 			go func() {
-				alertErr := alert.Send(msg, at.Telegram...)
-				if alertErr != nil {
-					golog.Error(alertErr)
-				}
+				alert.Send(msg, at.Telegram...)
 
 			}()
 		case *AlertWeiXin:
 
 			go func() {
-				alertErr := alert.Send(msg, at.WeiXin...)
-				if alertErr != nil {
-					golog.Error(alertErr)
-				}
+				alert.Send(msg, at.WeiXin...)
+
+			}()
+		case *AlertDingDing:
+			golog.Info("dingding  AlertDingDing ")
+			go func() {
+				alert.Send(msg, at.WeiXin...)
 
 			}()
 		case *Callback:
 			go func() {
-				alertErr := alert.Send(msg, at.Callback...)
-				if alertErr != nil {
-					golog.Error(alertErr)
-				}
+				alert.Send(msg, at.Callback...)
+
 			}()
 		}
 

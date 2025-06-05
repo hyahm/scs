@@ -13,14 +13,46 @@ import (
 
 var addr string
 
+type Response struct {
+	Code    int    `json:"code"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Data    Data   `json:"data"`
+	Time    string `json:"time"`
+}
+
+// 定义 Data 结构体
+type Data struct {
+	IP string `json:"ip"`
+}
+
 func GetIp() {
-	r, err := http.Get("https://ifconfig.me")
+	url := "https://cz88.net/api/cz88/ip/base?ip="
+	resp, err := http.Get(url)
 	if err != nil {
+		addr = "127.0.0.1"
+		golog.Error(err)
 		return
 	}
-	defer r.Body.Close()
-	b, _ := io.ReadAll(r.Body)
-	addr = string(b)
+	defer resp.Body.Close()
+
+	// 读取响应内容
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		addr = "127.0.0.1"
+		golog.Error(err)
+		return
+	}
+	res := Response{}
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		addr = "127.0.0.1"
+		golog.Error(err)
+		return
+	}
+
+	// 将响应内容转换为字符串
+	addr = res.Data.IP
 }
 
 type Message struct {

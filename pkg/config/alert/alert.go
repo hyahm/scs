@@ -13,6 +13,7 @@ type Alert struct {
 	Telegram *AlertTelegram `yaml:"telegram,omitempty" json:"telegram,omitempty"`
 	WeiXin   *AlertWeiXin   `yaml:"weixin,omitempty" json:"weixin,omitempty"`
 	Callback *Callback      `yaml:"callback,omitempty" json:"callback,omitempty"`
+	DingDing *AlertDingDing `yaml:"dingding,omitempty" json:"dingding,omitempty"`
 }
 type Alerter struct {
 	Alert        *Alert
@@ -86,6 +87,13 @@ func InitAlert() {
 	} else {
 		delete(alerter.Alerts, "weixin")
 	}
+
+	if alerter.Alert.DingDing != nil && alerter.Alert.DingDing.Server != "" {
+		alerter.Alerts["dingding"] = alerter.Alert.DingDing
+	} else {
+		delete(alerter.Alerts, "dingding")
+	}
+
 	if alerter.Alert.Callback != nil {
 		alerter.Alerts["callback"] = alerter.Alert.Callback
 	} else {
