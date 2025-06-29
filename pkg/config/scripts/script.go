@@ -62,6 +62,7 @@ func (s *Script) MakeTempEnv() {
 
 	pathEnvName := "PATH"
 	for _, v := range os.Environ() {
+
 		kv := strings.Split(v, "=")
 		if strings.ToUpper(kv[0]) == pathEnvName {
 			pathEnvName = kv[0]
@@ -88,6 +89,7 @@ func (s *Script) MakeTempEnv() {
 	tempEnv["PROJECT_HOME"] = s.Dir
 
 	s.TempEnv = tempEnv
+	golog.Warn(s.TempEnv)
 }
 
 func (s *Script) GetEnv() []string {

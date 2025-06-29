@@ -8,6 +8,8 @@ service control service or script
 文档请参考 docs目录下的内容，
 如果本地有docsify服务可以直接在本地启动打开美观的文档
 
+通过 systemctl 启动时，  用户的环境变量被默认过滤掉， 想要加载进去， 需要执行 `printenv  /tmp/service-env.conf`
+
 # 适用场景
 
 场景一:  服务器需要监控报警cpu，内存, 磁盘，但是主要是要给我实时报警，以便提前避免不必要的事故
