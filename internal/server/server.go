@@ -82,7 +82,7 @@ type Server struct {
 
 func newCommand(command string) *exec.Cmd {
 	if runtime.GOOS == "windows" {
-		return exec.Command("powershell", "/C", command)
+		return exec.Command("powershell.exe", "-Command", command)
 	} else {
 		return exec.Command("/bin/bash", "-c", command)
 	}

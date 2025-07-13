@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"os/user"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -77,6 +78,7 @@ func (svc *Server) start() error {
 		if k == "" || v == "" {
 			continue
 		}
+		v = strings.ReplaceAll(v, "\x00", "")
 		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
 	}
 	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true,

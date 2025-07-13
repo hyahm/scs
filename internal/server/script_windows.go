@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal/server/status"
@@ -37,9 +38,11 @@ func (svc *Server) start() error {
 		svc.Cmd.Env = make([]string, 0, len(svc.Env))
 	}
 	for k, v := range svc.Env {
-		if k == "" || v == "" {
+		if k == "" {
 			continue
 		}
+		// 去掉 key、value 里的 NUL 和控制字符
+		v = strings.ReplaceAll(v, "\x00", "")
 		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
 
 	}

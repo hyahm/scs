@@ -89,7 +89,6 @@ func (s *Script) MakeTempEnv() {
 	tempEnv["PROJECT_HOME"] = s.Dir
 
 	s.TempEnv = tempEnv
-	golog.Warn(s.TempEnv)
 }
 
 func (s *Script) GetEnv() []string {
