@@ -20,6 +20,13 @@ func (s *store) InitServer(index int, pname, name string) *server.Server {
 	return s.servers[name]
 }
 
+func (s *store) SetServer(name string, srv *server.Server) *server.Server {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.servers[name] = srv
+	return s.servers[name]
+}
+
 func (s *store) GetServerByName(name string) (*server.Server, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

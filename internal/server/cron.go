@@ -18,6 +18,7 @@ func (svc *Server) cron() {
 			return
 		case <-time.After(-time.Since(svc.Cron.StartTime)):
 			svc.Status.Status = status.RUNNING
+			svc.Status.Start = time.Now().Unix()
 			golog.Infof("cron start: %s time: %v\n", svc.SubName, svc.Cron.StartTime)
 			if err := svc.start(); err != nil {
 				golog.Error("cron start error: ", err)

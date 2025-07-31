@@ -97,6 +97,7 @@ func AddScript(s *scripts.Script) {
 		store.Store.SetScriptIndex(s.Name, i)
 		svc.Port = availablePort
 		svc.MakeServer(s)
+		svc.Env["INDEX"] = fmt.Sprintf("%d", i)
 		availablePort = svc.Port + 1
 		if s.Disable {
 			// 如果是禁用的 ，那么不用生成多个副本
@@ -129,7 +130,7 @@ func UpdateScriptApi(s *scripts.Script) {
 	// 对比脚本是否修改
 	if oldReplicate == newReplicate {
 		if !scripts.EqualScript(s, script) {
-			golog.Info(s.Name)
+			golog.Info("update: ", s.Name)
 			store.Store.SetScript(s)
 		}
 
@@ -163,6 +164,7 @@ func UpdateScriptApi(s *scripts.Script) {
 				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
 				return
 			}
+			golog.Info("add: ", s.Name)
 			svc.Start()
 		}
 	}

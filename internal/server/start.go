@@ -103,7 +103,7 @@ func (svc *Server) asyncStart(param string) {
 			// 如果没设置， 设置下此启动的时间为当前时间
 		}
 
-		svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
+		// svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 		golog.Info("cron start: ", svc.Cron.StartTime)
 		go svc.cron()
 		return

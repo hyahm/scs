@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/google/gopacket v1.1.19
-	github.com/hyahm/golog v0.0.0-20250613072438-e2c53e447087
+	github.com/hyahm/golog v0.0.0-20250724082931-2b0b1385f555
 	github.com/hyahm/xmux v0.0.0-20220516140250-b782eb5cebee
 	github.com/sacOO7/gowebsocket v0.0.0-20210515122958-9396f1a71e23
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -36,6 +36,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.5.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )

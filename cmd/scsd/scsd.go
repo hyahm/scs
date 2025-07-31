@@ -53,6 +53,7 @@ func main() {
 		}
 
 	}()
+
 	// 自动清除全局报警器的值
 	go alert.CleanAlert()
 	golog.Info("config file path: ", configfile)
