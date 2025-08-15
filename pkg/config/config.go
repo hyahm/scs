@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"time"
 
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg/config/alert"
@@ -14,40 +15,45 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var ConfigFile string
+
 type Config struct {
 	Listen      string         `yaml:"listen,omitempty"`
 	Token       string         `yaml:"token,omitempty"`
 	ProxyHeader string         `yaml:"proxyHeader,omitempty"`
 	Key         string         `yaml:"key,omitempty"`
-	Pem         string         `yaml:"pem,omitempty"`
-	DisableTls  bool           `yaml:"disableTls,omitempty"`
+	Cert        string         `yaml:"cert,omitempty"`
+	EnableTLS   bool           `yaml:"enableTLS,omitempty"`
 	Packet      bool           `yaml:"packet,omitempty"`
 	Log         *logger.Logger `yaml:"log,omitempty"`
 	IgnoreToken []string       `yaml:"ignoreToken,omitempty"`
+	ReadTimeout time.Duration  `yaml:"readTimeout,omitempty"`
 	// Repo        *Repo          `yaml:"repo,omitempty"`
 	Alert *alert.Alert      `yaml:"alert,omitempty"`
 	Probe *probe.Probe      `yaml:"probe,omitempty"`
 	SC    []*scripts.Script `yaml:"scripts,omitempty"`
 }
 
-func defaultConfig() *Config {
-	return &Config{
-		Listen: ":11111",
-	}
-}
-
 // 保存的配置文件路径
-var cfgfile string
 
 // 读文件
-func ReadConfig(filename string) (*Config, error) {
+func ReadConfig() (*Config, error) {
 	// 依次启动
-	if filename != "" {
-		cfgfile = filename
-		return load()
-	}
-
 	return reLoad()
+}
+
+func (c *Config) Store() {
+	global.CS.Cert = c.Cert
+	global.CS.EnableTLS = c.EnableTLS
+	global.CS.IgNoreToken = c.IgnoreToken
+	global.CS.Key = c.Key
+	if c.Listen == "" {
+		c.Listen = ":11111"
+	}
+	global.CS.Listen = c.Listen
+	global.CS.Token = c.Token
+	// global.CS.LogCount = c.log
+	global.CS.ReadTime = c.ReadTimeout
 }
 
 // 写入配置文件
@@ -59,26 +65,7 @@ func (c *Config) WriteConfig(update bool) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(cfgfile, b, 0644)
-}
-
-func load() (*Config, error) {
-	// reload: 第一次启动     还是 config reload
-	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
-	cfg, err := readConfig()
-	if err != nil {
-		golog.Error(err)
-		return nil, err
-	}
-
-	// 装载全局配置
-
-	global.SetListen(cfg.Listen)
-	global.SetDisableTls(cfg.DisableTls)
-	global.SetKey(cfg.Key)
-	global.SetPem(cfg.Pem)
-
-	return cfg, nil
+	return os.WriteFile(ConfigFile, b, 0644)
 }
 
 func reLoad() (*Config, error) {
@@ -90,14 +77,14 @@ func reLoad() (*Config, error) {
 // 读取配置文件， 找不到就创建一个空文件
 func readConfig() (*Config, error) {
 	cfg := &Config{}
-	b, err := os.ReadFile(cfgfile)
+	b, err := os.ReadFile(ConfigFile)
 	if err != nil {
-		f, err := os.Create(cfgfile)
+		f, err := os.Create(ConfigFile)
 		if err != nil {
 			golog.Error(err)
 		}
 		f.Close()
-		return defaultConfig(), nil
+		return cfg, nil
 
 	}
 
@@ -112,9 +99,8 @@ func readConfig() (*Config, error) {
 		return nil, err
 	}
 	// 装载全局配置
+	cfg.Store()
 	global.ProxyHeader = cfg.ProxyHeader
-	global.SetToken(cfg.Token)
-	global.SetIgnoreToken(cfg.IgnoreToken)
 	// 初始化日志
 	logger.ReloadLogger(cfg.Log)
 	// 初始化报警器信息
@@ -151,7 +137,7 @@ func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
 		return nil
 	}
 	// 默认配置
-	f, err := os.ReadFile(cfgfile)
+	f, err := os.ReadFile(ConfigFile)
 	if err != nil {
 		return err
 	}
@@ -179,7 +165,7 @@ func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
 func DeleteAllScriptToConfigFile(update bool) error {
 	// 添加
 	// 默认配置
-	f, err := os.ReadFile(cfgfile)
+	f, err := os.ReadFile(ConfigFile)
 	if err != nil {
 		return err
 	}
@@ -197,7 +183,7 @@ func DeleteAllScriptToConfigFile(update bool) error {
 func RemoveAllScriptToConfigFile(update bool) error {
 	// 添加
 	// 默认配置
-	f, err := os.ReadFile(cfgfile)
+	f, err := os.ReadFile(ConfigFile)
 	if err != nil {
 		return err
 	}
@@ -222,7 +208,7 @@ func DeleteScriptToConfigFile(s *scripts.Script, update bool) error {
 		return nil
 	}
 	// 删除默认配置
-	f, err := os.ReadFile(cfgfile)
+	f, err := os.ReadFile(ConfigFile)
 	if err != nil {
 		return err
 	}
@@ -246,7 +232,7 @@ func AddScriptToConfigFile(s *scripts.Script) error {
 	if !CheckScriptNameRule(s.Name) {
 		return errors.New("script name must be a word, " + s.Name)
 	}
-	f, err := os.ReadFile(cfgfile)
+	f, err := os.ReadFile(ConfigFile)
 	if err != nil {
 		return err
 	}

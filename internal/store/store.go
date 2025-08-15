@@ -10,8 +10,9 @@ import (
 type store struct {
 	servers     map[string]*server.Server
 	serverIndex map[string]map[int]struct{}
-	ss          map[string]*scripts.Script
-	mu          sync.RWMutex
+	// 脚本服务, 脚本服务名称为key
+	ss map[string]*scripts.Script
+	mu sync.RWMutex
 }
 
 var Store *store

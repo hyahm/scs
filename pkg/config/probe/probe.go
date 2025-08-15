@@ -40,7 +40,7 @@ type Config struct {
 	ContinuityInterval time.Duration `yaml:"continuityInterval"`
 }
 
-//  保存配置文件信息
+// 保存配置文件信息
 type Probe struct {
 	Monitor   []string `yaml:"monitor,omitempty"`
 	Monitored []string `yaml:"monitored,omitempty"`
@@ -97,8 +97,8 @@ func RunProbe(p *Probe) {
 			healthDetector.Probe = p
 		}
 	}
-	global.SeContinuityInterval(p.ContinuityInterval)
-	global.SetMonitored(healthDetector.Probe.Monitored)
+	global.CS.ContinuityInterval = p.ContinuityInterval
+	global.CS.Monitored = healthDetector.Probe.Monitored
 	healthDetector.Ctx, healthDetector.Cancel = context.WithCancel(context.Background())
 	initConfig()
 }

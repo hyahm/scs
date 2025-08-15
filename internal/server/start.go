@@ -2,10 +2,12 @@ package server
 
 import (
 	"context"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/internal/server/status"
 	"github.com/hyahm/scs/pkg"
@@ -17,6 +19,7 @@ func (svc *Server) Start(param ...string) {
 
 	if len(param) > 0 {
 		parameter = param[0]
+		golog.Info(parameter)
 	}
 	switch svc.Status.Status {
 	case status.STOP:
@@ -24,12 +27,14 @@ func (svc *Server) Start(param ...string) {
 		if !svc.Disable {
 			go svc.asyncStart(parameter)
 		}
-
 	}
 }
 
 // 当是停止状态的时候异步启动
 func (svc *Server) asyncStart(param string) {
+	svc.Logger = golog.NewLog(
+		filepath.Join(global.CS.LogDir, svc.SubName+".log"), 0, true, global.CS.CleanLog)
+	svc.Logger.Format = global.FORMAT
 	svc.Env["PARAMETER"] = param
 	// 格式化 SCS_TPL 开头的环境变量
 	for k := range svc.Env {

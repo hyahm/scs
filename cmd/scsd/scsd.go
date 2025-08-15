@@ -11,13 +11,13 @@ import (
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/scs/pkg/message"
 
 	"github.com/hyahm/golog"
 )
 
-var configfile string
 var showversion bool
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	// 设置limit值
 	internal.Setrlimit()
 	flag.BoolVar(&showversion, "v", false, "get scs server version")
-	flag.StringVar(&configfile, "f", "scs.yaml", "set config file")
+	flag.StringVar(&config.ConfigFile, "f", "scs.yaml", "set config file")
 	flag.Parse()
 	if showversion {
 		fmt.Println(global.VERSION)
@@ -56,9 +56,9 @@ func main() {
 
 	// 自动清除全局报警器的值
 	go alert.CleanAlert()
-	golog.Info("config file path: ", configfile)
+	golog.Info("config file path: ", config.ConfigFile)
 
-	controller.FirstStartAllScript(configfile)
+	controller.FirstStartAllScript()
 	api.HttpServer()
 
 }

@@ -11,7 +11,7 @@ func RandomToken() string {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	n := r.Intn(20)
 	for i := 0; i < n+30; i++ {
-		r := rand.Intn(87)
+		r := rand.Intn(len(s))
 		out += s[r : r+1]
 	}
 	return out

@@ -39,7 +39,7 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 
 	needToken := true
 	// 检查是否是被监控的
-	for _, v := range global.GetMonitored() {
+	for _, v := range global.CS.Monitored {
 		if strings.Contains(addr, v) {
 			needToken = false
 			break

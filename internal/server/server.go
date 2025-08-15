@@ -3,13 +3,11 @@ package server
 import (
 	"context"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/internal/server/status"
 	"github.com/hyahm/scs/pkg"
@@ -220,8 +218,7 @@ func (svc *Server) fillServer(script *scripts.Script) {
 	}
 	svc.StartTime = script.StartTime
 	svc.StopTime = script.StopTime
-	svc.Logger = golog.NewLog(
-		filepath.Join(global.LogDir, svc.SubName+".log"), 10<<10, false, global.CleanLog)
+
 	svc.Update = script.Update
 	svc.AI = &alert.AlertInfo{}
 	svc.AT = script.AT
@@ -236,7 +233,6 @@ func (svc *Server) fillServer(script *scripts.Script) {
 	// svc.DisableAlert = script.DisableAlert
 	svc.PreStart = script.PreStart
 
-	svc.Logger.Format = global.FORMAT
 	if script.Cron != nil {
 		svc.Cron = &cron.Cron{
 			Start:   script.Cron.Start,
@@ -293,6 +289,7 @@ func (svc *Server) Stop() {
 		golog.Infof("stop loop %s\n", svc.SubName)
 		svc.Cancel()
 		svc.stopStatus()
+		return
 	}
 	if svc.Always {
 		svc.Always = false

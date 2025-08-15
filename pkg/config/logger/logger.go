@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"path/filepath"
-
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 )
@@ -16,10 +14,10 @@ type Logger struct {
 
 func defaultLogger() *Logger {
 	return &Logger{
-		Path:  "",
+		Path:  "log",
 		Size:  0,
 		Day:   true,
-		Clear: 30,
+		Clear: 7,
 	}
 }
 
@@ -28,14 +26,9 @@ func ReloadLogger(log *Logger) {
 		log = defaultLogger()
 	}
 
-	global.LogDir = filepath.Dir(log.Path)
-
-	if global.LogDir == "." {
-		global.LogDir = "log"
-	}
-	global.CleanLog = log.Clear
-
-	golog.InitLogger(log.Path, log.Size, log.Day, log.Clear)
+	global.CS.LogDir = log.Path
+	global.CS.CleanLog = log.Clear
+	golog.InitLogger(global.CS.LogDir, log.Size, log.Day, global.CS.CleanLog)
 	// 设置所有级别的日志都显示
 	// golog.Level = golog.ALL
 	// 设置 日志名， 如果Cfg.Log.Path为空， 那么输出到控制台

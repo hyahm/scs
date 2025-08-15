@@ -64,7 +64,7 @@ func (svc *Server) wait() {
 						alert.AlertMessage(am, svc.AT)
 					} else {
 						// 间隔时间内才发送报警
-						if time.Since(svc.AI.AlertTime) >= global.GeContinuityInterval() {
+						if time.Since(svc.AI.AlertTime) >= global.CS.ContinuityInterval {
 							svc.AI.AlertTime = time.Now()
 							alert.AlertMessage(am, svc.AT)
 						}

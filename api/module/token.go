@@ -16,7 +16,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
 	// 	return true
 	// }
-	if token == global.GetToken() {
+	if token == global.CS.Token {
 		auths := controller.GetAllAuth()
 		xmux.GetInstance(r).Set("validAuths", auths)
 		xmux.GetInstance(r).Set("role", "admin")

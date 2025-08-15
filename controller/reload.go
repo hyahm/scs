@@ -19,7 +19,7 @@ func getTempScript(temp map[string]struct{}) {
 }
 
 func Fmt() error {
-	c, err := config.ReadConfig("")
+	c, err := config.ReadConfig()
 	if err != nil {
 		golog.Error(err)
 		// 第一次报错直接退出
@@ -36,7 +36,7 @@ func Fmt() error {
 更新所有store.ss
 */
 func Reload() error {
-	c, err := config.ReadConfig("")
+	c, err := config.ReadConfig()
 	if err != nil {
 		// 第一次报错直接退出
 		return err
@@ -97,7 +97,7 @@ func AddScript(s *scripts.Script) {
 		store.Store.SetScriptIndex(s.Name, i)
 		svc.Port = availablePort
 		svc.MakeServer(s)
-		svc.Env["INDEX"] = fmt.Sprintf("%d", i)
+		svc.Env["SCS_INDEX"] = fmt.Sprintf("%d", i)
 		availablePort = svc.Port + 1
 		if s.Disable {
 			// 如果是禁用的 ，那么不用生成多个副本

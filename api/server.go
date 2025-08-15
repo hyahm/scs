@@ -2,13 +2,9 @@ package api
 
 import (
 	"net/http"
-	"os"
-	"path/filepath"
-	"time"
 
 	"github.com/hyahm/scs/api/handle"
 	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/pkg"
 
 	"github.com/hyahm/golog"
@@ -36,29 +32,18 @@ func HttpServer() {
 	router.Post("/probe", handle.Probe)
 
 	router.AddGroup(AdminHandle())
-	if global.GetDisableTls() {
-		golog.Info("listen on " + global.GetListen() + " over http")
-		golog.Fatal(router.Run(global.GetListen()))
+	router.SetAddr(global.CS.Listen).SetTimeout(global.CS.ReadTime)
+	if !global.CS.EnableTLS {
+		golog.Info("listen on " + global.CS.Listen + " over http")
+		golog.Fatal(router.Run())
 	}
 
-	svc := &http.Server{
-		ReadTimeout: 5 * time.Second,
-		Addr:        global.GetListen(),
-		Handler:     router,
+	if global.CS.Key == "" || global.CS.Cert == "" {
+		panic("use tls. but key or cert not specified")
 	}
-
-	// 如果key文件不存在那么就自动生成
-	keyfile := filepath.Join("keys", "server.key")
-	pemfile := filepath.Join("keys", "server.pem")
-	_, err1 := os.Stat(keyfile)
-	_, err2 := os.Stat(pemfile)
-	if global.GetKey() == "" || global.GetPem() == "" && os.IsNotExist(err1) || os.IsNotExist(err2) {
-		internal.CreateTLS()
-	}
-
-	on := "listen on " + global.GetListen() + " over https"
-	golog.Info(on)
-	if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
-		golog.Fatal(err)
-	}
+	golog.Info("listen on " + global.CS.Listen + " over http")
+	golog.Fatal(router.RunTLS(global.CS.Cert, global.CS.Key))
+	// if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
+	// 	golog.Fatal(err)
+	// }
 }

@@ -28,7 +28,7 @@ func Log(w http.ResponseWriter, r *http.Request) {
 		golog.Error(err)
 		return
 	}
-	logfile := filepath.Join(global.LogDir, subname.Subname(name).String()+".log")
+	logfile := filepath.Join(global.CS.LogDir, subname.Subname(name).String()+".log")
 	f, err := os.Open(logfile)
 	if err != nil {
 		ws.SendMessage([]byte("file not found, yes, just without any print on, please wait"), xmux.TypeMsg)
