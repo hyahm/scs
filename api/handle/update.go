@@ -15,12 +15,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	name := xmux.Var(r)["name"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		pkg.Error(r, "not found pname: "+pname)
 		return
 	}
 	svc, ok := store.Store.GetServerByName(name)
 	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		pkg.Error(r, "not found name: "+name)
 		return
 	}
 	go controller.UpdateAndRestart(svc)

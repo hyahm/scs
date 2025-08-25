@@ -48,8 +48,8 @@ func ScriptHandle() *xmux.RouteGroup {
 	script.Post("/canstop/{name}", handle.CanStop)
 	script.Post("/get/scripts", handle.GetScripts) // complete
 	script.Post("/stop", handle.StopAll)           // complete
-	script.Post("/remove/{pname}/{name}", handle.Remove)
-	script.Post("/remove/{pname}", handle.RemovePname)
+	script.Post("/remove/{pname}/{name}", handle.Remove).AddModule(module.UpdateConfig)
+	script.Post("/remove/{pname}", handle.RemovePname).AddModule(module.UpdateConfig)
 	script.Post("/send/alert", handle.Alert)
 	script.AddGroup(simpleHandle())
 	return script
@@ -59,14 +59,14 @@ func AdminHandle() *xmux.RouteGroup {
 	// 只能管理员操作 修改文件的操作
 	admin := xmux.NewRouteGroup().AddPageKeys(scripts.AdminRole.ToString()).AddModule(module.CheckToken)
 
-	admin.Post("/get/alert", handle.GetAlert)   // 只能管理员用
-	admin.Post("/-/reload", handle.Reload)      // 只能管理员用
-	admin.Post("/-/fmt", handle.Fmt)            // 只能管理员用
-	admin.Post("/get/alarms", handle.GetAlarms) // 只能管理员用
-	admin.Post("/get/repo", handle.GetRepo)     // 只能管理员用
-	admin.Post("/script", handle.AddScript).BindJson(&scripts.Script{})
-	admin.Post("/enable/{pname}", handle.Enable)   // 只能管理员用
-	admin.Post("/disable/{pname}", handle.Disable) // 只能管理员用
+	admin.Post("/get/alert", handle.GetAlert)                             // 只能管理员用
+	admin.Post("/-/reload", handle.Reload).AddModule(module.UpdateConfig) // 只能管理员用
+	admin.Post("/-/fmt", handle.Fmt).AddModule(module.UpdateConfig)       // 只能管理员用
+	admin.Post("/get/alarms", handle.GetAlarms)                           // 只能管理员用
+	admin.Post("/get/repo", handle.GetRepo)                               // 只能管理员用
+	admin.Post("/script", handle.AddScript).BindJson(&scripts.Script{}).AddModule(module.UpdateConfig)
+	admin.Post("/enable/{pname}", handle.Enable).AddModule(module.UpdateConfig)   // 只能管理员用
+	admin.Post("/disable/{pname}", handle.Disable).AddModule(module.UpdateConfig) // 只能管理员用
 	admin.AddGroup(ScriptHandle())
 	return admin
 }

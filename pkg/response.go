@@ -3,8 +3,10 @@ package pkg
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 
 	"github.com/hyahm/golog"
+	"github.com/hyahm/xmux"
 )
 
 var ErrBugMsg = "严重错误， 请提交问题到https://github.com/hyahm/scs"
@@ -24,29 +26,26 @@ func (res *Response) Marshal() []byte {
 	return b
 }
 
-func (res *Response) Sucess(msg string) []byte {
-	res.Code = 200
-	res.Msg = msg
-	return res.Marshal()
+func Sucess(r *http.Request, data interface{}) {
+	xmux.GetInstance(r).Data.(*Response).Data = data
 }
 
-func (res *Response) ErrorE(err error) []byte {
-	res.Code = 200
-	res.Msg = err.Error()
-	return res.Marshal()
+func Error(r *http.Request, msg string) {
+	xmux.GetInstance(r).Data.(*Response).Code = 500
+	xmux.GetInstance(r).Data.(*Response).Msg = msg
 }
 
 var ErrNotFound = errors.New("not found pname or name")
 
-var ResponseMsg map[int]string
+// var ResponseMsg map[int]string
 
 func init() {
-	ResponseMsg = make(map[int]string)
-	ResponseMsg[200] = "ok"
-	ResponseMsg[201] = "config file is reloading, waiting completed first"
-	ResponseMsg[404] = "not found pname or name"
-	ResponseMsg[405] = "auth failed"
-	ResponseMsg[406] = "没有找到对应运行的信号参数"
+	// ResponseMsg = make(map[int]string)
+	// ResponseMsg[200] = "ok"
+	// ResponseMsg[201] = "config file is reloading, waiting completed first"
+	// ResponseMsg[404] = "not found pname or name"
+	// ResponseMsg[405] = "auth failed"
+	// ResponseMsg[406] = "没有找到对应运行的信号参数"
 }
 
 // 这是返回给前端的数据结构

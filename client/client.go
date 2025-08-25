@@ -41,7 +41,7 @@ func ReadClientConfig(configfile string) {
 	if len(b) == 0 {
 		x := `nodes:
   local: 
-    url: "https://127.0.0.1:11111"
+    url: "http://127.0.0.1:11111"
     token:  
 group: `
 		b = []byte(x)

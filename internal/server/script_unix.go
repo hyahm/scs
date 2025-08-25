@@ -51,8 +51,7 @@ import (
 // }
 
 func (svc *Server) kill() error {
-	var err error
-	err = syscall.Kill(-svc.Cmd.Process.Pid, syscall.SIGKILL)
+	err := syscall.Kill(-svc.Cmd.Process.Pid, syscall.SIGKILL)
 	if err != nil {
 		// 正常来说，不会进来的，特殊问题以后再说
 		golog.Error(err)
@@ -62,7 +61,6 @@ func (svc *Server) kill() error {
 }
 
 func (svc *Server) start() error {
-
 	svc.Cmd = exec.Command("/bin/bash", "-c", svc.Command)
 	if svc.Dir != "" {
 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {

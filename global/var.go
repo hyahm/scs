@@ -1,9 +1,50 @@
 package global
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 // 配置文件重载
-var CanReload int64
+var cr *canreloads
+
+type canreloads struct {
+	busy bool
+	msg  string
+	mu   sync.Mutex
+}
+
+func init() {
+	cr = &canreloads{
+		mu: sync.Mutex{},
+	}
+}
+
+// 是否可以重载
+func IsCanReload() (string, bool) {
+	cr.mu.Lock()
+	defer cr.mu.Unlock()
+	return cr.msg, !cr.busy
+}
+
+// 设置重载， 如果false 就是加载中，等待设置完成
+func SetReLoading(msg string) (string, bool) {
+	cr.mu.Lock()
+	defer cr.mu.Unlock()
+	_, ok := IsCanReload()
+	if ok {
+		cr.busy = true
+		cr.msg = msg
+	}
+	return cr.msg, ok
+}
+
+func SetCanReLoad() {
+	cr.mu.Lock()
+	defer cr.mu.Unlock()
+	cr.busy = false
+	cr.msg = ""
+}
 
 type ConfigStore struct {
 	Listen             string

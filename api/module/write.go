@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/xmux"
 )
 
@@ -18,9 +17,7 @@ func Exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 	var send []byte
 	var err error
 	if xmux.GetInstance(r).Response != nil {
-		response := xmux.GetInstance(r).Response.(*pkg.Response)
-		response.Msg = pkg.ResponseMsg[response.Code]
-		send, err = json.Marshal(response)
+		send, err = json.Marshal(xmux.GetInstance(r).Response)
 		if err != nil {
 			log.Println(err)
 		}

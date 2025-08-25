@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/hyahm/golog"
@@ -13,11 +14,7 @@ import (
 )
 
 func Disable(w http.ResponseWriter, r *http.Request) {
-	if global.CanReload != 0 {
-		// 报警相关配置
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-		return
-	}
+
 	pname := xmux.Var(r)["pname"]
 
 	script, ok := store.Store.GetScriptByName(pname)
@@ -25,6 +22,13 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
+	// 上面已经判断过是否存在了， 这里就忽略
+	msg, ok := global.SetReLoading(fmt.Sprintf("enable %s is running", pname))
+	if !ok {
+		pkg.Error(r, msg)
+		return
+	}
+	defer global.SetCanReLoad()
 	// 上面已经判断过是否存在了， 这里就忽略
 	if controller.DisableScript(script, false) {
 		err := config.UpdateScriptToConfigFile(script, true)
@@ -37,10 +41,7 @@ func Disable(w http.ResponseWriter, r *http.Request) {
 }
 
 func Enable(w http.ResponseWriter, r *http.Request) {
-	if global.CanReload != 0 {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-		return
-	}
+
 	pname := xmux.Var(r)["pname"]
 	script, ok := store.Store.GetScriptByName(pname)
 	if !ok {
@@ -48,7 +49,12 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 上面已经判断过是否存在了， 这里就忽略
-
+	msg, ok := global.SetReLoading(fmt.Sprintf("enable %s is running", pname))
+	if !ok {
+		pkg.Error(r, msg)
+		return
+	}
+	defer global.SetCanReLoad()
 	if controller.EnableScript(script) {
 		err := config.UpdateScriptToConfigFile(script, true)
 		if err != nil {
@@ -58,4 +64,5 @@ func Enable(w http.ResponseWriter, r *http.Request) {
 		}
 		controller.AddScript(script)
 	}
+
 }

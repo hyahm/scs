@@ -1,8 +1,8 @@
 package handle
 
 import (
+	"fmt"
 	"net/http"
-	"sync/atomic"
 
 	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
@@ -17,10 +17,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	// 读取配置文件
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	if global.CanReload != 0 {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-		return
-	}
+
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
@@ -31,15 +28,17 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	atomic.AddInt64(&global.CanReload, 1)
+	msg, ok := global.SetReLoading(fmt.Sprintf("remove %s %s", pname, name))
+	if !ok {
+		pkg.Error(r, msg)
+		return
+	}
+
 	go controller.Remove(svc, true)
 }
 
 func RemovePname(w http.ResponseWriter, r *http.Request) {
-	if global.CanReload != 0 {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-		return
-	}
+
 	pname := xmux.Var(r)["pname"]
 	_, ok := store.Store.GetScriptByName(pname)
 	if !ok {
@@ -47,8 +46,12 @@ func RemovePname(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	atomic.AddInt64(&global.CanReload, 1)
-	controller.RemoveScript(pname)
+	msg, ok := global.SetReLoading(fmt.Sprintf("remove %s ", pname))
+	if !ok {
+		pkg.Error(r, msg)
+		return
+	}
+	go controller.RemoveScript(pname)
 }
 
 // func RemoveAll(w http.ResponseWriter, r *http.Request) {

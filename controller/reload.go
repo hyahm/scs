@@ -2,10 +2,8 @@ package controller
 
 import (
 	"fmt"
-	"sync/atomic"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
@@ -68,7 +66,7 @@ func Reload() error {
 				golog.Error(pkg.ErrBugMsg)
 				continue
 			}
-			atomic.AddInt64(&global.CanReload, 1)
+
 			go Remove(svc, false)
 		}
 	}
@@ -147,7 +145,7 @@ func UpdateScriptApi(s *scripts.Script) {
 				golog.Error(pkg.ErrBugMsg)
 				continue
 			}
-			atomic.AddInt64(&global.CanReload, 1)
+
 			go Remove(svc, false)
 		}
 	} else {

@@ -1,0 +1,43 @@
+SHELL=/bin/bash
+COLORTERM=truecolor
+HISTCONTROL=ignoredups
+WSL2_GUI_APPS_ENABLED=1
+TERM_PROGRAM_VERSION=1.98.2
+WSL_DISTRO_NAME=AlmaLinux-9
+WT_SESSION=94373216-6380-4117-82f8-77495b93f752
+HOSTNAME=CHINAMI-LJM6TVN
+HISTSIZE=1000
+DXSF_ENV=development
+NAME=Code
+PWD=/mnt/d/cander/scs
+LOGNAME=root
+VSCODE_GIT_ASKPASS_NODE=/root/.vscode-server/bin/ddc367ed5c8936efe395cffeec279b04ffd7db78/node
+HOME=/root
+LANG=en_US.UTF-8
+WSL_INTEROP=/run/WSL/3936_interop
+LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=01;37;41:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=01;36:*.au=01;36:*.flac=01;36:*.m4a=01;36:*.mid=01;36:*.midi=01;36:*.mka=01;36:*.mp3=01;36:*.mpc=01;36:*.ogg=01;36:*.ra=01;36:*.wav=01;36:*.oga=01;36:*.opus=01;36:*.spx=01;36:*.xspf=01;36:
+WAYLAND_DISPLAY=wayland-0
+GIT_ASKPASS=/root/.vscode-server/bin/ddc367ed5c8936efe395cffeec279b04ffd7db78/extensions/git/dist/askpass.sh
+VSCODE_GIT_ASKPASS_EXTRA_ARGS=
+TERM=xterm-256color
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+USER=root
+VSCODE_GIT_IPC_HANDLE=/run/user/0/vscode-git-ae2ec23a89.sock
+DISPLAY=:0
+SHLVL=4
+XDG_RUNTIME_DIR=/run/user/0/
+WSLENV=ELECTRON_RUN_AS_NODE/w:WT_SESSION:WT_PROFILE_ID:
+which_declare=declare -f
+VSCODE_GIT_ASKPASS_MAIN=/root/.vscode-server/bin/ddc367ed5c8936efe395cffeec279b04ffd7db78/extensions/git/dist/askpass-main.js
+PATH=/root/.vscode-server/bin/ddc367ed5c8936efe395cffeec279b04ffd7db78/bin/remote-cli:/root/.deno/bin:/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/d/Program Files (x86)/VMware/VMware Workstation/bin/:/mnt/d/Program Files/Python36/Scripts/:/mnt/d/Program Files/Python36/:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Users/Administrator/AppData/Local/Android/Sdk/platform-tools:/mnt/c/Program Files/Git/cmd:/mnt/c/Users/Administrator/AppData/Roaming/nvm:/mnt/c/Program Files/nodejs:/mnt/c/Program Files/Go/bin:/mnt/c/msys64/ucrt64/bin:/mnt/d/winlibs-x86_64-posix-seh-gcc-14.2.0-llvm-19.1.7-mingw-w64ucrt-12.0.0-r3/mingw64/bin:/mnt/d/Program Files/TortoiseSVN/bin:/mnt/c/Program Files/dotnet/:/mnt/d/日常使用/nssm-2.24-101-g897c7ad/win64:/mnt/c/Users/Administrator/AppData/Local/Programs/Python/Python313/:/mnt/d/Program Files/gs/gs10.05.1/bin:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/d/日常使用/protoc-32.0-rc-2-win64/bin:/mnt/c/Users/Administrator/.local/bin:/mnt/c/Users/Administrator/scoop/shims:/mnt/c/Users/Administrator/AppData/Local/Programs/Python/Python313/Scripts/:/mnt/c/Users/Administrator/AppData/Local/Programs/Python/Python313/:/mnt/c/Users/Administrator/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/Administrator/AppData/Local/Programs/Fiddler:/mnt/d/Program Files/JetBrains/PyCharm 2024.3.1.1/bin:/mnt/c/Program Files/JetBrains/PyCharm Community Edition 2024.3.3/bin:/mnt/d/adiao/Microsoft VS Code/bin:/mnt/c/Users/Administrator/AppData/Local/Microsoft/WinGet/Links:/mnt/c/Users/Administrator/AppData/Roaming/npm:/mnt/c/Program Files/Git/bin:/mnt/c/Users/Administrator/AppData/Roaming/nvm:/mnt/c/Program Files/nodejs:/mnt/c/Users/Administrator/go/bin:/mnt/d/winlibs-x86_64-posix-seh-gcc-14.2.0-llvm-19.1.7-mingw-w64ucrt-12.0.0-r3/mingw64/bin:/mnt/c/Users/Administrator/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/Administrator/.dotnet/tools:/mnt/d/winlibs-x86_64-posix-seh-gcc-14.2.0-llvm-19.1.7-mingw-w64ucrt-12.0.0-r3/mingw64/bin:/mnt/c/Program Files/Graphviz/bin:/mnt/c/Users/Administrator/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0/LocalCache/local-packages/Python313/Scripts:/mnt/d/jdk-21_windows-x64_bin/jdk-21.0.7/bin:/mnt/c/Users/Administrator/scoop/shims:/mnt/c/Users/Administrator/scoop/apps:/mnt/c/Users/Administrator/Miniforge3/condabin:/mnt/c/Users/Administrator/scoop/apps/nodejs/current:/mnt/c/Users/Administrator/AppData/Local/Pandoc/
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/0/bus
+MAIL=/var/spool/mail/root
+HOSTTYPE=x86_64
+PULSE_SERVER=unix:/mnt/wslg/PulseServer
+WT_PROFILE_ID={ac78706d-34e3-597d-94ba-279d5b913f03}
+TERM_PROGRAM=vscode
+VSCODE_IPC_HOOK_CLI=/run/user/0/vscode-ipc-39ea7054-3242-417c-a9df-938d1b8bc997.sock
+BASH_FUNC_which%%=() {  ( alias;
+ eval ${which_declare} ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
+}
+_=/usr/bin/env

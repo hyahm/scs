@@ -3,7 +3,6 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"sync/atomic"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
@@ -27,8 +26,7 @@ func RemoveScript(pname string) error {
 			golog.Error(pkg.ErrBugMsg)
 			continue
 		}
-		atomic.AddInt64(&global.CanReload, 1)
-		go Remove(svc, true)
+		Remove(svc, true)
 	}
 	return nil
 }
@@ -49,7 +47,7 @@ func Remove(svc *server.Server, update bool) {
 	if store.Store.GetScriptLength(svc.Name) == 0 {
 		store.Store.DeleteScriptByName(svc.Name)
 	}
-	atomic.AddInt64(&global.CanReload, -1)
+	global.SetCanReLoad()
 }
 
 // func remove(svc *server.Server, update bool, wg *sync.WaitGroup) {

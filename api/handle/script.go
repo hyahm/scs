@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
@@ -15,16 +16,17 @@ import (
 // 这是一个添加script的handle
 func AddScript(w http.ResponseWriter, r *http.Request) {
 	s := xmux.GetInstance(r).Data.(*scripts.Script)
-	if global.CanReload != 0 {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-		return
-	}
 
 	if s.Name == "" {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	_, ok := store.Store.GetScriptByName(s.Name)
+	msg, ok := global.SetReLoading(fmt.Sprintf("add script %s ", s.Name))
+	if !ok {
+		pkg.Error(r, msg)
+		return
+	}
+	_, ok = store.Store.GetScriptByName(s.Name)
 	if ok {
 		// 存在的话，需要对比配置文件的修改
 		// 需要判断是否相等
@@ -32,6 +34,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 			// 如果没有修改，那么就返回已经add了
 			return
 		}
+
 		// 更新配置文件
 		err := config.UpdateScriptToConfigFile(s, true)
 		if err != nil {
@@ -51,5 +54,6 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		controller.AddScript(s)
 
 	}
+	global.SetCanReLoad()
 	xmux.GetInstance(r).Response.(*pkg.Response).Data = s.ScriptToken
 }
