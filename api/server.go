@@ -31,8 +31,6 @@ func HttpServer() {
 	router.SetHeader("Access-Control-Max-Age", "1728000")
 	router.Exit = exit
 
-	router.AddGroup(xmux.Pprof())
-
 	router.UnmarshalError = unmarshalError
 	router.Post("/probe", handle.Probe)
 

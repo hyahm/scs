@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/google/gopacket v1.1.19
-	github.com/hyahm/golog v0.0.0-20250903091314-8759b4596e62
+	github.com/hyahm/golog v0.0.0-20250904094750-1ba135939710
 	github.com/hyahm/xmux v0.0.0-20250828065953-07be4a6d81e4
 	github.com/sacOO7/gowebsocket v0.0.0-20210515122958-9396f1a71e23
 	github.com/shirou/gopsutil v3.21.11+incompatible

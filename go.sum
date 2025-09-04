@@ -24,6 +24,8 @@ github.com/hyahm/golog v0.0.0-20250724082931-2b0b1385f555 h1:CF2fQkmH85X68udsR4B
 github.com/hyahm/golog v0.0.0-20250724082931-2b0b1385f555/go.mod h1:vEHxwcQSalW0QKv7wA5+TNrj5youklyLrhJ1Lx6YJo8=
 github.com/hyahm/golog v0.0.0-20250903091314-8759b4596e62 h1:UnoxnCr9mdidjEdpyf7mVfRuM50sDNDZUj+/wJN8ATM=
 github.com/hyahm/golog v0.0.0-20250903091314-8759b4596e62/go.mod h1:MQDEnJEHYNfFtdkQPJVUWjhsDdCMX3lLCX8AMhW34bg=
+github.com/hyahm/golog v0.0.0-20250904094750-1ba135939710 h1:Q52Pt9hbkXd5eChwjup+Z2RExZ0YYL/zO5+ZPP31idY=
+github.com/hyahm/golog v0.0.0-20250904094750-1ba135939710/go.mod h1:MQDEnJEHYNfFtdkQPJVUWjhsDdCMX3lLCX8AMhW34bg=
 github.com/hyahm/xmux v0.0.0-20220516140250-b782eb5cebee h1:xfNP4YOQN0Sdrun2uYz3D6LKecA2tSEKzR1Il+mWL+g=
 github.com/hyahm/xmux v0.0.0-20220516140250-b782eb5cebee/go.mod h1:8+yuptjVUWZrjA+j0496MGb4BrFc52r7JhvlGiRKV+U=
 github.com/hyahm/xmux v0.0.0-20250812031352-45878627bf92 h1:lGpj3QpF1von7cVNhWerTQvtwRNaB5We8co8A90heAc=
