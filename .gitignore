@@ -1,0 +1,11 @@
+log
+scs.yaml
+main
+keys
+etcd
+scsctl*
+scsd*
+socks5
+bin
+repo/caddy
+repo/Caddyfile

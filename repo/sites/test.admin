@@ -1,0 +1,6 @@
+
+test.admin.hyahm.com {
+	root * E:\web\admin\web\8
+	try_files {path} / 
+	file_server
+}

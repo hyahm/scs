@@ -1,0 +1,17 @@
+[Unit]
+Description=Scs Service Control Script
+After=network.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/tmp/service-env.conf
+LimitNOFILE=6553500
+LimitNPROC=6553500
+WorkingDirectory=/data/scs
+ExecStart=/data/scs/scsd -f /etc/scs.yaml
+ExecStop=/bin/kill -s QUIT $MAINPID
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

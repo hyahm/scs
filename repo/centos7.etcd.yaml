@@ -1,0 +1,15 @@
+- name: etcd
+  env:
+    ETCD_VER: v3.4.14
+    DOWNLOAD_URL: https://github.com/etcd-io/etcd/releases/download
+  preStart:
+    - path: /tmp/etcd-download-test/etcd
+      install: > 
+              rm -f /tmp/etcd-{{ .ETCD_VER }}-linux-amd64.tar.gz &&
+              rm -rf /tmp/etcd-download-test && mkdir -p /tmp/etcd-download-test &&
+              curl -Ls {{ .DOWNLOAD_URL }}/{{ .ETCD_VER }}/etcd-{{ .ETCD_VER }}-linux-amd64.tar.gz -o /tmp/etcd-{{ .ETCD_VER }}-linux-amd64.tar.gz &&
+              tar xzvf /tmp/etcd-{{ .ETCD_VER }}-linux-amd64.tar.gz -C /tmp/etcd-download-test --strip-components=1  &&           
+              rm -f /tmp/etcd-{{ .ETCD_VER }}-linux-amd64.tar.gz 
+
+  dir: /tmp/etcd-download-test
+  command: ./etcd

@@ -1,0 +1,2 @@
+localhost
+respond "hello caddy"
