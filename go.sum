@@ -17,8 +17,8 @@ github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWm
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/hyahm/gocache v0.0.0-20220522145614-dfeab3db5e17 h1:u5KK90lE495XUl9pDJMTbi+iSr0wpQdgOdaI1rv6FuE=
 github.com/hyahm/gocache v0.0.0-20220522145614-dfeab3db5e17/go.mod h1:pxg9+FIAFFRd7ez1jHbrye1QH1efL4zY6iKqblI48fw=
-github.com/hyahm/golog v0.0.0-20250904122929-431096627ee3 h1:iu4/31oCbZWqep75QBoVbgrKaMhky2unVIbQry+HNIk=
-github.com/hyahm/golog v0.0.0-20250904122929-431096627ee3/go.mod h1:MQDEnJEHYNfFtdkQPJVUWjhsDdCMX3lLCX8AMhW34bg=
+github.com/hyahm/golog v0.0.0-20250904124838-1316dadad61c h1:GGUCo922AMTYIR3PH3pwf8J7EXmXv5DeUGMYF/eInpM=
+github.com/hyahm/golog v0.0.0-20250904124838-1316dadad61c/go.mod h1:MQDEnJEHYNfFtdkQPJVUWjhsDdCMX3lLCX8AMhW34bg=
 github.com/hyahm/xmux v0.0.0-20250828065953-07be4a6d81e4 h1:9C11fAxsv3Afz4URUe2Vr1aZBwrwLEardtXIl+7AF+M=
 github.com/hyahm/xmux v0.0.0-20250828065953-07be4a6d81e4/go.mod h1:udRo+Od/GhFtpuK3a1tLWfRTdSd6KjnHuH8/In6sZCM=
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=
