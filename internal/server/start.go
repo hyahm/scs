@@ -32,6 +32,9 @@ func (svc *Server) Start(param ...string) {
 
 // 当是停止状态的时候异步启动
 func (svc *Server) asyncStart(param string) {
+	if global.CS.LogDir == "" {
+		global.CS.LogDir = "log"
+	}
 	svc.Logger = golog.NewLog(
 		filepath.Join(global.CS.LogDir, svc.SubName+".log"), 0, true, global.CS.CleanLog)
 	svc.Logger.Format = global.FORMAT
