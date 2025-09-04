@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/google/gopacket v1.1.19
-	github.com/hyahm/golog v0.0.0-20250904094750-1ba135939710
+	github.com/hyahm/golog v0.0.0-20250904122929-431096627ee3
 	github.com/hyahm/xmux v0.0.0-20250828065953-07be4a6d81e4
 	github.com/sacOO7/gowebsocket v0.0.0-20210515122958-9396f1a71e23
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -29,7 +29,6 @@ require (
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/sacOO7/go-logger v0.0.0-20180719173527-9ac9add5a50d // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
