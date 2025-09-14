@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"path/filepath"
-
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/global"
 )
@@ -29,11 +27,11 @@ func ReloadLogger(log *Logger) {
 	if global.CS.LogDir != "" {
 		logdir = global.CS.LogDir
 	}
-
+	golog.SetDir(logdir)
 	if log.Path == "" {
 		golog.InitLogger("", 0, true, global.CS.CleanLog)
 	} else {
-		golog.InitLogger(filepath.Join(logdir, "scs.log"), 0, true, global.CS.CleanLog)
+		golog.InitLogger("scs.log", 0, true, global.CS.CleanLog)
 	}
 
 	// 设置所有级别的日志都显示

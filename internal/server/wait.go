@@ -11,6 +11,7 @@ import (
 )
 
 func (svc *Server) wait() {
+	defer svc.Logger.Sync()
 	go svc.successAlert()
 	// 这三行无视，
 	// ctx, cancel := context.WithCancel(context.Background())
