@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/google/gopacket v1.1.19
-	github.com/hyahm/golog v0.0.0-20250912071105-4b8f41109cf1
+	github.com/hyahm/golog v0.0.0-20251026074112-3f577916f349
 	github.com/hyahm/xmux v0.0.0-20250828065953-07be4a6d81e4
 	github.com/sacOO7/gowebsocket v0.0.0-20210515122958-9396f1a71e23
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -39,7 +39,7 @@ require (
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/mod v0.27.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/tools v0.36.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

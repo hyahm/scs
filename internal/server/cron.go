@@ -19,7 +19,7 @@ func (svc *Server) cron() {
 		case <-time.After(-time.Since(svc.Cron.StartTime)):
 			svc.Status.Status = status.RUNNING
 			svc.Status.Start = time.Now().Unix()
-			golog.Infof("cron start: %s time: %v\n", svc.SubName, svc.Cron.StartTime)
+			golog.Infof("cron start: %s time: %v", svc.SubName, svc.Cron.StartTime)
 			if err := svc.start(); err != nil {
 				golog.Error("cron start error: ", err)
 				golog.Error(err)
@@ -33,7 +33,7 @@ func (svc *Server) cron() {
 			svc.wait()
 			svc.Times--
 			if svc.Cron.Times > 0 && svc.Times <= 0 {
-				golog.Infof("循环器%s执行次数结束\n", svc.SubName)
+				golog.Infof("循环器%s执行次数结束", svc.SubName)
 				svc.stopStatus()
 				return
 			}

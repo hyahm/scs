@@ -55,7 +55,7 @@ func (ai *AlertInfo) Recover(title string) {
 
 func AlertMessage(msg *message.Message, at *to.AlertTo) {
 	msg.HostName, _ = os.Hostname()
-	golog.Errorf("异常报警: %s\n", msg.String())
+	golog.Errorf("异常报警: %s", msg.String())
 	for _, alert := range alerter.Alerts {
 		if at == nil {
 			alertErr := alert.Send(msg)

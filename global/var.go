@@ -63,4 +63,5 @@ var CS ConfigStore
 var ProxyHeader string
 
 const VERSION = "v3.8.5"
-const FORMAT = "{{ .Ctime }} - [{{ .Level }}] - {{.Hostname}} - {{ .Msg }}"
+
+// const FORMAT = "{{ .Ctime }} - [{{ .Level }}] - {{.Hostname}} - {{ .Msg }}"

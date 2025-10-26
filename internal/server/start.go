@@ -36,9 +36,8 @@ func (svc *Server) asyncStart(param string) {
 		global.CS.LogDir = "log"
 	}
 	svc.Logger = golog.NewLog(
-		filepath.Join(global.CS.LogDir, svc.SubName+".log"), 0, true, global.CS.CleanLog)
+		filepath.Join(global.CS.LogDir, svc.SubName+".log"), 0, true)
 
-	svc.Logger.Format = global.FORMAT
 	svc.Env["PARAMETER"] = param
 	// 格式化 SCS_TPL 开头的环境变量
 	for k := range svc.Env {

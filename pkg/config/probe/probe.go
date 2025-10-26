@@ -236,7 +236,7 @@ func getDisk() []disk.PartitionStat {
 
 	}
 	for _, part := range dp {
-		golog.Infof("alert dist: --%s--, type: %s\n", part.Mountpoint, part.Fstype)
+		golog.Infof("alert dist: --%s--, type: %s", part.Mountpoint, part.Fstype)
 	}
 	return dp
 }

@@ -99,7 +99,7 @@ func (svc *Server) wait() {
 				svc.Start()
 				return
 			}
-			golog.Errorf("serviceName: %s, subScript: %s, error: %v \n", svc.Name, svc.SubName, err)
+			golog.Errorf("serviceName: %s, subScript: %s, error: %v ", svc.Name, svc.SubName, err)
 		}
 
 	}

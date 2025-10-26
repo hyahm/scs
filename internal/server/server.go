@@ -247,7 +247,7 @@ func (svc *Server) fillServer(script *scripts.Script) {
 func (svc *Server) Remove() {
 	if svc.IsCron {
 		// 如果是定时任务， 直接停止
-		golog.Infof("stop loop %s\n", svc.SubName)
+		golog.Infof("stop loop %s", svc.SubName)
 		svc.Cancel()
 	}
 	if svc.Always {
@@ -286,7 +286,7 @@ func (svc *Server) Stop() {
 	}
 	if svc.IsCron {
 		// 如果是定时任务， 直接停止
-		golog.Infof("stop loop %s\n", svc.SubName)
+		golog.Infof("stop loop %s", svc.SubName)
 		svc.Cancel()
 		svc.stopStatus()
 		return
