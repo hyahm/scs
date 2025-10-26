@@ -39,15 +39,23 @@ func HttpServer() {
 	router.SetAddr(global.CS.Listen).SetTimeout(time.Second * 5)
 	if !global.CS.EnableTLS {
 		golog.Info("listen on " + global.CS.Listen + " over http")
-		golog.Fatal(router.Run())
+		err := router.Run()
+		if err != nil {
+			golog.Error(err)
+		}
+		// os.Exit(1)
+		return
 	}
 
 	if global.CS.Key == "" || global.CS.Cert == "" {
 		panic("use tls. but key or cert not specified")
 	}
 
-	golog.Info("listen on " + global.CS.Listen + " over http")
-	golog.Fatal(router.RunTLS(global.CS.Cert, global.CS.Key))
+	golog.Info("listen on " + global.CS.Listen + " over https")
+	err := router.RunTLS(global.CS.Cert, global.CS.Key)
+	if err != nil {
+		golog.Error(err)
+	}
 	// if err := svc.ListenAndServeTLS(filepath.Join("keys", "server.pem"), filepath.Join("keys", "server.key")); err != nil {
 	// 	golog.Fatal(err)
 	// }
