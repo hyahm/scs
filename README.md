@@ -5,7 +5,7 @@ service control service or script
 自带监控及通知     
 服务控制脚本能否停止 最大程度防止脚本数据丢失   
 码云地址: https://gitee.com/cander/scs
-文档请参考 docs目录下的内容，
+文档请参考 https://scs.doc.hyahm.com，
 如果本地有docsify服务可以直接在本地启动打开美观的文档
 
 通过 systemctl 启动时，  用户的环境变量被默认过滤掉， 想要加载进去， 需要执行 `printenv  /tmp/service-env.conf`
