@@ -13,7 +13,7 @@ import (
 func DisableScript(s *scripts.Script, update bool) bool {
 
 	// 禁用 script 所在的所有server
-	script, ok := store.Store.GetScriptByName(s.Name)
+	script, ok := store.GetStore().GetScriptByName(s.Name)
 	if !ok {
 		return false
 	}
@@ -21,9 +21,9 @@ func DisableScript(s *scripts.Script, update bool) bool {
 		return false
 	}
 	script.Disable = true
-	for i := range store.Store.GetScriptIndex(s.Name) {
+	for i := range store.GetStore().GetScriptIndex(s.Name) {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		svc, ok := store.Store.GetServerByName(subname)
+		svc, ok := store.GetStore().GetServerByName(subname)
 		if !ok {
 			golog.Error("严重错误， 请提交问题到https://github.com/hyahm/scs")
 		}
@@ -46,7 +46,7 @@ func DisableScript(s *scripts.Script, update bool) bool {
 // enable script
 func EnableScript(script *scripts.Script) bool {
 	// 禁用 script 所在的所有server
-	script, ok := store.Store.GetScriptByName(script.Name)
+	script, ok := store.GetStore().GetScriptByName(script.Name)
 	if !ok {
 		return false
 	}
@@ -76,7 +76,7 @@ func UpdateAndRestartScript(s *scripts.Script) {
 
 	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		svc, ok := store.Store.GetServerByName(subname)
+		svc, ok := store.GetStore().GetServerByName(subname)
 		if ok && !svc.Disable && i == 0 {
 			svc.UpdateServer()
 		}
@@ -88,13 +88,13 @@ func UpdateAndRestartScript(s *scripts.Script) {
 }
 
 func UpdateAllServer() {
-	for _, s := range store.Store.GetAllScriptMap() {
+	for _, s := range store.GetStore().GetAllScriptMap() {
 		go UpdateAndRestartScript(s)
 	}
 }
 
 func UpdateAllServerFromScript(names map[string]struct{}) {
-	for _, s := range store.Store.GetAllScriptMap() {
+	for _, s := range store.GetStore().GetAllScriptMap() {
 		if _, ok := names[s.Name]; ok {
 			go UpdateAndRestartScript(s)
 		}

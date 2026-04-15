@@ -8,7 +8,7 @@ import (
 
 func GetPnameToken(pname string) string {
 
-	script, ok := store.Store.GetScriptByName(pname)
+	script, ok := store.GetStore().GetScriptByName(pname)
 	if !ok {
 		return ""
 	}

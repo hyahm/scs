@@ -34,11 +34,11 @@ func getStatus(svc *server.Server) pkg.ServiceStatus {
 
 func ScriptName(pname, subname string) ([]pkg.ServiceStatus, error) {
 	statuss := make([]pkg.ServiceStatus, 0)
-	_, ok := store.Store.GetScriptByName(pname)
+	_, ok := store.GetStore().GetScriptByName(pname)
 	if !ok {
 		return nil, pkg.ErrNotFound
 	}
-	svc, ok := store.Store.GetServerByName(subname)
+	svc, ok := store.GetStore().GetServerByName(subname)
 	if !ok {
 		return nil, pkg.ErrNotFound
 	}
@@ -49,13 +49,13 @@ func ScriptName(pname, subname string) ([]pkg.ServiceStatus, error) {
 
 func ScriptPname(pname string) ([]pkg.ServiceStatus, error) {
 	statuss := make([]pkg.ServiceStatus, 0)
-	_, ok := store.Store.GetScriptByName(pname)
+	_, ok := store.GetStore().GetScriptByName(pname)
 	if !ok {
 		return nil, pkg.ErrNotFound
 	}
-	for i := range store.Store.GetScriptIndex(pname) {
+	for i := range store.GetStore().GetScriptIndex(pname) {
 		subname := fmt.Sprintf("%s_%d", pname, i)
-		svc, ok := store.Store.GetServerByName(subname)
+		svc, ok := store.GetStore().GetServerByName(subname)
 		if !ok {
 			golog.Error(pkg.ErrBugMsg)
 		}
@@ -68,7 +68,7 @@ func ScriptPname(pname string) ([]pkg.ServiceStatus, error) {
 // 获取所有服务的状态
 func AllStatus() []pkg.ServiceStatus {
 	statuss := make([]pkg.ServiceStatus, 0)
-	for _, svc := range store.Store.GetAllServer() {
+	for _, svc := range store.GetStore().GetAllServer() {
 		statuss = append(statuss, getStatus(svc))
 	}
 	return statuss
@@ -77,7 +77,7 @@ func AllStatus() []pkg.ServiceStatus {
 // 获取所有服务的状态
 func AllStatusFromScript(names map[string]struct{}) []pkg.ServiceStatus {
 	statuss := make([]pkg.ServiceStatus, 0)
-	for _, svc := range store.Store.GetAllServer() {
+	for _, svc := range store.GetStore().GetAllServer() {
 		if _, sok := names[svc.Name]; sok {
 			statuss = append(statuss, getStatus(svc))
 		}

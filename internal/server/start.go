@@ -60,16 +60,19 @@ func (svc *Server) asyncStart(param string) {
 	svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
 	go func() {
 		stopTime, err := time.ParseInLocation("2006-01-02 15:04:05", svc.StopTime, time.Local)
-		if err == nil && time.Since(stopTime).Seconds() < 0 {
-			for {
-				select {
-				case <-time.After(time.Since(stopTime) * -1):
-					svc.Stop()
-					svc.Cancel()
-					return
-				case <-svc.Ctx.Done():
-					return
-				}
+		if err != nil {
+			golog.Warnf("parse stop time failed: %v", err)
+			return
+		}
+		if time.Since(stopTime).Seconds() < 0 {
+			duration := -time.Since(stopTime)
+			select {
+			case <-time.After(duration):
+				svc.Stop()
+				svc.Cancel()
+				return
+			case <-svc.Ctx.Done():
+				return
 			}
 		}
 	}()

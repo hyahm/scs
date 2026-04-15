@@ -10,7 +10,7 @@ import (
 func NeedStop(s *scripts.Script) bool {
 	// 更新server
 	// 判断值是否相等
-	script, ok := store.Store.GetScriptByName(s.Name)
+	script, ok := store.GetStore().GetScriptByName(s.Name)
 	if !ok {
 		golog.Error(pkg.ErrBugMsg)
 		return false

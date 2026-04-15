@@ -15,13 +15,13 @@ import (
 // 只有在 Server.Removed 为 true的时候才会发送  svc.StopSignal 信号
 // RemovePname 的时候才会用到
 func RemoveScript(pname string) error {
-	_, sok := store.Store.GetScriptByName(pname)
+	_, sok := store.GetStore().GetScriptByName(pname)
 	if !sok {
 		return errors.New("not found this pname:" + pname)
 	}
-	for index := range store.Store.GetScriptIndex(pname) {
+	for index := range store.GetStore().GetScriptIndex(pname) {
 		subname := fmt.Sprintf("%s_%d", pname, index)
-		svc, ok := store.Store.GetServerByName(subname)
+		svc, ok := store.GetStore().GetServerByName(subname)
 		if !ok {
 			golog.Error(pkg.ErrBugMsg)
 			continue
@@ -38,14 +38,14 @@ func Remove(svc *server.Server, update bool) {
 	svc.Remove()
 	golog.Infof("%s removed ", svc.SubName)
 	<-svc.StopSignal
-	store.Store.DeleteScriptIndex(svc.Name, svc.Index)
-	store.Store.DeleteServerByName(svc.SubName)
+	store.GetStore().DeleteScriptIndex(svc.Name, svc.Index)
+	store.GetStore().DeleteServerByName(svc.SubName)
 	removeServer(svc.Name, svc.SubName, update)
 
 	// 如果全部删光了， 那么scripts的name也要删除
 
-	if store.Store.GetScriptLength(svc.Name) == 0 {
-		store.Store.DeleteScriptByName(svc.Name)
+	if store.GetStore().GetScriptLength(svc.Name) == 0 {
+		store.GetStore().DeleteScriptByName(svc.Name)
 	}
 	global.SetCanReLoad()
 }

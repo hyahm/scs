@@ -26,7 +26,7 @@ func AddScript(w http.ResponseWriter, r *http.Request) {
 		pkg.Error(r, msg)
 		return
 	}
-	_, ok = store.Store.GetScriptByName(s.Name)
+	_, ok = store.GetStore().GetScriptByName(s.Name)
 	if ok {
 		// 存在的话，需要对比配置文件的修改
 		// 需要判断是否相等

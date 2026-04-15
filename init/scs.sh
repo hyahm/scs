@@ -1,131 +1,125 @@
-#! /bin/bash
-# clone scs的目录
-workdir=/data
-# go 版本号
-go_version=1.17.6
+#!/bin/bash
+set -e  # 出错即退出
 
-sudo mkdir /opt
-source ~/.bashrc
-gobin=$(which go)
-if [[ $? -ne 0 ]]; then
-    sudo curl -k -s -L -o /opt/go${go_version}.linux-amd64.tar.gz https://dl.google.com/go/go${go_version}.linux-amd64.tar.gz
-    cd /opt/
-        tar -xf go${go_version}.linux-amd64.tar.gz
-    echo "export PATH=$PATH:/opt/go/bin" >> ~/.bashrc
-    source ~/.bashrc
-    gobin=/opt/go/bin/go
+# --- 配置区 ---
+WORKDIR="/data"
+GO_VERSION="1.17.6"
+SCS_CONF="/etc/scs.yaml"
+INSTALL_OPT="/opt"
+# 确保安装目录存在
+sudo mkdir -p $INSTALL_OPT
+
+# --- 1. Go 环境检查与安装 ---
+# 优先检查现有环境
+if ! command -v go &> /dev/null; then
+    echo "未检测到 Go，准备安装版本: ${GO_VERSION}..."
+    GO_TAR="go${GO_VERSION}.linux-amd64.tar.gz"
+
+    sudo curl -k -s -L -o "${INSTALL_OPT}/${GO_TAR}" "https://dl.google.com/go/${GO_TAR}"
+    sudo tar -C $INSTALL_OPT -xf "${INSTALL_OPT}/${GO_TAR}"
+
+    # 写入环境变量并立即对当前进程生效
+    echo "export PATH=\$PATH:${INSTALL_OPT}/go/bin" >> ~/.bashrc
+    export PATH=$PATH:${INSTALL_OPT}/go/bin
 fi
-sudo mkdir $workdir
-sudo chown -R $USER:$USER $workdir
-cd $workdir
-if [[ ! -d scs ]]; then
-        a=$(ping gitee.com -w 2 -i 3 | grep time= | awk -F'time=' '{print $2}' | awk -F'.' '{print $1}' | awk '{print $1}')
-        b=$(ping github.com -w 2 -i 3 | grep time= | awk -F'time=' '{print $2}' |  awk -F'.' '{print $1}' | awk '{print $1}')
-        if [[ ${a:-1000000} -lt ${b:-10000} ]];then
-        sudo $gobin env -w GOPROXY=https://goproxy.cn
-        $gobin env -w GOPROXY=https://goproxy.cn
-        echo "git clone from https://gitee.com/cander/scs.git"
+
+GOBIN=$(which go)
+echo "使用 Go 路径: $GOBIN"
+
+# --- 2. 源码下载逻辑 (智能测速) ---
+sudo mkdir -p "$WORKDIR"
+sudo chown -R "$USER:$USER" "$WORKDIR"
+cd "$WORKDIR"
+
+if [[ ! -d "scs" ]]; then
+    echo "正在测试 Gitee 与 Github 延迟..."
+    # 简化测速逻辑：取平均延迟数值
+    LATENCY_GITEE=$(ping -c 2 -q gitee.com | awk -F'/' 'END {print ($5 ? $5 : 9999)}' | cut -d. -f1)
+    LATENCY_GITHUB=$(ping -c 2 -q github.com | awk -F'/' 'END {print ($5 ? $5 : 9999)}' | cut -d. -f1)
+
+    if [ "$LATENCY_GITEE" -lt "$LATENCY_GITHUB" ]; then
+        echo "Gitee 较快，开始克隆..."
         git clone https://gitee.com/cander/scs.git
-        if [[ $? -ne 0 ]]; then
-            exit 1
-        fi
-        else
-        echo "git clone from https://gitee.com/cander/scs.git"
+        $GOBIN env -w GOPROXY=https://goproxy.cn,direct
+    else
+        echo "Github 较快或延迟相当，开始克隆..."
         git clone https://github.com/hyahm/scs.git
-        if [[ $? -ne 0 ]]; then
-            exit 1
-        fi
-        fi
+    fi
     cd scs
 else
-    cd scs
-        git pull
+    echo "目录已存在，执行更新..."
+    cd scs && git pull
 fi
-export GOPROXY=https://goproxy.cn
-$gobin build -o scsd cmd/scsd/scsd.go
-$gobin build -o /usr/local/bin/scsctl cmd/scsctl/scsctl.go
-if [[ $? -ne 0 ]]; then
-        echo "build scsctl failed , you can run as root by yourself
-        source ~/.bashrc
-        cd /data/scs
-        $gobin build -o /usr/local/bin/scsctl cmd/scsctl/main.go
-        "
-fi
-TOKEN=$($gobin run cmd/random/random.go)
 
-if [[ ! -f /etc/scs.yaml ]];then
-sudo /bin/bash -c "export TOKEN='$TOKEN' && cat > /etc/scs.yaml << EOF
-# 监听端口
+# --- 3. 编译阶段 ---
+export GOPROXY=https://goproxy.cn,direct
+echo "正在编译 scsd..."
+$GOBIN build -o scsd cmd/scsd/scsd.go
+
+echo "正在编译 scsctl..."
+# 编译并移动到系统路径，通常需要 sudo
+$GOBIN build -o scsctl cmd/scsctl/scsctl.go
+sudo mv scsctl /usr/local/bin/
+
+# 生成 Token
+TOKEN=$($GOBIN run cmd/random/random.go)
+
+# --- 4. 配置文件生成 ---
+if [[ ! -f "$SCS_CONF" ]]; then
+    echo "生成配置文件: $SCS_CONF"
+    sudo bash -c "cat > $SCS_CONF <<EOF
 listen: :11111
-# 服务日志配置
 log:
-    path: log
+    path: $WORKDIR/scs/log
     day: true
     size: 0
-# 请求头认证 Token： xxxx
 token: '$TOKEN'
-# 本地磁盘， cpu， 内存监控项， 确保elert存在才会有通知
 probe:
-  # mem使用率, 默认90
-  mem: 60
-  # cpu使用率, 默认90
-  cpu: 90
-  # 硬盘使用率， 默认85
-  disk: 80
-  # 排除的挂载点， 默认已经去掉了swap， 设备, 数组
-  excludeDisk:
-  # 检测间隔， 默认10秒
-  interval: 10s
-  # 下次报警时间间隔， 如果恢复了就重置
-  continuityInterval: 1h
-scripts:
-  # - name: ls
-  #   # 脚本执行的根目录
-  #   dir: D:\\myproject\\scs
-  #   env:
-  #     GOPROXY: MMMM
-  #   # 启动脚本
-  #   command: 'go'
-  #   # 不写默认10分钟
-  #   continuityInterval: 1h
-  #   always: true
-  #   # 禁用报警， 默认启动
-  #   # disableAlert: true
-  #   # replicate， 开启副本数
-  #   replicate: 1
-  #   killTime: 2s
-  #   alert:
-  #     email:
-  #       - 727023885460@qq.com
-  #
-  #     rocket:
-  #       - ''
+    mem: 60
+    cpu: 90
+    disk: 80
+    interval: 10s
+    continuityInterval: 1h
 EOF"
-cat > ~/.scsctl.yaml <<EOF
+
+    cat > ~/.scsctl.yaml <<EOF
 nodes:
   localhost:
-    url: https://127.0.0.1:11111
+    url: http://127.0.0.1:11111
     token: '$TOKEN'
 EOF
 fi
 
-sudo /bin/bash -c "cat > /etc/systemd/system/scsd.service <<EOF
+# --- 5. Systemd 服务配置 ---
+echo "配置 Systemd 服务..."
+sudo bash -c "cat > /etc/systemd/system/scsd.service <<EOF
 [Unit]
 Description=Scs Service Control Script
-After=network.target
-After=network-online.target
+After=network.target network-online.target
 Wants=network-online.target
+
 [Service]
+Type=simple
+User=$USER
 LimitNOFILE=6553500
 LimitNPROC=6553500
-WorkingDirectory=$workdir/scs
-ExecStart=$workdir/scs/scsd -f /etc/scs.yaml
+WorkingDirectory=$WORKDIR/scs
+ExecStart=$WORKDIR/scs/scsd -f $SCS_CONF
 ExecStop=/bin/kill -s QUIT \$MAINPID
-Type=simple
+Restart=on-failure
+
 [Install]
 WantedBy=multi-user.target
 EOF"
-sudo setenforce 0
-systemctl daemon-reload
-sudo systemctl start scsd
-sudo systemctl enable scsd
+
+# --- 6. 启动服务 ---
+# 针对 Fedora/AlmaLinux 禁用 SELinux (临时)
+if command -v setenforce &> /dev/null; then
+    sudo setenforce 0 || true
+fi
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now scsd
+
+echo "部署完成！服务状态："
+sudo systemctl status scsd --no-pager

@@ -13,7 +13,7 @@ import (
 func removeServer(name, subname string, update bool) {
 	// 如果scripts的副本数为0或者1就直接删除这个scripts
 
-	script, ok := store.Store.GetScriptByName(name)
+	script, ok := store.GetStore().GetScriptByName(name)
 	if !ok {
 		return
 	}
@@ -28,13 +28,13 @@ func removeServer(name, subname string, update bool) {
 }
 
 func StartAllServer() {
-	for _, svc := range store.Store.GetAllServer() {
+	for _, svc := range store.GetStore().GetAllServer() {
 		svc.Start()
 	}
 }
 
 func StartAllServerFromScript(names map[string]struct{}) {
-	for _, svc := range store.Store.GetAllServer() {
+	for _, svc := range store.GetStore().GetAllServer() {
 		svc.Start()
 	}
 }
@@ -54,7 +54,7 @@ func StartAllServerFromScript(names map[string]struct{}) {
 
 func GetServersFromScripts(names map[string]struct{}) map[string]*server.Server {
 	servers := make(map[string]*server.Server)
-	for name, svc := range store.Store.GetAllServerMap() {
+	for name, svc := range store.GetStore().GetAllServerMap() {
 		if _, ok := names[svc.Name]; ok {
 			servers[name] = svc
 		}
@@ -67,7 +67,7 @@ func GetAterts() map[string]message.SendAlerter {
 }
 
 func StopScriptFromName(names map[string]struct{}) {
-	for _, script := range store.Store.GetScriptMapFilterByName(names) {
+	for _, script := range store.GetStore().GetScriptMapFilterByName(names) {
 		err := StopScript(script)
 		if err != nil {
 			golog.Error(err)
@@ -76,7 +76,7 @@ func StopScriptFromName(names map[string]struct{}) {
 }
 
 func StopAllServer() {
-	for _, script := range store.Store.GetAllScriptMap() {
+	for _, script := range store.GetStore().GetAllScriptMap() {
 		err := StopScript(script)
 		if err != nil {
 			golog.Error(err)

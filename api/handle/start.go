@@ -15,12 +15,12 @@ import (
 func Start(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	_, ok := store.Store.GetScriptByName(pname)
+	_, ok := store.GetStore().GetScriptByName(pname)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	svc, ok := store.Store.GetServerByName(name)
+	svc, ok := store.GetStore().GetServerByName(name)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
@@ -32,7 +32,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 func StartPname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	_, ok := store.Store.GetScriptByName(pname)
+	_, ok := store.GetStore().GetScriptByName(pname)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return

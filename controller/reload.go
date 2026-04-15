@@ -11,7 +11,7 @@ import (
 )
 
 func getTempScript(temp map[string]struct{}) {
-	for name := range store.Store.GetAllScriptMap() {
+	for name := range store.GetStore().GetAllScriptMap() {
 		temp[name] = struct{}{}
 	}
 }
@@ -59,9 +59,9 @@ func Reload() error {
 
 	// 删除已删除的 script
 	for name := range temp {
-		for index := range store.Store.GetScriptIndex(name) {
+		for index := range store.GetStore().GetScriptIndex(name) {
 			subname := fmt.Sprintf("%s_%d", name, index)
-			svc, ok := store.Store.GetServerByName(subname)
+			svc, ok := store.GetStore().GetServerByName(subname)
 			if !ok {
 				golog.Error(pkg.ErrBugMsg)
 				continue
@@ -79,7 +79,7 @@ func AddScript(s *scripts.Script) {
 		s.ScriptToken = pkg.RandomToken()
 	}
 	// 将scripts填充到store中
-	store.Store.SetScript(s)
+	store.GetStore().SetScript(s)
 	// 初始化脚本的副本数
 	replicate := s.Replicate
 	if replicate == 0 {
@@ -91,8 +91,8 @@ func AddScript(s *scripts.Script) {
 	availablePort := s.Port
 	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		svc := store.Store.InitServer(i, s.Name, subname)
-		store.Store.SetScriptIndex(s.Name, i)
+		svc := store.GetStore().InitServer(i, s.Name, subname)
+		store.GetStore().SetScriptIndex(s.Name, i)
 		svc.Port = availablePort
 		svc.MakeServer(s)
 		svc.Env["SCS_INDEX"] = fmt.Sprintf("%d", i)
@@ -110,7 +110,7 @@ func AddScript(s *scripts.Script) {
 // 脚本更新操作
 func UpdateScriptApi(s *scripts.Script) {
 	// 既然是更新操作，那么这个必定存在
-	script, _ := store.Store.GetScriptByName(s.Name)
+	script, _ := store.GetStore().GetScriptByName(s.Name)
 
 	oldReplicate := script.Replicate
 
@@ -128,7 +128,7 @@ func UpdateScriptApi(s *scripts.Script) {
 	// 对比脚本是否修改
 	if oldReplicate == newReplicate {
 		if !scripts.EqualScript(s, script) {
-			store.Store.SetScript(s)
+			store.GetStore().SetScript(s)
 		}
 
 		// 如果一样的名字， 副本数一样的就直接跳过
@@ -138,7 +138,7 @@ func UpdateScriptApi(s *scripts.Script) {
 		// 如果大于的话， 那么就删除多余的
 		for i := newReplicate; i < oldReplicate; i++ {
 			subname := fmt.Sprintf("%s_%d", s.Name, i)
-			svc, ok := store.Store.GetServerByName(subname)
+			svc, ok := store.GetStore().GetServerByName(subname)
 			if !ok {
 				golog.Error(pkg.ErrBugMsg)
 				continue
@@ -151,8 +151,8 @@ func UpdateScriptApi(s *scripts.Script) {
 		availablePort := s.Port
 		for i := oldReplicate; i < newReplicate; i++ {
 			subname := fmt.Sprintf("%s_%d", s.Name, i)
-			svc := store.Store.InitServer(i, s.Name, subname)
-			store.Store.SetScriptIndex(s.Name, i)
+			svc := store.GetStore().InitServer(i, s.Name, subname)
+			store.GetStore().SetScriptIndex(s.Name, i)
 			svc.Port = availablePort
 			svc.MakeServer(script)
 			availablePort = svc.Port + 1
@@ -170,7 +170,7 @@ func UpdateScriptApi(s *scripts.Script) {
 func reloadScripts(s *scripts.Script) {
 	// script: 配置文件新读取出来的
 	// 处理存在的
-	_, ok := store.Store.GetScriptByName(s.Name)
+	_, ok := store.GetStore().GetScriptByName(s.Name)
 	// 对比启动的副本
 	if !ok {
 		// 如果不存在，说明要新增

@@ -11,7 +11,6 @@ import (
 )
 
 func (svc *Server) wait() {
-	defer svc.Logger.Sync()
 	go svc.successAlert()
 	// 这三行无视，
 	// ctx, cancel := context.WithCancel(context.Background())
@@ -76,13 +75,11 @@ func (svc *Server) wait() {
 			// 如果是定时器的话， 直接结束
 			// if svc.Cron != nil && svc.Cron.Loop > 0 {
 			// 	svc.Status.Pid = 0
-			// 	svc.Logger.Close()
 			// 	return
 			// }
 			if svc.IsCron {
-				// 如果是个定时器， 执行结束不停止
+				// 如果是个定时器， 执行结束不停止，状态保持为RUNNING（等待下次执行）
 				svc.Status.RestartCount++
-				svc.Status.Status = status.STOP
 				svc.Status.Pid = 0
 				return
 			}
@@ -93,7 +90,6 @@ func (svc *Server) wait() {
 				svc.Status.Pid = 0
 				svc.Status.Start = 0
 				// 失败了， 每秒启动一次
-				svc.Logger.Close()
 				svc.Status.RestartCount++
 				time.Sleep(time.Second)
 				svc.Start()
@@ -104,9 +100,8 @@ func (svc *Server) wait() {
 
 	}
 	if svc.IsCron {
-		// 如果是个定时器， 执行结束不停止
+		// 如果是个定时器， 执行结束不停止，状态保持为RUNNING（等待下次执行）
 		svc.Status.Pid = 0
-		svc.Status.Status = status.STOP
 		return
 	}
 	// if svc.Removed {

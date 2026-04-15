@@ -27,7 +27,7 @@ func restartServer(svc *server.Server) {
 	//已经停止了。
 	<-svc.StopSignal
 	// 更新server并启动
-	script, ok := store.Store.GetScriptByName(svc.Name)
+	script, ok := store.GetStore().GetScriptByName(svc.Name)
 	if !ok {
 		golog.Error(pkg.ErrBugMsg)
 		return
@@ -43,10 +43,10 @@ func RestartScript(s *scripts.Script) error {
 		return nil
 	}
 
-	for index := range store.Store.GetScriptIndex(s.Name) {
+	for index := range store.GetStore().GetScriptIndex(s.Name) {
 
 		subname := fmt.Sprintf("%s_%d", s.Name, index)
-		svc, ok := store.Store.GetServerByName(subname)
+		svc, ok := store.GetStore().GetServerByName(subname)
 		if !ok {
 			golog.Error(pkg.ErrBugMsg)
 			continue
@@ -57,7 +57,7 @@ func RestartScript(s *scripts.Script) error {
 }
 
 func RestartAllServer() {
-	for _, svc := range store.Store.GetAllServer() {
+	for _, svc := range store.GetStore().GetAllServer() {
 		if svc.Disable {
 			continue
 		}
@@ -67,9 +67,9 @@ func RestartAllServer() {
 
 func RestartAllServerFromScripts(names map[string]struct{}) {
 	for pname := range names {
-		for index := range store.Store.GetScriptIndex(pname) {
+		for index := range store.GetStore().GetScriptIndex(pname) {
 			subname := fmt.Sprintf("%s_%d", pname, index)
-			svc, ok := store.Store.GetServerByName(subname)
+			svc, ok := store.GetStore().GetServerByName(subname)
 			if !ok {
 				golog.Error(pkg.ErrBugMsg)
 				continue

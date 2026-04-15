@@ -7,9 +7,11 @@ import (
 )
 
 func (svc *Server) stop() {
+	ticker := time.NewTicker(time.Millisecond * 10)
+	defer ticker.Stop()
 	for {
 		select {
-		case <-time.After(time.Millisecond * 10):
+		case <-ticker.C:
 			if !svc.Status.CanNotStop {
 				svc.kill()
 				// 通知外部已经停止了
@@ -23,10 +25,12 @@ func (svc *Server) stop() {
 }
 
 func (svc *Server) remove() {
+	ticker := time.NewTicker(time.Millisecond * 10)
+	defer ticker.Stop()
 	svc.Status.Status = status.REMOVING
 	for {
 		select {
-		case <-time.After(time.Millisecond * 10):
+		case <-ticker.C:
 			if !svc.Status.CanNotStop {
 				svc.kill()
 				// 通知外部已经停止了

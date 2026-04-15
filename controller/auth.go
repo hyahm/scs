@@ -15,7 +15,7 @@ type Auth struct {
 func GetAuthByToken(token string) []Auth {
 
 	auths := make([]Auth, 0)
-	for name, server := range store.Store.GetAllServerMap() {
+	for name, server := range store.GetStore().GetAllServerMap() {
 		if server.ScriptToken == token {
 			auths = append(auths, Auth{
 				ServerName: name,
@@ -36,7 +36,7 @@ func GetAuthByToken(token string) []Auth {
 
 func GetAllAuth() []Auth {
 	auths := make([]Auth, 0)
-	for name, server := range store.Store.GetAllServerMap() {
+	for name, server := range store.GetStore().GetAllServerMap() {
 		auths = append(auths, Auth{
 			ServerName: name,
 			ScriptName: server.Name,

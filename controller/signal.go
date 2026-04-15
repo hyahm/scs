@@ -79,7 +79,7 @@ func UnStop(ctx context.Context, name string, timeout time.Duration) {
 			ra.SendAlert()
 		}
 		if sr.Restart {
-			if server, ok := store.Store.GetServerByName(name); ok {
+			if server, ok := store.GetStore().GetServerByName(name); ok {
 				KillAndStartServer(sr.Parameter, server)
 			}
 		}

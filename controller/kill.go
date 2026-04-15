@@ -9,7 +9,7 @@ import (
 )
 
 func WaitKillAllServer() {
-	for _, svc := range store.Store.GetAllServer() {
+	for _, svc := range store.GetStore().GetAllServer() {
 		svc.Kill()
 	}
 }
@@ -21,7 +21,7 @@ func KillScript(s *scripts.Script) {
 	}
 	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		svc, ok := store.Store.GetServerByName(subname)
+		svc, ok := store.GetStore().GetServerByName(subname)
 		if ok {
 			svc.Kill()
 		}

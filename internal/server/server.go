@@ -348,9 +348,11 @@ func (svc *Server) stopStatus() {
 	svc.Status.CanNotStop = false
 	svc.Status.RestartCount = 0
 	svc.Status.Start = 0
-	svc.Logger.Close()
 	svc.Cmd = nil
-	// svc.Removed = false
+	if svc.Logger != nil {
+		svc.Logger.Sync()
+		svc.Logger = nil
+	}
 }
 
 func (s *Server) successAlert() {

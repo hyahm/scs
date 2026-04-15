@@ -8,11 +8,11 @@ import (
 
 // 获取脚本结构体
 func GetServerByNameAndSubname(name string, subname string) (*server.Server, *scripts.Script, bool) {
-	script, ok := store.Store.GetScriptByName(name)
+	script, ok := store.GetStore().GetScriptByName(name)
 	if !ok {
 		return nil, nil, false
 	}
-	svc, ok := store.Store.GetServerByName(subname)
+	svc, ok := store.GetStore().GetServerByName(subname)
 	if !ok {
 		return nil, nil, false
 	}

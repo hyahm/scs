@@ -13,12 +13,12 @@ import (
 func Update(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
 	name := xmux.Var(r)["name"]
-	_, ok := store.Store.GetScriptByName(pname)
+	_, ok := store.GetStore().GetScriptByName(pname)
 	if !ok {
 		pkg.Error(r, "not found pname: "+pname)
 		return
 	}
-	svc, ok := store.Store.GetServerByName(name)
+	svc, ok := store.GetStore().GetServerByName(name)
 	if !ok {
 		pkg.Error(r, "not found name: "+name)
 		return
@@ -29,7 +29,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 func UpdatePname(w http.ResponseWriter, r *http.Request) {
 	pname := xmux.Var(r)["pname"]
-	script, ok := store.Store.GetScriptByName(pname)
+	script, ok := store.GetStore().GetScriptByName(pname)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return

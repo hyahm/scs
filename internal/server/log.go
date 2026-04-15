@@ -10,9 +10,9 @@ import (
 )
 
 func (svc *Server) read() {
-    if svc.Cmd == nil {
-        return
-    }
+	if svc.Cmd == nil {
+		return
+	}
 	stdout, err := svc.Cmd.StdoutPipe()
 	if err != nil {
 		golog.Error(err)
@@ -38,7 +38,6 @@ func (svc *Server) appendRead(stdout io.ReadCloser, iserr bool) {
 	for {
 		select {
 		case <-svc.Ctx.Done():
-			// close(svc.Msg)
 			return
 		default:
 			if readout == nil {
@@ -58,9 +57,6 @@ func (svc *Server) appendRead(stdout io.ReadCloser, iserr bool) {
 			} else {
 				svc.Logger.Info(string(line))
 			}
-			// t := time.Now().Format("2006/1/2 15:04:05")
-			// msg := t + " -- " + string(line)
-			// svc.Msg <- msg
 		}
 	}
 }
@@ -76,14 +72,15 @@ func read(cmd *exec.Cmd, svc *Server) {
 		golog.Error(err)
 	}
 
-	//实时循环读取输出流中的一行内容
 	go appendErrRead(stderr, svc)
 
-	//实时循环读取输出流中的一行内容
 	go appendRead(stdout, svc)
 }
 
 func appendErrRead(stdout io.ReadCloser, svc *Server) {
+	if stdout == nil {
+		return
+	}
 	readout := bufio.NewReader(stdout)
 	for {
 		line, err := readout.ReadString('\n')
@@ -96,6 +93,9 @@ func appendErrRead(stdout io.ReadCloser, svc *Server) {
 }
 
 func appendRead(stdout io.ReadCloser, svc *Server) {
+	if stdout == nil {
+		return
+	}
 	readout := bufio.NewReader(stdout)
 	for {
 		line, err := readout.ReadString('\n')

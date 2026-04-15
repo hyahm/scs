@@ -74,7 +74,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	defer golog.Sync()
-	golog.InitLogger(*logpath, 0, true, 7)
+	golog.InitLogger(*logpath, 0, true)
 	flag.Parse()
 	if *token == "" {
 		log.Fatal("token can not be empty")

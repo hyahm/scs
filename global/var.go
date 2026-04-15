@@ -31,6 +31,8 @@ func IsCanReload() (string, bool) {
 func SetReLoading(msg string) (string, bool) {
 	_, ok := IsCanReload()
 	if ok {
+		cr.mu.Lock()
+		defer cr.mu.Unlock()
 		cr.busy = true
 		cr.msg = msg
 	}

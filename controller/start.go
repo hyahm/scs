@@ -11,9 +11,9 @@ import (
 
 // 启动存在的脚本
 func StartExsitScript(name string) {
-	for index := range store.Store.GetScriptIndex(name) {
+	for index := range store.GetStore().GetScriptIndex(name) {
 		subname := fmt.Sprintf("%s_%d", name, index)
-		svc, ok := store.Store.GetServerByName(subname)
+		svc, ok := store.GetStore().GetServerByName(subname)
 		if ok {
 			svc.Start()
 			continue

@@ -14,7 +14,7 @@ func StopScript(s *scripts.Script) error {
 	if s.Disable {
 		return nil
 	}
-	_, ok := store.Store.GetScriptByName(s.Name)
+	_, ok := store.GetStore().GetScriptByName(s.Name)
 	if !ok {
 		return errors.New("not found script: " + s.Name)
 	}
@@ -25,7 +25,7 @@ func StopScript(s *scripts.Script) error {
 	}
 	for i := 0; i < replicate; i++ {
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		svc, ok := store.Store.GetServerByName(subname)
+		svc, ok := store.GetStore().GetServerByName(subname)
 		if ok {
 			golog.Debug("send all stop")
 			go svc.Stop()
