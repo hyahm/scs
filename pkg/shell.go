@@ -17,7 +17,7 @@ func GetVersion(command string) string {
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("powershell", "-c", command)
 	} else {
-		cmd = exec.Command("/bin/bash", "-c", command)
+		cmd = exec.Command("/bin/sh", "-c", command)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	s := new(string)

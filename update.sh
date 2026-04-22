@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 git pull
 export GOPROXY=https://goproxy.cn
 go build -o scsd cmd/scsd/scsd.go

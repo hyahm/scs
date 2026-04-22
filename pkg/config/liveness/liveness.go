@@ -17,7 +17,7 @@ func newCommand(command string) *exec.Cmd {
 	if runtime.GOOS == "windows" {
 		return exec.Command("powershell", "/C", command)
 	} else {
-		return exec.Command("/bin/bash", "-c", command)
+		return exec.Command("/bin/sh", "-c", command)
 	}
 }
 

@@ -61,7 +61,7 @@ func (svc *Server) kill() error {
 }
 
 func (svc *Server) start() error {
-	svc.Cmd = exec.Command("/bin/bash", "-c", svc.Command)
+	svc.Cmd = exec.Command("/bin/sh", "-c", svc.Command)
 	if svc.Dir != "" {
 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
 			golog.Error(err)

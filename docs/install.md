@@ -18,7 +18,7 @@ PName    Name    Status    Pid    UpTime    Version    CanNotStop  Failed    Dis
 ## 自动安装
 linux(需要 git tar命令， 关闭selinux,mac, windows 请按照使用二进制安装或自行编译安装
 ```
-/bin/bash -c "$(curl -fsSL http://download.hyahm.com/scs.sh)"
+/bin/sh -c "$(curl -fsSL http://download.hyahm.com/scs.sh)"
 ```
 
 ## 手动安装 
