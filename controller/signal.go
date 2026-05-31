@@ -8,7 +8,7 @@ import (
 
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 var signalHandle map[string]*pkg.SignalRequest
@@ -68,7 +68,7 @@ func UnStop(ctx context.Context, name string, timeout time.Duration) {
 		defer DeleteSignalRequest(name)
 		// 报警
 		if sr.Notice {
-			ra := &alert.RespAlert{
+			ra := &config.RespAlert{
 				Name:   name,
 				Title:  "原子操作超时",
 				Reason: fmt.Sprintf("原子操作超时超过 %d 秒没有执行完成", sr.Timeout),

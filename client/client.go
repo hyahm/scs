@@ -17,10 +17,9 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/alert"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/sacOO7/gowebsocket"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var CCfg *ClientConfig
@@ -193,6 +192,7 @@ func (sc *SCSClient) webSocket(url string, body io.Reader) {
 	wsdomain := sc.Domain + url
 	wsdomain = strings.Replace(wsdomain, "https", "wss", 1)
 	wsdomain = strings.Replace(wsdomain, "http", "ws", 1)
+	golog.Info(wsdomain)
 	socket := gowebsocket.New(wsdomain)
 
 	socket.RequestHeader.Set("Token", sc.Token)
@@ -506,7 +506,7 @@ func (sc *SCSClient) Search(derivative, serviceName string) (*pkg.Response, erro
 }
 
 // 添加或修改脚本
-func (sc *SCSClient) AddScript(s *scripts.Script) (*pkg.Response, error) {
+func (sc *SCSClient) AddScript(s *config.Script) (*pkg.Response, error) {
 	send, _ := json.Marshal(s)
 	return sc.requests("/script", bytes.NewReader(send))
 }
@@ -536,7 +536,7 @@ func (sc *SCSClient) StatusName() (*pkg.Response, error) {
 }
 
 // 发送报警
-func (sc *SCSClient) Alert(alert *alert.RespAlert) (*pkg.Response, error) {
+func (sc *SCSClient) Alert(alert *config.RespAlert) (*pkg.Response, error) {
 	send, _ := json.Marshal(alert)
 	return sc.requests("/send/alert", bytes.NewReader(send))
 }

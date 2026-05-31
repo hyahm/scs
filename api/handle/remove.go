@@ -1,11 +1,9 @@
 package handle
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/hyahm/scs/controller"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 
@@ -28,11 +26,11 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	msg, ok := global.SetReLoading(fmt.Sprintf("remove %s %s", pname, name))
-	if !ok {
-		pkg.Error(r, msg)
-		return
-	}
+	// msg, ok := global.SetReLoading(fmt.Sprintf("remove %s %s", pname, name))
+	// if !ok {
+	// 	pkg.Error(r, msg)
+	// 	return
+	// }
 
 	go controller.Remove(svc, true)
 }
@@ -46,11 +44,11 @@ func RemovePname(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	msg, ok := global.SetReLoading(fmt.Sprintf("remove %s ", pname))
-	if !ok {
-		pkg.Error(r, msg)
-		return
-	}
+	// msg, ok := global.SetReLoading(fmt.Sprintf("remove %s ", pname))
+	// if !ok {
+	// 	pkg.Error(r, msg)
+	// 	return
+	// }
 	go controller.RemoveScript(pname)
 }
 

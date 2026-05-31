@@ -8,7 +8,7 @@ import (
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/probe"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 func getStatus(svc *server.Server) pkg.ServiceStatus {
@@ -28,7 +28,7 @@ func getStatus(svc *server.Server) pkg.ServiceStatus {
 		Start:        svc.Status.Start,
 	}
 
-	status.Cpu, status.Mem, _ = probe.GetProcessInfo(int32(status.Pid))
+	status.Cpu, status.Mem, _ = config.GetProcessInfo(int32(status.Pid))
 	return status
 }
 

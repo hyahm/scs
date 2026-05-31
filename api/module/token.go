@@ -5,8 +5,8 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/xmux"
 )
 
@@ -17,9 +17,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
 	// 	return true
 	// }
-	golog.Warn("check token ", token)
-	if token == global.CS.Token {
-		golog.Info("check token success ")
+	if token == config.Cfg.Token {
 		auths := controller.GetAllAuth()
 		xmux.GetInstance(r).Set("validAuths", auths)
 		xmux.GetInstance(r).Set("role", "admin")

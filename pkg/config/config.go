@@ -5,56 +5,39 @@ import (
 	"os"
 	"time"
 
-	"github.com/hyahm/scs/global"
-	"github.com/hyahm/scs/pkg/config/alert"
-	"github.com/hyahm/scs/pkg/config/logger"
-	"github.com/hyahm/scs/pkg/config/probe"
-	"github.com/hyahm/scs/pkg/config/scripts"
-
 	"github.com/hyahm/golog"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var ConfigFile string
 
+var Cfg *Config
+
+func init() {
+	Cfg = &Config{}
+}
+
 type Config struct {
-	Listen      string         `yaml:"listen,omitempty"`
-	Token       string         `yaml:"token,omitempty"`
-	ProxyHeader string         `yaml:"proxyHeader,omitempty"`
-	Key         string         `yaml:"key,omitempty"`
-	Cert        string         `yaml:"cert,omitempty"`
-	EnableTLS   bool           `yaml:"enableTLS,omitempty"`
-	Packet      bool           `yaml:"packet,omitempty"`
-	Log         *logger.Logger `yaml:"log,omitempty"`
-	IgnoreToken []string       `yaml:"ignoreToken,omitempty"`
-	ReadTimeout time.Duration  `yaml:"readTimeout,omitempty"`
+	Listen      string        `yaml:"listen,omitempty"`
+	Token       string        `yaml:"token,omitempty"`
+	ProxyHeader string        `yaml:"proxyHeader,omitempty"`
+	Key         string        `yaml:"key,omitempty"`
+	Cert        string        `yaml:"cert,omitempty"`
+	EnableTLS   bool          `yaml:"enableTLS,omitempty"`
+	Debug       bool          `yaml:"debug,omitempty"`
+	Packet      bool          `yaml:"packet,omitempty"`
+	Log         Logger        `yaml:"log,omitempty"`
+	IgnoreToken []string      `yaml:"ignoreToken,omitempty"`
+	ReadTimeout time.Duration `yaml:"readTimeout,omitempty"`
 	// Repo        *Repo          `yaml:"repo,omitempty"`
-	Alert *alert.Alert      `yaml:"alert,omitempty"`
-	Probe *probe.Probe      `yaml:"probe,omitempty"`
-	SC    []*scripts.Script `yaml:"scripts,omitempty"`
+	Alert   Alert    `yaml:"alert,omitempty"`
+	Probe   Probe    `yaml:"probe,omitempty"`
+	Scripts []Script `yaml:"scripts,omitempty"`
 }
 
 // 保存的配置文件路径
 
 // 读文件
-func ReadConfig() (*Config, error) {
-	// 依次启动
-	return reLoad()
-}
-
-func (c *Config) Store() {
-	global.CS.Cert = c.Cert
-	global.CS.EnableTLS = c.EnableTLS
-	global.CS.IgNoreToken = c.IgnoreToken
-	global.CS.Key = c.Key
-	if c.Listen == "" {
-		c.Listen = ":11111"
-	}
-	global.CS.Listen = c.Listen
-	global.CS.Token = c.Token
-	// global.CS.LogCount = c.log
-	global.CS.ReadTime = c.ReadTimeout
-}
 
 // 写入配置文件
 func (c *Config) WriteConfig(update bool) error {
@@ -68,15 +51,9 @@ func (c *Config) WriteConfig(update bool) error {
 	return os.WriteFile(ConfigFile, b, 0644)
 }
 
-func reLoad() (*Config, error) {
-	// reload: 第一次启动     还是 config reload
-	// 读取配置文件, 配置文件有问题的话，不做后面的处理， 但是会提示错误信息
-	return readConfig()
-}
-
 // 读取配置文件， 找不到就创建一个空文件
-func readConfig() (*Config, error) {
-	cfg := &Config{}
+func ReadConfig() error {
+
 	b, err := os.ReadFile(ConfigFile)
 	if err != nil {
 		f, err := os.Create(ConfigFile)
@@ -84,54 +61,55 @@ func readConfig() (*Config, error) {
 			golog.Error(err)
 		}
 		f.Close()
-		return cfg, nil
+		return nil
 
 	}
 
-	err = yaml.Unmarshal(b, cfg)
+	err = yaml.Unmarshal(b, Cfg)
 	if err != nil {
 		golog.Error(err)
-		return nil, err
+		return err
 	}
 	// 检测配置文件的name是否重复
-	err = cfg.check()
+	err = Cfg.check()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// 装载全局配置
-	cfg.Store()
-	global.ProxyHeader = cfg.ProxyHeader
+	// Cfg.Store()
+	// global.ProxyHeader = Cfg.ProxyHeader
 	// 初始化日志
-	logger.ReloadLogger(cfg.Log)
+	// ReloadLogger(Cfg.Log)
 	// 初始化报警器信息
-	alert.RunAlert(cfg.Alert)
+	// RunAlert(Cfg.Alert)
+	Cfg.Log.initLogger()
+	golog.Debug(Cfg.Log.Path)
 	// 初始化硬件检测
-	probe.RunProbe(cfg.Probe)
-
-	return cfg, nil
+	Cfg.Probe.initProbe()
+	return nil
 }
 
 func (c *Config) check() error {
 	// 配置信息填充至状态
 	checkrepeat := make(map[string]bool)
-	for index := range c.SC {
-		if c.SC[index].Name == "" || c.SC[index].Command == "" {
+	for index := range c.Scripts {
+		if c.Scripts[index].Name == "" || c.Scripts[index].Command == "" {
 			golog.Fatal("name or commond is empty")
 		}
-		if !CheckScriptNameRule(c.SC[index].Name) {
-			return errors.New("脚本名不符合命名规则：" + c.SC[index].Name)
+		if !CheckScriptNameRule(c.Scripts[index].Name) {
+			return errors.New("脚本名不符合命名规则：" + c.Scripts[index].Name)
 		}
 		// 检查名字是否有重复的
-		if _, ok := checkrepeat[c.SC[index].Name]; ok {
-			return errors.New("配置文件的脚本名重复：" + c.SC[index].Name)
+		if _, ok := checkrepeat[c.Scripts[index].Name]; ok {
+			return errors.New("配置文件的脚本名重复：" + c.Scripts[index].Name)
 		}
-		checkrepeat[c.SC[index].Name] = true
+		checkrepeat[c.Scripts[index].Name] = true
 	}
 	return nil
 }
 
 // 更新单个script到配置文件
-func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
+func UpdateScriptToConfigFile(s Script, update bool) error {
 	// 添加
 	if !update {
 		return nil
@@ -147,12 +125,12 @@ func UpdateScriptToConfigFile(s *scripts.Script, update bool) error {
 	if err != nil {
 		return err
 	}
-	for i := range tmp.SC {
-		if tmp.SC[i].Name == s.Name {
+	for i := range tmp.Scripts {
+		if tmp.Scripts[i].Name == s.Name {
 			if s.Replicate < 0 {
-				tmp.SC = append(tmp.SC[:i], tmp.SC[i+1:]...)
+				tmp.Scripts = append(tmp.Scripts[:i], tmp.Scripts[i+1:]...)
 			} else {
-				tmp.SC[i] = s
+				tmp.Scripts[i] = s
 			}
 
 		}
@@ -175,7 +153,7 @@ func DeleteAllScriptToConfigFile(update bool) error {
 	if err != nil {
 		return err
 	}
-	tmp.SC = nil
+	tmp.Scripts = nil
 	return tmp.WriteConfig(update)
 }
 
@@ -197,13 +175,8 @@ func RemoveAllScriptToConfigFile(update bool) error {
 	return tmp.WriteConfig(update)
 }
 
-// func RemoveAllScripts() {
-// 	// 删除所有脚本
-// 	RemoveAllScriptToConfigFile()
-// }
-
 // 从配置文件删除
-func DeleteScriptToConfigFile(s *scripts.Script, update bool) error {
+func DeleteScriptToConfigFile(s Script, update bool) error {
 	if !update {
 		return nil
 	}
@@ -218,16 +191,16 @@ func DeleteScriptToConfigFile(s *scripts.Script, update bool) error {
 	if err != nil {
 		return err
 	}
-	for i := range tmp.SC {
-		if tmp.SC[i].Name == s.Name {
-			tmp.SC = append(tmp.SC[:i], tmp.SC[i+1:]...)
+	for i := range tmp.Scripts {
+		if tmp.Scripts[i].Name == s.Name {
+			tmp.Scripts = append(tmp.Scripts[:i], tmp.Scripts[i+1:]...)
 			break
 		}
 	}
 	return tmp.WriteConfig(update)
 }
 
-func AddScriptToConfigFile(s *scripts.Script) error {
+func AddScriptToConfigFile(s *Script) error {
 	// 默认配置
 	if !CheckScriptNameRule(s.Name) {
 		return errors.New("script name must be a word, " + s.Name)
@@ -242,6 +215,6 @@ func AddScriptToConfigFile(s *scripts.Script) error {
 	if err != nil {
 		return err
 	}
-	tmp.SC = append(tmp.SC, s)
+	tmp.Scripts = append(tmp.Scripts, *s)
 	return tmp.WriteConfig(true)
 }

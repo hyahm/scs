@@ -79,8 +79,16 @@ func (svc *Server) start() error {
 		v = strings.ReplaceAll(v, "\x00", "")
 		svc.Cmd.Env = append(svc.Cmd.Env, k+"="+v)
 	}
-	svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true,
-		Credential: &syscall.Credential{}}
+	u, _ := user.Current()
+	uid, _ := strconv.Atoi(u.Uid)
+	gid, _ := strconv.Atoi(u.Gid)
+	if uid == 0 && gid == 0 {
+		svc.Cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true,
+			Credential: &syscall.Credential{
+				Uid: uint32(uid),
+				Gid: uint32(gid),
+			}}
+	}
 
 	if svc.User != "" {
 		users, err := user.Lookup(svc.User)

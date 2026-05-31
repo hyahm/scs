@@ -6,11 +6,11 @@ import (
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 // 更新的操作
-func DisableScript(s *scripts.Script, update bool) bool {
+func DisableScript(s config.Script, update bool) bool {
 
 	// 禁用 script 所在的所有server
 	script, ok := store.GetStore().GetScriptByName(s.Name)
@@ -44,7 +44,7 @@ func DisableScript(s *scripts.Script, update bool) bool {
 }
 
 // enable script
-func EnableScript(script *scripts.Script) bool {
+func EnableScript(script config.Script) bool {
 	// 禁用 script 所在的所有server
 	script, ok := store.GetStore().GetScriptByName(script.Name)
 	if !ok {
@@ -68,7 +68,7 @@ func UpdateAndRestart(svc *server.Server) {
 
 // 返回成功还是失败
 
-func UpdateAndRestartScript(s *scripts.Script) {
+func UpdateAndRestartScript(s config.Script) {
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1

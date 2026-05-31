@@ -7,6 +7,7 @@ import (
 	"github.com/hyahm/scs/api/handle"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/pkg/config"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
@@ -36,9 +37,8 @@ func HttpServer() {
 
 	router.AddGroup(AdminHandle())
 
-	router.SetAddr(global.CS.Listen).SetTimeout(time.Second * 5)
-	if !global.CS.EnableTLS {
-		golog.Info("listen on " + global.CS.Listen + " over http")
+	router.SetAddr(config.Cfg.Listen).SetTimeout(time.Second * 5)
+	if !config.Cfg.EnableTLS {
 		err := router.Run()
 		if err != nil {
 			golog.Error(err)
@@ -47,12 +47,12 @@ func HttpServer() {
 		return
 	}
 
-	if global.CS.Key == "" || global.CS.Cert == "" {
+	if config.Cfg.Key == "" || config.Cfg.Cert == "" {
 		panic("use tls. but key or cert not specified")
 	}
 
-	golog.Info("listen on " + global.CS.Listen + " over https")
-	err := router.RunTLS(global.CS.Cert, global.CS.Key)
+	golog.Info("listen on " + config.Cfg.Listen + " over https")
+	err := router.RunTLS(config.Cfg.Cert, config.Cfg.Key)
 	if err != nil {
 		golog.Error(err)
 	}

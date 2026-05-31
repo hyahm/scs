@@ -5,8 +5,6 @@ import (
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg/config"
-	"github.com/hyahm/scs/pkg/config/alert"
-	"github.com/hyahm/scs/pkg/message"
 )
 
 // 删除对应的server, 外部加了锁，内部调用不用加锁  todo:
@@ -62,9 +60,9 @@ func GetServersFromScripts(names map[string]struct{}) map[string]*server.Server 
 	return servers
 }
 
-func GetAterts() map[string]message.SendAlerter {
-	return alert.GetAlerts()
-}
+// func GetAterts() map[string]message.SendAlerter {
+// 	return config.GetAlerts()
+// }
 
 func StopScriptFromName(names map[string]struct{}) {
 	for _, script := range store.GetStore().GetScriptMapFilterByName(names) {

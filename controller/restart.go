@@ -7,7 +7,7 @@ import (
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 // 没有锁，只是为了外部访问
@@ -37,7 +37,7 @@ func restartServer(svc *server.Server) {
 }
 
 // 重启第一步
-func RestartScript(s *scripts.Script) error {
+func RestartScript(s config.Script) error {
 	// 禁用 script 所在的所有server
 	if s.Disable {
 		return nil

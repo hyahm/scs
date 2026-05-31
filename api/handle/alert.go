@@ -5,15 +5,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/xmux"
 )
 
 func Alert(w http.ResponseWriter, r *http.Request) {
 
-	ra := &alert.RespAlert{}
+	ra := &config.RespAlert{}
 	err := json.NewDecoder(r.Body).Decode(ra)
 	if err != nil {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
@@ -23,20 +22,20 @@ func Alert(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
-	xmux.GetInstance(r).Response.(*pkg.Response).Data = alert.GetDispatcher()
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = config.GetDispatcher()
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
 	var addr string
-	if global.ProxyHeader == "" {
+	if config.Cfg.ProxyHeader == "" {
 		addr = strings.Split(r.RemoteAddr, ":")[0]
 	} else {
-		addr = r.Header.Get(global.ProxyHeader)
+		addr = r.Header.Get(config.Cfg.ProxyHeader)
 	}
 
 	needToken := true
 	// 检查是否是被监控的
-	for _, v := range global.CS.Monitored {
+	for _, v := range config.Cfg.Probe.Monitored {
 		if strings.Contains(addr, v) {
 			needToken = false
 			break

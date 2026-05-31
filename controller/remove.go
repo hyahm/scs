@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
@@ -47,7 +46,7 @@ func Remove(svc *server.Server, update bool) {
 	if store.GetStore().GetScriptLength(svc.Name) == 0 {
 		store.GetStore().DeleteScriptByName(svc.Name)
 	}
-	global.SetCanReLoad()
+	// global.SetCanReLoad()
 }
 
 // func remove(svc *server.Server, update bool, wg *sync.WaitGroup) {

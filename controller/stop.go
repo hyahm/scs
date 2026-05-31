@@ -6,11 +6,11 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 // 异步执行停止脚本
-func StopScript(s *scripts.Script) error {
+func StopScript(s config.Script) error {
 	if s.Disable {
 		return nil
 	}

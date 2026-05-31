@@ -7,12 +7,12 @@ import (
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/xmux"
 )
 
 func GetAlarms(w http.ResponseWriter, r *http.Request) {
-	xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.GetAterts()
+	// xmux.GetInstance(r).Response.(*pkg.Response).Data = controller.GetAterts()
 }
 
 func GetServers(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +31,7 @@ func GetServers(w http.ResponseWriter, r *http.Request) {
 func GetScripts(w http.ResponseWriter, r *http.Request) {
 	validAuths := xmux.GetInstance(r).Get("validAuths").([]controller.Auth)
 	ss := store.GetStore().GetAllScriptMap()
-	validScript := make(map[string]*scripts.Script)
+	validScript := make(map[string]config.Script)
 	for _, auth := range validAuths {
 		if v, ok := ss[auth.ScriptName]; ok {
 			validScript[auth.ScriptName] = v

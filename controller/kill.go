@@ -5,7 +5,7 @@ import (
 
 	"github.com/hyahm/scs/internal/server"
 	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 func WaitKillAllServer() {
@@ -14,7 +14,7 @@ func WaitKillAllServer() {
 	}
 }
 
-func KillScript(s *scripts.Script) {
+func KillScript(s config.Script) {
 	replicate := s.Replicate
 	if replicate == 0 {
 		replicate = 1
@@ -32,7 +32,7 @@ func KillScript(s *scripts.Script) {
 func KillAndStartServer(param string, svc *server.Server) {
 	go func() {
 		svc.Kill()
-		svc.Start(param)
+		svc.Start()
 	}()
 
 }

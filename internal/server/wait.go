@@ -4,9 +4,8 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server/status"
-	"github.com/hyahm/scs/pkg/config/alert"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/message"
 )
 
@@ -48,28 +47,28 @@ func (svc *Server) wait() {
 			// 意外退出的报警
 			if !svc.DisableAlert {
 				golog.Error(svc.SubName+": ", err.Error())
-				if alert.HaveAlert() {
-					am := &message.Message{
-						Title:  "service error stop",
-						Pname:  svc.Name,
-						Name:   svc.SubName,
-						Reason: err.Error(),
-					}
-					if !svc.AI.Broken {
-						// 第一次
-						svc.AI.Start = time.Now()
-						am.BrokenTime = svc.AI.Start.String()
+				// if config.HaveAlert() {
+				am := &message.Message{
+					Title:  "service error stop",
+					Pname:  svc.Name,
+					Name:   svc.SubName,
+					Reason: err.Error(),
+				}
+				if !svc.AI.Broken {
+					// 第一次
+					svc.AI.Start = time.Now()
+					am.BrokenTime = svc.AI.Start.String()
+					svc.AI.AlertTime = time.Now()
+					svc.AI.Broken = true
+					config.AlertMessage(am, svc.AT)
+				} else {
+					// 间隔时间内才发送报警
+					if time.Since(svc.AI.AlertTime) >= config.Cfg.Probe.ContinuityInterval {
 						svc.AI.AlertTime = time.Now()
-						svc.AI.Broken = true
-						alert.AlertMessage(am, svc.AT)
-					} else {
-						// 间隔时间内才发送报警
-						if time.Since(svc.AI.AlertTime) >= global.CS.ContinuityInterval {
-							svc.AI.AlertTime = time.Now()
-							alert.AlertMessage(am, svc.AT)
-						}
+						config.AlertMessage(am, svc.AT)
 					}
 				}
+				// }
 
 			}
 			// 如果是定时器的话， 直接结束

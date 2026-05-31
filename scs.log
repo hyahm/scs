@@ -1,0 +1,4 @@
+2026-04-22 17:52:44.717 -- [INFO] -- /home/cander/scs/pkg/config/probe.go:215 -- alert dist: --/--, type: ext4
+2026-04-22 17:52:44.717 -- [INFO] -- /home/cander/scs/api/server.go:42 -- listen on :11111 over http
+2026-04-22 17:52:44.718 -- [ERROR] -- /home/cander/scs/internal/server/script_unix.go:113 -- fork/exec /bin/sh: operation not permitted
+2026-04-22 17:52:44.718 -- [INFO] -- /home/cander/scs/internal/server/start.go:142 -- fork/exec /bin/sh: operation not permitted

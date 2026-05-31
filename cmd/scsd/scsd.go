@@ -12,7 +12,6 @@ import (
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/pkg/config"
-	"github.com/hyahm/scs/pkg/config/alert"
 	"github.com/hyahm/scs/pkg/message"
 
 	"github.com/hyahm/golog"
@@ -45,7 +44,7 @@ func main() {
 			case <-single:
 				// 确保删除了server
 				fmt.Println("waiting stop all")
-				controller.WaitKillAllServer()
+				// controller.WaitKillAllServer()
 				os.Exit(1)
 			case <-pipe:
 				fmt.Println("pipe exit")
@@ -55,9 +54,13 @@ func main() {
 	}()
 
 	// 自动清除全局报警器的值
-	go alert.CleanAlert()
+	go config.CleanAlert()
 	golog.Info("config file path: ", config.ConfigFile)
-
+	err := config.ReadConfig()
+	if err != nil {
+		// 第一次报错直接退出
+		golog.Fatal(err)
+	}
 	controller.FirstStartAllScript()
 	api.HttpServer()
 

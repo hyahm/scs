@@ -11,12 +11,7 @@ import (
 	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/internal/server/status"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/alert"
-	"github.com/hyahm/scs/pkg/config/alert/to"
-	"github.com/hyahm/scs/pkg/config/liveness"
-	"github.com/hyahm/scs/pkg/config/scripts"
-	"github.com/hyahm/scs/pkg/config/scripts/cron"
-	"github.com/hyahm/scs/pkg/config/scripts/prestart"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/message"
 )
 
@@ -33,7 +28,7 @@ type Server struct {
 	Dir         string            `json:"dir,omitempty"`
 	Command     string            `json:"command"`
 	Version     string            `json:"version,omitempty"`
-	Cron        *cron.Cron        `json:"cron,omitempty"`    // 这个cron是新生成的
+	Cron        *config.Cron      `json:"cron,omitempty"`    // 这个cron是新生成的
 	IsCron      bool              `json:"is_loop,omitempty"` // 如果是定时任务
 	Env         map[string]string `json:"-"`
 	Logger      *golog.Log        `json:"-"`               // 日志
@@ -48,10 +43,10 @@ type Server struct {
 	Status *status.Status `json:"status,omitempty"`
 	// Alert     map[string]message.SendAlerter `json:"-"`
 	//  todo: 感觉不够完善
-	AT      *to.AlertTo      `json:"at,omitempty"`
-	Disable bool             `json:"disable,omitempty"`
-	Port    int              `json:"port,omitempty"`
-	AI      *alert.AlertInfo `json:"-"` // 报警规则
+	AT      *config.AlertTo   `json:"at,omitempty"`
+	Disable bool              `json:"disable,omitempty"`
+	Port    int               `json:"port,omitempty"`
+	AI      *config.AlertInfo `json:"-"` // 报警规则
 	// 主动退出的信号， kill: 9, restart: 10, stop: 11, remove: 12
 	Exit chan int `json:"-"`
 	// 取消操作， 可以取消等待重启， 等待停止， 等待remove(暂时没实现)
@@ -64,14 +59,14 @@ type Server struct {
 	// 更新的命令
 	Update string `json:"update,omitempty"`
 	// 暂时无视
-	Liveness *liveness.Liveness `json:"-"`
-	Ready    chan bool          `json:"-"`
+	Liveness *config.Liveness `json:"-"`
+	Ready    chan bool        `json:"-"`
 	// 是否一直重启， 应该还需要一个retry次数的字段才对
 	Always bool `json:"always,omitempty"`
 	// 取消报警的感觉没用， 谁没事了会取消报警
 	DisableAlert bool `json:"disable_alert,omitempty"`
 	// 启动前的准备工作
-	PreStart []*prestart.PreStart `json:"-"`
+	PreStart []*config.PreStart `json:"-"`
 	// 执行完成就自动删除
 	DeleteWhenExit bool `json:"deleteWhenExit,omitempty"`
 	// 执行完成就remove的信号
@@ -177,7 +172,7 @@ func (svc *Server) Restart() {
 }
 
 // 填充到server中
-func (svc *Server) MakeServer(script *scripts.Script) {
+func (svc *Server) MakeServer(script config.Script) {
 
 	env := make(map[string]string)
 	for k, v := range script.TempEnv {
@@ -198,7 +193,7 @@ func (svc *Server) MakeServer(script *scripts.Script) {
 }
 
 // 填充server
-func (svc *Server) fillServer(script *scripts.Script) {
+func (svc *Server) fillServer(script config.Script) {
 
 	svc.ScriptToken = script.ScriptToken
 	svc.SimpleToken = script.SimpleToken
@@ -220,7 +215,7 @@ func (svc *Server) fillServer(script *scripts.Script) {
 	svc.StopTime = script.StopTime
 
 	svc.Update = script.Update
-	svc.AI = &alert.AlertInfo{}
+	svc.AI = &config.AlertInfo{}
 	svc.AT = script.AT
 	svc.StopSignal = make(chan bool, 1)
 
@@ -232,9 +227,9 @@ func (svc *Server) fillServer(script *scripts.Script) {
 
 	// svc.DisableAlert = script.DisableAlert
 	svc.PreStart = script.PreStart
-
-	if script.Cron != nil {
-		svc.Cron = &cron.Cron{
+	svc.Cron = script.Cron
+	if svc.Cron != nil {
+		svc.Cron = &config.Cron{
 			Start:   script.Cron.Start,
 			Loop:    script.Cron.Loop,
 			IsMonth: script.Cron.IsMonth,
@@ -371,7 +366,7 @@ func (s *Server) successAlert() {
 				BrokenTime: s.AI.Start.String(),
 				FixTime:    time.Now().String(),
 			}
-			alert.AlertMessage(am, s.AT)
+			config.AlertMessage(am, s.AT)
 			s.AI.Broken = false
 			return
 		case <-s.Ctx.Done():

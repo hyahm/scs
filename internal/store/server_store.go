@@ -9,18 +9,19 @@ import (
 	"github.com/hyahm/scs/pkg"
 )
 
-type ServerStore struct {
+type serverStore struct {
 	mu      sync.RWMutex
 	servers map[string]*server.Server
 }
 
-func NewServerStore() *ServerStore {
-	return &ServerStore{
+func NewServerStore() *serverStore {
+	return &serverStore{
+		mu:      sync.RWMutex{},
 		servers: make(map[string]*server.Server),
 	}
 }
 
-func (s *ServerStore) Init(index int, pname, name string) *server.Server {
+func (s *serverStore) Init(index int, pname, name string) *server.Server {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.servers[name] = &server.Server{
@@ -31,21 +32,20 @@ func (s *ServerStore) Init(index int, pname, name string) *server.Server {
 	return s.servers[name]
 }
 
-func (s *ServerStore) Set(name string, srv *server.Server) *server.Server {
+func (s *serverStore) set(name string, svc *server.Server) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.servers[name] = srv
-	return s.servers[name]
+	s.servers[name] = svc
 }
 
-func (s *ServerStore) Get(name string) (*server.Server, bool) {
+func (s *serverStore) get(name string) (*server.Server, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	v, ok := s.servers[name]
 	return v, ok
 }
 
-func (s *ServerStore) GetAll() []*server.Server {
+func (s *serverStore) getAll() []*server.Server {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	servers := make([]*server.Server, 0, len(s.servers))
@@ -55,19 +55,19 @@ func (s *ServerStore) GetAll() []*server.Server {
 	return servers
 }
 
-func (s *ServerStore) GetAllMap() map[string]*server.Server {
+func (s *serverStore) getAllMap() map[string]*server.Server {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.servers
 }
 
-func (s *ServerStore) Delete(name string) {
+func (s *serverStore) delete(name string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.servers, name)
 }
 
-func (s *ServerStore) GetByScript(pname string, indexMap map[int]struct{}) map[string]*server.Server {
+func (s *serverStore) GetByScript(pname string, indexMap map[int]struct{}) map[string]*server.Server {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	sm := make(map[string]*server.Server)

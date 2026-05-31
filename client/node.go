@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 // 已经支持多服务器操作， 每台服务器相当于一个node
@@ -231,7 +231,7 @@ func (node *Node) Info(args string) {
 	fmt.Println(string(out))
 }
 
-func (node *Node) Install(scripts []*scripts.Script, env map[string]string) {
+func (node *Node) Install(scripts []*config.Script, env map[string]string) {
 	// 先读取配置文件
 
 	for _, script := range scripts {

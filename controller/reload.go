@@ -7,7 +7,6 @@ import (
 	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
-	"github.com/hyahm/scs/pkg/config/scripts"
 )
 
 func getTempScript(temp map[string]struct{}) {
@@ -17,14 +16,14 @@ func getTempScript(temp map[string]struct{}) {
 }
 
 func Fmt() error {
-	c, err := config.ReadConfig()
+	err := config.ReadConfig()
 	if err != nil {
 		golog.Error(err)
 		// 第一次报错直接退出
 		return err
 	}
 	// 配置文件是对的， 那么直接写进配置文件
-	return c.WriteConfig(true)
+	return config.Cfg.WriteConfig(true)
 }
 
 /*
@@ -34,14 +33,14 @@ func Fmt() error {
 更新所有store.ss
 */
 func Reload() error {
-	c, err := config.ReadConfig()
+	err := config.ReadConfig()
 	if err != nil {
 		// 第一次报错直接退出
 		return err
 	}
 	// 配置文件是对的， 那么直接写进配置文件， 后面所有的操作都取消更新配置文件
-	cfg = c
-	err = cfg.WriteConfig(true)
+
+	err = config.Cfg.WriteConfig(true)
 	if err != nil {
 		// 写进配置文件
 		return err
@@ -50,11 +49,11 @@ func Reload() error {
 	temp := make(map[string]struct{})
 	// 备份旧的scripts
 	getTempScript(temp)
-	for index := range cfg.SC {
+	for index := range config.Cfg.Scripts {
 		// 删除之前存在的name
-		delete(temp, cfg.SC[index].Name)
+		delete(temp, config.Cfg.Scripts[index].Name)
 		// 查看副本是不是对的， 不会对存在的脚本有影响
-		reloadScripts(cfg.SC[index])
+		reloadScripts(config.Cfg.Scripts[index])
 	}
 
 	// 删除已删除的 script
@@ -74,12 +73,13 @@ func Reload() error {
 }
 
 // 新增script并启动
-func AddScript(s *scripts.Script) {
+func AddScript(s config.Script) {
 	if s.ScriptToken == "" {
 		s.ScriptToken = pkg.RandomToken()
 	}
+	so := store.GetStore()
 	// 将scripts填充到store中
-	store.GetStore().SetScript(s)
+	so.SetScript(s)
 	// 初始化脚本的副本数
 	replicate := s.Replicate
 	if replicate == 0 {
@@ -90,9 +90,10 @@ func AddScript(s *scripts.Script) {
 	// 对于每个script 都生成对应的
 	availablePort := s.Port
 	for i := 0; i < replicate; i++ {
+
 		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		svc := store.GetStore().InitServer(i, s.Name, subname)
-		store.GetStore().SetScriptIndex(s.Name, i)
+		svc := so.InitServer(i, s.Name, subname)
+		so.SetScriptIndex(s.Name, i)
 		svc.Port = availablePort
 		svc.MakeServer(s)
 		svc.Env["SCS_INDEX"] = fmt.Sprintf("%d", i)
@@ -102,13 +103,15 @@ func AddScript(s *scripts.Script) {
 			// 不在上面就是因为， 是为了看到状态
 			return
 		}
-
+		so.SetServer(subname, svc)
+		store.GetStore()
 		svc.Start()
 	}
+
 }
 
 // 脚本更新操作
-func UpdateScriptApi(s *scripts.Script) {
+func UpdateScriptApi(s config.Script) {
 	// 既然是更新操作，那么这个必定存在
 	script, _ := store.GetStore().GetScriptByName(s.Name)
 
@@ -127,7 +130,7 @@ func UpdateScriptApi(s *scripts.Script) {
 	s.MakeTempEnv()
 	// 对比脚本是否修改
 	if oldReplicate == newReplicate {
-		if !scripts.EqualScript(s, script) {
+		if !config.EqualScript(s, script) {
 			store.GetStore().SetScript(s)
 		}
 
@@ -167,7 +170,7 @@ func UpdateScriptApi(s *scripts.Script) {
 }
 
 // 配置文件直接reload
-func reloadScripts(s *scripts.Script) {
+func reloadScripts(s config.Script) {
 	// script: 配置文件新读取出来的
 	// 处理存在的
 	_, ok := store.GetStore().GetScriptByName(s.Name)

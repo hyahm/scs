@@ -2,18 +2,19 @@ package store
 
 import "sync"
 
-type IndexStore struct {
+type indexStore struct {
 	mu          sync.RWMutex
 	serverIndex map[string]map[int]struct{}
 }
 
-func NewIndexStore() *IndexStore {
-	return &IndexStore{
+func NewIndexStore() *indexStore {
+	return &indexStore{
+		mu:          sync.RWMutex{},
 		serverIndex: make(map[string]map[int]struct{}),
 	}
 }
 
-func (s *IndexStore) Set(pname string, i int) {
+func (s *indexStore) Set(pname string, i int) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.serverIndex[pname]; !ok {
@@ -22,7 +23,7 @@ func (s *IndexStore) Set(pname string, i int) {
 	s.serverIndex[pname][i] = struct{}{}
 }
 
-func (s *IndexStore) Delete(pname string, i int) {
+func (s *indexStore) Delete(pname string, i int) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.serverIndex[pname]; !ok {
@@ -31,7 +32,7 @@ func (s *IndexStore) Delete(pname string, i int) {
 	delete(s.serverIndex[pname], i)
 }
 
-func (s *IndexStore) Get(pname string) []int {
+func (s *indexStore) Get(pname string) []int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	indexs := make([]int, 0)
@@ -44,7 +45,7 @@ func (s *IndexStore) Get(pname string) []int {
 	return indexs
 }
 
-func (s *IndexStore) Len(pname string) int {
+func (s *indexStore) Len(pname string) int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if _, ok := s.serverIndex[pname]; !ok {
@@ -53,7 +54,7 @@ func (s *IndexStore) Len(pname string) int {
 	return len(s.serverIndex[pname])
 }
 
-func (s *IndexStore) Has(pname string, i int) bool {
+func (s *indexStore) Has(pname string, i int) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if _, ok := s.serverIndex[pname]; !ok {

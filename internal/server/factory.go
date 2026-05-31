@@ -5,12 +5,9 @@ import (
 	"strconv"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal/server/status"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/alert"
-	"github.com/hyahm/scs/pkg/config/scripts"
-	"github.com/hyahm/scs/pkg/config/scripts/cron"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 type ServerOption func(s *Server)
@@ -48,7 +45,7 @@ func NewServer(opts ...ServerOption) *Server {
 	return s
 }
 
-func (s *Server) ApplyConfig(script *scripts.Script) {
+func (s *Server) ApplyConfig(script *config.Script) {
 	s.ScriptToken = script.ScriptToken
 	if s.SimpleToken == "" {
 		s.SimpleToken = pkg.RandomToken()
@@ -61,7 +58,7 @@ func (s *Server) ApplyConfig(script *scripts.Script) {
 	s.StartTime = script.StartTime
 	s.StopTime = script.StopTime
 	s.Update = script.Update
-	s.AI = &alert.AlertInfo{}
+	s.AI = &config.AlertInfo{}
 	s.AT = script.AT
 	s.Liveness = script.Liveness
 	s.Always = script.Always
@@ -70,8 +67,8 @@ func (s *Server) ApplyConfig(script *scripts.Script) {
 	s.PreStart = script.PreStart
 	s.DisableAlert = script.DisableAlert
 
-	if script.Cron != nil {
-		s.Cron = &cron.Cron{
+	if s.Cron != nil {
+		s.Cron = &config.Cron{
 			Start:   script.Cron.Start,
 			Loop:    script.Cron.Loop,
 			IsMonth: script.Cron.IsMonth,
@@ -96,11 +93,11 @@ func (s *Server) ApplyConfig(script *scripts.Script) {
 }
 
 func (s *Server) InitLogger() {
-	if global.CS.LogDir == "" {
-		global.CS.LogDir = "log"
+	if config.Cfg.Log.Path == "" {
+		config.Cfg.Log.Path = "log"
 	}
 	s.Logger = golog.NewLog(
-		filepath.Join(global.CS.LogDir, s.SubName+".log"), 0, true)
+		filepath.Join(config.Cfg.Log.Path, s.SubName+".log"), 0, true)
 }
 
 func (s *Server) PrepareStart() {

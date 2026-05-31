@@ -9,13 +9,13 @@ import (
 	"github.com/hyahm/scs/api/handle"
 	"github.com/hyahm/scs/api/module"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/xmux"
 )
 
 func simpleHandle() *xmux.RouteGroup {
 	// 只是调试的权限
-	simple := xmux.NewRouteGroup().AddPageKeys(scripts.SimpleRole.ToString())
+	simple := xmux.NewRouteGroup().AddPageKeys(config.SimpleRole.ToString())
 	simple.Post("/status/{pname}/{name}", handle.Status)
 	simple.Post("/status/{pname}", handle.StatusPname)
 	simple.Post("/start/{pname}", handle.StartPname)
@@ -34,7 +34,7 @@ func simpleHandle() *xmux.RouteGroup {
 }
 
 func ScriptHandle() *xmux.RouteGroup {
-	script := xmux.NewRouteGroup().AddPageKeys(scripts.ScriptRole.ToString())
+	script := xmux.NewRouteGroup().AddPageKeys(config.ScriptRole.ToString())
 	script.Post("/stop/{pname}/{name}", handle.Stop)
 	script.Post("/stop/{pname}", handle.StopPname)
 	script.Post("/kill/{pname}", handle.KillPname)
@@ -57,14 +57,14 @@ func ScriptHandle() *xmux.RouteGroup {
 
 func AdminHandle() *xmux.RouteGroup {
 	// 只能管理员操作 修改文件的操作
-	admin := xmux.NewRouteGroup().AddPageKeys(scripts.AdminRole.ToString()).AddModule(module.CheckToken)
+	admin := xmux.NewRouteGroup().AddPageKeys(config.AdminRole.ToString()).AddModule(module.CheckToken)
 
 	admin.Post("/get/alert", handle.GetAlert)                             // 只能管理员用
 	admin.Post("/-/reload", handle.Reload).AddModule(module.UpdateConfig) // 只能管理员用
 	admin.Post("/-/fmt", handle.Fmt).AddModule(module.UpdateConfig)       // 只能管理员用
 	admin.Post("/get/alarms", handle.GetAlarms)                           // 只能管理员用
 	admin.Post("/get/repo", handle.GetRepo)                               // 只能管理员用
-	admin.Post("/script", handle.AddScript).BindJson(&scripts.Script{}).AddModule(module.UpdateConfig)
+	admin.Post("/script", handle.AddScript).BindJson(&config.Script{}).AddModule(module.UpdateConfig)
 	admin.Post("/enable/{pname}", handle.Enable).AddModule(module.UpdateConfig)   // 只能管理员用
 	admin.Post("/disable/{pname}", handle.Disable).AddModule(module.UpdateConfig) // 只能管理员用
 	admin.AddGroup(ScriptHandle())
@@ -97,7 +97,7 @@ func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(send)
 	}
-	golog.Infof("method: %s\turl: %s\ttime: %f\t status_code: %v, body: %s, response: %s\n",
+	golog.Debugf("method: %s\turl: %s\ttime: %f\t status_code: %v, body: %s, response: %s\n",
 		r.Method,
 		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
 		string(xmux.GetInstance(r).Body),

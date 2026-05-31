@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg/config/scripts"
+	"github.com/hyahm/scs/pkg/config"
 )
 
 type Auth struct {
@@ -20,14 +20,14 @@ func GetAuthByToken(token string) []Auth {
 			auths = append(auths, Auth{
 				ServerName: name,
 				ScriptName: server.Name,
-				Role:       string(scripts.ScriptRole),
+				Role:       string(config.ScriptRole),
 			})
 		}
 		if server.SimpleToken == token {
 			auths = append(auths, Auth{
 				ServerName: name,
 				ScriptName: server.Name,
-				Role:       string(scripts.SimpleRole),
+				Role:       string(config.SimpleRole),
 			})
 		}
 	}
@@ -40,7 +40,7 @@ func GetAllAuth() []Auth {
 		auths = append(auths, Auth{
 			ServerName: name,
 			ScriptName: server.Name,
-			Role:       string(scripts.ScriptRole),
+			Role:       string(config.ScriptRole),
 		})
 	}
 	return auths
