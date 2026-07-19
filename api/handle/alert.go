@@ -22,7 +22,7 @@ func Alert(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAlert(w http.ResponseWriter, r *http.Request) {
-	xmux.GetInstance(r).Response.(*pkg.Response).Data = config.GetDispatcher()
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = config.GetDispatcherList()
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
