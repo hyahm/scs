@@ -32,11 +32,16 @@ func FirstStartAllScript() {
 
 // 当是停止状态的时候异步启动
 func (svc *Server) Start() {
-	svc.Logger = golog.NewLog(
+	// 局部捕获 logger：restart 路径下新 Start() 会覆盖 svc.Logger，
+	// defer 必须绑定本次实例，否则旧 goroutine 退出时会误刷新进程的日志。
+	// golog 的 (*Log).Sync() 会无条件 close 内部 channel，重复调用会 panic，用 recover 兜底。
+	logger := golog.NewLog(
 		filepath.Join(internal.GetLogPath(), svc.SubName+".log"), 0, true)
-	// golog 的 (*Log).Sync() 会无条件 close 内部 channel，重复调用会 panic，
-	// 这里用 syncOnce 保证同一个 Logger 实例只 Sync 一次
-	defer svc.syncLogger()
+	svc.Logger = logger
+	defer func() {
+		defer func() { _ = recover() }()
+		logger.Sync()
+	}()
 	// svc.Env["PARAMETER"] = param
 	// 格式化 SCS_TPL 开头的环境变量
 	for k := range svc.Env {
@@ -52,12 +57,12 @@ func (svc *Server) Start() {
 		svc.stopStatus()
 		return
 	}
-	svc.Exit = make(chan int, 2)
-	// svc.CancelProcess = make(chan bool, 2)
-
 	svc.Status.Command = internal.Format(svc.Command, svc.Env)
-	svc.Ctx, svc.Cancel = context.WithCancel(context.Background())
-	defer svc.Cancel()
+	// 局部捕获 cancel：restart 路径下新 Start() 会覆盖 svc.Cancel，
+	// defer 必须绑定本次的 cancel，否则旧 goroutine 退出时会误杀新进程的 ctx。
+	ctx, cancel := context.WithCancel(context.Background())
+	svc.Ctx, svc.Cancel = ctx, cancel
+	defer cancel()
 	// go func() {
 	// 	if svc.StopTime != "" {
 	// 		stopTime, err := time.ParseInLocation(time.DateTime, svc.StopTime, time.Local)
@@ -114,18 +119,4 @@ func (svc *Server) Start() {
 	}
 	svc.wait()
 
-}
-
-// syncLogger 安全地刷新日志。
-// golog 的 (*Log).Sync() 会无条件 close 内部 channel，重复调用会触发
-// "close of closed channel" panic。这里用 recover 兜底，避免在
-// 定时任务/重启等路径下对同一 Logger 实例重复 Sync 导致整个进程崩溃。
-func (svc *Server) syncLogger() {
-	if svc.Logger == nil {
-		return
-	}
-	defer func() {
-		_ = recover()
-	}()
-	svc.Logger.Sync()
 }

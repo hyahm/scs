@@ -42,23 +42,25 @@ controller/            旧三层架构，几乎全部被注释（死代码）
 
 ## Server 状态机（重要）
 每个 `Server` 副本通过 3 个并发原语协作：
-- `Ctx context.Context + Cancel context.CancelFunc`：取消日志 goroutine、cron ticker、CommandContext 进程
-- `Exit chan int`（buffer 2）：信号路由，9=kill / 10=restart / 11=stop / 12=remove
+- `Ctx context.Context + Cancel context.CancelFunc`：取消日志 goroutine、cron ticker、CommandContext 进程。`Start()` 内局部捕获 `ctx, cancel` + `defer cancel()`，避免 restart 重入误杀新进程。
+- `restartOnExit bool`（`svc.mu` 保护）：Restart 的"退出后重启"意图。RUNNING 时置 true + Cancel，`wait()` 退出后消费并 `StartAsync()`；Stop/Kill/Remove 入口清零。
 - `Status.Status`：`STOP / RUNNING / WAITSTOP / WAITRESTART`（常量在 `pkg/status.go`）
+
+cannotstop（原子停止）：`Stop/Kill/Restart/Remove` 入口都 `if GetCanNotStop() { <-ChStop }` 阻塞等待 canstop 解除。
 
 操作流转：
 - `StartAsync()` → 仅当 `Status==STOP` 时 `go Start()`
-- `Start()` → 新建 Logger + Exit chan + Ctx → 走 cron 或普通 `start()` → `wait()`
-- `Stop()` → cron 直接 Cancel；RUNNING 走 `Cancel()`（context 取消会杀进程）
-- `Kill()` → RUNNING 时 `Exit <- 10` + `kill()`；WAITRESTART/WAITSTOP 先 `<-Exit` 排空
-- `Restart()` → 通过 `Exit chan` 传递 10
-- `Remove()` → `Exit <- 12`
+- `Start()` → 局部捕获 Logger + ctx/cancel → 走 cron 或普通 `start()` → `wait()`
+- `Stop()` → 清 restartOnExit → 等 cannotstop → `Cancel()`
+- `Kill()` → 清 restartOnExit → 等 cannotstop → `Cancel()` + `kill()` 强杀进程组
+- `Restart()` → 等 cannotstop → STOP 直接 `StartAsync()`；RUNNING 置 restartOnExit + `Cancel()`
+- `Remove()` → 清 restartOnExit → 等 cannotstop → `Cancel()` + `RemoveServer()` 删 server 缓存
 
 ## 协作约定
 1. **中文优先**：注释、错误信息、commit message、文档全部用中文。
 2. **跨平台**：任何进程操作都要同时考虑 `script_windows.go` 和 `script_unix.go`，用 build tag 区分。
 3. **不要碰 controller/**：整层是被注释的死代码，新功能一律放 `internal/cache` + `api/handle`。
-4. **golog 坑**：调用 `Logger.Sync()` 必须用 `syncLogger()`（已加 recover），不能直接裸调。
+4. **golog 坑**：`(*Log).Sync()` 会 close channel，重复调用 panic。`Start()` 内已用局部捕获 logger + `defer` 同步，新增同步逻辑照此模式，不能裸调 `svc.Logger.Sync()`。
 5. **并发安全**：访问全局 store（serverStore / Script / InConfig / dispatcher）必须走它们的 RWMutex 包装方法，不要直接读 map。
 6. **重构痕迹**：大量旧代码被注释保留（wait.go / send.go / probe.go / global/var.go），改动前先确认目标代码是否已被注释替代。
 7. **报警链路当前是半成品**：`InitAlert` 和 `AlertMessage` 的关键分发循环被整段注释，只有 dispatcher（去抖）和探测器框架就位——改报警相关功能前先与 owner 确认预期行为。
@@ -81,3 +83,14 @@ go test ./internal/... ./pkg/...
 - 全局 `msgCache` channel（容量 1000）没有消费者 goroutine，是预留管道。
 - `Server.Ready chan bool` 创建了但从未收发（CheckReady 未完成）。
 - `appendRead`（log.go 方法版）依赖 `Ctx.Done()` 退出，但 `read`（包级函数版，用于 shell 命令）不监听 Ctx，仅靠 EOF 退出——短命令可接受，长命令需注意。
+- **`ChStop` 无缓冲 chan**：同 svc 多个 goroutine 阻塞 `<-ChStop` 时 `canstop` 只发一个 token，潜在死锁（`SetCanNotOperation` 已串行化同 svc 操作，触发罕见）。
+
+## 已知坏测试（`go test ./...` FAIL，非 bug，勿误修）
+- `client.go:446` `fmt.Sprintf`、`pkg/config/rocket.go:88` `fmt.Errorf`：非常量格式串 → `go test` 的 vet 拦截报 build failed（`go build` 正常）。
+- `pkg.TestRand`（rand_test.go）：测 `random.go`。
+- 验证改动用 `go test ./internal/cache/...`。
+
+## 未完成 / 半成品（改动前先与 owner 确认）
+- **Remove 仅删 server 缓存**：`cache.Server.Remove()` 只停进程 + `RemoveServer()`；script 配置删除 + 配置文件回写属 handler 层 + `UpdateConfig` module，`remove.go` handler 当前空壳。
+- **Always 自动重启未生效**：`wait()` 重启 switch 被注释，进程崩溃不自愈。
+- **报警主链路未通**：`InitAlert`/`AlertMessage`/`probe.CheckHardWare` 被注释。

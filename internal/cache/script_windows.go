@@ -13,16 +13,17 @@ import (
 	"github.com/hyahm/scs/pkg"
 )
 
-func (svc *Server) kill() {
-	if svc.Cmd == nil {
-		golog.Info(svc.Cmd)
-		return
+func (svc *Server) kill() error {
+	if svc.Cmd == nil || svc.Cmd.Process == nil {
+		return nil
 	}
 	err := exec.Command("powershell", "/C", "taskkill", "/F", "/T", "/PID", fmt.Sprint(svc.Cmd.Process.Pid)).Run()
 	if err != nil {
 		// 正常来说，不会进来的，特殊问题以后再说
 		golog.Error(err)
+		return err
 	}
+	return nil
 }
 
 func (svc *Server) start() error {

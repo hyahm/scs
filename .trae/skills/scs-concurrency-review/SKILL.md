@@ -1,6 +1,6 @@
 ---
 name: "scs-concurrency-review"
-description: "SCS 并发与 channel 安全审查。当修改 Server 状态机、全局 store（serverStore/Script/dispatcher）、Exit chan、Logger 或新增 goroutine 时调用，用于排查死锁、channel panic、goroutine 泄漏。"
+description: "SCS 并发与 channel 安全审查。当修改 Server 状态机、全局 store（serverStore/Script/dispatcher）、restartOnExit 标志、Logger 或新增 goroutine 时调用，用于排查死锁、channel panic、goroutine 泄漏。"
 ---
 
 # SCS 并发与 channel 安全审查
@@ -10,22 +10,21 @@ description: "SCS 并发与 channel 安全审查。当修改 Server 状态机、
 ## 审查清单
 
 ### 1. golog 的 Sync 陷阱（★★★ 已踩过坑）
-**问题**：`golog.(*Log).Sync()` 内部 `close(l.task.cache)` 是无条件的，对同一 Logger 实例二次调用会 `panic: close of closed channel`。
+**问题**：`golog.(*Log).Sync()` 内部 `close(l.task.cache)` 是无条件的，对同一 Logger 实例二次调用会 `panic: close of closed channel`。restart 路径下两次 `Start()` goroutine 重叠会覆盖 `svc.Logger`，旧 goroutine 的 defer 若读字段会误刷新进程日志。
 
 **检查点**：
-- 任何调用 `Logger.Sync()` 的地方必须走 `Server.syncLogger()`（`start.go`，已加 `defer recover()`）
-- 新增 defer 时确认不会对同一 Logger 重复触发
-- cron / always restart / 重启路径下 `Start()` 会被多次进入，Logger 会被重新赋值，但旧 Logger 的 Sync 不能被重复触发
+- `Start()` 内用**局部变量捕获 logger** + `defer func(){ defer func(){ _ = recover() }(); logger.Sync() }()`，确保只同步本次实例
+- 新增 defer 时确认绑定的是局部变量，而非 `svc.Logger` 字段
+- cron / always restart / 重启路径下 `Start()` 会被多次进入，Logger 会被重新赋值，旧 Logger 的 Sync 不能被重复触发
 
-**修复模板**：
+**修复模板**（`start.go` 当前实现）：
 ```go
-func (svc *Server) syncLogger() {
-    if svc.Logger == nil {
-        return
-    }
+logger := golog.NewLog(...)
+svc.Logger = logger
+defer func() {
     defer func() { _ = recover() }()
-    svc.Logger.Sync()
-}
+    logger.Sync()
+}()
 ```
 
 ### 2. 全局 store 锁（★★★ 已知有 bug）
@@ -43,10 +42,11 @@ func (svc *Server) syncLogger() {
 ### 3. channel 创建与关闭
 | channel | 创建位置 | 关闭策略 |
 |---------|----------|----------|
-| `Server.Exit chan int` | `start.go:55 Start()` | **从不显式 close**，靠 `Ctx.Done()` + `cmd.Wait()` 退出 |
 | `Server.Ready chan bool` | `factory.go:32` | 从未收发（CheckReady 未完成），改动时确认 |
 | `Status.ChStop chan struct{}` | `script.go:52` | 用于 cannotstop 原子停止，未 close |
 | 全局 `msgCache chan message.Message` | `internal/cache.go init()` | **无消费者**，发送方要注意非阻塞写 |
+
+> 注：`Server.Exit chan int`（旧的 9/10/11/12 信号路由）已删除，改为 `restartOnExit bool`（`svc.mu` 保护）+ `Cancel()` 协作。
 
 **审查点**：
 - 新增 channel 必须明确：谁创建、谁 close、谁接收

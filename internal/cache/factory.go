@@ -94,14 +94,6 @@ func NewServer(opts ...ServerOption) *Server {
 // 		filepath.Join(config.Cfg.Log.Path, s.SubName+".log"), 0, true)
 // }
 
-func (s *Server) PrepareStart() {
-	// s.InitLogger()
-
-	s.Exit = make(chan int, 2)
-	// s.CancelProcess = make(chan bool, 2)
-	s.Status.Command = s.Command
-}
-
 func (s *Server) Close() {
 	s.Cmd = nil
 }

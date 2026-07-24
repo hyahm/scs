@@ -51,6 +51,9 @@ import (
 // }
 
 func (svc *Server) kill() error {
+	if svc.Cmd == nil || svc.Cmd.Process == nil {
+		return nil
+	}
 	err := syscall.Kill(-svc.Cmd.Process.Pid, syscall.SIGKILL)
 	if err != nil {
 		// 正常来说，不会进来的，特殊问题以后再说

@@ -22,7 +22,7 @@ func simpleHandle() *xmux.RouteGroup {
 	simple.Get("/update", handle.UpdateAll) // complete
 	simple.Get("/start", handle.StartAll)   // complete
 	simple.Get("/status", handle.AllStatus) // complete
-	simple.Get("/log/tail}", handle.Log).BindResponse(nil)
+	simple.Get("/log/name", handle.Log).BindResponse(nil)
 
 	simple.Post("/restart/name", handle.RestartPname)
 	simple.Post("/restart", handle.RestartAll) // complete
@@ -92,9 +92,9 @@ func exit(w http.ResponseWriter, r *http.Request, start time.Time) {
 		}
 		w.Write(send)
 	}
-	golog.Debugf("method: %s\turl: %s\ttime: %f\t status_code: %v, body: %s, response: %s",
-		r.Method,
-		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
-		string(xmux.GetInstance(r).Body),
-		string(send))
+	// golog.Debugf("method: %s\turl: %s\ttime: %f\t status_code: %v, body: %s, response: %s",
+	// 	r.Method,
+	// 	r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
+	// 	string(xmux.GetInstance(r).Body),
+	// 	string(send))
 }

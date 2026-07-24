@@ -49,8 +49,8 @@ type Server struct {
 	Disable bool `json:"disable,omitempty"`
 	Port    int  `json:"port,omitempty"`
 	// AI      *config.AlertInfo `json:"-"` // 报警规则
-	// 主动退出的信号， kill: 9, restart: 10, stop: 11, remove: 12
-	Exit chan int `json:"-"`
+	// 进程退出后是否自动重启（Restart 设置，wait 消费）
+	restartOnExit bool `json:"-"`
 	// 取消操作， 可以取消等待重启， 等待停止， 等待remove(暂时没实现)
 	// CancelProcess chan bool `json:"-"`
 	// 服务停止后的信号， 比如  restart, remove 操作， 因为停止后还有下一步操作
@@ -99,6 +99,18 @@ func (s *Server) GetCanNotStop() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.Status.CanNotStop
+}
+
+func (s *Server) setRestartOnExit(v bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.restartOnExit = v
+}
+
+func (s *Server) getRestartOnExit() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.restartOnExit
 }
 
 // update 的时候执行
@@ -181,37 +193,36 @@ func (svc *Server) GetStatus() pkg.ServiceStatus {
 	return status
 }
 
-// Restart send stop single
+// Restart 重启服务：先等 cannotstop 解除，再按当前状态决定——
+// STOP 直接 StartAsync 拉起；RUNNING 置 restartOnExit 并 Cancel，由 wait() 在进程退出后重启。
 func (svc *Server) Restart() {
-
 	if svc.IsCron {
+		// 定时任务直接取消循环
 		svc.Cancel()
-		// 如果是循环的就直接退出
 		return
+	}
+	// 等 cannotstop 解除
+	if svc.GetCanNotStop() {
+		<-svc.Status.ChStop
 	}
 	if svc.Always {
 		svc.Always = false
 	}
-	golog.Info(svc.Status.Status)
+	svc.mu.Lock()
 	switch svc.Status.Status {
-	case pkg.WAITSTOP:
-		// 如果之前是等待停止的状态， 更改为重启状态
-		golog.Info("waiting stop")
-		<-svc.Exit
-		svc.Exit <- 10
-		svc.Status.Status = pkg.WAITRESTART
-		return
-	case pkg.RUNNING:
-		svc.Exit <- 10
-		svc.Status.Status = pkg.WAITRESTART
-		// go svc.stop()
-		return
 	case pkg.STOP:
-		golog.Debug("ready send stop single")
-		// svc.StopSignal <- true
-		golog.Debug("send stop single")
+		svc.mu.Unlock()
+		// 已停止，直接拉起
+		svc.StartAsync()
+	case pkg.RUNNING:
+		// 标记本轮退出后重启，Cancel 触发 wait() 执行重启
+		svc.restartOnExit = true
+		svc.mu.Unlock()
+		svc.Cancel()
+	default:
+		// WAITSTOP / WAITRESTART 等中间态：忽略，避免状态错乱
+		svc.mu.Unlock()
 	}
-
 }
 
 // 填充到server中
@@ -277,45 +288,37 @@ func (svc *Server) FillServer(script config.Script) {
 	}
 }
 
-// 同步删除
+// Remove 删除服务：撤销待重启意图，等 cannotstop 解除后停止进程，再从全局 store 移除。
 func (svc *Server) Remove() {
+	// 撤销任何待重启意图
+	svc.setRestartOnExit(false)
 	if svc.IsCron {
-		// 如果是定时任务， 直接停止
+		// 定时任务直接取消循环
 		golog.Infof("stop loop %s", svc.SubName)
 		svc.Cancel()
+	} else {
+		if svc.Always {
+			svc.Always = false
+		}
+		if svc.GetCanNotStop() {
+			<-svc.Status.ChStop
+		}
+		switch svc.Status.Status {
+		case pkg.RUNNING, pkg.WAITRESTART, pkg.WAITSTOP:
+			svc.Cancel()
+			if err := svc.kill(); err != nil {
+				golog.Error(err)
+			}
+		}
 	}
-	if svc.Always {
-		svc.Always = false
-	}
-	golog.Info("remove")
-	golog.Info(svc.Status.Status)
-	switch svc.Status.Status {
-	case pkg.WAITRESTART:
-		// 结束发送的退出错误发出的信号
-		<-svc.Exit
-		// 结束停止的goroutine， 转为删除处理
-		svc.Exit <- 12
-		// svc.remove()
-	case pkg.STOP:
-		golog.Debug("ready send stop single")
-		// svc.StopSignal <- true
-		// DeleteServiceBySubName(svc.SubName)
-	case pkg.RUNNING:
-		golog.Info("remove")
-		svc.Exit <- 12
-		// svc.remove()
-	case pkg.WAITSTOP:
-		<-svc.Exit
-		// 结束停止的goroutine， 转为删除处理
-		svc.Exit <- 12
-	default:
-		golog.Error("error status")
-	}
-
+	// 从全局 store 删除
+	RemoveServer(svc.SubName)
 }
 
-// Stop  停止服务
+// Stop  停止服务：撤销待重启意图后，等 cannotstop 解除再 Cancel。
 func (svc *Server) Stop() {
+	// 撤销任何待重启意图，避免进程退出后被 wait() 自动拉起
+	svc.setRestartOnExit(false)
 	if svc.Disable {
 		return
 	}
@@ -324,10 +327,8 @@ func (svc *Server) Stop() {
 		<-svc.Status.ChStop
 	}
 	if svc.IsCron {
-		// 如果是定时任务， 直接停止
-		// golog.Infof("stop loop %s", svc.SubName)
+		// 定时任务直接取消循环
 		svc.Cancel()
-		// svc.stopStatus()
 		return
 	}
 	if svc.Always {
@@ -336,16 +337,7 @@ func (svc *Server) Stop() {
 
 	switch svc.Status.Status {
 	case pkg.RUNNING:
-		// svc.Exit <- 9
-		// svc.Status.Status = pkg.WAITSTOP
 		svc.Cancel()
-	// case status.STOP:
-	// svc.Exit <- 9
-	case pkg.WAITRESTART:
-		//
-		// <-svc.Exit
-		// svc.Exit <- 9
-		// svc.Status.Status = pkg.WAITSTOP
 	}
 }
 
@@ -362,24 +354,24 @@ func (svc *Server) UpdateServer() {
 
 }
 
-// Stop  杀掉服务, 没有产生goroutine， 直接杀死
+// Kill 杀掉服务：撤销待重启意图，等 cannotstop 解除后 Cancel + kill 强杀整个进程组。
 func (svc *Server) Kill() {
 	if svc.IsCron {
 		svc.Cancel()
 		return
 	}
-	switch svc.Status.Status {
-	case pkg.RUNNING:
-		svc.Exit <- 10
-		svc.kill()
-		// <-svc.StopSignal
-	case pkg.WAITRESTART, pkg.WAITSTOP:
-		<-svc.Exit
-		svc.Exit <- 10
-		svc.kill()
-		// <-svc.StopSignal
+	// 撤销任何待重启意图，避免退出后被 wait() 自动拉起
+	svc.setRestartOnExit(false)
+	if svc.GetCanNotStop() {
+		<-svc.Status.ChStop
 	}
-
+	switch svc.Status.Status {
+	case pkg.RUNNING, pkg.WAITRESTART, pkg.WAITSTOP:
+		svc.Cancel()
+		if err := svc.kill(); err != nil {
+			golog.Error(err)
+		}
+	}
 }
 
 func (svc *Server) stopStatus() {

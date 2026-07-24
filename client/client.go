@@ -295,7 +295,7 @@ func (sc *SCSClient) Log(line int) {
 		golog.Error(ErrNameIsEmpty)
 		return
 	}
-	sc.webSocket(fmt.Sprintf("/log/%s/%d", sc.Name, line), nil)
+	sc.webSocket(fmt.Sprintf("/log/name?name=%s&line=%d", sc.Name, line), nil)
 }
 
 // 获取当前副本的环境变量

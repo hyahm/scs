@@ -9,7 +9,7 @@ description: "SCS 进程管理操作指南。当需要新增/修改 scsd 对脚�
 
 ## 核心文件
 - 状态机入口：`internal/cache/server.go`（`Start/Stop/Kill/Restart/Remove/UpdateServer`）
-- 启动流程：`internal/cache/start.go`（`StartAsync` / `Start` / `syncLogger`）
+- 启动流程：`internal/cache/start.go`（`StartAsync` / `Start`，局部捕获 ctx/logger）
 - 等待退出：`internal/cache/wait.go`
 - 定时任务：`internal/cache/cron.go`（`cron` / `doTicker`）
 - 跨平台实现：
@@ -22,17 +22,17 @@ description: "SCS 进程管理操作指南。当需要新增/修改 scsd 对脚�
    - 日志 goroutine（`log.go appendRead` 监听 `Ctx.Done()`）
    - cron ticker（`cron.go` 的 `select`）
    - 进程本身（`exec.CommandContext(ctx, ...)`，ctx 取消 → 进程被杀）
-2. **`Exit chan int`**（buffer 2）：信号路由
-   - 9 = kill，10 = restart，11 = stop，12 = remove
-   - 发送方非阻塞写；`Kill/Restart` 会先 `<-Exit` 排空旧信号
+2. **`restartOnExit bool`**（`svc.mu` 保护）：Restart 的"退出后重启"意图
+   - RUNNING 时 `Restart()` 置 true + `Cancel()`，`wait()` 进程退出后消费并 `StartAsync()`
+   - `Stop/Kill/Remove` 入口必须 `setRestartOnExit(false)`，否则 Restart 后 Stop 仍会被拉起
 3. **`Status.Status`**（`pkg/status.go` 常量）：`STOP / RUNNING / WAITSTOP / WAITRESTART`
 
 ## 修改 Check List
 改任何进程操作前，依次确认：
 - [ ] 是否同时处理了 Windows 和 Unix？（用 build tag 拆分到 `script_*.go`）
-- [ ] 是否会触发 `Logger.Sync()` 重复调用？→ 一律走 `svc.syncLogger()`（已加 recover）
+- [ ] 是否会触发 `Logger.Sync()` 重复调用？→ `Start()` 内已局部捕获 logger + defer 同步，新增同步照此模式
 - [ ] goroutine 退出路径：是否有 `Ctx.Done()` 分支？是否会泄漏？
-- [ ] `Exit chan` 是否被排空？状态切换前若有积压信号会导致状态错乱
+- [ ] Stop/Kill/Remove 是否清零了 `restartOnExit`？Restart 是否按 Status 分支（STOP 直接 StartAsync，RUNNING 走标志）？
 - [ ] 访问 `serverStore` / `Script` 是否通过它们的 RWMutex 包装方法？
 - [ ] cron 路径：`IsCron=true` 时 `wait()` 不应改 `Status` 为 STOP（保持 RUNNING 等下次）
 
@@ -55,8 +55,8 @@ description: "SCS 进程管理操作指南。当需要新增/修改 scsd 对脚�
 - `doTicker` 会 `Times--`，到 0 自动 `stopStatus()`
 
 ## 不要做的事
-- ❌ 直接 `close(svc.Exit)` —— 从不显式 close，靠 Ctx + cmd.Wait() 退出
-- ❌ 直接 `svc.Logger.Sync()` —— 必须用 `svc.syncLogger()`
+- ❌ 直接 `svc.Logger.Sync()` —— golog 的 Sync 会 close channel，重复调用 panic。`Start()` 内已用局部捕获 logger + `defer func(){ recover(); logger.Sync() }()`，新增同步逻辑照此模式
+- ❌ 在 Stop/Kill/Remove 里忘记 `setRestartOnExit(false)` —— 否则 Restart 后 Stop 仍会被 wait() 自动拉起
 - ❌ 在 `controller/` 下加新代码 —— 整层是死代码
 - ❌ 给 `msgCache` 加发送方但不加消费者 —— 会阻塞或丢弃
 

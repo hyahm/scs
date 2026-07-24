@@ -2,24 +2,23 @@ package handle
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestTailf(t *testing.T) {
 	f, err := os.Open("../../log/test_0.log")
 	if err != nil {
-		log.Fatal(err)
+		t.Skip("log file not found, skip tailf test")
 	}
+	defer f.Close()
 	buf := bufio.NewReader(f)
-	for {
+	// 只读若干行后退出，避免无限循环卡死 go test
+	for i := 0; i < 10; i++ {
 		line, _, err := buf.ReadLine()
 		if err != nil {
-			time.Sleep(time.Second)
-			continue
+			break
 		}
 		t.Log(string(line))
 	}

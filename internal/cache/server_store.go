@@ -50,8 +50,8 @@ func GetAllServer() []*Server {
 }
 
 func RemoveServer(name string) {
-	storeInstance.RLock()
-	defer storeInstance.RUnlock()
+	storeInstance.Lock()
+	defer storeInstance.Unlock()
 	delete(storeInstance.server, name)
 }
 
