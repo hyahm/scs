@@ -3,51 +3,52 @@ package handle
 import (
 	"net/http"
 
-	"github.com/hyahm/scs/controller"
-	"github.com/hyahm/scs/internal/store"
+	"github.com/hyahm/scs/internal/cache"
 	"github.com/hyahm/scs/pkg"
-
 	"github.com/hyahm/xmux"
 )
 
 func Restart(w http.ResponseWriter, r *http.Request) {
-	pname := xmux.Var(r)["pname"]
-	name := xmux.Var(r)["name"]
 
-	_, ok := store.GetStore().GetScriptByName(pname)
+	subname := r.FormValue("subname")
+	svc, ok := cache.GetServer(subname)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	svc, ok := store.GetStore().GetServerByName(name)
-	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-		return
-	}
-	go controller.RestartServer(svc)
+	// 先停止，再删除， 异步处理
+	go func(svc *cache.Server) {
+		svc.SetCanNotOperation(true)
+		svc.Stop()
+		svc.Start()
+		svc.SetCanNotOperation(false)
+	}(svc)
 }
 
 func RestartPname(w http.ResponseWriter, r *http.Request) {
-	pname := xmux.Var(r)["pname"]
-
-	// for _, pname := range strings.Split(names, ",") {
-	script, ok := store.GetStore().GetScriptByName(pname)
-	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-		return
+	// pname := xmux.Var(r)["pname"]
+	name := r.FormValue("name")
+	for _, v := range cache.GetGroupServer(name) {
+		// 先停止，再删除， 异步处理
+		go func(svc *cache.Server) {
+			svc.SetCanNotOperation(true)
+			svc.Stop()
+			svc.Start()
+			svc.SetCanNotOperation(false)
+		}(v)
 	}
-	controller.RestartScript(script)
-	// }
+
 }
 
 func RestartAll(w http.ResponseWriter, r *http.Request) {
 	// 删除所有的脚本
-
-	validAuths := xmux.GetInstance(r).Get("validAuths").([]controller.Auth)
-	validName := make(map[string]struct{})
-	for _, auth := range validAuths {
-		validName[auth.ScriptName] = struct{}{}
+	for _, v := range cache.GetAllServer() {
+		// 先停止，再删除， 异步处理
+		go func(svc *cache.Server) {
+			svc.SetCanNotOperation(true)
+			svc.Stop()
+			svc.Start()
+			svc.SetCanNotOperation(false)
+		}(v)
 	}
-	controller.RestartAllServerFromScripts(validName)
-
 }

@@ -51,12 +51,8 @@ func (node *Node) Restart(args ...string) {
 	switch len(args) {
 	case 0:
 		res, err = cli.RestartAll()
-	case 1:
-		cli.Pname = args[0]
-		res, err = cli.RestartPname()
 	default:
-		cli.Pname = args[0]
-		cli.Name = args[1]
+		cli.Name = args[0]
 		res, err = cli.RestartName()
 	}
 	if err != nil {
@@ -119,12 +115,8 @@ func (node *Node) Start(args ...string) {
 	switch len(args) {
 	case 0:
 		res, err = cli.StartAll()
-	case 1:
-		cli.Pname = args[0]
-		res, err = cli.StartPname()
 	default:
-		cli.Pname = args[0]
-		cli.Name = args[1]
+		cli.Name = args[0]
 		res, err = cli.StartName()
 	}
 	if err != nil {
@@ -144,12 +136,8 @@ func (node *Node) Status(args ...string) (*ScriptStatusNode, error) {
 	switch len(args) {
 	case 0:
 		ssn, err = cli.StatusAll()
-	case 1:
-		cli.Pname = args[0]
-		ssn, err = cli.StatusPname()
 	default:
-		cli.Pname = args[0]
-		cli.Name = args[1]
+		cli.Name = args[0]
 		ssn, err = cli.StatusName()
 	}
 	if err != nil {
@@ -180,12 +168,8 @@ func (node *Node) Kill(args ...string) {
 	var err error
 	switch len(args) {
 	case 2:
-		cli.Pname = args[0]
-		cli.Name = args[1]
+		cli.Name = args[0]
 		res, err = cli.KillName()
-	case 1:
-		cli.Pname = args[0]
-		res, err = cli.KillPname()
 	default:
 		return
 	}
@@ -260,12 +244,8 @@ func (node *Node) Stop(args ...string) {
 	switch len(args) {
 	case 0:
 		res, err = cli.StopAll()
-	case 1:
-		cli.Pname = args[0]
-		res, err = cli.StopPname()
 	default:
-		cli.Pname = args[0]
-		cli.Name = args[1]
+		cli.Name = args[0]
 		res, err = cli.StopName()
 	}
 	if err != nil {
@@ -286,12 +266,8 @@ func (node *Node) Remove(args ...string) {
 		fmt.Printf("name: %s , msg: remove all have been removed\n", node.Name)
 		return
 		// b, err = cli.RemoveAllScrip()
-	case 1:
-		cli.Pname = args[0]
-		res, err = cli.RemovePnameScrip()
 	default:
-		cli.Pname = args[0]
-		cli.Name = args[1]
+		cli.Name = args[0]
 		res, err = cli.RemoveNameScrip()
 	}
 	if err != nil {
@@ -305,7 +281,6 @@ func (node *Node) Remove(args ...string) {
 func (node *Node) Enable(pname string) {
 
 	cli := node.NewSCSClient()
-	cli.Pname = pname
 	res, err := cli.Enable()
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
@@ -377,7 +352,6 @@ func (node *Node) GetScripts() {
 func (node *Node) Disable(pname string) {
 
 	cli := node.NewSCSClient()
-	cli.Pname = pname
 	res, err := cli.Disable()
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)
@@ -395,12 +369,8 @@ func (node *Node) Update(args ...string) {
 	switch len(args) {
 	case 0:
 		res, err = cli.UpdateAll()
-	case 1:
-		cli.Pname = args[0]
-		res, err = cli.UpdatePname()
 	default:
-		cli.Pname = args[0]
-		cli.Name = args[1]
+		cli.Name = args[0]
 		res, err = cli.UpdateName()
 	}
 	if err != nil {

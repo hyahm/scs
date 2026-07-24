@@ -1,30 +1,21 @@
 package controller
 
-import (
-	"fmt"
-
-	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config"
-)
-
 func getTempScript(temp map[string]struct{}) {
-	for name := range store.GetStore().GetAllScriptMap() {
-		temp[name] = struct{}{}
-	}
+	// for name := range store.GetStore().GetAllScriptMap() {
+	// 	temp[name] = struct{}{}
+	// }
 }
 
-func Fmt() error {
-	err := config.ReadConfig()
-	if err != nil {
-		golog.Error(err)
-		// 第一次报错直接退出
-		return err
-	}
-	// 配置文件是对的， 那么直接写进配置文件
-	return config.Cfg.WriteConfig(true)
-}
+// func Fmt() error {
+// 	err := internal.ReadConfig()
+// 	if err != nil {
+// 		golog.Error(err)
+// 		// 第一次报错直接退出
+// 		return err
+// 	}
+// 	// 配置文件是对的， 那么直接写进配置文件
+// 	return internal.WriteConfig(true)
+// }
 
 /*
 重载：  备份旧的scripts的replicate
@@ -33,152 +24,152 @@ func Fmt() error {
 更新所有store.ss
 */
 func Reload() error {
-	err := config.ReadConfig()
-	if err != nil {
-		// 第一次报错直接退出
-		return err
-	}
-	// 配置文件是对的， 那么直接写进配置文件， 后面所有的操作都取消更新配置文件
+	// err := internal.ReadConfig()
+	// if err != nil {
+	// 	// 第一次报错直接退出
+	// 	return err
+	// }
+	// // 配置文件是对的， 那么直接写进配置文件， 后面所有的操作都取消更新配置文件
 
-	err = config.Cfg.WriteConfig(true)
-	if err != nil {
-		// 写进配置文件
-		return err
-	}
-	// 取出之前的scripts
-	temp := make(map[string]struct{})
-	// 备份旧的scripts
-	getTempScript(temp)
-	for index := range config.Cfg.Scripts {
-		// 删除之前存在的name
-		delete(temp, config.Cfg.Scripts[index].Name)
-		// 查看副本是不是对的， 不会对存在的脚本有影响
-		reloadScripts(config.Cfg.Scripts[index])
-	}
+	// err = internal.Cfg.WriteConfig(true)
+	// if err != nil {
+	// 	// 写进配置文件
+	// 	return err
+	// }
+	// // 取出之前的scripts
+	// temp := make(map[string]struct{})
+	// // 备份旧的scripts
+	// getTempScript(temp)
+	// // for index := range internal.GetAllScript() {
+	// // 	// 删除之前存在的name // 这里应该删早了， 等服务停止的时候再删除
+	// // 	// delete(temp, internal.Cfg.Scripts[index].Name)
+	// // 	// 查看副本是不是对的， 不会对存在的脚本有影响
+	// // 	// reloadScripts(internal.Cfg.Scripts[index])
+	// // }
 
-	// 删除已删除的 script
-	for name := range temp {
-		for index := range store.GetStore().GetScriptIndex(name) {
-			subname := fmt.Sprintf("%s_%d", name, index)
-			svc, ok := store.GetStore().GetServerByName(subname)
-			if !ok {
-				golog.Error(pkg.ErrBugMsg)
-				continue
-			}
+	// // 删除已删除的 script
+	// for name := range temp {
+	// 	for index := range store.GetStore().GetScriptIndex(name) {
+	// 		// subname := fmt.Sprintf("%s_%d", name, index)
+	// 		// svc, ok := store.GetStore().GetServerByName(subname)
+	// 		// if !ok {
+	// 		// 	golog.Error(pkg.ErrBugMsg)
+	// 		// 	continue
+	// 		// }
 
-			go Remove(svc, false)
-		}
-	}
+	// 		// go Remove(svc, false)
+	// 	}
+	// }
 	return nil
 }
 
 // 新增script并启动
-func AddScript(s config.Script) {
-	if s.ScriptToken == "" {
-		s.ScriptToken = pkg.RandomToken()
-	}
-	so := store.GetStore()
-	// 将scripts填充到store中
-	so.SetScript(s)
-	// 初始化脚本的副本数
-	replicate := s.Replicate
-	if replicate == 0 {
-		replicate = 1
-	}
-	s.MakeTempEnv()
-	// 假设设置的端口是可用的
-	// 对于每个script 都生成对应的
-	availablePort := s.Port
-	for i := 0; i < replicate; i++ {
+// func AddScript(s config.Script) {
+// 	if s.ScriptToken == "" {
+// 		s.ScriptToken = pkg.RandomToken()
+// 	}
+// 	so := store.GetStore()
+// 	// 将scripts填充到store中
+// 	so.SetScript(s)
+// 	// 初始化脚本的副本数
+// 	replicate := s.Replicate
+// 	if replicate == 0 {
+// 		replicate = 1
+// 	}
+// 	s.MakeTempEnv()
+// 	// 假设设置的端口是可用的
+// 	// 对于每个script 都生成对应的
+// 	availablePort := s.Port
+// 	for i := 0; i < replicate; i++ {
 
-		subname := fmt.Sprintf("%s_%d", s.Name, i)
-		svc := so.InitServer(i, s.Name, subname)
-		so.SetScriptIndex(s.Name, i)
-		svc.Port = availablePort
-		svc.MakeServer(s)
-		svc.Env["SCS_INDEX"] = fmt.Sprintf("%d", i)
-		availablePort = svc.Port + 1
-		if s.Disable {
-			// 如果是禁用的 ，那么不用生成多个副本
-			// 不在上面就是因为， 是为了看到状态
-			return
-		}
-		so.SetServer(subname, svc)
-		store.GetStore()
-		svc.Start()
-	}
+// 		subname := fmt.Sprintf("%s_%d", s.Name, i)
+// 		svc := so.InitServer(i, s.Name, subname)
+// 		so.SetScriptIndex(s.Name, i)
+// 		svc.Port = availablePort
+// 		svc.MakeServer(s)
+// 		svc.Env["SCS_INDEX"] = fmt.Sprintf("%d", i)
+// 		availablePort = svc.Port + 1
+// 		if s.Disable {
+// 			// 如果是禁用的 ，那么不用生成多个副本
+// 			// 不在上面就是因为， 是为了看到状态
+// 			return
+// 		}
+// 		so.SetServer(subname, svc)
+// 		store.GetStore()
+// 		svc.Start()
+// 	}
 
-}
+// }
 
 // 脚本更新操作
-func UpdateScriptApi(s config.Script) {
-	// 既然是更新操作，那么这个必定存在
-	script, _ := store.GetStore().GetScriptByName(s.Name)
+// func UpdateScriptApi(s config.Script) {
+// 	// 既然是更新操作，那么这个必定存在
+// 	script, _ := store.GetStore().GetScriptByName(s.Name)
 
-	oldReplicate := script.Replicate
+// 	oldReplicate := script.Replicate
 
-	if oldReplicate == 0 {
-		oldReplicate = 1
-	}
-	if s.Replicate == 1 {
-		s.Replicate = 0
-	}
-	newReplicate := s.Replicate
-	if newReplicate == 0 {
-		newReplicate = 1
-	}
-	s.MakeTempEnv()
-	// 对比脚本是否修改
-	if oldReplicate == newReplicate {
-		if !config.EqualScript(s, script) {
-			store.GetStore().SetScript(s)
-		}
+// 	if oldReplicate == 0 {
+// 		oldReplicate = 1
+// 	}
+// 	if s.Replicate == 1 {
+// 		s.Replicate = 0
+// 	}
+// 	newReplicate := s.Replicate
+// 	if newReplicate == 0 {
+// 		newReplicate = 1
+// 	}
+// 	s.MakeTempEnv()
+// 	// 对比脚本是否修改
+// 	if oldReplicate == newReplicate {
+// 		if !config.EqualScript(s, script) {
+// 			store.GetStore().SetScript(s)
+// 		}
 
-		// 如果一样的名字， 副本数一样的就直接跳过
-		return
-	}
-	if oldReplicate > newReplicate {
-		// 如果大于的话， 那么就删除多余的
-		for i := newReplicate; i < oldReplicate; i++ {
-			subname := fmt.Sprintf("%s_%d", s.Name, i)
-			svc, ok := store.GetStore().GetServerByName(subname)
-			if !ok {
-				golog.Error(pkg.ErrBugMsg)
-				continue
-			}
+// 		// 如果一样的名字， 副本数一样的就直接跳过
+// 		return
+// 	}
+// 	if oldReplicate > newReplicate {
+// 		// 如果大于的话， 那么就删除多余的
+// 		for i := newReplicate; i < oldReplicate; i++ {
+// 			// subname := fmt.Sprintf("%s_%d", s.Name, i)
+// 			// svc, ok := store.GetStore().GetServerByName(subname)
+// 			// if !ok {
+// 			// 	golog.Error(pkg.ErrBugMsg)
+// 			// 	continue
+// 			// }
 
-			go Remove(svc, false)
-		}
-	} else {
-		// 小于的话，就增加
-		availablePort := s.Port
-		for i := oldReplicate; i < newReplicate; i++ {
-			subname := fmt.Sprintf("%s_%d", s.Name, i)
-			svc := store.GetStore().InitServer(i, s.Name, subname)
-			store.GetStore().SetScriptIndex(s.Name, i)
-			svc.Port = availablePort
-			svc.MakeServer(script)
-			availablePort = svc.Port + 1
-			if s.Disable {
-				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
-				return
-			}
-			svc.Start()
-		}
-	}
+// 			// go Remove(svc, false)
+// 		}
+// 	} else {
+// 		// 小于的话，就增加
+// 		availablePort := s.Port
+// 		for i := oldReplicate; i < newReplicate; i++ {
+// 			subname := fmt.Sprintf("%s_%d", s.Name, i)
+// 			svc := store.GetStore().InitServer(i, s.Name, subname)
+// 			store.GetStore().SetScriptIndex(s.Name, i)
+// 			svc.Port = availablePort
+// 			svc.MakeServer(script)
+// 			availablePort = svc.Port + 1
+// 			if s.Disable {
+// 				// 如果是禁用的 ，那么不用生成多个副本，直接执行下一个script
+// 				return
+// 			}
+// 			svc.Start()
+// 		}
+// 	}
 
-}
+// }
 
-// 配置文件直接reload
-func reloadScripts(s config.Script) {
-	// script: 配置文件新读取出来的
-	// 处理存在的
-	_, ok := store.GetStore().GetScriptByName(s.Name)
-	// 对比启动的副本
-	if !ok {
-		// 如果不存在，说明要新增
-		AddScript(s)
-		return
-	}
-	UpdateScriptApi(s)
-}
+// // 配置文件直接reload
+// func reloadScripts(s config.Script) {
+// 	// script: 配置文件新读取出来的
+// 	// 处理存在的
+// 	_, ok := store.GetStore().GetScriptByName(s.Name)
+// 	// 对比启动的副本
+// 	if !ok {
+// 		// 如果不存在，说明要新增
+// 		// AddScript(s)
+// 		return
+// 	}
+// 	UpdateScriptApi(s)
+// }

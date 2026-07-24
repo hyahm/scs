@@ -1,10 +1,5 @@
 package controller
 
-import (
-	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg/config"
-)
-
 type Auth struct {
 	ServerName string
 	ScriptName string
@@ -15,34 +10,34 @@ type Auth struct {
 func GetAuthByToken(token string) []Auth {
 
 	auths := make([]Auth, 0)
-	for name, server := range store.GetStore().GetAllServerMap() {
-		if server.ScriptToken == token {
-			auths = append(auths, Auth{
-				ServerName: name,
-				ScriptName: server.Name,
-				Role:       string(config.ScriptRole),
-			})
-		}
-		if server.SimpleToken == token {
-			auths = append(auths, Auth{
-				ServerName: name,
-				ScriptName: server.Name,
-				Role:       string(config.SimpleRole),
-			})
-		}
-	}
+	// for name, server := range store.GetStore().GetAllServerMap() {
+	// 	if server.ScriptToken == token {
+	// 		auths = append(auths, Auth{
+	// 			ServerName: name,
+	// 			ScriptName: server.Name,
+	// 			Role:       string(config.ScriptRole),
+	// 		})
+	// 	}
+	// 	if server.SimpleToken == token {
+	// 		auths = append(auths, Auth{
+	// 			ServerName: name,
+	// 			ScriptName: server.Name,
+	// 			Role:       string(config.SimpleRole),
+	// 		})
+	// 	}
+	// }
 	return auths
 }
 
 func GetAllAuth() []Auth {
 	auths := make([]Auth, 0)
-	for name, server := range store.GetStore().GetAllServerMap() {
-		auths = append(auths, Auth{
-			ServerName: name,
-			ScriptName: server.Name,
-			Role:       string(config.ScriptRole),
-		})
-	}
+	// for name, server := range store.GetStore().GetAllServerMap() {
+	// 	auths = append(auths, Auth{
+	// 		ServerName: name,
+	// 		ScriptName: server.Name,
+	// 		Role:       string(config.ScriptRole),
+	// 	})
+	// }
 	return auths
 }
 

@@ -1,4 +1,4 @@
-package server
+package cache
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/internal"
-	"github.com/hyahm/scs/internal/server/status"
+	"github.com/hyahm/scs/pkg"
 )
 
 // 比较大于等于
@@ -140,7 +140,7 @@ func lt(one, two, sep string) bool {
 
 func (svc *Server) Install() (err error) {
 
-	svc.Status.Status = status.INSTALL
+	svc.Status.Status = pkg.INSTALL
 	for _, v := range svc.PreStart {
 		if strings.Trim(v.Path, " ") == "" &&
 			strings.Trim(v.Command, " ") == "" &&

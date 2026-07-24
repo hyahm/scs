@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/xmux"
 )
@@ -18,25 +19,26 @@ import (
 var HEARTBEAT = time.Second * 10
 
 func Log(w http.ResponseWriter, r *http.Request) {
-	name := xmux.Var(r)["name"]
-	line := xmux.Var(r)["line"]
+	name := r.FormValue("name")
+	line := r.FormValue("line")
 	num, _ := strconv.Atoi(line)
-	golog.Info(1111)
 	ws, err := xmux.UpgradeWebSocket(w, r)
 	if err != nil {
 		golog.Error(err)
 		return
 	}
-	logfile := filepath.Join(config.Cfg.Log.Path, config.Subname(name).String()+".log")
+	logfile := filepath.Join(internal.GetLogPath(), config.Subname(name).String()+".log")
 	f, err := os.Open(logfile)
 	if err != nil {
 		ws.SendMessage([]byte("file not found, yes, just without any print on, please wait"), xmux.TypeMsg)
-		ws.Close()
 		return
 	}
 	count := 0
 	scan := bufio.NewScanner(f)
 	for scan.Scan() {
+		if scan.Err() != nil {
+			break
+		}
 		count++
 	}
 	f.Close()

@@ -6,16 +6,16 @@ import (
 
 	"github.com/hyahm/scs/api/handle"
 	"github.com/hyahm/scs/global"
+	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config"
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/xmux"
 )
 
 // 为了兼容之前版本，无视解析失败的问题
-func unmarshalError(err error, w http.ResponseWriter, r *http.Request) bool {
-	return false
+func unmarshalError(w http.ResponseWriter, r *http.Request, err error) bool {
+	return true
 }
 
 // var dir := "key"
@@ -37,8 +37,8 @@ func HttpServer() {
 
 	router.AddGroup(AdminHandle())
 
-	router.SetAddr(config.Cfg.Listen).SetTimeout(time.Second * 5)
-	if !config.Cfg.EnableTLS {
+	router.SetAddr(internal.GetListen()).SetTimeout(time.Second * 5)
+	if !internal.GetEnableTLS() {
 		err := router.Run()
 		if err != nil {
 			golog.Error(err)
@@ -47,12 +47,12 @@ func HttpServer() {
 		return
 	}
 
-	if config.Cfg.Key == "" || config.Cfg.Cert == "" {
+	if internal.GetKey() == "" || internal.GetCert() == "" {
 		panic("use tls. but key or cert not specified")
 	}
 
-	golog.Info("listen on " + config.Cfg.Listen + " over https")
-	err := router.RunTLS(config.Cfg.Cert, config.Cfg.Key)
+	golog.Info("listen on " + internal.GetListen() + " over https")
+	err := router.RunTLS(internal.GetCert(), internal.GetKey())
 	if err != nil {
 		golog.Error(err)
 	}

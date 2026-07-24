@@ -12,6 +12,3 @@ type CheckPointer interface {
 	Check()
 	Update()
 }
-
-func test() {
-}

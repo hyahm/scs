@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/hyahm/golog"
@@ -23,22 +24,22 @@ const (
 )
 
 type Script struct {
-	Name         string            `yaml:"name,omitempty" json:"name"`
-	Dir          string            `yaml:"dir,omitempty" json:"dir,omitempty"`
-	Command      string            `yaml:"command,omitempty" json:"command"`
-	ScriptToken  string            `yaml:"scriptToken,omitempty" json:"scriptToken,omitempty"` // 只用来查看的token
-	SimpleToken  string            `yaml:"simpleToken,omitempty" json:"simpleToken,omitempty"` // 角色权限
+	Name    string `yaml:"name,omitempty" json:"name"`
+	Dir     string `yaml:"dir,omitempty" json:"dir,omitempty"`
+	Command string `yaml:"command,omitempty" json:"command"`
+	// ScriptToken  string            `yaml:"scriptToken,omitempty" json:"scriptToken,omitempty"` // 只用来查看的token
+	// SimpleToken  string            `yaml:"simpleToken,omitempty" json:"simpleToken,omitempty"` // 角色权限
 	Replicate    int               `yaml:"replicate,omitempty" json:"replicate,omitempty"`
 	Always       bool              `yaml:"always,omitempty" json:"always,omitempty"`
 	DisableAlert bool              `yaml:"disableAlert,omitempty" json:"disableAlert,omitempty"`
 	Env          map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
 	// ContinuityInterval time.Duration        `yaml:"continuityInterval,omitempty" json:"continuityInterval,omitempty"`
-	Port           int               `yaml:"port,omitempty" json:"port,omitempty"`
-	AT             *AlertTo          `yaml:"alert,omitempty" json:"alert,omitempty"`
+	Port int `yaml:"port,omitempty" json:"port,omitempty"`
+	// AT             *AlertTo          `yaml:"alert,omitempty" json:"alert,omitempty"`
 	Version        string            `yaml:"version,omitempty" json:"version,omitempty"`
-	PreStart       []*PreStart       `yaml:"preStart,omitempty" json:"preStart,omitempty"`
+	PreStart       []PreStart        `yaml:"preStart,omitempty" json:"preStart,omitempty"`
 	Disable        bool              `yaml:"disable,omitempty" json:"disable,omitempty"`
-	Cron           *Cron             `yaml:"cron,omitempty" json:"cron,omitempty"`
+	Cron           Cron              `yaml:"cron,omitempty" json:"cron,omitempty"`
 	Update         string            `yaml:"update,omitempty" json:"update,omitempty"`
 	DeleteWhenExit bool              `yaml:"deleteWhenExit,omitempty" json:"deleteWhenExit,omitempty"`
 	TempEnv        map[string]string `yaml:"-" json:"-"`
@@ -48,11 +49,91 @@ type Script struct {
 	StopTime       string            `yaml:"stopTime,omitempty" json:"stopTime,omitempty"`   // 停止时间
 	// Ready              chan bool            `yaml:"-" json:"-"`
 	// 服务ready的探测器
-	Liveness *Liveness `yaml:"liveness,omitempty" json:"liveness,omitempty"`
+	// Liveness *Liveness `yaml:"liveness,omitempty" json:"liveness,omitempty"`
 }
 
+// func (s *Script) Start() {
+// 	// 这里转到 store
+// 	// parameter := ""
+// 	switch s.Status.Status {
+// 	case status.STOP:
+// 		// 开始启动的时候，需要将遍历变量值的模板渲染
+// 		go s.asyncStart()
+// 	}
+// }
+
+func (s *Script) MakeServer() {
+
+	env := make(map[string]string)
+	for k, v := range s.TempEnv {
+		env[k] = v
+	}
+	if s.Port > 0 {
+		// 顺序拿到可用端口
+		s.Port = pkg.GetAvailablePort(s.Port)
+		env["PORT"] = strconv.Itoa(s.Port)
+	} else {
+		env["PORT"] = "0"
+	}
+	// 填充server到store
+	// s.FillServer()
+	// env["NAME"] = s.SubName
+
+	s.Env = env
+}
+
+// func (s *Script) SetToken(token string) {
+
+// }
+
+// func (s *Script) FillServer(subname string) {
+// store := server.GetStore()
+// svc := store.GetServerBySubName(subname)
+// svc.ScriptToken = s.ScriptToken
+// svc.SimpleToken = s.SimpleToken
+// if svc.SimpleToken == "" {
+// 	svc.SimpleToken = pkg.RandomToken()
+// }
+// svc.Command = script.Command
+// svc.User = script.User
+// svc.Group = script.Group
+// svc.Disable = script.Disable
+// // Log:       make([]string, 0, global.GetLogCount()),
+// svc.Dir = script.Dir
+// if svc.Status == nil {
+// 	svc.Status = &status.Status{
+// 		Status: status.STOP,
+// 	}
+// }
+// svc.StartTime = script.StartTime
+// svc.StopTime = script.StopTime
+
+// svc.Update = script.Update
+// svc.AI = &config.AlertInfo{}
+// // svc.AT = script.AT
+// svc.StopSignal = make(chan bool, 1)
+
+// // svc.Liveness = script.Liveness
+// svc.Ready = make(chan bool, 1)
+// svc.Always = script.Always
+// svc.AlwaysSign = script.Always
+// svc.DeleteWhenExit = script.DeleteWhenExit
+
+// // svc.DisableAlert = script.DisableAlert
+// svc.PreStart = script.PreStart
+// svc.Cron = script.Cron
+// if svc.Cron != nil {
+// 	svc.Cron = &config.Cron{
+// 		Start:   script.Cron.Start,
+// 		Loop:    script.Cron.Loop,
+// 		IsMonth: script.Cron.IsMonth,
+// 		Times:   script.Cron.Times,
+// 	}
+// }
+// }
+
 // 生成新的env 到 tempenv
-func (s *Script) MakeTempEnv() {
+func (s *Script) MakeTempEnv() map[string]string {
 	// 生成 全局脚本的 env
 	tempEnv := make(map[string]string)
 
@@ -80,11 +161,11 @@ func (s *Script) MakeTempEnv() {
 	}
 	tempEnv["OS"] = runtime.GOOS
 	// 增加token, 不过是随机的
-	tempEnv["TOKEN"] = s.ScriptToken
+	// tempEnv["TOKEN"] = s.ScriptToken
 	tempEnv["PNAME"] = s.Name
 	tempEnv["PROJECT_HOME"] = s.Dir
 
-	s.TempEnv = tempEnv
+	return tempEnv
 }
 
 func (s *Script) GetEnv() []string {
@@ -107,9 +188,9 @@ func EqualScript(s1, s2 Script) bool {
 		s1.Dir != s2.Dir ||
 		s1.Command != s2.Command ||
 		s1.Always != s2.Always ||
-		s1.ScriptToken != s2.ScriptToken ||
+		// s1.ScriptToken != s2.ScriptToken ||
 		!pkg.CompareMap(s1.Env, s2.Env) ||
-		!CompareAT(s1.AT, s2.AT) ||
+		// !CompareAT(s1.AT, s2.AT) ||
 		s1.DisableAlert != s2.DisableAlert ||
 		s1.Disable != s2.Disable ||
 		s1.Update != s2.Update ||

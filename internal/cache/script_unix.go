@@ -10,7 +10,7 @@
  * @FilePath: /scs/script_unix.go
  */
 
-package server
+package cache
 
 import (
 	"os"
@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/server/status"
+	"github.com/hyahm/scs/pkg"
 )
 
 // func (svc *Server) stop() {
@@ -61,7 +61,7 @@ func (svc *Server) kill() error {
 }
 
 func (svc *Server) start() error {
-	svc.Cmd = exec.Command("/bin/sh", "-c", svc.Command)
+	svc.Cmd = exec.CommandContext(svc.Ctx, "/bin/sh", "-c", svc.Command)
 	if svc.Dir != "" {
 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
 			golog.Error(err)
@@ -90,28 +90,28 @@ func (svc *Server) start() error {
 			}}
 	}
 
-	if svc.User != "" {
-		users, err := user.Lookup(svc.User)
-		if err != nil {
-			return err
-		}
-		uid, err := strconv.ParseUint(users.Uid, 10, 32)
-		if err != nil {
-			return err
-		}
-		svc.Cmd.SysProcAttr.Credential.Uid = uint32(uid)
-	}
-	if svc.Group != "" {
-		groups, err := user.LookupGroup(svc.Group)
-		if err != nil {
-			return err
-		}
-		gid, err := strconv.ParseUint(groups.Gid, 10, 32)
-		if err != nil {
-			return err
-		}
-		svc.Cmd.SysProcAttr.Credential.Gid = uint32(gid)
-	}
+	// if svc.User != "" {
+	// 	users, err := user.Lookup(svc.User)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	uid, err := strconv.ParseUint(users.Uid, 10, 32)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	svc.Cmd.SysProcAttr.Credential.Uid = uint32(uid)
+	// }
+	// if svc.Group != "" {
+	// 	groups, err := user.LookupGroup(svc.Group)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	gid, err := strconv.ParseUint(groups.Gid, 10, 32)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	svc.Cmd.SysProcAttr.Credential.Gid = uint32(gid)
+	// }
 	svc.read()
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.Cmd.Start(); err != nil {
@@ -119,6 +119,6 @@ func (svc *Server) start() error {
 		golog.Error(err)
 		return err
 	}
-	svc.Status.Status = status.RUNNING
+	svc.Status.Status = pkg.RUNNING
 	return nil
 }

@@ -32,13 +32,7 @@ func (c *Cron) IsEqual(newc *Cron) bool {
 	return true
 }
 
-func CompareCron(c1, c2 *Cron) bool {
-	if c1 == nil && c2 != nil || c1 != nil && c2 == nil {
-		return false
-	}
-	if c1 == nil && c2 == nil {
-		return true
-	}
+func CompareCron(c1, c2 Cron) bool {
 	if c1.Start != c2.Start ||
 		c1.IsMonth != c2.IsMonth ||
 		c1.Loop != c2.Loop {

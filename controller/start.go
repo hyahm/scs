@@ -1,40 +1,25 @@
 package controller
 
-import (
-	"fmt"
-
-	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config"
-)
-
 // 启动存在的脚本
-func StartExsitScript(name string) {
-	for index := range store.GetStore().GetScriptIndex(name) {
-		subname := fmt.Sprintf("%s_%d", name, index)
-		svc, ok := store.GetStore().GetServerByName(subname)
-		if ok {
-			svc.Start()
-			continue
-		}
-		golog.Error(pkg.ErrBugMsg)
-	}
-}
-
-// 第一次启动
-func FirstStartAllScript() {
-	for _, script := range config.Cfg.Scripts {
-		// 如果没设置token， 默认生成一个脚本的token
-		AddScript(script)
-	}
-}
-
-// // 启动脚本, 也有可能是重载
-// func StartAllScript() {
-// 	// 先将配置文件填充到 store
-// 	for _, script := range cfg.SC {
-// 		// 如果没设置token， 默认生成一个脚本的token
-// 		AddScript(script)
+// func StartExsitScript(name string) {
+// 	for index := range store.GetStore().GetScriptIndex(name) {
+// 		subname := fmt.Sprintf("%s_%d", name, index)
+// 		svc, ok := store.GetStore().GetServerByName(subname)
+// 		if ok {
+// 			svc.Start()
+// 			continue
+// 		}
+// 		golog.Error(pkg.ErrBugMsg)
 // 	}
 // }
+
+// // 第一次启动
+
+// // // 启动脚本, 也有可能是重载
+// // func StartAllScript() {
+// // 	// 先将配置文件填充到 store
+// // 	for _, script := range cfg.SC {
+// // 		// 如果没设置token， 默认生成一个脚本的token
+// // 		AddScript(script)
+// // 	}
+// // }

@@ -8,9 +8,9 @@ import (
 	"syscall"
 
 	"github.com/hyahm/scs/api"
-	"github.com/hyahm/scs/controller"
 	"github.com/hyahm/scs/global"
 	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/internal/cache"
 	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/scs/pkg/message"
 
@@ -28,40 +28,47 @@ func main() {
 	// 设置limit值
 	internal.Setrlimit()
 	flag.BoolVar(&showversion, "v", false, "get scs server version")
-	flag.StringVar(&config.ConfigFile, "f", "scs.yaml", "set config file")
+	flag.StringVar(&internal.ConfigFile, "f", "scs.yaml", "set config file")
 	flag.Parse()
 	if showversion {
 		fmt.Println(global.VERSION)
 		return
 	}
 	single := make(chan os.Signal, 1)
-	signal.Notify(single, os.Interrupt, syscall.SIGTERM)
-	pipe := make(chan os.Signal, 1)
-	signal.Notify(pipe, syscall.SIGPIPE)
+	signal.Notify(single, os.Interrupt, syscall.SIGTERM, syscall.SIGPIPE)
 	go func() {
-		for {
-			select {
-			case <-single:
-				// 确保删除了server
-				fmt.Println("waiting stop all")
-				// controller.WaitKillAllServer()
-				os.Exit(1)
-			case <-pipe:
-				fmt.Println("pipe exit")
-			}
+		for range single {
+			// 确保删除了server
+			fmt.Println("waiting stop all")
+			// controller.WaitKillAllServer()
+			os.Exit(1)
 		}
 
 	}()
-
-	// 自动清除全局报警器的值
-	go config.CleanAlert()
-	golog.Info("config file path: ", config.ConfigFile)
-	err := config.ReadConfig()
+	golog.Info("config file path: ", internal.ConfigFile)
+	err := internal.ReadConfig()
 	if err != nil {
 		// 第一次报错直接退出
 		golog.Fatal(err)
 	}
-	controller.FirstStartAllScript()
+	golog.SetLevel(golog.DEBUG)
+	// if internal.GetDebug() {
+	// 	golog.SetLevel(golog.DEBUG)
+	// } else {
+	// 	golog.SetDir(internal.GetLogPath())
+	// 	golog.InitLogger("scs.log", 0, true)
+	// }
+
+	// 自动清除全局报警器的值
+	go config.CleanAlert()
+	// 启动脚本
+	cache.FirstStartAllScript()
+	// 回写
+	err = internal.WriteConfig(internal.GetConfig())
+	if err != nil {
+		// 第一次报错直接退出
+		golog.Error(err)
+	}
 	api.HttpServer()
 
 }

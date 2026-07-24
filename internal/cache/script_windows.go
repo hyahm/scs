@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package server
+package cache
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/server/status"
+	"github.com/hyahm/scs/pkg"
 )
 
 func (svc *Server) kill() {
@@ -27,7 +27,7 @@ func (svc *Server) kill() {
 
 func (svc *Server) start() error {
 	golog.Info("server command: ", svc.Status.Command)
-	svc.Cmd = exec.Command("powershell", "-c", svc.Status.Command)
+	svc.Cmd = exec.CommandContext(svc.Ctx, "powershell", "-c", svc.Status.Command)
 	if svc.Dir != "" {
 		if _, err := os.Stat(svc.Dir); os.IsNotExist(err) {
 			return err
@@ -54,6 +54,6 @@ func (svc *Server) start() error {
 		svc.stopStatus()
 		return err
 	}
-	svc.Status.Status = status.RUNNING
+	svc.Status.Status = pkg.RUNNING
 	return nil
 }

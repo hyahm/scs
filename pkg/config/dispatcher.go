@@ -48,8 +48,8 @@ func GetDispatcher(name string) (AlertInfo, bool) {
 }
 
 func SetDispatcher(name string, value AlertInfo) {
-	dispatcher.RLock()
-	defer dispatcher.RUnlock()
+	dispatcher.Lock()
+	defer dispatcher.Unlock()
 	dispatcher.dispatcher[name] = value
 }
 
@@ -110,14 +110,12 @@ func (ra *RespAlert) SendAlert() {
 func CleanAlert() {
 	// 删除超过10小时没发送信息的值， 每10分钟执行一次
 	for {
-		dispatcher.Lock()
 		for name, di := range GetDispatcherList() {
 			if time.Since(di.AlertTime) > time.Hour*10 {
 				DeleteDispatcher(name)
 			}
 
 		}
-		dispatcher.Unlock()
 		time.Sleep(time.Minute * 10)
 	}
 

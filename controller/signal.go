@@ -4,88 +4,88 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"time"
 
-	"github.com/hyahm/scs/internal/store"
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
 )
 
-var signalHandle map[string]*pkg.SignalRequest
-var mu sync.RWMutex
+type SignalHandle struct {
+	sync.RWMutex
+	signalHandle map[string]pkg.SignalRequest
+}
 
-func init() {
-	signalHandle = make(map[string]*pkg.SignalRequest)
-	mu = sync.RWMutex{}
+var signalHandle = &SignalHandle{
+	signalHandle: make(map[string]pkg.SignalRequest),
+}
+
+// var mu sync.RWMutex
+
+// func init() {
+// 	signalHandle = make(map[string]*pkg.SignalRequest)
+// 	mu = sync.RWMutex{}
+// }
+
+// 添加信号请求，如果添加成功返回true， 修改就是false
+func AddSignalRequest(name string, sr pkg.SignalRequest) {
+	signalHandle.Lock()
+	defer signalHandle.Unlock()
+	if _, ok := signalHandle.signalHandle[name]; !ok {
+		signalHandle.signalHandle[name] = sr
+	}
 }
 
 // 添加信号请求，如果添加成功返回true， 修改就是false
-func AddSignalRequest(name string, sr *pkg.SignalRequest) {
-	mu.Lock()
-	defer mu.Unlock()
-	if _, ok := signalHandle[name]; !ok {
-		signalHandle[name] = sr
-	}
+func UpdateSignalRequest(name string, sr pkg.SignalRequest) {
+	signalHandle.Lock()
+	defer signalHandle.Unlock()
+	signalHandle.signalHandle[name] = sr
 }
 
-// 添加信号请求，如果添加成功返回true， 修改就是false
-func UpdateSignalRequest(name string, sr *pkg.SignalRequest) bool {
-	mu.Lock()
-	defer mu.Unlock()
-	if _, ok := signalHandle[name]; ok {
-		signalHandle[name].Parameter = sr.Parameter
-		signalHandle[name].Notice = sr.Notice
-		signalHandle[name].Restart = sr.Restart
-		return true
-	}
-	return false
-}
-
-func GetSignalRequest(name string) *pkg.SignalRequest {
-	mu.RLock()
-	defer mu.RUnlock()
-	if sr, ok := signalHandle[name]; ok {
-		return sr
-	}
-	return nil
+func GetSignalRequest(name string) (pkg.SignalRequest, bool) {
+	signalHandle.RLock()
+	defer signalHandle.RUnlock()
+	sr, ok := signalHandle.signalHandle[name]
+	return sr, ok
 }
 
 func DeleteSignalRequest(name string) {
-	mu.Lock()
-	defer mu.Unlock()
-	delete(signalHandle, name)
+	signalHandle.Lock()
+	defer signalHandle.Unlock()
+	delete(signalHandle.signalHandle, name)
 }
 
-func UnStop(ctx context.Context, name string, timeout time.Duration) {
-	select {
-	case <-time.After(time.Second * timeout):
-		pkg.DeleteAtomSignal(name)
-		sr := GetSignalRequest(name)
-		if sr == nil {
-			return
-		}
-		// 清除超时信号
-		defer DeleteSignalRequest(name)
-		// 报警
-		if sr.Notice {
-			ra := &config.RespAlert{
-				Name:   name,
-				Title:  "原子操作超时",
-				Reason: fmt.Sprintf("原子操作超时超过 %d 秒没有执行完成", sr.Timeout),
-			}
-			if sr.ContinuityInterval > 0 {
-				ra.ContinuityInterval = sr.ContinuityInterval
-			}
-			ra.SendAlert()
-		}
-		if sr.Restart {
-			if server, ok := store.GetStore().GetServerByName(name); ok {
-				KillAndStartServer(sr.Parameter, server)
-			}
-		}
-	case <-ctx.Done():
-
+func UnStop(ctx context.Context, name string) {
+	// pkg.DeleteAtomSignal(name)
+	sr, ok := GetSignalRequest(name)
+	if !ok {
+		return
 	}
+	// 清除超时信号
+	defer DeleteSignalRequest(name)
+	if ctx.Err() != nil {
+		return
+	}
+	// 报警
+	if sr.Notice {
+		ra := &config.RespAlert{
+			Name:   name,
+			Title:  "原子操作超时",
+			Reason: fmt.Sprintf("原子操作超时超过 %d 秒没有执行完成", sr.Timeout),
+		}
+		if sr.ContinuityInterval > 0 {
+			ra.ContinuityInterval = sr.ContinuityInterval
+		}
+		ra.SendAlert()
+	}
+	if ctx.Err() != nil {
+		return
+	}
+	if sr.Restart {
+		// if server, ok := store.GetStore().GetServerByName(name); ok {
+		// 	// KillAndStartServer(sr.Parameter, server)
+		// }
+	}
+
 }
 
 // 保存是否可停止的状态

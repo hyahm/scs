@@ -16,41 +16,36 @@ import (
 func simpleHandle() *xmux.RouteGroup {
 	// 只是调试的权限
 	simple := xmux.NewRouteGroup().AddPageKeys(config.SimpleRole.ToString())
-	simple.Post("/status/{pname}/{name}", handle.Status)
-	simple.Post("/status/{pname}", handle.StatusPname)
-	simple.Post("/start/{pname}", handle.StartPname)
-	simple.Post("/start/{pname}/{name}", handle.Start)
-	simple.Post("/update/{pname}/{name}", handle.Update)
-	simple.Post("/update/{pname}", handle.UpdatePname)
-	simple.Post("/update", handle.UpdateAll) // complete
-	simple.Post("/start", handle.StartAll)   // complete
-	simple.Post("/status", handle.AllStatus) // complete
-	simple.Get("/log/{name}/{int:line}", handle.Log).BindResponse(nil)
+	simple.Get("/status/name", handle.StatusPname)
+	simple.Get("/start/name", handle.StartPname)
+	simple.Get("/update/name", handle.UpdatePname)
+	simple.Get("/update", handle.UpdateAll) // complete
+	simple.Get("/start", handle.StartAll)   // complete
+	simple.Get("/status", handle.AllStatus) // complete
+	simple.Get("/log/tail}", handle.Log).BindResponse(nil)
 
-	simple.Post("/restart/{pname}/{name}", handle.Restart)
-	simple.Post("/restart/{pname}", handle.RestartPname)
+	simple.Post("/restart/name", handle.RestartPname)
 	simple.Post("/restart", handle.RestartAll) // complete
 	return simple
 }
 
 func ScriptHandle() *xmux.RouteGroup {
 	script := xmux.NewRouteGroup().AddPageKeys(config.ScriptRole.ToString())
-	script.Post("/stop/{pname}/{name}", handle.Stop)
-	script.Post("/stop/{pname}", handle.StopPname)
-	script.Post("/kill/{pname}", handle.KillPname)
-	script.Post("/kill/{pname}/{name}", handle.Kill)
-	script.Post("/env/{name}", handle.GetEnvName)
-	script.Post("/server/info/{name}", handle.ServerInfo) // 获取某个server信息
-	script.Post("/get/servers", handle.GetServers)        // 获取所有server信息 complete
-	script.Post("/get/index/{pname}", handle.GetIndex)    // 获取某script 对应副本的index
-	script.Post("/cannotstop/{name}", handle.CanNotStop).BindJson(pkg.SignalRequest{})
-	script.Post("/parameter/{name}", handle.SetParameter).BindJson(pkg.SignalRequest{})
-	script.Post("/canstop/{name}", handle.CanStop)
-	script.Post("/get/scripts", handle.GetScripts) // complete
-	script.Post("/stop", handle.StopAll)           // complete
-	script.Post("/remove/{pname}/{name}", handle.Remove).AddModule(module.UpdateConfig)
-	script.Post("/remove/{pname}", handle.RemovePname).AddModule(module.UpdateConfig)
-	script.Post("/send/alert", handle.Alert)
+	script.Get("/stop/name", handle.StopPname)
+	script.Get("/stop", handle.StopAll) // complete
+	script.Get("/kill/name", handle.KillPname)
+	script.Get("/server/info/name", handle.ServerInfo) // 获取某个server信息
+	script.Get("/get/servers", handle.GetServers)      // 获取所有server信息 complete
+	script.Get("/get/index/name", handle.GetIndex)     // 获取某script 对应副本的index
+	script.Get("/cannotstop/name", handle.CanNotStop)
+	// .BindJson(pkg.SignalRequest{})
+	script.Get("/parameter/name", handle.SetParameter).BindJson(pkg.SignalRequest{})
+	script.Get("/canstop/name", handle.CanStop)
+	script.Get("/get/scripts", handle.GetScripts) // complete
+
+	// script.Get("/remove/name", handle.Remove).AddModule(module.UpdateConfig)
+	script.Get("/remove/name", handle.RemovePname).AddModule(module.UpdateConfig)
+	script.Get("/send/alert", handle.Alert)
 	script.AddGroup(simpleHandle())
 	return script
 }
@@ -59,14 +54,14 @@ func AdminHandle() *xmux.RouteGroup {
 	// 只能管理员操作 修改文件的操作
 	admin := xmux.NewRouteGroup().AddPageKeys(config.AdminRole.ToString()).AddModule(module.CheckToken)
 
-	admin.Post("/get/alert", handle.GetAlert)                             // 只能管理员用
-	admin.Post("/-/reload", handle.Reload).AddModule(module.UpdateConfig) // 只能管理员用
-	admin.Post("/-/fmt", handle.Fmt).AddModule(module.UpdateConfig)       // 只能管理员用
-	admin.Post("/get/alarms", handle.GetAlarms)                           // 只能管理员用
-	admin.Post("/get/repo", handle.GetRepo)                               // 只能管理员用
-	admin.Post("/script", handle.AddScript).BindJson(&config.Script{}).AddModule(module.UpdateConfig)
-	admin.Post("/enable/{pname}", handle.Enable).AddModule(module.UpdateConfig)   // 只能管理员用
-	admin.Post("/disable/{pname}", handle.Disable).AddModule(module.UpdateConfig) // 只能管理员用
+	admin.Get("/get/alert", handle.GetAlert)                             // 只能管理员用
+	admin.Get("/-/reload", handle.Reload).AddModule(module.UpdateConfig) // 只能管理员用
+	admin.Get("/-/fmt", handle.Fmt).AddModule(module.UpdateConfig)       // 只能管理员用
+	admin.Get("/get/alarms", handle.GetAlarms)                           // 只能管理员用
+	admin.Get("/get/repo", handle.GetRepo)                               // 只能管理员用
+	admin.Get("/script", handle.AddScript).BindJson(&config.Script{}).AddModule(module.UpdateConfig)
+	admin.Get("/enable/name", handle.Enable).AddModule(module.UpdateConfig)   // 只能管理员用
+	admin.Get("/disable/name", handle.Disable).AddModule(module.UpdateConfig) // 只能管理员用
 	admin.AddGroup(ScriptHandle())
 	return admin
 }
@@ -83,7 +78,7 @@ func init() {
 	statusMsg[500] = "system error"
 }
 
-func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
+func exit(w http.ResponseWriter, r *http.Request, start time.Time) {
 	var send []byte
 	var err error
 
@@ -97,7 +92,7 @@ func exit(start time.Time, w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(send)
 	}
-	golog.Debugf("method: %s\turl: %s\ttime: %f\t status_code: %v, body: %s, response: %s\n",
+	golog.Debugf("method: %s\turl: %s\ttime: %f\t status_code: %v, body: %s, response: %s",
 		r.Method,
 		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
 		string(xmux.GetInstance(r).Body),

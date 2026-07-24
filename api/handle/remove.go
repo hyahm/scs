@@ -2,54 +2,50 @@ package handle
 
 import (
 	"net/http"
-
-	"github.com/hyahm/scs/controller"
-	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg"
-
-	"github.com/hyahm/xmux"
 )
 
 func Remove(w http.ResponseWriter, r *http.Request) {
 
-	// 读取配置文件
-	pname := xmux.Var(r)["pname"]
-	name := xmux.Var(r)["name"]
+	// // 读取配置文件
+	// pname := xmux.Var(r)["pname"]
+	// name := xmux.Var(r)["name"]
 
-	_, ok := store.GetStore().GetScriptByName(pname)
-	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-		return
-	}
-	svc, ok := store.GetStore().GetServerByName(name)
-	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-		return
-	}
-	// msg, ok := global.SetReLoading(fmt.Sprintf("remove %s %s", pname, name))
+	// _, ok := store.GetStore().GetScriptByName(pname)
 	// if !ok {
-	// 	pkg.Error(r, msg)
+	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 	// 	return
 	// }
+	// svc, ok := store.GetStore().GetServerByName(name)
+	// if !ok {
+	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+	// 	return
+	// }
+	// // msg, ok := global.SetReLoading(fmt.Sprintf("remove %s %s", pname, name))
+	// // if !ok {
+	// // 	pkg.Error(r, msg)
+	// // 	return
+	// // }
 
-	go controller.Remove(svc, true)
+	// go controller.Remove(svc, true)
 }
 
 func RemovePname(w http.ResponseWriter, r *http.Request) {
 
-	pname := xmux.Var(r)["pname"]
-	_, ok := store.GetStore().GetScriptByName(pname)
-	if !ok {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-
-		return
-	}
-	// msg, ok := global.SetReLoading(fmt.Sprintf("remove %s ", pname))
-	// if !ok {
-	// 	pkg.Error(r, msg)
-	// 	return
+	// name := r.FormValue("pname")
+	// if pkg.IsNameWithSuffix(name) {
+	// 	svc, ok := cache.GetServer(name)
+	// 	if !ok {
+	// 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+	// 		return
+	// 	}
 	// }
-	go controller.RemoveScript(pname)
+
+	// // msg, ok := global.SetReLoading(fmt.Sprintf("remove %s ", pname))
+	// // if !ok {
+	// // 	pkg.Error(r, msg)
+	// // 	return
+	// // }
+	// go controller.RemoveScript(pname)
 }
 
 // func RemoveAll(w http.ResponseWriter, r *http.Request) {

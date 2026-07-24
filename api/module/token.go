@@ -5,8 +5,8 @@ import (
 
 	"github.com/hyahm/golog"
 	"github.com/hyahm/scs/controller"
+	"github.com/hyahm/scs/internal"
 	"github.com/hyahm/scs/pkg"
-	"github.com/hyahm/scs/pkg/config"
 	"github.com/hyahm/xmux"
 )
 
@@ -17,11 +17,11 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
 	// 	return true
 	// }
-	if token == config.Cfg.Token {
+	if token == internal.GetToken() {
 		auths := controller.GetAllAuth()
 		xmux.GetInstance(r).Set("validAuths", auths)
 		xmux.GetInstance(r).Set("role", "admin")
-		return false
+		return true
 	}
 	golog.Info("check token ", token)
 	roles := xmux.GetInstance(r).GetPageKeys()
@@ -46,7 +46,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 		if pname == "" && name == "" {
 			// 如果都是空的，那么后面接口基本需要这个来操作
 			xmux.GetInstance(r).Set("validAuths", validAuths)
-			return false
+			return true
 		}
 
 		if pname != "" && name == "" {
@@ -54,7 +54,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 			for _, auth := range validAuths {
 				if pname == auth.ScriptName {
 					xmux.GetInstance(r).Set("role", auth.Role)
-					return false
+					return true
 				}
 			}
 		}
@@ -63,7 +63,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 			for _, auth := range validAuths {
 				if name == auth.ServerName {
 					xmux.GetInstance(r).Set("role", auth.Role)
-					return false
+					return true
 				}
 			}
 		}
@@ -73,7 +73,7 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 			for _, auth := range validAuths {
 				if name == auth.ServerName && pname == auth.ScriptName {
 					xmux.GetInstance(r).Set("role", auth.Role)
-					return false
+					return true
 				}
 			}
 		}
@@ -87,5 +87,5 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool {
 	// 	addr = r.Header.Get(global.ProxyHeader)
 	// }
 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
-	return true
+	return false
 }

@@ -3,7 +3,6 @@ package handle
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
@@ -26,24 +25,19 @@ func GetAlert(w http.ResponseWriter, r *http.Request) {
 }
 
 func Probe(w http.ResponseWriter, r *http.Request) {
-	var addr string
-	if config.Cfg.ProxyHeader == "" {
-		addr = strings.Split(r.RemoteAddr, ":")[0]
-	} else {
-		addr = r.Header.Get(config.Cfg.ProxyHeader)
-	}
 
-	needToken := true
-	// 检查是否是被监控的
-	for _, v := range config.Cfg.Probe.Monitored {
-		if strings.Contains(addr, v) {
-			needToken = false
-			break
-		}
-	}
-	if needToken {
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
-		return
-	}
+	// addr := xmux.GetClientIP(r)
+	// needToken := true
+	// // 检查是否是被监控的
+	// for _, v := range internal.Cfg.Probe.Monitored {
+	// 	if strings.Contains(addr, v) {
+	// 		needToken = false
+	// 		break
+	// 	}
+	// }
+	// if needToken {
+	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 203
+	// 	return
+	// }
 
 }

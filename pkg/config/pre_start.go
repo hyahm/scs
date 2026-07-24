@@ -37,7 +37,7 @@ type PreStart struct {
 }
 
 // 判断2个 preStart 的值是否相同
-func EqualPreStart(p1, p2 []*PreStart) bool {
+func EqualPreStart(p1, p2 []PreStart) bool {
 	if len(p1) != len(p2) {
 		return false
 	}
@@ -49,7 +49,7 @@ func EqualPreStart(p1, p2 []*PreStart) bool {
 	return true
 }
 
-func equalPreStart(p1, p2 *PreStart) bool {
+func equalPreStart(p1, p2 PreStart) bool {
 
 	return !(p1.Path != p2.Path ||
 		p1.Command != p2.Command ||

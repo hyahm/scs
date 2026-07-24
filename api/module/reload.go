@@ -9,5 +9,5 @@ func UpdateConfig(w http.ResponseWriter, r *http.Request) bool {
 	// if !ok {
 	// 	pkg.Error(r, msg)
 	// }
-	return false
+	return true
 }

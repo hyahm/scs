@@ -1,14 +1,9 @@
 package pkg
 
-import (
-	"context"
-	"sync"
-)
-
-type atomSignal struct {
-	Cancel map[string]context.CancelFunc
-	mu     *sync.RWMutex
-}
+// type atomSignal struct {
+// 	Cancel map[string]context.CancelFunc
+// 	sync.RWMutex
+// }
 
 type SignalRequest struct {
 	Timeout            int64  `json:"timeout"`            // 超时时间， 默认s
@@ -18,34 +13,29 @@ type SignalRequest struct {
 	Parameter          string `json:"parameter"`          // 重启后的传参
 }
 
-var atom *atomSignal
+// var atom = &atomSignal{
+// 	Cancel: make(map[string]context.CancelFunc),
+// }
 
-func init() {
-	atom = &atomSignal{
-		Cancel: make(map[string]context.CancelFunc),
-		mu:     &sync.RWMutex{},
-	}
-}
+// // 删除原子操作的超时处理
+// func DeleteAtomSignal1(name string) {
+// 	atom.Lock()
+// 	delete(atom.Cancel, name)
+// 	atom.Unlock()
+// }
 
-// 删除原子操作的超时处理
-func DeleteAtomSignal(name string) {
-	atom.mu.Lock()
-	delete(atom.Cancel, name)
-	atom.mu.Unlock()
-}
+// // 设置信号
+// func SetAtomSignal1(name string, cancel context.CancelFunc) {
+// 	atom.Lock()
+// 	atom.Cancel[name] = cancel
+// 	atom.Unlock()
+// }
 
-// 设置信号
-func SetAtomSignal(name string, cancel context.CancelFunc) {
-	atom.mu.Lock()
-	atom.Cancel[name] = cancel
-	atom.mu.Unlock()
-}
-
-func CancelAtomSignal(name string) {
-	atom.mu.Lock()
-	if cancel, ok := atom.Cancel[name]; ok {
-		cancel()
-		delete(atom.Cancel, name)
-	}
-	atom.mu.Unlock()
-}
+// func CancelAtomSignal1(name string) {
+// 	atom.Lock()
+// 	if cancel, ok := atom.Cancel[name]; ok {
+// 		cancel()
+// 		delete(atom.Cancel, name)
+// 	}
+// 	atom.Unlock()
+// }

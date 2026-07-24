@@ -1,51 +1,45 @@
 package controller
 
 import (
-	"errors"
-	"fmt"
-
-	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/server"
-	"github.com/hyahm/scs/internal/store"
-	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/scs/internal/cache"
 )
 
 // 只有在删除的时候才会需要   svc.StopSignal 信号
 // 只有在 Server.Removed 为 true的时候才会发送  svc.StopSignal 信号
 // RemovePname 的时候才会用到
 func RemoveScript(pname string) error {
-	_, sok := store.GetStore().GetScriptByName(pname)
-	if !sok {
-		return errors.New("not found this pname:" + pname)
-	}
-	for index := range store.GetStore().GetScriptIndex(pname) {
-		subname := fmt.Sprintf("%s_%d", pname, index)
-		svc, ok := store.GetStore().GetServerByName(subname)
-		if !ok {
-			golog.Error(pkg.ErrBugMsg)
-			continue
-		}
-		Remove(svc, true)
-	}
+	// _, sok := store.GetStore().GetScriptByName(pname)
+	// if !sok {
+	// 	return errors.New("not found this pname:" + pname)
+	// }
+	// for index := range store.GetStore().GetScriptIndex(pname) {
+	// 	subname := fmt.Sprintf("%s_%d", pname, index)
+	// 	svc, ok := store.GetStore().GetServerByName(subname)
+	// 	if !ok {
+	// 		golog.Error(pkg.ErrBugMsg)
+	// 		continue
+	// 	}
+	// 	Remove(svc, true)
+	// }
 	return nil
 }
 
 // update: 是否需要重新修改配置文件， 有锁
-func Remove(svc *server.Server, update bool) {
+func Remove(svc *cache.Server, update bool) {
 	// 如果是always 为 true，那么直接修改为false
-	golog.Infof("%s start removed ", svc.SubName)
-	svc.Remove()
-	golog.Infof("%s removed ", svc.SubName)
-	<-svc.StopSignal
-	store.GetStore().DeleteScriptIndex(svc.Name, svc.Index)
-	store.GetStore().DeleteServerByName(svc.SubName)
-	removeServer(svc.Name, svc.SubName, update)
+	// golog.Infof("%s start removed ", svc.SubName)
+	// svc.Remove()
+	// golog.Infof("%s removed ", svc.SubName)
+	// <-svc.StopSignal
+	// store.GetStore().DeleteScriptIndex(svc.Name, svc.Index)
+	// store.GetStore().DeleteServerByName(svc.SubName)
+	// removeServer(svc.Name, svc.SubName, update)
 
-	// 如果全部删光了， 那么scripts的name也要删除
+	// // 如果全部删光了， 那么scripts的name也要删除
 
-	if store.GetStore().GetScriptLength(svc.Name) == 0 {
-		store.GetStore().DeleteScriptByName(svc.Name)
-	}
+	// if store.GetStore().GetScriptLength(svc.Name) == 0 {
+	// 	store.GetStore().DeleteScriptByName(svc.Name)
+	// }
 	// global.SetCanReLoad()
 }
 

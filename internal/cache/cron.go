@@ -1,13 +1,14 @@
-package server
+package cache
 
 import (
 	"time"
 
 	"github.com/hyahm/golog"
-	"github.com/hyahm/scs/internal/server/status"
+	"github.com/hyahm/scs/pkg"
 )
 
 func (svc *Server) cron() {
+	golog.Debug("cron")
 	ticker := time.NewTicker(time.Duration(svc.Cron.Loop) * time.Second)
 	defer ticker.Stop()
 	if svc.Cron.Start != "" {
@@ -31,8 +32,8 @@ do:
 		select {
 		case <-svc.Ctx.Done():
 			golog.Info("name:" + svc.SubName + " end cron")
-			golog.Debug("ready send stop single")
-			svc.StopSignal <- true
+			svc.stopStatus()
+			// svc.StopSignal <- true
 			return
 		case <-ticker.C:
 			svc.doTicker()
@@ -42,7 +43,7 @@ do:
 }
 
 func (svc *Server) doTicker() {
-	svc.Status.Status = status.RUNNING
+	svc.Status.Status = pkg.RUNNING
 	svc.Status.Start = time.Now().Unix()
 	if err := svc.start(); err != nil {
 		golog.Error("cron start error: ", err)

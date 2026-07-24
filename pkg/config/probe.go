@@ -20,23 +20,6 @@ type Detector struct {
 	Cps    []CheckPointer
 }
 
-// type Config struct {
-// 	// 通过静态配置生成动态配置
-// 	Monitor   []string
-// 	Monitored []string
-// 	Mem       float64 `yaml:"mem"`
-// 	// cpu使用率, 默认90
-// 	Cpu float64 `yaml:"cpu"`
-// 	IO  float64 `yaml:"io"`
-// 	// 硬盘使用率， 默认90
-// 	Disk float64              `yaml:"disk"`
-// 	Dp   []disk.PartitionStat `yaml:"excludeDisk"`
-// 	// 检测间隔， 默认10秒
-// 	Interval time.Duration `yaml:"interval"`
-// 	// 下次报警时间间隔， 如果恢复了就重置
-// 	ContinuityInterval time.Duration `yaml:"continuityInterval"`
-// }
-
 // 保存配置文件信息
 type Probe struct {
 	Monitor   []string `yaml:"monitor,omitempty"`
@@ -56,7 +39,7 @@ type Probe struct {
 	ContinuityInterval time.Duration `yaml:"continuityInterval,omitempty"`
 }
 
-func (p *Probe) initProbe() {
+func (p *Probe) InitProbe() {
 	if p == nil {
 		p = &Probe{}
 	}
@@ -192,9 +175,9 @@ func getDisk() []string {
 		return []string{}
 	}
 	excludePath := make(map[string]int)
-	for _, he := range Cfg.Probe.ExcludeDisk {
-		excludePath[strings.ToUpper(he)] = 0
-	}
+	// for _, he := range Cfg.Probe.ExcludeDisk {
+	// 	excludePath[strings.ToUpper(he)] = 0
+	// }
 
 	mountNames := make(map[string]string)
 	for _, part := range parts {
