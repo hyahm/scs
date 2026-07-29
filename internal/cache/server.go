@@ -19,8 +19,8 @@ import (
 const defaultContinuityInterval = time.Hour * 1
 
 type Server struct {
-	mu             sync.RWMutex
-	canNotOpration bool
+	Mu             sync.RWMutex
+	CanNotOpration bool
 	Index          int `json:"index"` // svc的索引
 	// ScriptToken string            `json:"scriptToken"` // svc的token
 	// SimpleToken string            `json:"simpleToken"` // svc的token
@@ -50,7 +50,7 @@ type Server struct {
 	Port    int  `json:"port,omitempty"`
 	// AI      *config.AlertInfo `json:"-"` // 报警规则
 	// 进程退出后是否自动重启（Restart 设置，wait 消费）
-	restartOnExit bool `json:"-"`
+	// restartOnExit bool `json:"-"`
 	// 取消操作， 可以取消等待重启， 等待停止， 等待remove(暂时没实现)
 	// CancelProcess chan bool `json:"-"`
 	// 服务停止后的信号， 比如  restart, remove 操作， 因为停止后还有下一步操作
@@ -62,7 +62,7 @@ type Server struct {
 	Update string `json:"update,omitempty"`
 	// 暂时无视
 	Liveness *config.Liveness `json:"-"`
-	Ready    chan bool        `json:"-"`
+	// Ready    chan bool        `json:"-"`
 	// 是否一直重启， 应该还需要一个retry次数的字段才对
 	Always bool `json:"always,omitempty"`
 	// 取消报警的感觉没用， 谁没事了会取消报警
@@ -75,43 +75,37 @@ type Server struct {
 	DeleteWhenExitSingle chan bool `json:"-"`
 }
 
-func (s *Server) SetCanNotOperation(v bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.canNotOpration = v
-}
+// func (s *Server) SetCanNotOperation(v bool) {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
+// 	s.canNotOpration = v
+// }
 
-// CanOperation 安全地读取 canOpration
-func (s *Server) GetCanNotOperation() bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.canNotOpration
-}
+// // CanOperation 安全地读取 canOpration
+// func (s *Server) GetCanNotOperation() bool {
+// 	s.mu.RLock()
+// 	defer s.mu.RUnlock()
+// 	return s.canNotOpration
+// }
 
-func (s *Server) SetCanNotStop(v bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.Status.CanNotStop = v
-}
+// func (s *Server) SetCanNotStop(v bool) {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
+// 	s.Status.CanNotStop = v
+// }
 
-// CanOperation 安全地读取 canOpration
-func (s *Server) GetCanNotStop() bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.Status.CanNotStop
-}
+// func (s *Server) SetWaitingStop() {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
+// 	s.Status.Status = pkg.WAITSTOP
+// }
 
-func (s *Server) setRestartOnExit(v bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.restartOnExit = v
-}
-
-func (s *Server) getRestartOnExit() bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.restartOnExit
-}
+// // CanOperation 安全地读取 canOpration
+// func (s *Server) GetCanNotStop() bool {
+// 	s.mu.RLock()
+// 	defer s.mu.RUnlock()
+// 	return s.Status.CanNotStop
+// }
 
 // update 的时候执行
 func (svc *Server) shell(command string) error {
@@ -162,7 +156,7 @@ func (svc *Server) CheckReady(ctx context.Context) {
 		case <-time.After(time.Millisecond * 1):
 			ok := svc.Liveness.Ready()
 			if ok {
-				svc.Ready <- true
+				// svc.Ready <- true
 				return
 			}
 		}
@@ -171,8 +165,6 @@ func (svc *Server) CheckReady(ctx context.Context) {
 }
 
 func (svc *Server) GetStatus() pkg.ServiceStatus {
-	svc.mu.RLock()
-	defer svc.mu.RUnlock()
 	status := pkg.ServiceStatus{
 		PName:        svc.Name,
 		Name:         svc.SubName,
@@ -202,26 +194,22 @@ func (svc *Server) Restart() {
 		return
 	}
 	// 等 cannotstop 解除
-	if svc.GetCanNotStop() {
+	if svc.Status.CanNotStop {
 		<-svc.Status.ChStop
 	}
 	if svc.Always {
 		svc.Always = false
 	}
-	svc.mu.Lock()
 	switch svc.Status.Status {
 	case pkg.STOP:
-		svc.mu.Unlock()
 		// 已停止，直接拉起
 		svc.StartAsync()
 	case pkg.RUNNING:
 		// 标记本轮退出后重启，Cancel 触发 wait() 执行重启
-		svc.restartOnExit = true
-		svc.mu.Unlock()
+		// svc.restartOnExit = true
 		svc.Cancel()
 	default:
 		// WAITSTOP / WAITRESTART 等中间态：忽略，避免状态错乱
-		svc.mu.Unlock()
 	}
 }
 
@@ -272,7 +260,7 @@ func (svc *Server) FillServer(script config.Script) {
 	// svc.StopSignal = make(chan bool, 1)
 
 	// svc.Liveness = script.Liveness
-	svc.Ready = make(chan bool, 1)
+	// svc.Ready = make(chan bool, 1)
 	svc.Always = script.Always
 	svc.AlwaysSign = script.Always
 	svc.DeleteWhenExit = script.DeleteWhenExit
@@ -291,7 +279,7 @@ func (svc *Server) FillServer(script config.Script) {
 // Remove 删除服务：撤销待重启意图，等 cannotstop 解除后停止进程，再从全局 store 移除。
 func (svc *Server) Remove() {
 	// 撤销任何待重启意图
-	svc.setRestartOnExit(false)
+	// svc.setRestartOnExit(false)
 	if svc.IsCron {
 		// 定时任务直接取消循环
 		golog.Infof("stop loop %s", svc.SubName)
@@ -300,7 +288,7 @@ func (svc *Server) Remove() {
 		if svc.Always {
 			svc.Always = false
 		}
-		if svc.GetCanNotStop() {
+		if svc.Status.CanNotStop {
 			<-svc.Status.ChStop
 		}
 		switch svc.Status.Status {
@@ -318,12 +306,13 @@ func (svc *Server) Remove() {
 // Stop  停止服务：撤销待重启意图后，等 cannotstop 解除再 Cancel。
 func (svc *Server) Stop() {
 	// 撤销任何待重启意图，避免进程退出后被 wait() 自动拉起
-	svc.setRestartOnExit(false)
+	// svc.setRestartOnExit(false)
 	if svc.Disable {
 		return
 	}
 
-	if svc.GetCanNotStop() {
+	if svc.Status.CanNotStop {
+		svc.Status.Status = pkg.WAITSTOP
 		<-svc.Status.ChStop
 	}
 	if svc.IsCron {
@@ -361,8 +350,8 @@ func (svc *Server) Kill() {
 		return
 	}
 	// 撤销任何待重启意图，避免退出后被 wait() 自动拉起
-	svc.setRestartOnExit(false)
-	if svc.GetCanNotStop() {
+	// svc.setRestartOnExit(false)
+	if svc.Status.CanNotStop {
 		<-svc.Status.ChStop
 	}
 	switch svc.Status.Status {
@@ -374,12 +363,12 @@ func (svc *Server) Kill() {
 	}
 }
 
-func (svc *Server) stopStatus() {
+func (svc *Server) resetStatus() {
+	golog.UpFunc(1, "111111111")
 	svc.Status.Status = pkg.STOP
 	svc.Status.Pid = 0
 	svc.Status.CanNotStop = false
 	svc.Status.RestartCount = 0
-	svc.SetCanNotOperation(false)
 	svc.Status.Start = 0
 	svc.Cmd = nil
 	// if svc.Logger != nil {

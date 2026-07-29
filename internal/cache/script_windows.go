@@ -51,8 +51,8 @@ func (svc *Server) start() error {
 	svc.read()
 	if err := svc.Cmd.Start(); err != nil {
 		// 执行脚本前的错误, 改变状态
-		golog.Error(err)
-		svc.stopStatus()
+		svc.Logger.Error(err)
+		svc.resetStatus()
 		return err
 	}
 	svc.Status.Status = pkg.RUNNING

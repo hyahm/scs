@@ -17,18 +17,7 @@ func Kill(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	if svc.GetCanNotOperation() {
-		golog.Info("服务暂时无法被操作: ", svc.SubName)
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-		return
-	}
-	if svc.Status.Status == pkg.RUNNING {
-		go func(svc *cache.Server) {
-			svc.SetCanNotOperation(true)
-			svc.Kill()
-			svc.SetCanNotOperation(false)
-		}(svc)
-	}
+	go kill(svc)
 }
 
 // KillPname 按 name 强杀：name 带后缀时强杀单个副本，否则强杀整组。
@@ -40,31 +29,24 @@ func KillPname(w http.ResponseWriter, r *http.Request) {
 			xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 			return
 		}
-		if svc.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", svc.SubName)
-			xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-			return
-		}
-		if svc.Status.Status == pkg.RUNNING {
-			go func(svc *cache.Server) {
-				svc.SetCanNotOperation(true)
-				svc.Kill()
-				svc.SetCanNotOperation(false)
-			}(svc)
-		}
+		go kill(svc)
 		return
 	}
-	for _, v := range cache.GetGroupServer(name) {
-		if v.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", v.SubName)
-			continue
-		}
-		if v.Status.Status == pkg.RUNNING {
-			go func(svc *cache.Server) {
-				v.SetCanNotOperation(true)
-				v.Kill()
-				v.SetCanNotOperation(false)
-			}(v)
-		}
+	for _, svc := range cache.GetGroupServer(name) {
+		go kill(svc)
+	}
+}
+
+func kill(svc *cache.Server) {
+	svc.Mu.Lock()
+	defer svc.Mu.Unlock()
+	if svc.CanNotOpration {
+		golog.Info("服务暂时无法被操作: ", svc.SubName)
+		return
+	}
+	if svc.Status.Status == pkg.RUNNING {
+		svc.CanNotOpration = true
+		svc.Kill()
+		svc.CanNotOpration = false
 	}
 }

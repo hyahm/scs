@@ -417,6 +417,20 @@ func (sc *SCSClient) StopName() (*pkg.Response, error) {
 	return sc.requests("/stop/name?name="+sc.Name, nil)
 }
 
+func (sc *SCSClient) CanStopName() (*pkg.Response, error) {
+	if sc.Name == "" {
+		return nil, ErrPnameIsEmpty
+	}
+	return sc.requests("/canstop/name?name="+sc.Name, nil)
+}
+
+func (sc *SCSClient) CanNotStopName() (*pkg.Response, error) {
+	if sc.Name == "" {
+		return nil, ErrPnameIsEmpty
+	}
+	return sc.requests("/cannotstop/name?name="+sc.Name, nil)
+}
+
 // 停止当前副本
 // func (sc *SCSClient) StopName() (*pkg.Response, error) {
 // 	if sc.Name == "" {
@@ -431,19 +445,11 @@ func (sc *SCSClient) StopName() (*pkg.Response, error) {
 // }
 
 // 移除当前脚本
-func (sc *SCSClient) RemovePnameScrip() (*pkg.Response, error) {
+func (sc *SCSClient) RemoveScrip() (*pkg.Response, error) {
 	if sc.Name == "" {
 		return nil, ErrPnameIsEmpty
 	}
 	return sc.requests("/remove/name?name="+sc.Name, nil)
-}
-
-// 移除当前副本
-func (sc *SCSClient) RemoveNameScrip() (*pkg.Response, error) {
-	if sc.Name == "" {
-		return nil, ErrNameIsEmpty
-	}
-	return sc.requests(fmt.Sprintf("/remove/name?name="+sc.Name), nil)
 }
 
 // 启用脚本

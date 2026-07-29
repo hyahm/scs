@@ -39,46 +39,30 @@ func StartPname(w http.ResponseWriter, r *http.Request) {
 			xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 			return
 		}
-		if svc.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", name)
-			return
-		}
-		go func() {
-			svc.SetCanNotOperation(true)
-			svc.Start()
-			svc.SetCanNotOperation(false)
-		}()
+		go start(svc)
 		return
 	}
-	for _, v := range cache.GetGroupServer(name) {
-		if v.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", v.SubName)
-			continue
-		}
-		if v.Status.Status == pkg.STOP {
-			go func(svc *cache.Server) {
-				svc.SetCanNotOperation(true)
-				svc.Start()
-				svc.SetCanNotOperation(false)
-			}(v)
-		}
+	for _, svc := range cache.GetGroupServer(name) {
+		go start(svc)
 
 	}
 	// controller.StartExsitScript(pname)
 }
 
 func StartAll(w http.ResponseWriter, r *http.Request) {
-	for _, v := range cache.GetAllServer() {
-		if v.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", v.SubName)
-			continue
-		}
-		if v.Status.Status == pkg.STOP {
-			go func(svc *cache.Server) {
-				svc.SetCanNotOperation(true)
-				svc.Start()
-				svc.SetCanNotOperation(false)
-			}(v)
-		}
+	for _, svc := range cache.GetAllServer() {
+		go start(svc)
 	}
+}
+
+func start(svc *cache.Server) {
+	svc.Mu.Lock()
+	defer svc.Mu.Unlock()
+	if svc.CanNotOpration {
+		golog.Info("服务暂时无法被操作: ", svc.SubName)
+		return
+	}
+	svc.CanNotOpration = true
+	svc.Start()
+	svc.CanNotOpration = false
 }

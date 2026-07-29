@@ -16,44 +16,30 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	if svc.GetCanNotOperation() {
-		golog.Info("服务暂时无法被操作: ", svc.SubName)
-		xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-		return
-	}
-	// 重启交由 svc.Restart 处理（内含 cannotstop 等待 + stop->start 语义）
-	go func(svc *cache.Server) {
-		svc.SetCanNotOperation(true)
-		svc.Restart()
-		svc.SetCanNotOperation(false)
-	}(svc)
+	go restart(svc)
 }
 
 func RestartPname(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
-	for _, v := range cache.GetGroupServer(name) {
-		if v.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", v.SubName)
-			continue
-		}
-		go func(svc *cache.Server) {
-			svc.SetCanNotOperation(true)
-			svc.Restart()
-			svc.SetCanNotOperation(false)
-		}(v)
+	for _, svc := range cache.GetGroupServer(name) {
+		go restart(svc)
 	}
 }
 
 func RestartAll(w http.ResponseWriter, r *http.Request) {
-	for _, v := range cache.GetAllServer() {
-		if v.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", v.SubName)
-			continue
-		}
-		go func(svc *cache.Server) {
-			svc.SetCanNotOperation(true)
-			svc.Restart()
-			svc.SetCanNotOperation(false)
-		}(v)
+	for _, svc := range cache.GetAllServer() {
+		go restart(svc)
 	}
+}
+
+func restart(svc *cache.Server) {
+	svc.Mu.Lock()
+	defer svc.Mu.Unlock()
+	if svc.CanNotOpration {
+		golog.Info("服务暂时无法被操作: ", svc.SubName)
+		return
+	}
+	svc.CanNotOpration = true
+	svc.Restart()
+	svc.CanNotOpration = false
 }

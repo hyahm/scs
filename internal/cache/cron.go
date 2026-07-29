@@ -8,7 +8,6 @@ import (
 )
 
 func (svc *Server) cron() {
-	golog.Debug("cron")
 	ticker := time.NewTicker(time.Duration(svc.Cron.Loop) * time.Second)
 	defer ticker.Stop()
 	if svc.Cron.Start != "" {
@@ -20,11 +19,9 @@ func (svc *Server) cron() {
 		reset := time.Until(start)
 		if reset > 0 {
 			ticker.Reset(reset)
-			goto do
 		}
 	}
 	svc.doTicker()
-do:
 	// 计算下次启动时间
 
 	svc.Times = svc.Cron.Times
@@ -32,7 +29,7 @@ do:
 		select {
 		case <-svc.Ctx.Done():
 			golog.Info("name:" + svc.SubName + " end cron")
-			svc.stopStatus()
+			svc.resetStatus()
 			// svc.StopSignal <- true
 			return
 		case <-ticker.C:
@@ -46,8 +43,8 @@ func (svc *Server) doTicker() {
 	svc.Status.Status = pkg.RUNNING
 	svc.Status.Start = time.Now().Unix()
 	if err := svc.start(); err != nil {
-		golog.Error("cron start error: ", err)
-		svc.stopStatus()
+		svc.Logger.Error("cron start error: ", err)
+		svc.resetStatus()
 		return
 	}
 	if svc.Cmd != nil && svc.Cmd.Process != nil {
@@ -56,8 +53,8 @@ func (svc *Server) doTicker() {
 	svc.wait()
 	svc.Times--
 	if svc.Cron.Times > 0 && svc.Times <= 0 {
-		golog.Infof("循环器%s执行次数结束", svc.SubName)
-		svc.stopStatus()
+		svc.Logger.Infof("循环器%s执行次数结束", svc.SubName)
+		svc.resetStatus()
 		return
 	}
 	svc.Status.Pid = 0

@@ -44,12 +44,9 @@ var FmtCmd = &cobra.Command{
 			return
 		}
 		for _, node := range nodes {
-			wg.Add(1)
-			go func(node *client.Node) {
+			wg.Go(func() {
 				node.Fmt()
-				wg.Done()
-			}(node)
-
+			})
 		}
 		wg.Wait()
 

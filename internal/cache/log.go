@@ -15,11 +15,11 @@ func (svc *Server) read() {
 	}
 	stdout, err := svc.Cmd.StdoutPipe()
 	if err != nil {
-		golog.Error(err)
+		svc.Logger.Error(err)
 	}
 	stderr, err := svc.Cmd.StderrPipe()
 	if err != nil {
-		golog.Error(err)
+		svc.Logger.Error(err)
 	}
 	// svc.Msg = make(chan string, 1000)
 	// 数据同步到log命令

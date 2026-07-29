@@ -256,6 +256,38 @@ func (node *Node) Stop(args ...string) {
 
 }
 
+func (node *Node) CanNotStop(args ...string) {
+
+	cli := node.NewSCSClient()
+	var err error
+	var res *pkg.Response
+	for _, v := range args {
+		cli.Name = v
+		res, err = cli.CanNotStopName()
+		if err != nil {
+			fmt.Printf("name: %s , msg: %v\n", node.Name, err)
+			continue
+		}
+	}
+	fmt.Println(string(res.Marshal()))
+}
+
+func (node *Node) CanStop(args ...string) {
+
+	cli := node.NewSCSClient()
+	var err error
+	var res *pkg.Response
+	for _, v := range args {
+		cli.Name = v
+		res, err = cli.CanStopName()
+		if err != nil {
+			fmt.Printf("name: %s , msg: %v\n", node.Name, err)
+			continue
+		}
+	}
+	fmt.Println(string(res.Marshal()))
+}
+
 func (node *Node) Remove(args ...string) {
 
 	cli := node.NewSCSClient()
@@ -268,7 +300,7 @@ func (node *Node) Remove(args ...string) {
 		// b, err = cli.RemoveAllScrip()
 	default:
 		cli.Name = args[0]
-		res, err = cli.RemoveNameScrip()
+		res, err = cli.RemoveScrip()
 	}
 	if err != nil {
 		fmt.Printf("name: %s , msg: %v\n", node.Name, err)

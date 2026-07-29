@@ -28,8 +28,8 @@ func NewServer(opts ...ServerOption) *Server {
 			Status: pkg.STOP,
 		},
 		// StopSignal: make(chan bool, 1),
-		Ready: make(chan bool, 1),
-		Env:   make(map[string]string),
+		// Ready: make(chan bool, 1),
+		Env: make(map[string]string),
 	}
 
 	for _, opt := range opts {

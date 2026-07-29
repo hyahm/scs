@@ -11,27 +11,37 @@ import (
 )
 
 func CanStop(w http.ResponseWriter, r *http.Request) {
-	subname := r.FormValue("subname")
-	svc, ok := cache.GetServer(subname)
+	name := r.FormValue("name")
+	svc, ok := cache.GetServer(name)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	if !svc.GetCanNotStop() {
-		return
-	}
-	svc.SetCanNotStop(false)
-	svc.Status.ChStop <- struct{}{}
+	go func() {
+		svc.Mu.Lock()
+		defer svc.Mu.Unlock()
+		if !svc.Status.CanNotStop {
+			return
+		}
+		svc.Status.CanNotStop = false
+		svc.Status.ChStop <- struct{}{}
+	}()
+
 }
 
 func CanNotStop(w http.ResponseWriter, r *http.Request) {
-	subname := r.FormValue("subname")
-	svc, ok := cache.GetServer(subname)
+	name := r.FormValue("name")
+	svc, ok := cache.GetServer(name)
 	if !ok {
 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 		return
 	}
-	svc.SetCanNotStop(true)
+	go func() {
+		svc.Mu.Lock()
+		defer svc.Mu.Unlock()
+		svc.Status.CanNotStop = true
+	}()
+
 }
 
 func SetParameter(w http.ResponseWriter, r *http.Request) {

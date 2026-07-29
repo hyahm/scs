@@ -35,13 +35,11 @@ func (svc *Server) Start() {
 	// 局部捕获 logger：restart 路径下新 Start() 会覆盖 svc.Logger，
 	// defer 必须绑定本次实例，否则旧 goroutine 退出时会误刷新进程的日志。
 	// golog 的 (*Log).Sync() 会无条件 close 内部 channel，重复调用会 panic，用 recover 兜底。
-	logger := golog.NewLog(
+	svc.Logger = golog.NewLog(
 		filepath.Join(internal.GetLogPath(), svc.SubName+".log"), 0, true)
-	svc.Logger = logger
-	defer func() {
-		defer func() { _ = recover() }()
-		logger.Sync()
-	}()
+	// svc.Logger = logger
+	defer svc.Logger.Sync()
+
 	// svc.Env["PARAMETER"] = param
 	// 格式化 SCS_TPL 开头的环境变量
 	for k := range svc.Env {
@@ -54,7 +52,7 @@ func (svc *Server) Start() {
 	err := svc.Install()
 	if err != nil {
 		golog.Error(err)
-		svc.stopStatus()
+		svc.resetStatus()
 		return
 	}
 	svc.Status.Command = internal.Format(svc.Command, svc.Env)
@@ -111,7 +109,7 @@ func (svc *Server) Start() {
 	svc.Status.Start = time.Now().Unix() // 设置启动状态是成功的
 	if err := svc.start(); err != nil {
 		golog.Info(err)
-		svc.stopStatus()
+		svc.resetStatus()
 		return
 	}
 	if svc.Cmd.Process != nil {

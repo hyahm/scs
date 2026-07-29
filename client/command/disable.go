@@ -11,7 +11,7 @@ import (
 var EnableCmd = &cobra.Command{
 	Use:   "enable",
 	Short: "enable script",
-	Long:  `command: scsctl enable <pname>`,
+	Long:  `command: scsctl enable <pname|name>`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		wg := &sync.WaitGroup{}

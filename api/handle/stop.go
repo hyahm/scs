@@ -52,34 +52,11 @@ func StopPname(w http.ResponseWriter, r *http.Request) {
 			xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
 			return
 		}
-		if svc.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", svc.SubName)
-			xmux.GetInstance(r).Response.(*pkg.Response).Code = 201
-			return
-
-		}
-		if svc.Status.Status == pkg.RUNNING {
-			go func(svc *cache.Server) {
-				svc.SetCanNotOperation(true)
-				svc.Stop()
-				svc.SetCanNotOperation(false)
-			}(svc)
-		}
+		go stop(svc)
 		return
 	}
-	for _, v := range cache.GetGroupServer(name) {
-		if v.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", v.SubName)
-			continue
-
-		}
-		if v.Status.Status == pkg.RUNNING {
-			go func(svc *cache.Server) {
-				v.SetCanNotOperation(true)
-				v.Stop()
-				v.SetCanNotOperation(false)
-			}(v)
-		}
+	for _, svc := range cache.GetGroupServer(name) {
+		go stop(svc)
 	}
 	// err := controller.StopScript(script)
 	// if err != nil {
@@ -95,18 +72,23 @@ func StopAll(w http.ResponseWriter, r *http.Request) {
 	// 	validName[auth.ScriptName] = struct{}{}
 	// }
 	// controller.StopScriptFromName(validName)
-	for _, v := range cache.GetAllServer() {
-		if v.GetCanNotOperation() {
-			golog.Info("服务暂时无法被操作: ", v.SubName)
-			continue
-		}
-		if v.Status.Status == pkg.RUNNING {
-			go func(svc *cache.Server) {
-				v.SetCanNotOperation(true)
-				v.Stop()
-				v.SetCanNotOperation(false)
-			}(v)
-		}
+	for _, svc := range cache.GetAllServer() {
+		go stop(svc)
 	}
 
+}
+
+func stop(svc *cache.Server) {
+	svc.Mu.Lock()
+	defer svc.Mu.Unlock()
+	if svc.CanNotOpration {
+		golog.Info("服务暂时无法被操作: ", svc.SubName)
+		return
+
+	}
+	if svc.Status.Status == pkg.RUNNING {
+		svc.CanNotOpration = true
+		svc.Stop()
+		svc.CanNotOpration = false
+	}
 }
