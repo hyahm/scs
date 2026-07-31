@@ -73,7 +73,7 @@ func (ra *RespAlert) SendAlert() {
 	defer dispatcher.Unlock()
 	// 异常的通知
 	// 如果收到了报警
-	val, ok := GetDispatcher(ra.Name)
+	val, ok := dispatcher.dispatcher[ra.Name]
 	if !ok {
 		// 如果是第一次， 那么初始化值并直接发送报警
 		if ra.ContinuityInterval == 0 {
@@ -94,7 +94,7 @@ func (ra *RespAlert) SendAlert() {
 			To:                 ra.To,
 			ContinuityInterval: time.Duration(ra.ContinuityInterval) * time.Second,
 		}
-		SetDispatcher(ra.Name, ai)
+		dispatcher.dispatcher[ra.Name] = ai
 		AlertMessage(ai.AM, ai.To)
 		return
 	}
@@ -102,21 +102,24 @@ func (ra *RespAlert) SendAlert() {
 	if time.Since(val.AlertTime) > val.ContinuityInterval {
 		AlertMessage(val.AM, val.To)
 		val.AlertTime = time.Now()
-		SetDispatcher(ra.Name, val)
+		dispatcher.dispatcher[ra.Name] = val
 	}
-
 }
 
 func CleanAlert() {
 	// 删除超过10小时没发送信息的值， 每10分钟执行一次
 	for {
-		for name, di := range GetDispatcherList() {
+		dispatcher.RLock()
+		var expired []string
+		for name, di := range dispatcher.dispatcher {
 			if time.Since(di.AlertTime) > time.Hour*10 {
-				DeleteDispatcher(name)
+				expired = append(expired, name)
 			}
-
+		}
+		dispatcher.RUnlock()
+		for _, name := range expired {
+			DeleteDispatcher(name)
 		}
 		time.Sleep(time.Minute * 10)
 	}
-
 }

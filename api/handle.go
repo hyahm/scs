@@ -42,6 +42,7 @@ func ScriptHandle() *xmux.RouteGroup {
 	script.Get("/parameter/name", handle.SetParameter).BindJson(pkg.SignalRequest{})
 	script.Get("/canstop/name", handle.CanStop)
 	script.Get("/get/scripts", handle.GetScripts) // complete
+	script.Get("/env/name", handle.GetEnvName)
 
 	// script.Get("/remove/name", handle.Remove).AddModule(module.UpdateConfig)
 	script.Get("/remove/name", handle.RemovePname).AddModule(module.UpdateConfig)
@@ -92,9 +93,9 @@ func exit(w http.ResponseWriter, r *http.Request, start time.Time) {
 		}
 		w.Write(send)
 	}
-	// golog.Debugf("method: %s\turl: %s\ttime: %f\t status_code: %v, body: %s, response: %s",
-	// 	r.Method,
-	// 	r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
-	// 	string(xmux.GetInstance(r).Body),
-	// 	string(send))
+	golog.Debugf("method: %s\turl: %s\ttime: %f\t status_code: %v, body: %s, response: %s",
+		r.Method,
+		r.URL.Path, time.Since(start).Seconds(), xmux.GetInstance(r).StatusCode,
+		string(xmux.GetInstance(r).Body),
+		string(send))
 }

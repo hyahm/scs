@@ -1,6 +1,11 @@
 package config
 
-// 暂时只支持邮箱
+import (
+	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/pkg/message"
+)
+
+// Alert 聚合所有报警通道的配置。
 type Alert struct {
 	Email    AlertEmail    `yaml:"email,omitempty" json:"email,omitempty"`
 	Rocket   AlertRocket   `yaml:"rocket,omitempty" json:"rocket,omitempty"`
@@ -10,62 +15,50 @@ type Alert struct {
 	DingDing AlertDingDing `yaml:"dingding,omitempty" json:"dingding,omitempty"`
 }
 
-// func GetAlerts() map[string]message.SendAlerter {
-// 	alerter.alertsLocker.RLock()
-// 	defer alerter.alertsLocker.RUnlock()
-// 	return alerter.Alerts
-// }
+var alerter = &Alerter{
+	Alerts: make(map[string]message.SendAlerter),
+}
 
-// func InitAlert() {
-// 	if alerter.Alert == nil {
-// 		alerter.Alerts = make(map[string]message.SendAlerter)
-// 		return
-// 	}
-// 	// 报警配置转移到了 Alerts
-// 	if alerter.Alert.Email != nil {
-// 		if alerter.Alert.Email.Host != "" && alerter.Alert.Email.UserName != "" &&
-// 			alerter.Alert.Email.Password != "" {
-// 			if alerter.Alert.Email.Port == 0 {
-// 				alerter.Alert.Email.Port = 465
-// 			}
-// 			alerter.Alerts["email"] = alerter.Alert.Email
+type Alerter struct {
+	Alert  Alert
+	Alerts map[string]message.SendAlerter
+}
 
-// 		}
-// 	} else {
-// 		delete(alerter.Alerts, "email")
-// 	}
-// 	if alerter.Alert.Rocket != nil {
+func GetAlerts() map[string]message.SendAlerter {
+	return alerter.Alerts
+}
 
-// 		if alerter.Alert.Rocket.Server != "" && alerter.Alert.Rocket.Username != "" &&
-// 			alerter.Alert.Rocket.Password != "" {
-// 			alerter.Alerts["rocket"] = alerter.Alert.Rocket
-// 		}
+// InitAlert 根据配置初始化各报警器实例，存入 alerter.Alerts。
+func InitAlert(cfg Alert) {
+	alerter.Alerts = make(map[string]message.SendAlerter)
+	alerter.Alert = cfg
 
-// 	} else {
-// 		delete(alerter.Alerts, "rocket")
-// 	}
-
-// 	if alerter.Alert.Telegram != nil && alerter.Alert.Telegram.Server != "" {
-// 		alerter.Alerts["telegram"] = alerter.Alert.Telegram
-
-// 	} else {
-// 		delete(alerter.Alerts, "telegram")
-// 	}
-// 	if alerter.Alert.WeiXin != nil && alerter.Alert.WeiXin.Server != "" {
-// 		alerter.Alerts["weixin"] = alerter.Alert.WeiXin
-// 	} else {
-// 		delete(alerter.Alerts, "weixin")
-// 	}
-
-// 	if alerter.Alert.DingDing != nil && alerter.Alert.DingDing.Server != "" {
-// 		alerter.Alerts["dingding"] = alerter.Alert.DingDing
-// 	} else {
-// 		delete(alerter.Alerts, "dingding")
-// 	}
-
-// 	if alerter.Alert.Callback != nil {
-// 		alerter.Alerts["callback"] = alerter.Alert.Callback
-// 	} else {
-// 		delete(alerter.Alerts, "callback")
-// 	}
-// }
+	if cfg.Email.Host != "" && cfg.Email.UserName != "" && cfg.Email.Password != "" {
+		email := cfg.Email
+		if email.Port == 0 {
+			email.Port = 465
+		}
+		alerter.Alerts["email"] = &email
+		golog.Info("报警通道初始化: email")
+	}
+	if cfg.Rocket.Server != "" && cfg.Rocket.Username != "" && cfg.Rocket.Password != "" {
+		alerter.Alerts["rocket"] = &cfg.Rocket
+		golog.Info("报警通道初始化: rocket")
+	}
+	if cfg.Telegram.Server != "" {
+		alerter.Alerts["telegram"] = &cfg.Telegram
+		golog.Info("报警通道初始化: telegram")
+	}
+	if cfg.WeiXin.Server != "" {
+		alerter.Alerts["weixin"] = &cfg.WeiXin
+		golog.Info("报警通道初始化: weixin")
+	}
+	if cfg.DingDing.Server != "" {
+		alerter.Alerts["dingding"] = &cfg.DingDing
+		golog.Info("报警通道初始化: dingding")
+	}
+	if cfg.Callback.Urls != nil && len(cfg.Callback.Urls) > 0 {
+		alerter.Alerts["callback"] = &cfg.Callback
+		golog.Info("报警通道初始化: callback")
+	}
+}

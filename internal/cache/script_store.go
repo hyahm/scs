@@ -17,6 +17,22 @@ var scriptInstance = &Script{
 	// index:   make(map[string]int),
 }
 
+func GetAllScript() map[string]config.Script {
+	scriptInstance.RLock()
+	defer scriptInstance.RUnlock()
+	result := make(map[string]config.Script, len(scriptInstance.script))
+	for k, v := range scriptInstance.script {
+		result[k] = v
+	}
+	return result
+}
+
+func RemoveScript(name string) {
+	scriptInstance.Lock()
+	defer scriptInstance.Unlock()
+	delete(scriptInstance.script, name)
+}
+
 func GetScript(name string) (config.Script, bool) {
 	scriptInstance.RLock()
 	defer scriptInstance.RUnlock()

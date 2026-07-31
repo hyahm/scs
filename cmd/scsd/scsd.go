@@ -59,8 +59,16 @@ func main() {
 	// 	golog.InitLogger("scs.log", 0, true)
 	// }
 
+	// 初始化报警通道
+	cfg := internal.GetConfig()
+	config.InitAlert(cfg.Alert)
 	// 自动清除全局报警器的值
 	go config.CleanAlert()
+	// 初始化并启动硬件检测
+	config.InitDetector(&cfg)
+	if cfg.Probe.Cpu > 0 || cfg.Probe.Mem > 0 || cfg.Probe.Disk > 0 || cfg.Probe.IO > 0 || len(cfg.Probe.Monitor) > 0 {
+		go config.CheckHardWare()
+	}
 	// 启动脚本
 	cache.FirstStartAllScript()
 	// 回写

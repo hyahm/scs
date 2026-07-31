@@ -29,9 +29,13 @@ type Disk struct {
 }
 
 func NewDisk() *Disk {
+	dp := make([]disk.PartitionStat, 0, len(healthDetector.Config.Probe.DiskPartition))
+	for _, mount := range healthDetector.Config.Probe.DiskPartition {
+		dp = append(dp, disk.PartitionStat{Mountpoint: mount})
+	}
 	return &Disk{
 		Percent: healthDetector.Config.Probe.Disk,
-		// Dp:      healthDetector.Config.Dp,
+		Dp:      dp,
 		AI: &AlertInfo{
 			AM:                 &message.Message{},
 			ContinuityInterval: healthDetector.Config.Probe.ContinuityInterval,

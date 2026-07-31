@@ -185,6 +185,35 @@ func UpdateScriptToConfigFile(s config.Script, update bool) error {
 
 }
 
+// DeleteScriptFromConfigFile 从配置文件删除指定 script
+func DeleteScriptFromConfigFile(name string) error {
+	cfg.RLock()
+	tmp := cfg.config
+	cfg.RUnlock()
+	newScripts := make([]config.Script, 0, len(tmp.Scripts))
+	for _, s := range tmp.Scripts {
+		if s.Name != name {
+			newScripts = append(newScripts, s)
+		}
+	}
+	tmp.Scripts = newScripts
+	return WriteConfig(tmp)
+}
+
+// SetScriptDisableInConfig 在配置文件里设置 script 的 disable 字段
+func SetScriptDisableInConfig(name string, disable bool) error {
+	cfg.RLock()
+	tmp := cfg.config
+	cfg.RUnlock()
+	for i := range tmp.Scripts {
+		if tmp.Scripts[i].Name == name {
+			tmp.Scripts[i].Disable = disable
+			break
+		}
+	}
+	return WriteConfig(tmp)
+}
+
 // // 删除配置文件的所有scripts
 // func DeleteAllScriptToConfigFile(update bool) error {
 // 	// 添加

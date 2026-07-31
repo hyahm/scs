@@ -55,6 +55,26 @@ func RemoveServer(name string) {
 	delete(storeInstance.server, name)
 }
 
+func RemoveGroupServer(pname string) {
+	storeInstance.Lock()
+	defer storeInstance.Unlock()
+	for k, v := range storeInstance.server {
+		if v.Name == pname {
+			delete(storeInstance.server, k)
+		}
+	}
+}
+
+func GetAllServerMap() map[string]*Server {
+	storeInstance.RLock()
+	defer storeInstance.RUnlock()
+	result := make(map[string]*Server, len(storeInstance.server))
+	for k, v := range storeInstance.server {
+		result[k] = v
+	}
+	return result
+}
+
 // GetStore 返回全局 Store 实例
 
 // func (s *Store) GetServerBySubName(subname string) (Server, bool) {

@@ -2,58 +2,63 @@ package handle
 
 import (
 	"net/http"
+
+	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/internal/cache"
+	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/xmux"
 )
 
 func Disable(w http.ResponseWriter, r *http.Request) {
-
-	// pname := xmux.Var(r)["pname"]
-	// golog.Info("disable ", pname)
-	// script, ok := store.GetStore().GetScriptByName(pname)
-	// if !ok {
-	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-	// 	return
-	// }
-	// // 上面已经判断过是否存在了， 这里就忽略
-	// // msg, ok := global.SetReLoading(fmt.Sprintf("enable %s is running", pname))
-	// // if !ok {
-	// // 	pkg.Error(r, msg)
-	// // 	return
-	// // }
-	// // defer global.SetCanReLoad()
-	// // 上面已经判断过是否存在了， 这里就忽略
-	// if controller.DisableScript(script, false) {
-	// 	// err := config.UpdateScriptToConfigFile(script, true)
-	// 	// if err != nil {
-	// 	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
-	// 	// 	return
-	// 	// }
-	// }
-
+	name := r.FormValue("name")
+	if name == "" {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		return
+	}
+	script, ok := cache.GetScript(name)
+	if !ok {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		return
+	}
+	if script.Disable {
+		return
+	}
+	script.Disable = true
+	cache.SetScript(name, script)
+	if err := internal.SetScriptDisableInConfig(name, true); err != nil {
+		golog.Error(err)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
+		return
+	}
+	for _, svc := range cache.GetGroupServer(name) {
+		go stop(svc)
+	}
 }
 
 func Enable(w http.ResponseWriter, r *http.Request) {
-
-	// pname := xmux.Var(r)["pname"]
-	// script, ok := store.GetStore().GetScriptByName(pname)
-	// if !ok {
-	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-	// 	return
-	// }
-	// // 上面已经判断过是否存在了， 这里就忽略
-	// // msg, ok := global.SetReLoading(fmt.Sprintf("enable %s is running", pname))
-	// // if !ok {
-	// // 	pkg.Error(r, msg)
-	// // 	return
-	// // }
-	// // defer global.SetCanReLoad()
-	// if controller.EnableScript(script) {
-	// 	err := config.UpdateScriptToConfigFile(script, true)
-	// 	if err != nil {
-	// 		golog.Error(err)
-	// 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
-	// 		return
-	// 	}
-	// 	controller.AddScript(script)
-	// }
-
+	name := r.FormValue("name")
+	if name == "" {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		return
+	}
+	script, ok := cache.GetScript(name)
+	if !ok {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		return
+	}
+	if !script.Disable {
+		return
+	}
+	script.Disable = false
+	cache.SetScript(name, script)
+	if err := internal.SetScriptDisableInConfig(name, false); err != nil {
+		golog.Error(err)
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 500
+		return
+	}
+	for _, svc := range cache.GetGroupServer(name) {
+		svc.Disable = false
+		go start(svc)
+	}
 }

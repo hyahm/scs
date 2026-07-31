@@ -2,9 +2,10 @@ package handle
 
 import (
 	"net/http"
-)
 
-// 获取url和DERIVATIVE
+	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/xmux"
+)
 
 type RespRepo struct {
 	Url        []string `json:"url"`
@@ -12,9 +13,5 @@ type RespRepo struct {
 }
 
 func GetRepo(w http.ResponseWriter, r *http.Request) {
-	// resp := &RespRepo{}
-	// resp.Url = server.Cfg.Repo.Url
-	// resp.Derivative = server.Cfg.Repo.Derivative
-	// send, _ := json.Marshal(resp)
-	// Write(w, r,send)
+	xmux.GetInstance(r).Response.(*pkg.Response).Data = nil
 }

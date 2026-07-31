@@ -19,16 +19,9 @@ type AlertInfo struct {
 	ContinuityInterval time.Duration
 }
 
-// var cache []*AlertInfo
-
-// func init() {
-// 	cache = make([]*AlertInfo, 4)
-// }
-
 func (ai *AlertInfo) BreakDown(title string) {
 	ai.AM.Title = title
 	if !ai.Broken {
-		// 第一次发送
 		ai.Broken = true
 		ai.AM.BrokenTime = time.Now().String()
 		ai.Start = time.Now()
@@ -45,63 +38,66 @@ func (ai *AlertInfo) BreakDown(title string) {
 func (ai *AlertInfo) Recover(title string) {
 	if ai.Broken {
 		ai.AM.Title = title
-		// ai.AM.BrokenTime = ai.Start.String()
 		ai.AM.FixTime = time.Now().Local().String()
 		AlertMessage(ai.AM, nil)
 		ai.Broken = false
 	}
 }
 
+// AlertMessage 将报警消息发送到所有已配置的报警通道。
 func AlertMessage(msg *message.Message, at *AlertTo) {
 	msg.HostName, _ = os.Hostname()
-	golog.Errorf("异常报警: %s", msg.String())
-	// for _, alert := range alerter.Alerts {
-	// 	if at == nil {
-	// 		alertErr := alert.Send(msg)
-	// 		if alertErr != nil {
-	// 			continue
-	// 		}
-	// 		continue
-	// 	}
-
-	// 	switch alert.(type) {
-	// 	// 目前只支持邮箱
-	// 	case *AlertEmail:
-	// 		go func() {
-	// 			alertErr := alert.Send(msg, at.Email...)
-	// 			if alertErr != nil {
-	// 				golog.Error(alertErr)
-	// 			}
-
-	// 		}()
-	// 	case *AlertRocket:
-	// 		go func() {
-	// 			alert.Send(msg, at.Rocket...)
-
-	// 		}()
-	// 	case *AlertTelegram:
-	// 		go func() {
-	// 			alert.Send(msg, at.Telegram...)
-
-	// 		}()
-	// 	case *AlertWeiXin:
-
-	// 		go func() {
-	// 			alert.Send(msg, at.WeiXin...)
-
-	// 		}()
-	// 	case *AlertDingDing:
-	// 		golog.Info("dingding  AlertDingDing ")
-	// 		go func() {
-	// 			alert.Send(msg, at.WeiXin...)
-
-	// 		}()
-	// 	case *Callback:
-	// 		go func() {
-	// 			alert.Send(msg, at.Callback...)
-
-	// 		}()
-	// 	}
-
-	// }
+	alerts := alerter.Alerts
+	if len(alerts) == 0 {
+		golog.Warnf("无报警通道配置，仅打印日志: %s", msg.String())
+		return
+	}
+	for name, alert := range alerts {
+		if at == nil {
+			go func(n string, a message.SendAlerter) {
+				if err := a.Send(msg); err != nil {
+					golog.Errorf("报警发送失败 [%s]: %v", n, err)
+				}
+			}(name, alert)
+			continue
+		}
+		switch a := alert.(type) {
+		case *AlertEmail:
+			go func(a *AlertEmail) {
+				if err := a.Send(msg, at.Email...); err != nil {
+					golog.Errorf("报警发送失败 [email]: %v", err)
+				}
+			}(a)
+		case *AlertRocket:
+			go func(a *AlertRocket) {
+				if err := a.Send(msg, at.Rocket...); err != nil {
+					golog.Errorf("报警发送失败 [rocket]: %v", err)
+				}
+			}(a)
+		case *AlertTelegram:
+			go func(a *AlertTelegram) {
+				if err := a.Send(msg); err != nil {
+					golog.Errorf("报警发送失败 [telegram]: %v", err)
+				}
+			}(a)
+		case *AlertWeiXin:
+			go func(a *AlertWeiXin) {
+				if err := a.Send(msg); err != nil {
+					golog.Errorf("报警发送失败 [weixin]: %v", err)
+				}
+			}(a)
+		case *AlertDingDing:
+			go func(a *AlertDingDing) {
+				if err := a.Send(msg); err != nil {
+					golog.Errorf("报警发送失败 [dingding]: %v", err)
+				}
+			}(a)
+		case *Callback:
+			go func(a *Callback) {
+				if err := a.Send(msg, at.Callback...); err != nil {
+					golog.Errorf("报警发送失败 [callback]: %v", err)
+				}
+			}(a)
+		}
+	}
 }

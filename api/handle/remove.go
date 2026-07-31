@@ -2,63 +2,33 @@ package handle
 
 import (
 	"net/http"
+
+	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/internal"
+	"github.com/hyahm/scs/internal/cache"
+	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/xmux"
 )
 
-func Remove(w http.ResponseWriter, r *http.Request) {
-
-	// // 读取配置文件
-	// pname := xmux.Var(r)["pname"]
-	// name := xmux.Var(r)["name"]
-
-	// _, ok := store.GetStore().GetScriptByName(pname)
-	// if !ok {
-	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-	// 	return
-	// }
-	// svc, ok := store.GetStore().GetServerByName(name)
-	// if !ok {
-	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-	// 	return
-	// }
-	// // msg, ok := global.SetReLoading(fmt.Sprintf("remove %s %s", pname, name))
-	// // if !ok {
-	// // 	pkg.Error(r, msg)
-	// // 	return
-	// // }
-
-	// go controller.Remove(svc, true)
-}
-
 func RemovePname(w http.ResponseWriter, r *http.Request) {
-
-	// name := r.FormValue("pname")
-	// if pkg.IsNameWithSuffix(name) {
-	// 	svc, ok := cache.GetServer(name)
-	// 	if !ok {
-	// 		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-	// 		return
-	// 	}
-	// }
-
-	// // msg, ok := global.SetReLoading(fmt.Sprintf("remove %s ", pname))
-	// // if !ok {
-	// // 	pkg.Error(r, msg)
-	// // 	return
-	// // }
-	// go controller.RemoveScript(pname)
+	name := r.FormValue("name")
+	if name == "" {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		return
+	}
+	_, ok := cache.GetScript(name)
+	if !ok {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		return
+	}
+	go func() {
+		for _, svc := range cache.GetGroupServer(name) {
+			svc.Remove()
+		}
+		cache.RemoveGroupServer(name)
+		cache.RemoveScript(name)
+		if err := internal.DeleteScriptFromConfigFile(name); err != nil {
+			golog.Error(err)
+		}
+	}()
 }
-
-// func RemoveAll(w http.ResponseWriter, r *http.Request) {
-// 	if reloadKey {
-// 		Write(w, r,[]byte(`{"code": 201, "msg": "config file is reloading, waiting completed first"}`))
-// 		return
-// 	}
-// 	reloadKey = true
-// 	defer func() {
-// 		reloadKey = false
-// 	}()
-// 	config.DeleteAllScriptToConfigFile()
-// 	controller.RemoveAllScripts()
-
-// 	Write(w, r,[]byte(`{"code": 200, "msg": "waiting stop"}`))
-// }

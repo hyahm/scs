@@ -40,14 +40,14 @@ type Probe struct {
 }
 
 func (p *Probe) InitProbe() {
-	if p == nil {
-		p = &Probe{}
-	}
 	if p.Interval == 0 {
 		p.Interval = time.Second * 10
 	}
+	if p.ContinuityInterval == 0 {
+		p.ContinuityInterval = time.Hour * 1
+	}
 	if len(p.DiskPartition) == 0 {
-		p.DiskPartition = getDisk()
+		p.DiskPartition = getDisk(p.ExcludeDisk)
 	}
 	if p.Mem == 0 {
 		p.Mem = 90
@@ -60,114 +60,105 @@ func (p *Probe) InitProbe() {
 	}
 }
 
-// func initConfig() {
-// 	healthDetector.Config.Probe.Interval = healthDetector.Probe.Interval
-// 	healthDetector.Config.Probe.ContinuityInterval = healthDetector.Probe.ContinuityInterval
-// 	if healthDetector.Config.Probe.Interval == 0 {
-// 		healthDetector.Config.Probe.Interval = time.Second * 10
-// 	}
-// 	if healthDetector.Config.Probe.ContinuityInterval == 0 {
-// 		healthDetector.Config.Probe.ContinuityInterval = time.Hour * 1
-// 	}
-// 	// todo: healthDetector.Config.Dp = getDisk()
-// 	healthDetector.Config.Probe.Monitored = healthDetector.Probe.Monitored
-// 	healthDetector.Config.Probe.Cpu = healthDetector.Probe.Cpu
-// 	healthDetector.Config.Probe.Mem = healthDetector.Probe.Mem
-// 	healthDetector.Config.Probe.Disk = healthDetector.Probe.Disk
-// 	healthDetector.Config.Probe.Monitor = healthDetector.Probe.Monitor
-// 	if healthDetector.Config.Probe.Cpu == 0 {
-// 		healthDetector.Config.Probe.Cpu = 90
-// 	}
-// 	if healthDetector.Config.Probe.Mem == 0 {
-// 		healthDetector.Config.Probe.Mem = 90
-// 	}
-// 	if healthDetector.Config.Probe.Disk == 0 {
-// 		healthDetector.Config.Probe.Disk = 85
-// 	}
+// InitDetector 初始化全局硬件检测器，绑定配置并创建 context。
+func InitDetector(cfg *Config) {
+	ctx, cancel := context.WithCancel(context.Background())
+	healthDetector = &Detector{
+		Probe:  &cfg.Probe,
+		Ctx:    ctx,
+		Cancel: cancel,
+		Config: cfg,
+		Cps:    make([]CheckPointer, 4),
+	}
+}
 
-// 	if healthDetector.Config.Probe.Cpu > 0 ||
-// 		healthDetector.Config.Probe.Mem > 0 ||
-// 		healthDetector.Config.Probe.Disk > 0 ||
-// 		healthDetector.Config.Probe.IO > 0 ||
-// 		len(healthDetector.Config.Probe.Monitor) > 0 {
-// 		go CheckHardWare()
-// 	}
+// StopDetector 停止硬件检测循环。
+func StopDetector() {
+	if healthDetector != nil && healthDetector.Cancel != nil {
+		healthDetector.Cancel()
+	}
+}
 
-// }
+// CheckHardWare 主循环：按 Interval 周期调用各检测器的 Check。
+func CheckHardWare() {
+	if healthDetector == nil {
+		golog.Error("healthDetector 未初始化，无法启动硬件检测")
+		return
+	}
+	// 初始化检测器
+	if healthDetector.Config.Probe.Cpu > 0 {
+		healthDetector.Cps[0] = NewCpu()
+	}
+	if healthDetector.Config.Probe.Mem > 0 {
+		healthDetector.Cps[1] = NewMem()
+	}
+	if healthDetector.Config.Probe.Disk > 0 {
+		healthDetector.Cps[2] = NewDisk()
+	}
+	if len(healthDetector.Config.Probe.Monitor) > 0 {
+		healthDetector.Cps[3] = NewMonitor()
+	}
 
-// func (p *Probe) CheckHardWare() {
+	golog.Info("硬件检测启动，间隔: ", healthDetector.Config.Probe.Interval)
+	for {
+		select {
+		case <-healthDetector.Ctx.Done():
+			golog.Info("硬件检测退出")
+			return
+		case <-time.After(healthDetector.Config.Probe.Interval):
+			for _, check := range healthDetector.Cps {
+				if IsNil(check) {
+					continue
+				}
+				check.Check()
+			}
+		}
+	}
+}
 
-// 	if p.Cpu > 0 {
-// 		if IsNil(healthDetector.Cps[0]) {
-// 			healthDetector.Cps[0] = NewCpu()
-// 		} else {
-// 			healthDetector.Cps[0].Update()
-// 		}
-// 	} else {
-// 		healthDetector.Cps[0] = nil
-// 	}
-// 	if healthDetector.Config.Probe.Mem > 0 {
-// 		if IsNil(healthDetector.Cps[1]) {
-// 			healthDetector.Cps[1] = NewMem()
-// 		} else {
-// 			healthDetector.Cps[1].Update()
-// 		}
-
-// 	} else {
-// 		healthDetector.Cps[1] = nil
-// 	}
-// 	if healthDetector.Config.Probe.Disk > 0 {
-// 		if IsNil(healthDetector.Cps[2]) {
-// 			healthDetector.Cps[2] = NewDisk()
-// 		} else {
-// 			healthDetector.Cps[2].Update()
-// 		}
-// 	} else {
-// 		healthDetector.Cps[2] = nil
-// 	}
-// 	if len(healthDetector.Config.Probe.Monitor) > 0 {
-// 		if IsNil(healthDetector.Cps[3]) {
-// 			healthDetector.Cps[3] = NewMonitor()
-// 		} else {
-// 			healthDetector.Cps[3].Update()
-// 		}
-// 	} else {
-// 		healthDetector.Cps[3] = nil
-// 	}
-
-// 	// if healthDetector.Config.IO > 0 {
-// 	// 	if IsNil(healthDetector.Cps[4]) {
-// 	// 		healthDetector.Cps[4] = NewCpu()
-// 	// 	} else {
-// 	// 		healthDetector.Cps[4].Update()
-// 	// 	}
-// 	// } else {
-// 	// 	healthDetector.Cps[4] = nil
-// 	// }
-// 	for {
-// 		select {
-// 		case <-healthDetector.Ctx.Done():
-// 			golog.Info("exit check")
-// 			return
-// 		case <-time.After(healthDetector.Config.Probe.Interval):
-// 			for _, check := range healthDetector.Cps {
-
-// 				if IsNil(check) {
-// 					continue
-// 				}
-// 				check.Check()
-// 			}
-// 		}
-// 	}
-
-// }
+// ReloadDetector 重载时更新各检测器配置。
+func ReloadDetector(cfg *Config) {
+	if healthDetector == nil {
+		InitDetector(cfg)
+		return
+	}
+	healthDetector.Config = cfg
+	healthDetector.Probe = &cfg.Probe
+	// 更新已有检测器
+	for _, check := range healthDetector.Cps {
+		if !IsNil(check) {
+			check.Update()
+		}
+	}
+	// 按新配置启用/禁用检测器
+	if cfg.Probe.Cpu > 0 && IsNil(healthDetector.Cps[0]) {
+		healthDetector.Cps[0] = NewCpu()
+	} else if cfg.Probe.Cpu == 0 {
+		healthDetector.Cps[0] = nil
+	}
+	if cfg.Probe.Mem > 0 && IsNil(healthDetector.Cps[1]) {
+		healthDetector.Cps[1] = NewMem()
+	} else if cfg.Probe.Mem == 0 {
+		healthDetector.Cps[1] = nil
+	}
+	if cfg.Probe.Disk > 0 && IsNil(healthDetector.Cps[2]) {
+		healthDetector.Cps[2] = NewDisk()
+	} else if cfg.Probe.Disk == 0 {
+		healthDetector.Cps[2] = nil
+	}
+	if len(cfg.Probe.Monitor) > 0 && IsNil(healthDetector.Cps[3]) {
+		healthDetector.Cps[3] = NewMonitor()
+	} else if len(cfg.Probe.Monitor) == 0 {
+		healthDetector.Cps[3] = nil
+	}
+}
 
 func IsNil(i interface{}) bool {
 	vi := reflect.ValueOf(i)
 	return !vi.IsValid() || vi.IsNil()
 }
 
-func getDisk() []string {
+func getDisk(excludeDisk []string) []string {
 	dp := make([]disk.PartitionStat, 0)
 	parts, err := disk.Partitions(true)
 	if err != nil {
@@ -175,27 +166,22 @@ func getDisk() []string {
 		return []string{}
 	}
 	excludePath := make(map[string]int)
-	// for _, he := range Cfg.Probe.ExcludeDisk {
-	// 	excludePath[strings.ToUpper(he)] = 0
-	// }
+	for _, he := range excludeDisk {
+		excludePath[strings.ToUpper(he)] = 0
+	}
 
-	mountNames := make(map[string]string)
 	for _, part := range parts {
 		if _, ok := excludePath[strings.ToUpper(part.Mountpoint)]; ok {
 			continue
 		}
-
 		if _, ok := cludeType[strings.ToUpper(part.Fstype)]; ok {
-			mountNames[part.Mountpoint] = part.Fstype
 			dp = append(dp, part)
-			continue
 		}
-
 	}
 	list := make([]string, 0, len(dp))
 	for _, part := range dp {
 		list = append(list, part.Mountpoint)
-		golog.Infof("alert dist: --%s--, type: %s", part.Mountpoint, part.Fstype)
+		golog.Infof("alert disk: --%s--, type: %s", part.Mountpoint, part.Fstype)
 	}
 	return list
 }
