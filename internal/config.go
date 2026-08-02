@@ -152,6 +152,23 @@ func (c *InConfig) checkLocked() error {
 	return nil
 }
 
+// AddScriptToConfigFile 将新脚本追加到配置文件。
+func AddScriptToConfigFile(s *config.Script) error {
+	cfg.RLock()
+	tmp := cfg.config
+	cfg.RUnlock()
+	for _, script := range tmp.Scripts {
+		if script.Name == s.Name {
+			return errors.New("脚本名已存在: " + s.Name)
+		}
+	}
+	if !CheckScriptNameRule(s.Name) {
+		return errors.New("脚本名不符合命名规则: " + s.Name)
+	}
+	tmp.Scripts = append(tmp.Scripts, *s)
+	return WriteConfig(tmp)
+}
+
 // 更新单个script到配置文件
 func UpdateScriptToConfigFile(s config.Script, update bool) error {
 	// 添加
@@ -166,12 +183,7 @@ func UpdateScriptToConfigFile(s config.Script, update bool) error {
 	cfg.RLock()
 	tmp := cfg.config
 	cfg.RUnlock()
-	tmp.Scripts = make([]config.Script, 0)
-	// err = yaml.Unmarshal(f, tmp)
-	// if err != nil {
-	// 	return err
-	// }
-	for i := range GetAllScript() {
+	for i := range tmp.Scripts {
 		if tmp.Scripts[i].Name == s.Name {
 			if s.Replicate < 0 {
 				tmp.Scripts = append(tmp.Scripts[:i], tmp.Scripts[i+1:]...)

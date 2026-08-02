@@ -85,7 +85,7 @@ func (rocket *AlertRocket) getToken() (*Token, error) {
 	}
 	if rd.Status == "error" {
 		golog.Error(rd.Message)
-		return nil, fmt.Errorf(rd.Message)
+		return nil, fmt.Errorf("%s", rd.Message)
 	}
 	return &rd.Data, nil
 }

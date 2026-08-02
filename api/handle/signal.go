@@ -23,8 +23,9 @@ func CanStop(w http.ResponseWriter, r *http.Request) {
 		if !svc.Status.CanNotStop {
 			return
 		}
-		svc.Status.CanNotStop = false
-		svc.Status.ChStop <- struct{}{}
+svc.Status.CanNotStop = false
+	close(svc.Status.ChStop)
+	svc.Status.ChStop = make(chan struct{})
 	}()
 
 }

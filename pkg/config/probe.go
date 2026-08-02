@@ -68,7 +68,7 @@ func InitDetector(cfg *Config) {
 		Ctx:    ctx,
 		Cancel: cancel,
 		Config: cfg,
-		Cps:    make([]CheckPointer, 4),
+		Cps:    make([]CheckPointer, 5),
 	}
 }
 
@@ -97,6 +97,9 @@ func CheckHardWare() {
 	}
 	if len(healthDetector.Config.Probe.Monitor) > 0 {
 		healthDetector.Cps[3] = NewMonitor()
+	}
+	if healthDetector.Config.Probe.IO > 0 {
+		healthDetector.Cps[4] = NewIO()
 	}
 
 	golog.Info("硬件检测启动，间隔: ", healthDetector.Config.Probe.Interval)
@@ -150,6 +153,11 @@ func ReloadDetector(cfg *Config) {
 		healthDetector.Cps[3] = NewMonitor()
 	} else if len(cfg.Probe.Monitor) == 0 {
 		healthDetector.Cps[3] = nil
+	}
+	if cfg.Probe.IO > 0 && IsNil(healthDetector.Cps[4]) {
+		healthDetector.Cps[4] = NewIO()
+	} else if cfg.Probe.IO == 0 {
+		healthDetector.Cps[4] = nil
 	}
 }
 

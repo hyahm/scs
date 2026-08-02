@@ -8,6 +8,7 @@ func (svc *Server) wait() {
 	if err := svc.Cmd.Wait(); err != nil {
 		// 不正常推出才重置
 		golog.Warn(err, "-->", svc.SubName)
+		svc.broken = true
 		svc.resetStatus()
 	}
 	if svc.IsCron {
@@ -16,13 +17,13 @@ func (svc *Server) wait() {
 		return
 	}
 	// 锁内原子决策：进程退出后是否自动重启（由 Restart 设置 restartOnExit，此处消费）
-	// svc.mu.Lock()
-	// restart := svc.restartOnExit
-	// svc.restartOnExit = false
-	// svc.mu.Unlock()
+	svc.Mu.Lock()
+	restart := svc.restartOnExit
+	svc.restartOnExit = false
+	svc.Mu.Unlock()
 
-	// if svc.restartOnExit {
-	// 	// 重新拉起：StartAsync 仅在 Status==STOP 时启动
-	// 	svc.StartAsync()
-	// }
+	if restart {
+		// 重新拉起：StartAsync 仅在 Status==STOP 时启动
+		svc.StartAsync()
+	}
 }

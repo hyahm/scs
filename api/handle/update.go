@@ -2,42 +2,74 @@ package handle
 
 import (
 	"net/http"
+
+	"github.com/hyahm/golog"
+	"github.com/hyahm/scs/internal/cache"
+	"github.com/hyahm/scs/pkg"
+	"github.com/hyahm/xmux"
 )
 
 func Update(w http.ResponseWriter, r *http.Request) {
-	// pname := xmux.Var(r)["pname"]
-	// name := xmux.Var(r)["name"]
-	// _, ok := store.GetStore().GetScriptByName(pname)
-	// if !ok {
-	// 	pkg.Error(r, "not found pname: "+pname)
-	// 	return
-	// }
-	// svc, ok := store.GetStore().GetServerByName(name)
-	// if !ok {
-	// 	pkg.Error(r, "not found name: "+name)
-	// 	return
-	// }
-	// go controller.UpdateAndRestart(svc)
-
+	subname := r.FormValue("subname")
+	svc, ok := cache.GetServer(subname)
+	if !ok {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		return
+	}
+	go func() {
+		svc.Mu.Lock()
+		if svc.CanNotOpration {
+			svc.Mu.Unlock()
+			return
+		}
+		svc.CanNotOpration = true
+		svc.Mu.Unlock()
+		svc.UpdateServer()
+		svc.Mu.Lock()
+		svc.CanNotOpration = false
+		svc.Mu.Unlock()
+	}()
 }
 
 func UpdatePname(w http.ResponseWriter, r *http.Request) {
-	// pname := xmux.Var(r)["pname"]
-	// script, ok := store.GetStore().GetScriptByName(pname)
-	// if !ok {
-	// 	xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
-	// 	return
-	// }
-
-	// go controller.UpdateAndRestartScript(script)
+	pname := xmux.Var(r)["pname"]
+	_, ok := cache.GetScript(pname)
+	if !ok {
+		xmux.GetInstance(r).Response.(*pkg.Response).Code = 404
+		return
+	}
+	for _, svc := range cache.GetGroupServer(pname) {
+		go func(s *cache.Server) {
+			s.Mu.Lock()
+			if s.CanNotOpration {
+				s.Mu.Unlock()
+				return
+			}
+			s.CanNotOpration = true
+			s.Mu.Unlock()
+			s.UpdateServer()
+			s.Mu.Lock()
+			s.CanNotOpration = false
+			s.Mu.Unlock()
+		}(svc)
+	}
 }
 
 func UpdateAll(w http.ResponseWriter, r *http.Request) {
-	// validAuths := xmux.GetInstance(r).Get("validAuths").([]controller.Auth)
-	// validName := make(map[string]struct{})
-	// for _, auth := range validAuths {
-	// 	validName[auth.ScriptName] = struct{}{}
-	// }
-	// controller.UpdateAllServerFromScript(validName)
-
+	for _, svc := range cache.GetAllServer() {
+		go func(s *cache.Server) {
+			s.Mu.Lock()
+			if s.CanNotOpration {
+				s.Mu.Unlock()
+				return
+			}
+			s.CanNotOpration = true
+			s.Mu.Unlock()
+			s.UpdateServer()
+			s.Mu.Lock()
+			s.CanNotOpration = false
+			s.Mu.Unlock()
+		}(svc)
+	}
+	golog.Info("update all servers done")
 }

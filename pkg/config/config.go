@@ -2,6 +2,11 @@ package config
 
 // var Cfg = &Config{}
 
+type Repo struct {
+	Url        []string `yaml:"url,omitempty" json:"url"`
+	Derivative string   `yaml:"derivative,omitempty" json:"derivative"`
+}
+
 type Config struct {
 	Listen string `yaml:"listen,omitempty"`
 	Token  string `yaml:"token,omitempty"`
@@ -17,6 +22,7 @@ type Config struct {
 	// Repo        *Repo          `yaml:"repo,omitempty"`
 	Alert   Alert    `yaml:"alert,omitempty"`
 	Probe   Probe    `yaml:"probe,omitempty"`
+	Repo    *Repo    `yaml:"repo,omitempty"`
 	Scripts []Script `yaml:"scripts,omitempty"`
 }
 

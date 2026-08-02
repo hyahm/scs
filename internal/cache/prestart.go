@@ -180,21 +180,21 @@ func (svc *Server) Install() (err error) {
 				if v.EQ != "" && string(bytes.TrimSpace(result)) != v.EQ {
 					goto install
 				}
-				if v.NE != "" && string(bytes.TrimSpace(result)) == v.EQ {
-					goto install
-				}
-				if v.GT != "" && gt(string(bytes.TrimSpace(result)), v.EQ, v.Separation) {
-					goto install
-				}
-				if v.LT != "" && lt(string(bytes.TrimSpace(result)), v.EQ, v.Separation) {
-					goto install
-				}
-				if v.GE != "" && ge(string(bytes.TrimSpace(result)), v.EQ, v.Separation) {
-					goto install
-				}
-				if v.LE != "" && le(string(bytes.TrimSpace(result)), v.EQ, v.Separation) {
-					goto install
-				}
+if v.NE != "" && string(bytes.TrimSpace(result)) == v.NE {
+				goto install
+			}
+			if v.GT != "" && gt(string(bytes.TrimSpace(result)), v.GT, v.Separation) {
+				goto install
+			}
+			if v.LT != "" && lt(string(bytes.TrimSpace(result)), v.LT, v.Separation) {
+				goto install
+			}
+			if v.GE != "" && ge(string(bytes.TrimSpace(result)), v.GE, v.Separation) {
+				goto install
+			}
+			if v.LE != "" && le(string(bytes.TrimSpace(result)), v.LE, v.Separation) {
+				goto install
+			}
 				continue
 			}
 		}

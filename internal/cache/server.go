@@ -13,6 +13,7 @@ import (
 
 	"github.com/hyahm/scs/pkg"
 	"github.com/hyahm/scs/pkg/config"
+	"github.com/hyahm/scs/pkg/message"
 )
 
 // 默认的间隔时间
@@ -50,7 +51,9 @@ type Server struct {
 	Port    int  `json:"port,omitempty"`
 	// AI      *config.AlertInfo `json:"-"` // 报警规则
 	// 进程退出后是否自动重启（Restart 设置，wait 消费）
-	// restartOnExit bool `json:"-"`
+	restartOnExit bool `json:"-"`
+	// 进程是否曾异常退出，用于 successAlert 判断是否发送恢复通知
+	broken bool `json:"-"`
 	// 取消操作， 可以取消等待重启， 等待停止， 等待remove(暂时没实现)
 	// CancelProcess chan bool `json:"-"`
 	// 服务停止后的信号， 比如  restart, remove 操作， 因为停止后还有下一步操作
@@ -206,7 +209,7 @@ func (svc *Server) Restart() {
 		svc.StartAsync()
 	case pkg.RUNNING:
 		// 标记本轮退出后重启，Cancel 触发 wait() 执行重启
-		// svc.restartOnExit = true
+		svc.restartOnExit = true
 		svc.Cancel()
 	default:
 		// WAITSTOP / WAITRESTART 等中间态：忽略，避免状态错乱
@@ -279,7 +282,7 @@ func (svc *Server) FillServer(script config.Script) {
 // Remove 删除服务：撤销待重启意图，等 cannotstop 解除后停止进程，再从全局 store 移除。
 func (svc *Server) Remove() {
 	// 撤销任何待重启意图
-	// svc.setRestartOnExit(false)
+	svc.restartOnExit = false
 	if svc.IsCron {
 		// 定时任务直接取消循环
 		golog.Infof("stop loop %s", svc.SubName)
@@ -306,7 +309,7 @@ func (svc *Server) Remove() {
 // Stop  停止服务：撤销待重启意图后，等 cannotstop 解除再 Cancel。
 func (svc *Server) Stop() {
 	// 撤销任何待重启意图，避免进程退出后被 wait() 自动拉起
-	// svc.setRestartOnExit(false)
+	svc.restartOnExit = false
 	if svc.Disable {
 		return
 	}
@@ -350,7 +353,7 @@ func (svc *Server) Kill() {
 		return
 	}
 	// 撤销任何待重启意图，避免退出后被 wait() 自动拉起
-	// svc.setRestartOnExit(false)
+	svc.restartOnExit = false
 	if svc.Status.CanNotStop {
 		<-svc.Status.ChStop
 	}
@@ -364,7 +367,6 @@ func (svc *Server) Kill() {
 }
 
 func (svc *Server) resetStatus() {
-	golog.UpFunc(1, "111111111")
 	svc.Status.Status = pkg.STOP
 	svc.Status.Pid = 0
 	svc.Status.CanNotStop = false
@@ -378,27 +380,24 @@ func (svc *Server) resetStatus() {
 }
 
 func (s *Server) successAlert() {
-	// 启动成功后恢复的通知
-	// if !s.AI.Broken {
-	// 	return
-	// }
+	// 启动成功后恢复的通知，仅当进程之前异常退出时才发送
 	for {
 		select {
-		// 每3秒一次操作
 		case <-time.After(time.Second * 3):
-			// am := &message.Message{
-			// 	Title: "service recover",
-			// 	Pname: s.Name,
-			// 	Name:  s.SubName,
-			// 	// BrokenTime: s.AI.Start.String(),
-			// 	FixTime: time.Now().String(),
-			// }
-			// config.AlertMessage(am, s.AT)
-			// s.AI.Broken = false
+			if !s.broken || s.DisableAlert {
+				return
+			}
+			am := &message.Message{
+				Title:   "service recover",
+				Pname:   s.Name,
+				Name:    s.SubName,
+				FixTime: time.Now().String(),
+			}
+			config.AlertMessage(am, nil)
+			s.broken = false
 			return
 		case <-s.Ctx.Done():
 			return
 		}
 	}
-
 }

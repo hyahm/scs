@@ -60,6 +60,7 @@ func AdminHandle() *xmux.RouteGroup {
 	admin.Get("/-/fmt", handle.Fmt).AddModule(module.UpdateConfig)       // 只能管理员用
 	admin.Get("/get/alarms", handle.GetAlarms)                           // 只能管理员用
 	admin.Get("/get/repo", handle.GetRepo)                               // 只能管理员用
+	admin.Get("/-/config", handle.ShowConfig)                                    // 只能管理员用
 	admin.Get("/script", handle.AddScript).BindJson(&config.Script{}).AddModule(module.UpdateConfig)
 	admin.Get("/enable/name", handle.Enable).AddModule(module.UpdateConfig)   // 只能管理员用
 	admin.Get("/disable/name", handle.Disable).AddModule(module.UpdateConfig) // 只能管理员用

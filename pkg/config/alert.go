@@ -30,9 +30,19 @@ func GetAlerts() map[string]message.SendAlerter {
 
 // InitAlert 根据配置初始化各报警器实例，存入 alerter.Alerts。
 func InitAlert(cfg Alert) {
-	alerter.Alerts = make(map[string]message.SendAlerter)
 	alerter.Alert = cfg
+	alerter.Alerts = make(map[string]message.SendAlerter)
+	initAlertChannels(cfg)
+}
 
+// ReloadAlert 热更新报警通道配置，关闭旧通道并初始化新通道。
+func ReloadAlert(cfg Alert) {
+	alerter.Alert = cfg
+	alerter.Alerts = make(map[string]message.SendAlerter)
+	initAlertChannels(cfg)
+}
+
+func initAlertChannels(cfg Alert) {
 	if cfg.Email.Host != "" && cfg.Email.UserName != "" && cfg.Email.Password != "" {
 		email := cfg.Email
 		if email.Port == 0 {

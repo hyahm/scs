@@ -13,7 +13,6 @@ import (
 
 type Cpu struct {
 	Percent  float64
-	IO       float64
 	AI       *AlertInfo
 	Interval time.Duration
 }
@@ -43,7 +42,6 @@ func NewCpu() *Cpu {
 			ContinuityInterval: healthDetector.Config.Probe.ContinuityInterval,
 		},
 		Interval: healthDetector.Config.Probe.Interval,
-		IO:       healthDetector.Config.Probe.IO,
 	}
 }
 
@@ -52,29 +50,6 @@ func (c *Cpu) Update() {
 	c.Interval = healthDetector.Config.Probe.Interval
 	c.AI.ContinuityInterval = healthDetector.Config.Probe.ContinuityInterval
 }
-
-// 检测wait， 其实也就是io的读写
-// func (c *Cpu) io() {
-
-// 	states, err := cpu.Times(true)
-// 	if err != nil {
-// 		golog.Error(err)
-// 		return
-// 	}
-// 	var iocount float64 = 0
-// 	for _, state := range states {
-// 		state.
-// 		iocount += state.Iowait
-// 	}
-// 	if iocount >= c.IO {
-// 		c.AI.AM.UsePercent, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", iocount), 64)
-// 		// c.AI.AM.Top = TopCpu(1)[0].ToString()
-// 		c.AI.BreakDown(fmt.Sprintf("io超过 %.2f%%", iocount))
-// 		return
-// 	}
-// 	// c.AI.AM.UsePercent, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", iocount), 64)
-// 	c.AI.Recover("io恢复")
-// }
 
 func (c *Cpu) Check() {
 	// go c.io()
